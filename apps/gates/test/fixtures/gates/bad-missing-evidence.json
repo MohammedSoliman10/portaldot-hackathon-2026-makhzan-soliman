@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "gateId": "G07",
+  "runState": "blocked",
+  "verdict": null,
+  "reason": "missing evidence path on purpose",
+  "startedAt": "2026-10-20T04:00:00Z",
+  "finishedAt": "2026-10-20T04:01:00Z",
+  "endpoint": "https://example.invalid",
+  "chainIdObserved": null,
+  "commands": [],
+  "measurements": [],
+  "transactions": [],
+  "errors": [],
+  "verdictReason": null,
+  "classification": null,
+  "adaptation": null,
+  "evidenceFiles": ["evidence/raw/g07/does-not-exist.txt"]
+}

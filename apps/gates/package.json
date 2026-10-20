@@ -13,7 +13,7 @@
     "rollup": "node src/rollup.ts",
     "validate": "node src/validate.ts",
     "typecheck": "tsc --noEmit",
-    "test": "node --test test/"
+    "test": "node --test test/*.test.ts"
   },
   "dependencies": {
     "@polkadot/api": "17.0.2",

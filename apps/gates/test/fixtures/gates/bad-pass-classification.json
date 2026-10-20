@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "gateId": "G07",
+  "runState": "done",
+  "verdict": "PASS",
+  "reason": null,
+  "startedAt": "2026-10-20T04:00:00Z",
+  "finishedAt": "2026-10-20T04:01:00Z",
+  "endpoint": "https://example.invalid",
+  "chainIdObserved": "420420777",
+  "commands": [
+    {
+      "command": "node src/gates/runner.ts G07",
+      "cwd": "apps/gates",
+      "exitCode": 0,
+      "rawOutput": "evidence/raw/setup/01-toolchain.txt",
+      "ranAt": "2026-10-20T04:00:10Z"
+    }
+  ],
+  "measurements": [
+    {
+      "name": "implied-factor",
+      "value": 10000,
+      "unit": "ratio",
+      "method": "receipt",
+      "conditions": {},
+      "txRef": "0x1111111111111111111111111111111111111111111111111111111111111111"
+    }
+  ],
+  "transactions": [],
+  "errors": [],
+  "verdictReason": "classification on a PASS on purpose",
+  "classification": "DESIGN-CHANGE",
+  "adaptation": "should be rejected",
+  "evidenceFiles": ["evidence/raw/setup/01-toolchain.txt"]
+}

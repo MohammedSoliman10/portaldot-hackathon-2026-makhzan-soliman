@@ -1,0 +1,56 @@
+# T016 foundation tests + validator 2026-10-20T04:54:59Z
+
+$ cd apps/gates && npm test
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ a record without runState is rejected (1.8149ms)
+✔ done without a verdict is rejected (0.3017ms)
+✔ blocked with a verdict is rejected (1.2902ms)
+✔ blocked without a reason is rejected (0.1923ms)
+✔ not_run without a reason is rejected (0.2294ms)
+✔ PASS with a classification is rejected (0.2103ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.2533ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.2586ms)
+✔ a loaded secret value is rejected (0.528ms)
+✔ a recorded --private-key flag is rejected (0.3214ms)
+✔ a missing evidenceFiles path is rejected (0.2349ms)
+✔ timestamps out of order are rejected (0.1568ms)
+✔ a valid blocked record is accepted (0.1613ms)
+✔ method is always recorded (0.8074ms)
+✔ a missing method throws (0.5401ms)
+✔ receipt method requires a txRef (0.1428ms)
+✔ differential requires two labelled samples (0.1307ms)
+✔ differential records both labels (0.5447ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 106.401797
+exit=0
+
+$ cd apps/gates && npm run validate -- --fixtures
+
+> makhzan-gates@0.1.0 validate
+> node src/validate.ts --fixtures
+
+FAIL apps/gates/test/fixtures/gates/bad-blocked-with-verdict.json: blocked must not carry a verdict; PASS is missing required measurement implied-factor
+FAIL apps/gates/test/fixtures/gates/bad-done-no-verdict.json: runState done requires a verdict
+FAIL apps/gates/test/fixtures/gates/bad-missing-evidence.json: evidenceFiles path does not exist: evidence/raw/g07/does-not-exist.txt
+FAIL apps/gates/test/fixtures/gates/bad-missing-runstate.json: runState is required
+FAIL apps/gates/test/fixtures/gates/bad-pass-classification.json: PASS must not carry a classification; PASS must not carry an adaptation; classification must be null when verdict is PASS
+ok   apps/gates/test/fixtures/gates/valid-blocked.json
+checked 6 record(s) and 5 raw file(s); evidence dir present
+5 failure(s)
+exit=3
+
+$ cd apps/gates && npm run typecheck
+
+> makhzan-gates@0.1.0 typecheck
+> tsc --noEmit
+
+exit=0
