@@ -1,0 +1,16 @@
+# T007 toolchain smoke 2026-10-20T04:51:44Z
+
+$ cd contracts && forge build
+Nothing to compile
+exit=0
+
+$ cd apps/gates && npm ci && npm run typecheck
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @substrate/connect@0.8.11: versions below 1.x are no longer maintained
+
+added 75 packages in 9s
+
+> makhzan-gates@0.1.0 typecheck
+> tsc --noEmit
+
+exit=0

@@ -1,0 +1,14 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+solc = "0.8.28"
+evm_version = "paris"
+optimizer = true
+optimizer_runs = 200
+
+# The compiler pin and evm_version are provisional until G02 records which
+# compilation path the live chain accepts. Do not change them for a product
+# reason before that gate has a verdict.
