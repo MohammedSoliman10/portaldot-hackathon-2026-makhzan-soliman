@@ -37,3 +37,48 @@ if G02 has to run on PVM, that limitation is recorded rather than papered over.
 solc `0.8.28` for both paths.
 
 **Evidence.** `evidence/raw/g01/05-resolc.txt`, `evidence/raw/g01/CounterProbe.pvm`.
+
+## DR-003 — Storage deposits are balance, not just gas (2026-10-20)
+
+**Context.** Other teams report `[reported]`: about 0.079 tPOT per code byte plus about 13 tPOT per
+contract for deployment, about 3.9 tPOT per new slot (refunded when cleared), and that
+`eth_estimateGas` includes the deposit. If true, a 24 KiB size ladder would cost roughly 1,475 tPOT
+and a gas limit is not a safe proxy for affordability.
+
+**Decision.** Treat every deposit as real balance. G02 deploys at most three small probes (~0.5, 2
+and 4 KiB runtime code) and derives deposit per byte plus the fixed part; the code-size limit comes
+from runtime metadata/constants, and any further size is an `eth_estimateGas` dry run only when the
+owner balance covers it. No single probe may spend more than 5% of the owner balance. G05 measures the
+deposit matrix and the refund recipient; G06 states its budget as tPOT = gas + deposits floated −
+refunds and includes Tier 1 deployment at 8, 12 and 16 KiB runtime code.
+
+**Consequences.** G02's live size answer may be `PARTIAL` if the three probes do not bracket the
+limit; the metadata limit is then the recorded answer with that caveat. Anvil's 24,576-byte result is
+never reported as the chain's limit.
+
+**Status.** `[reported]` until our own G02/G05 measurements confirm or correct it.
+
+## DR-004 — Chain identity in every gate record (2026-10-20)
+
+**Context.** A team reports genesis `0xd4f9acbc…283bd`. Our records currently do not pin the chain
+identity at measurement time, so a later reader cannot tell whether a gate ran against the same chain.
+
+**Decision.** Every gate record includes our own `chain_getBlockHash(0)` and runtime spec version,
+read at measurement time. The reported genesis is a cross-check only; our own read decides
+`equal`, `different` or `unconfirmed`. G07 also calls the read-only `ReviveApi_account_id` for the
+owner EVM address and compares it with candidate A.
+
+**Consequences.** A genesis or spec mismatch is recorded as a contradiction and flagged, not worked
+around silently. The check is read-only and costs no funds.
+
+## DR-005 — RPC event and finality shape (2026-10-20)
+
+**Context.** `[reported]`: `eth_getLogs` is limited, blocks take about 6 s, and the finalized head lags
+the best head by 1–2 blocks.
+
+**Decision.** Gates read events from their own transaction receipts or very recent blocks, never from
+a long historical `eth_getLogs` query. Where finality matters, the gate waits for the finalized head
+and records both heads. The reported numbers are re-measured, not assumed.
+
+**Consequences.** G03's latest-state sampling (DR-001) remains correct; a receipt is authoritative
+for event values. A limited `eth_getLogs` is recorded as an RPC limitation, not as a gate failure.
