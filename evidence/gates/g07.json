@@ -4,8 +4,8 @@
   "runState": "blocked",
   "verdict": null,
   "reason": "funds not requested by instruction; T023 not started, owner funding pending",
-  "startedAt": "2026-10-20T05:00:15Z",
-  "finishedAt": "2026-10-20T05:00:24Z",
+  "startedAt": "2026-10-20T05:01:59Z",
+  "finishedAt": "2026-10-20T05:02:07Z",
   "endpoint": "https://test-evm-rpc-v3.portaldot.dev",
   "chainIdObserved": "420420777",
   "commands": [
@@ -14,7 +14,7 @@
       "cwd": "apps/gates",
       "exitCode": 2,
       "rawOutput": "evidence/raw/g07/03-metadata.txt",
-      "ranAt": "2026-10-20T05:00:15Z"
+      "ranAt": "2026-10-20T05:01:59Z"
     }
   ],
   "measurements": [],
@@ -91,7 +91,14 @@
         "gasScale",
         "maxEthExtrinsicWeight",
         "nativeToEthRatio"
-      ]
+      ],
+      "reviveConstantValues": {
+        "autoMap": true,
+        "nativeToEthRatio": 10000,
+        "chainId": 420420777,
+        "allowEVMBytecode": true,
+        "depositPerByte": 6000000000000
+      }
     },
     "accounts": [
       {

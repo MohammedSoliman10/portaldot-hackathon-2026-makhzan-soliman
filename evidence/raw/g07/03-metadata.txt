@@ -49,5 +49,12 @@
     "gasScale",
     "maxEthExtrinsicWeight",
     "nativeToEthRatio"
-  ]
+  ],
+  "reviveConstantValues": {
+    "autoMap": true,
+    "nativeToEthRatio": 10000,
+    "chainId": 420420777,
+    "allowEVMBytecode": true,
+    "depositPerByte": 6000000000000
+  }
 }

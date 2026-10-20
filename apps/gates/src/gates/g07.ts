@@ -67,6 +67,7 @@ interface MetadataSummary {
   reviveCalls: string[];
   reviveStorage: string[];
   reviveConstants: string[];
+  reviveConstantValues: Record<string, unknown>;
 }
 
 async function inspectMetadata(api: Awaited<ReturnType<typeof connectSubstrate>>["api"]): Promise<MetadataSummary> {
@@ -84,6 +85,12 @@ async function inspectMetadata(api: Awaited<ReturnType<typeof connectSubstrate>>
     reviveCalls: Object.keys(tx.revive ?? {}).sort(),
     reviveStorage: Object.keys(query.revive ?? {}).sort(),
     reviveConstants: Object.keys(consts.revive ?? {}).sort(),
+    reviveConstantValues: Object.fromEntries(
+      ["autoMap", "nativeToEthRatio", "chainId", "allowEVMBytecode", "depositPerByte"].map((name) => {
+        const value = consts.revive?.[name] as { toJSON?: () => unknown } | undefined;
+        return [name, typeof value?.toJSON === "function" ? value.toJSON() : (value ?? null)];
+      }),
+    ),
   };
 }
 
