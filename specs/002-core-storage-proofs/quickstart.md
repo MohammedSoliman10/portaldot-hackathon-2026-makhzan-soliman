@@ -18,8 +18,12 @@ Portaldot testnet and it is gated on the Tier 0 verdicts and owner funding.
 
 ```bash
 cd contracts && forge build --sizes        # prints the Makhzan runtime size
-cd ../apps/makhzan && npm ci && npm run typecheck
+cd ../apps/gates && npm ci                 # the imported tier-0 helper resolves viem from this tree
+cd ../makhzan && npm ci && npm run typecheck
 ```
+
+Both installs are required: `apps/makhzan` imports `apps/gates/src/lib/evidence.ts` by relative path,
+and Node resolves that file's `viem` import from `apps/gates/node_modules`.
 
 Expected: `forge build` succeeds and `Makhzan` is at or below the budget in
 `contracts/size-budget.json`; the size script passes:

@@ -64,6 +64,7 @@ function peek(bytes32[] calldata slots) external view returns (bytes32[] memory 
 ```
 
 `peek` is a read-only generic slot reader used by the operator tooling and the evidence writer. It
+returns the requested slot values in request order, with an unallocated slot reading as zero. It
 cannot write and exposes nothing that a public chain does not already expose.
 
 ## Events
@@ -107,6 +108,10 @@ Short, argument-free errors, mapped to messages by the off-chain components.
 | `AlreadySettled` | the deal is already settled |
 | `BeforeEnd` | settlement attempted before the end block |
 | `TransferFailed` | a value transfer reverted |
+
+`NotImplemented` is a scaffolding-only error: it exists in the initial skeleton so every unimplemented
+state-changing stub reverts instead of returning empty data, `Interface.t.sol` asserts it, and it MUST
+be gone from the deployed contract (asserted by the final local gate, T062).
 
 ## Guarantees and non-guarantees
 

@@ -83,7 +83,7 @@ of record, 1 Mermaid architecture diagram.
 | IV. Bounded Agent Authority | No agent in this tier. Payouts are decided on-chain by the verifier, never by a model or a daemon report; the daemon only submits answers. | PASS — N/A by scope, stated explicitly |
 | V. Evidence Over Claims | Every claim cites a test result or a tx hash under `evidence/`; the README implemented/simulated/roadmap table is generated against those artifacts. | PASS — this is the feature |
 | VI. Honesty About Limits | `docs/EXPLAIN.md` names the trusted components (chain randomness source, daemon availability) and states that a passed challenge proves possession of one block, not the whole file. | PASS |
-| VII. Modular Design | Core sits behind `IMakhzan`; bond accounting and payment release are internal modules so a different bond asset or identity link can replace them without rewriting verification. Single deployment is justified under Complexity Tracking. | PASS |
+| VII. Modular Design | Core sits behind `IMakhzan`; `BondLib` is the single seam for the bond asset — every credit, debit, slash and transfer of bond value goes through it, so replacing native tPOT with a token, or attaching an identity link, changes one library and no verification or challenge logic. Single deployment is justified under Complexity Tracking. | PASS |
 | VIII. Untrusted Input | Every external value is validated before use: file sizes, leaf counts, path lengths, byte lengths, durations, prices, provider ids, daemon upload envelopes. Reject, never coerce. | PASS |
 | IX. Local First, Live Second | All development and every acceptance test except SC-007 run on `anvil`; the live phase is last and gated. RPC outages are logged verbatim with UTC time and retried. | PASS |
 | X. One Feature Per Tier | Only `specs/002-core-storage-proofs` and the tier-1 paths named here are touched; `.specify/templates/` untouched. Tier-0 probes are not modified. | PASS |
@@ -163,6 +163,7 @@ apps/makhzan/                           # TypeScript daemon + CLI (no UI)
 │   ├── upload.ts                       # client → daemon envelope, validation, ack
 │   ├── daemon.ts                       # persist files, poll challenges, answer, record
 │   ├── cli.ts                          # upload | create | challenge | watch | claim | settle | report
+│   ├── errors.ts                       # custom error → human message map shared by CLI and daemon
 │   └── evidenceWriter.ts               # thin wrapper over apps/gates/src/lib/evidence.ts
 └── test/                               # node:test for merkle, chunk, status, state, cli, daemon
 
@@ -281,7 +282,7 @@ Until then, live tasks are `blocked` and every local acceptance item is still pr
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --- | --- | --- |
-| One contract holds bonds, escrow and verification (Principle VII asks for modular, swappable parts) | A single deployment keeps the live code-deposit cost near the 10 KB budget and avoids cross-contract calls on a gas model that is still being measured (G04/G05). Modularity is delivered at source level: `IMakhzan` is the stable surface and the bond, payment and Merkle modules are separate internal libraries. | A registry/bond contract plus a challenge contract plus a payment contract would multiply the per-contract deposit (≈ 13 tPOT each) and the deployed-byte budget, and would turn a local invariant (conservation of funds) into a cross-contract one before the chain's cost model is known. |
+| One contract holds bonds, escrow and verification (Principle VII asks for modular, swappable parts) | A single deployment keeps the live code-deposit cost near the 10 KB budget and avoids cross-contract calls on a gas model that is still being measured (G04/G05). Modularity is delivered at source level: `IMakhzan` is the stable surface, `MerkleLib` and `PayLib` are separate internal libraries, and **`BondLib` is the bond-asset seam** — it owns the bond ledger, the exit guard and every value movement for bonds, so replacing native tPOT with a token asset (or adding an identity check) is a change to that one library with no edit to verification, challenge or payment code. The asset type is deliberately not exposed through `IMakhzan`. | A registry/bond contract plus a challenge contract plus a payment contract would multiply the per-contract deposit (≈ 13 tPOT each) and the deployed-byte budget, and would turn a local invariant (conservation of funds) into a cross-contract one before the chain's cost model is known. |
 | `optimizer_runs = 1` (worst execution gas, smallest code) | Deployed bytes are charged to the operator and are a published budget; execution gas is paid by the caller per operation and is not the binding constraint at demo volume. | `runs = 200` (tier-0 default) produces larger runtime code for a call-frequency assumption the demo does not need; it is likely to breach the 10 KB budget. |
 
 No other constitution violations. The budgets are re-set from G05 before any live claim, so the

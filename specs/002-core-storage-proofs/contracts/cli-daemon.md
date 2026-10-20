@@ -69,3 +69,7 @@ Every transaction record contains: `submitted` (hash, nonce), `included` (block 
 `executed` (receipt status), `finalized` (`finalized` block tag, or `heuristic(confirmations=N)` with
 the count), `readBack` (named view calls and their returns). A component refuses to act on a state
 that is earlier than `executed` and refuses to print `finalized` unless it observed it.
+
+Every revert is decoded through the shared map in `apps/makhzan/src/errors.ts`: each of the short
+custom errors in `imakhzan.md` becomes its documented message, an unrecognised revert is surfaced
+verbatim, and a rejected call is never reported as a success (FR-045).
