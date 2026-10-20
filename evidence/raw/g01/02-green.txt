@@ -1,0 +1,13 @@
+Compiling 22 files with Solc 0.8.28
+Solc 0.8.28 finished in 552.05ms
+Compiler run successful!
+
+Ran 5 tests for test/tier0/CounterProbe.t.sol:CounterProbeTest
+[PASS] testBoomRevertsWithReason() (gas: 8389)
+[PASS] testFuzzSetGet(uint256) (runs: 256, μ: 50752, ~: 52856)
+[PASS] testSetEmitsIndexedValue() (gas: 54052)
+[PASS] testSetThenGet() (gas: 52725)
+[PASS] testStartsAtZero() (gas: 7603)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.24ms (2.11ms CPU time)
+
+Ran 1 test suite in 6.88ms (2.24ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)
