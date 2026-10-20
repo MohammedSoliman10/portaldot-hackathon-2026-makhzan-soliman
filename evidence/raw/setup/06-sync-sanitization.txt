@@ -1,0 +1,4 @@
+scan_utc=2026-10-20T07:07Z
+key_values_scanned=6 files_scanned=29
+secret_hits=0 env_or_key_files=0
+result=CLEAN
