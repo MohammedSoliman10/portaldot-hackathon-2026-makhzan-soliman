@@ -27,6 +27,7 @@ This project is built with AI assistance. AI-assisted parts are marked in commit
 | [GitHub Spec Kit](https://github.com/github/spec-kit) (`specify-cli`) | v1.2.2 | MIT |
 | [Foundry](https://github.com/foundry-rs/foundry) (`forge`, `cast`, `anvil`) | 1.8.5 | MIT / Apache-2.0 |
 | [forge-std](https://github.com/foundry-rs/forge-std) | 1.17.0 | MIT |
+| [resolc](https://github.com/paritytech/revive) (PolkaVM fallback compiler) | 1.4.0 | Apache-2.0 |
 | [Node.js](https://nodejs.org/) | 24.20.0 | MIT |
 | [viem](https://viem.sh/) | 2.57.7 | MIT |
 | [@polkadot/api](https://github.com/polkadot-js/api) | 17.0.2 | Apache-2.0 |
@@ -34,6 +35,15 @@ This project is built with AI assistance. AI-assisted parts are marked in commit
 | [@polkadot/util-crypto](https://github.com/polkadot-js/common) | 14.0.3 | Apache-2.0 |
 | [TypeScript](https://www.typescriptlang.org/) | 5.9.3 | Apache-2.0 |
 | [@types/node](https://github.com/DefinitelyTyped/DefinitelyTyped) | 24.19.2 | MIT |
+
+### Compiler paths
+
+The primary path is standard Foundry/`solc` (EVM bytecode), because the chain reports
+`allowEVMBytecode=true`. The fallback path compiles the same Solidity source with the official
+`resolc` 1.4.0 CLI into a PolkaVM blob. Standard Foundry 1.8.5 has no `--resolc` flag; the
+ParityTech `foundry-polkadot` fork is the only supported `forge build --resolc` path and is not
+installed here. Both paths share `apps/gates/src/lib/deploy.ts`; the resolc binary is installed
+outside the repository at `~/.local/bin/resolc` and is not committed.
 
 ## Licence
 

@@ -1,0 +1,28 @@
+# T029A — resolc / PolkaVM toolchain 2026-10-20T10:14:37Z
+
+$ sha256sum /tmp/opencode/resolc
+74e051ce27300c77e82e323f5c47acf2c452819b6a8d0eb21bf5b9111e7a686d  /tmp/opencode/resolc
+$ grep resolc-x86_64-unknown-linux-musl checksums.txt
+74e051ce27300c77e82e323f5c47acf2c452819b6a8d0eb21bf5b9111e7a686d  resolc-x86_64-unknown-linux-musl
+checksum_match=yes
+$ ~/.local/bin/resolc --version
+Solidity frontend for the revive compiler version 1.4.0+commit.ca3c770.llvm-22.1.5
+$ ~/.local/bin/resolc --supported-solc-versions
+>=0.8.0,<=0.8.36
+
+$ resolc contracts/src/tier0/CounterProbe.sol --bin --output-dir /tmp/opencode/resolc-out2 -O3 --base-path contracts --solc ~/.svm/0.8.28/solc-0.8.28 --overwrite
+Compiler run successful. Artifact(s) can be found in directory "/tmp/opencode/resolc-out2".
+exit=0
+
+total 4
+-rw-r--r-- 1 mohammed_soliman mohammed_soliman 2532 Oct 20 13:14 CounterProbe.sol:CounterProbe.pvm
+$ sha256sum CounterProbe.pvm
+1e02a9435e84df15f9a0b95650445a5e40b014c17630e6049dc592c9118840e6  evidence/raw/g01/CounterProbe.pvm
+$ xxd -l 4 CounterProbe.pvm
+00000000: 5056 4d00                                PVM.
+
+## Foundry support
+$ forge build --help | grep resolc
+no --resolc in Foundry 1.8.5
+
+Standard Foundry 1.8.5 has no resolc/PolkaVM build path. The official supported path is the ParityTech Foundry-Polkadot fork (forge build --resolc / forge create --resolc); this project keeps standard forge for solc/EVM and uses the resolc CLI for the PVM fallback blob. Fork not installed.
