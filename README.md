@@ -2,6 +2,10 @@
 
 Bonded, challenge-verified storage on Portaldot, with an accountable AI agent as its first customer.
 
+## Repository
+
+https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
+
 ## Status
 
 Tier 0 in progress: a measurement harness verifies the Portaldot chain assumptions before any
