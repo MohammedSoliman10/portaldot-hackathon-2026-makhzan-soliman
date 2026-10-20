@@ -1,0 +1,99 @@
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ a tick records exactly one outcome per endpoint (1.8764ms)
+✔ a tick with both ok and error is rejected (0.5156ms)
+✔ timestamps are ISO-8601 UTC at second precision (0.2944ms)
+✔ the day file rotates on the UTC date (0.434ms)
+✔ EVM is attempted first when allowEVMBytecode is true (1.4576ms)
+✔ PVM is attempted first when the caller asks for it (0.181ms)
+✔ a record without runState is rejected (1.9705ms)
+✔ done without a verdict is rejected (0.2587ms)
+✔ blocked with a verdict is rejected (0.3293ms)
+✔ blocked without a reason is rejected (0.1996ms)
+✔ not_run without a reason is rejected (0.213ms)
+✔ PASS with a classification is rejected (0.1985ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.1948ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.2416ms)
+✔ a loaded secret value is rejected (0.4284ms)
+✔ a recorded --private-key flag is rejected (0.3352ms)
+✔ a missing evidenceFiles path is rejected (0.218ms)
+✔ timestamps out of order are rejected (0.128ms)
+✔ a valid blocked record is accepted (0.174ms)
+✔ isFunded is false when both balances are zero (0.6669ms)
+✔ isFunded is true when native free is non-zero (0.1175ms)
+✔ isFunded is true when the EVM balance is non-zero (0.0882ms)
+✔ isFunded rejects a malformed value instead of guessing (0.1923ms)
+✔ fundingFlagText records public values only (0.5097ms)
+✖ implied factor is the smallest-unit ratio derived from both balances (2.6716ms)
+✖ implied factor agrees with nativeToEvm at the metadata ratio (0.2725ms)
+✔ a zero native balance cannot produce a factor (0.3946ms)
+✔ native to EVM scaling applies the observed factor (0.0931ms)
+✔ a zero EVM balance after mapping attempts is a FAIL (0.097ms)
+✔ a run that never reached the chain is blocked, never FAIL (0.0897ms)
+✔ a funded and spendable EVM balance passes (0.1457ms)
+✔ the worked example keeps native and EVM amounts distinct (0.1281ms)
+✔ candidate A is the 20 EVM bytes followed by twelve 0xEE bytes (0.6971ms)
+✔ candidate A rejects a non-address (0.3728ms)
+✔ keygen produces six distinct keys (29.842102ms)
+✔ the env file is mode 600 and is never overwritten (10.059401ms)
+✔ method is always recorded (0.7094ms)
+✔ a missing method throws (0.332ms)
+✔ receipt method requires a txRef (0.1154ms)
+✔ differential requires two labelled samples (0.1517ms)
+✔ differential records both labels (0.3999ms)
+✔ isPvmBlob accepts the PVM magic 0x50564d00 (0.7431ms)
+✔ isPvmBlob rejects EVM bytecode (0.1857ms)
+✔ isPvmBlob rejects odd-length and non-hex input (0.1164ms)
+✔ pvmBlobHex encodes bytes with a 0x prefix (0.1615ms)
+ℹ tests 45
+ℹ suites 0
+ℹ pass 43
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1951.807725
+
+✖ failing tests:
+
+test at test/g07.test.ts:5:1
+✖ implied factor is the smallest-unit ratio derived from both balances (2.6716ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '1' !== '10000'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/test/g07.test.ts:8:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '1',
+    expected: '10000',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/g07.test.ts:11:1
+✖ implied factor agrees with nativeToEvm at the metadata ratio (0.2725ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '1' !== '10000'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/test/g07.test.ts:13:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '1',
+    expected: '10000',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

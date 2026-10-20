@@ -16,17 +16,13 @@ export interface BurnerView {
   evmBalanceWei: string;
 }
 
-/** Factor between native planck and EVM wei, derived from two observed balances. */
-export function impliedFactor(
-  nativeBalance: bigint,
-  evmBalance: bigint,
-  nativeDecimals = 14,
-  evmDecimals = 18,
-): string {
+/**
+ * Smallest-unit factor between native planck and EVM wei, derived from two observed balances.
+ * It is the inverse of nativeToEvm: evmWei = nativePlanck * factor.
+ */
+export function impliedFactor(nativeBalance: bigint, evmBalance: bigint): string {
   if (nativeBalance <= 0n) throw new Error("native balance must be greater than zero");
-  const numerator = evmBalance * 10n ** BigInt(nativeDecimals);
-  const denominator = nativeBalance * 10n ** BigInt(evmDecimals);
-  const scaled = (numerator * 1_000_000n) / denominator;
+  const scaled = (evmBalance * 1_000_000n) / nativeBalance;
   const whole = scaled / 1_000_000n;
   const fraction = (scaled % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, "");
   return fraction ? `${whole}.${fraction}` : whole.toString();

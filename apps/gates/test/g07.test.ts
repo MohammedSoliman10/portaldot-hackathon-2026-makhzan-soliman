@@ -2,10 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { impliedFactor, mappingOutcome, workedExample, nativeToEvm } from "../src/gates/g07.ts";
 
-test("implied factor is derived from both observed balances", () => {
+test("implied factor is the smallest-unit ratio derived from both balances", () => {
   const native = 1_000_000_000_000_000n; // 10 tPOT at 14 decimals
-  const evm = 100_000_000_000_000_000_000_000n; // 100,000 at 18 decimals
+  const evm = 10_000_000_000_000_000_000n; // 10 EVM tokens at 18 decimals
   assert.equal(impliedFactor(native, evm), "10000");
+});
+
+test("implied factor agrees with nativeToEvm at the metadata ratio", () => {
+  const native = 1_000_000_000_000_000n;
+  assert.equal(impliedFactor(native, nativeToEvm(native, 10000)), "10000");
 });
 
 test("a zero native balance cannot produce a factor", () => {
