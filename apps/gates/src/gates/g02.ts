@@ -3,6 +3,7 @@ import { loadConfig } from "../config.ts";
 import { loadArtifact } from "../lib/artifacts.ts";
 import { walletForMode } from "../lib/accounts.ts";
 import { getEvmBalance, publicClientFor } from "../lib/evm.ts";
+import { deployProbe, type DeployPath } from "../lib/deploy.ts";
 import { ratio, receiptGas } from "../lib/measure.ts";
 import { RawLog, writeGateRecord, exitCodeFor } from "../lib/gateIO.ts";
 import type { CostMeasurement, GateRecord, TransactionRef } from "../lib/evidence.ts";
@@ -28,8 +29,9 @@ async function waitForNextBlock(client: ReturnType<typeof publicClientFor>, afte
   throw new Error(`no block after ${after} within 60s`);
 }
 
-export async function run(options: { mode?: "live" | "local" } = {}): Promise<number> {
+export async function run(options: { mode?: "live" | "local"; path?: DeployPath } = {}): Promise<number> {
   const mode = options.mode ?? "live";
+  const path: DeployPath = options.path ?? "evm";
   const startedAt = new Date();
   const config = loadConfig();
   if (mode === "live" && config.evmRpcUrl.includes("127.0.0.1")) throw new Error("live mode refuses a local RPC endpoint");
@@ -54,16 +56,17 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
 
   try {
     // ---- behavior probe -------------------------------------------------
-    const behaviorDeploy = await wallet.deployContract({
-      abi: behaviorArtifact.abi,
-      bytecode: behaviorArtifact.bytecode.object,
+    const behaviorDeployed = await deployProbe({
+      path,
+      wallet,
+      client,
+      contract: "BehaviorProbe",
+      artifact: behaviorArtifact,
       args: [],
-      account: wallet.account!,
-      chain: wallet.chain,
     });
-    const behaviorReceipt = await client.waitForTransactionReceipt({ hash: behaviorDeploy });
-    const behaviorAddress = behaviorReceipt.contractAddress;
-    if (!behaviorAddress) throw new Error("BehaviorProbe deployment produced no address");
+    const behaviorDeploy = behaviorDeployed.hash;
+    const behaviorReceipt = behaviorDeployed.receipt;
+    const behaviorAddress = behaviorDeployed.address;
     transactions.push({
       hash: behaviorDeploy,
       kind: "deploy BehaviorProbe",
@@ -73,7 +76,7 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
       status: behaviorReceipt.status,
       explorerUrl: explorer(behaviorDeploy),
     });
-    measurements.push(receiptGas("behavior-deploy-gas", behaviorReceipt.gasUsed, behaviorDeploy, { contract: "BehaviorProbe" }));
+    measurements.push(receiptGas("behavior-deploy-gas", behaviorReceipt.gasUsed, behaviorDeploy, { contract: "BehaviorProbe", path, compiler: behaviorDeployed.compiler }));
 
     const firstStore = await wallet.writeContract({
       address: behaviorAddress,
@@ -170,16 +173,17 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
     if (!numberMonotonic) throw new Error(`block number did not increase: ${firstRead[3]} -> ${secondRead[3]}`);
 
     // ---- hash ratios ----------------------------------------------------
-    const hashDeploy = await wallet.deployContract({
-      abi: hashArtifact.abi,
-      bytecode: hashArtifact.bytecode.object,
+    const hashDeployed = await deployProbe({
+      path,
+      wallet,
+      client,
+      contract: "HashProbe",
+      artifact: hashArtifact,
       args: [],
-      account: wallet.account!,
-      chain: wallet.chain,
     });
-    const hashReceipt = await client.waitForTransactionReceipt({ hash: hashDeploy });
-    const hashAddress = hashReceipt.contractAddress;
-    if (!hashAddress) throw new Error("HashProbe deployment produced no address");
+    const hashDeploy = hashDeployed.hash;
+    const hashReceipt = hashDeployed.receipt;
+    const hashAddress = hashDeployed.address;
     transactions.push({
       hash: hashDeploy,
       kind: "deploy HashProbe",
@@ -233,15 +237,17 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
     let firstFailure: { size: number; error: string } | null = null;
     for (const size of LADDER) {
       try {
-        const hash = await wallet.deployContract({
-          abi: sizeArtifact.abi,
-          bytecode: sizeArtifact.bytecode.object,
+        const deployed = await deployProbe({
+          path,
+          wallet,
+          client,
+          contract: "SizeProbe",
+          artifact: sizeArtifact,
           args: [BigInt(size)],
-          account: wallet.account!,
-          chain: wallet.chain,
         });
-        const receipt = await client.waitForTransactionReceipt({ hash });
-        const address = receipt.contractAddress;
+        const hash = deployed.hash;
+        const receipt = deployed.receipt;
+        const address = deployed.address;
         const code = address ? await client.getCode({ address }) : "0x";
         const codeBytes = code && code !== "0x" ? (code.length - 2) / 2 : 0;
         if (receipt.status !== "success" || codeBytes !== size) {
@@ -265,15 +271,17 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
       while (high - low > 1) {
         const mid = Math.floor((low + high) / 2);
         try {
-          const hash = await wallet.deployContract({
-            abi: sizeArtifact.abi,
-            bytecode: sizeArtifact.bytecode.object,
+          const deployed = await deployProbe({
+            path,
+            wallet,
+            client,
+            contract: "SizeProbe",
+            artifact: sizeArtifact,
             args: [BigInt(mid)],
-            account: wallet.account!,
-            chain: wallet.chain,
           });
-          const receipt = await client.waitForTransactionReceipt({ hash });
-          const address = receipt.contractAddress;
+          const hash = deployed.hash;
+          const receipt = deployed.receipt;
+          const address = deployed.address;
           const code = address ? await client.getCode({ address }) : "0x";
           const codeBytes = code && code !== "0x" ? (code.length - 2) / 2 : 0;
           if (receipt.status === "success" && codeBytes === mid) {
@@ -331,8 +339,10 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
       account,
       behaviorAddress,
       hashAddress,
-      compiler: behaviorArtifact.metadata.compiler.version,
-      evmVersion: behaviorArtifact.metadata.settings.evmVersion,
+      path,
+      compiler: behaviorDeployed.compiler,
+      evmVersion: behaviorDeployed.evmVersion,
+      pvm: behaviorDeployed.pvm ? { sha256: behaviorDeployed.pvm.sha256, bytes: behaviorDeployed.pvm.bytes } : null,
       observations,
       differences,
       size: { lastSuccess, firstFailure, attempts: sizeAttempts },
@@ -344,8 +354,8 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
 
     if (raw) {
       for (const [label, value] of Object.entries({ behaviorReceipt: firstReceipt, secondReceipt, sizeAttempts, summary })) {
-        const path = await raw.write(label, JSON.stringify(value, (_key, entry) => (typeof entry === "bigint" ? entry.toString() : entry), 2));
-        evidenceFiles.push(raw.relative(path));
+        const filePath = await raw.write(label, JSON.stringify(value, (_key, entry) => (typeof entry === "bigint" ? entry.toString() : entry), 2));
+        evidenceFiles.push(raw.relative(filePath));
       }
     }
 
@@ -364,7 +374,7 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
       chainIdObserved: chainId,
       commands: [
         { command: "forge build --force", cwd: "contracts", exitCode: 0, rawOutput: evidenceFiles[0] ?? "", ranAt: stamp(startedAt) },
-        { command: "node src/gates/runner.ts G02", cwd: "apps/gates", exitCode: 0, rawOutput: evidenceFiles[0] ?? "", ranAt: stamp(startedAt) },
+        { command: `node src/gates/runner.ts G02 --path ${path}`, cwd: "apps/gates", exitCode: 0, rawOutput: evidenceFiles[0] ?? "", ranAt: stamp(startedAt) },
       ],
       measurements,
       transactions,
@@ -418,8 +428,11 @@ export async function run(options: { mode?: "live" | "local" } = {}): Promise<nu
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const mode = process.argv.includes("--local") ? "local" : "live";
+  const pathIndex = process.argv.indexOf("--path");
+  const pathValue = pathIndex >= 0 ? process.argv[pathIndex + 1] : "evm";
+  if (pathValue !== "evm" && pathValue !== "pvm") throw new Error(`--path must be evm or pvm, got ${pathValue}`);
   try {
-    process.exit(await run({ mode }));
+    process.exit(await run({ mode, path: pathValue as DeployPath }));
   } catch (error) {
     console.error((error as Error).stack ?? String(error));
     process.exit(1);

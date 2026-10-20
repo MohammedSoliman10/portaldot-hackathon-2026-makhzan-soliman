@@ -1,0 +1,47 @@
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+{
+  "mode": "local",
+  "at": "2026-10-20T10:16:49Z",
+  "endpoint": "http://127.0.0.1:8547",
+  "chainId": "420420777",
+  "account": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "path": "evm",
+  "contract": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+  "compiler": "0.8.28+commit.7893614a",
+  "evmVersion": "paris",
+  "optimizer": {
+    "enabled": true,
+    "runs": 200
+  },
+  "bytecodeBytes": 331,
+  "deployedBytes": 300,
+  "pvm": null,
+  "deployHash": "0x7da5eff9d5f42caad71a43dfcccd6c593d177b222ec0e494fbb99859bfec9d27",
+  "deployGas": "118261",
+  "setHash": "0x8f1bab872077a698711a16a9faa5c82625d17e26808f5efd6a0634e8fc7bfb55",
+  "setGas": "44657",
+  "get": "7",
+  "balanceBefore": "10000000000000000000000",
+  "attempts": [
+    {
+      "path": "evm",
+      "status": "success",
+      "ms": 47
+    }
+  ]
+}

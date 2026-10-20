@@ -1,0 +1,56 @@
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ a tick records exactly one outcome per endpoint (1.7096ms)
+✔ a tick with both ok and error is rejected (0.667199ms)
+✔ timestamps are ISO-8601 UTC at second precision (0.3086ms)
+✔ the day file rotates on the UTC date (0.5555ms)
+✔ EVM is attempted first when allowEVMBytecode is true (2.8698ms)
+✔ PVM is attempted first when the caller asks for it (0.218ms)
+✔ a record without runState is rejected (2.8649ms)
+✔ done without a verdict is rejected (1.2922ms)
+✔ blocked with a verdict is rejected (0.2992ms)
+✔ blocked without a reason is rejected (0.3057ms)
+✔ not_run without a reason is rejected (0.24ms)
+✔ PASS with a classification is rejected (0.1878ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.2589ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.2507ms)
+✔ a loaded secret value is rejected (0.4042ms)
+✔ a recorded --private-key flag is rejected (0.3061ms)
+✔ a missing evidenceFiles path is rejected (3.492ms)
+✔ timestamps out of order are rejected (0.1909ms)
+✔ a valid blocked record is accepted (0.1616ms)
+✔ isFunded is false when both balances are zero (1.1346ms)
+✔ isFunded is true when native free is non-zero (0.1532ms)
+✔ isFunded is true when the EVM balance is non-zero (0.0973ms)
+✔ isFunded rejects a malformed value instead of guessing (0.2445ms)
+✔ fundingFlagText records public values only (0.4602ms)
+✔ implied factor is derived from both observed balances (1.6081ms)
+✔ a zero native balance cannot produce a factor (0.3619ms)
+✔ native to EVM scaling applies the observed factor (0.1628ms)
+✔ a zero EVM balance after mapping attempts is a FAIL (0.2036ms)
+✔ a run that never reached the chain is blocked, never FAIL (0.105ms)
+✔ a funded and spendable EVM balance passes (0.0917ms)
+✔ the worked example keeps native and EVM amounts distinct (0.1616ms)
+✔ candidate A is the 20 EVM bytes followed by twelve 0xEE bytes (0.8146ms)
+✔ candidate A rejects a non-address (0.9656ms)
+✔ keygen produces six distinct keys (30.903999ms)
+✔ the env file is mode 600 and is never overwritten (10.615899ms)
+✔ method is always recorded (1.032ms)
+✔ a missing method throws (0.4011ms)
+✔ receipt method requires a txRef (0.1206ms)
+✔ differential requires two labelled samples (0.1371ms)
+✔ differential records both labels (0.4718ms)
+✔ isPvmBlob accepts the PVM magic 0x50564d00 (1.2811ms)
+✔ isPvmBlob rejects EVM bytecode (0.261ms)
+✔ isPvmBlob rejects odd-length and non-hex input (0.1883ms)
+✔ pvmBlobHex encodes bytes with a 0x prefix (0.2357ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 44
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1315.905147
