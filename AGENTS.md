@@ -1,0 +1,10 @@
+- Scope: one Spec Kit feature per tier. Stay inside the active feature. Don't touch unrelated files or .specify/ templates.
+- Secrets: never print, log, echo, commit or paste private keys, API keys or .env contents, in code, specs, evidence, commit messages or checkpoints. Burner keys via environment variables only. If a secret appears anywhere, stop and tell me to rotate it.
+- Tests before funds: any contract that holds value gets unit, fuzz and invariant tests, written and failing for the right reason, before its implementation.
+- Commits: small, one per task or small group, `type(scope): summary`, add [ai] if the code is AI-written. At least one meaningful commit every working day. Never batch core modules into one commit or into the last 24h before the Nov 6 04:00 UTC freeze.
+- Local first: develop and test on a local Foundry node; deploy to the live Portaldot testnet only when the feature calls for it. The RPC can be down: record the exact error and UTC time, retry later, keep working locally.
+- Evidence: every PASS needs the command, raw output, tx hash and RPC/explorer reference saved in evidence/. Never mark anything done on assumption. Report failures verbatim.
+- Reality over spec: if the live chain contradicts an assumption, stop, record it in docs/decisions.md and flag it in the checkpoint. Never silently work around it.
+- Checkpoints: after every stage chain and every implement phase, write the bundle to the sync folder, then STOP and wait for my "go".
+- CHECKPOINT FORMAT: <sync>/CHECKPOINT.md = feature, stage, UTC time, `git log --oneline -15`, task status (done / in progress / blocked), deviations from spec, open risks, test and gas summary, exact next step. Copy spec.md, plan.md, tasks.md, the analyze output and relevant evidence/*.md into <sync>/<feature>/. Before writing, confirm no value from .env appears in anything copied.
+- Communication: plain English, short, at most one question at a time. Mark AI-assisted parts in the README as they appear and disclose every third-party library.
