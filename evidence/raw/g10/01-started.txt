@@ -1,0 +1,11 @@
+# G10 probe start
+utc=2026-10-20T04:55:57Z
+cwd=/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates
+command=PORTALDOT_EVM_RPC_URL=$PORTALDOT_EVM_RPC_URL PORTALDOT_WS_URL=$PORTALDOT_WS_URL nohup node src/probe/daemon.ts >> evidence/raw/g10/daemon.log 2>&1 &
+tick_interval_s=180
+pid=10836
+restart_note=first nohup process (04:55:59 tick) exited when its shell closed; daemon restarted with the harness background runner at 04:56:30. The 31 s gap between the first two ticks is a restart artifact, not backfilled.
+first_ticks:
+{"ts":"2026-10-20T04:55:59Z","evm":{"ok":true,"latencyMs":1922,"blockNumber":112756,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1100,"blockNumber":112756,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T04:56:30Z","evm":{"ok":true,"latencyMs":916,"blockNumber":112761,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1034,"blockNumber":112761,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T04:59:31Z","evm":{"ok":true,"latencyMs":1114,"blockNumber":112792,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1157,"blockNumber":112792,"source":"chain_subscribeNewHeads"}}
