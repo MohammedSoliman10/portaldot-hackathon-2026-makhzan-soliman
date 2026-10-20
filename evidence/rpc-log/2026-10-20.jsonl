@@ -12,3 +12,33 @@
 {"ts":"2026-10-20T05:26:31Z","evm":{"ok":true,"latencyMs":1037,"blockNumber":113062,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1260,"blockNumber":113062,"source":"chain_subscribeNewHeads"}}
 {"ts":"2026-10-20T05:27:12Z","evm":{"ok":true,"latencyMs":898,"blockNumber":113068,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1175,"blockNumber":113068,"source":"chain_subscribeNewHeads"}}
 {"ts":"2026-10-20T05:30:13Z","evm":{"ok":true,"latencyMs":947,"blockNumber":113099,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1240,"blockNumber":113099,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:33:13Z","evm":{"ok":true,"latencyMs":968,"blockNumber":113129,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1318,"blockNumber":113129,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:36:13Z","evm":{"ok":true,"latencyMs":1317,"blockNumber":113159,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":998,"blockNumber":113159,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:39:13Z","evm":{"ok":true,"latencyMs":934,"blockNumber":113189,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1274,"blockNumber":113189,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:42:13Z","evm":{"ok":true,"latencyMs":928,"blockNumber":113219,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":985,"blockNumber":113219,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:45:14Z","evm":{"ok":true,"latencyMs":1866,"blockNumber":113249,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1257,"blockNumber":113249,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:48:13Z","evm":{"ok":true,"latencyMs":727,"blockNumber":113279,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1169,"blockNumber":113279,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:51:14Z","evm":{"ok":true,"latencyMs":1387,"blockNumber":113309,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1311,"blockNumber":113309,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:54:13Z","evm":{"ok":true,"latencyMs":871,"blockNumber":113339,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":971,"blockNumber":113339,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T05:57:13Z","evm":{"ok":true,"latencyMs":903,"blockNumber":113369,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1285,"blockNumber":113369,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:00:14Z","evm":{"ok":true,"latencyMs":1803,"blockNumber":113399,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1185,"blockNumber":113399,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:03:13Z","evm":{"ok":true,"latencyMs":1000,"blockNumber":113429,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1283,"blockNumber":113429,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:06:13Z","evm":{"ok":true,"latencyMs":797,"blockNumber":113459,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1000,"blockNumber":113459,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:09:14Z","evm":{"ok":true,"latencyMs":1318,"blockNumber":113489,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1377,"blockNumber":113489,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:12:14Z","evm":{"ok":true,"latencyMs":1329,"blockNumber":113519,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1152,"blockNumber":113519,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:15:23Z","evm":{"ok":false,"error":"TimeoutError: The operation was aborted due to timeout"},"ws":{"ok":true,"latencyMs":1152,"blockNumber":113549,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:18:14Z","evm":{"ok":true,"latencyMs":1345,"blockNumber":113579,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1134,"blockNumber":113579,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:21:14Z","evm":{"ok":true,"latencyMs":960,"blockNumber":113609,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1278,"blockNumber":113609,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:24:14Z","evm":{"ok":true,"latencyMs":837,"blockNumber":113639,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1179,"blockNumber":113639,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:27:15Z","evm":{"ok":true,"latencyMs":1860,"blockNumber":113669,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1282,"blockNumber":113669,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:30:14Z","evm":{"ok":true,"latencyMs":822,"blockNumber":113699,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1141,"blockNumber":113699,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:33:14Z","evm":{"ok":true,"latencyMs":895,"blockNumber":113728,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1268,"blockNumber":113728,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:36:14Z","evm":{"ok":true,"latencyMs":891,"blockNumber":113758,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":965,"blockNumber":113758,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:39:14Z","evm":{"ok":true,"latencyMs":1262,"blockNumber":113788,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1090,"blockNumber":113788,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:42:23Z","evm":{"ok":false,"error":"TimeoutError: The operation was aborted due to timeout"},"ws":{"ok":true,"latencyMs":1197,"blockNumber":113818,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:45:14Z","evm":{"ok":true,"latencyMs":963,"blockNumber":113848,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1072,"blockNumber":113848,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:48:15Z","evm":{"ok":true,"latencyMs":1335,"blockNumber":113878,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1033,"blockNumber":113878,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:51:15Z","evm":{"ok":true,"latencyMs":1072,"blockNumber":113908,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1116,"blockNumber":113908,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:54:15Z","evm":{"ok":true,"latencyMs":1533,"blockNumber":113938,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1642,"blockNumber":113938,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T06:57:15Z","evm":{"ok":true,"latencyMs":842,"blockNumber":113968,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":1093,"blockNumber":113968,"source":"chain_subscribeNewHeads"}}
+{"ts":"2026-10-20T07:00:15Z","evm":{"ok":true,"latencyMs":1420,"blockNumber":113998,"chainId":"420420777"},"ws":{"ok":true,"latencyMs":982,"blockNumber":113998,"source":"chain_subscribeNewHeads"}}

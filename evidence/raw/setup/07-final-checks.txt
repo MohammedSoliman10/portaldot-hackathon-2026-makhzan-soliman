@@ -1,0 +1,32 @@
+# Final Phase A2 checks 2026-10-20T07:02:49Z
+
+$ forge fmt --check
+exit=0
+
+$ forge test
+[PASS] testSmallLadder() (gas: 7789)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 5.21ms (5.64ms CPU time)
+
+Ran 5 test suites in 9.33ms (20.44ms CPU time): 22 tests passed, 0 failed, 0 skipped (22 total tests)
+exit=0
+
+$ npm run typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm test
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1189.347913
+exit=0
+
+$ npm run validate
+
+ok   evidence/gates/g07.json
+checked 1 record(s) and 42 raw file(s); evidence dir present
+exit=0

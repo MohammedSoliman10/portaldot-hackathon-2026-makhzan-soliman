@@ -1,0 +1,10 @@
+Compiling 24 files with Solc 0.8.28
+Solc 0.8.28 finished in 587.81ms
+Compiler run successful!
+
+Ran 2 tests for test/tier0/SizeProbe.t.sol:SizeProbeTest
+[PASS] testDeploysExactlyRequestedSize(uint16) (runs: 256, μ: 4363, ~: 4363)
+[PASS] testSmallLadder() (gas: 7789)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 3.59ms (3.93ms CPU time)
+
+Ran 1 test suite in 7.21ms (3.59ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

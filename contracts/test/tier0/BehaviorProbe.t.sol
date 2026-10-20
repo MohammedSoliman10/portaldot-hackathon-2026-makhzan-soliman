@@ -45,26 +45,26 @@ contract BehaviorProbeTest is Test {
 
     function testTimestampIsMonotonic() public {
         probe.store(1);
-        (, , uint256 first, ) = probe.read();
+        (,, uint256 first,) = probe.read();
         vm.warp(block.timestamp + 30);
         probe.store(2);
-        (, , uint256 second, ) = probe.read();
+        (,, uint256 second,) = probe.read();
         assertGt(second, first);
     }
 
     function testBlockNumberIsMonotonic() public {
         probe.store(1);
-        (, , , uint256 first) = probe.read();
+        (,,, uint256 first) = probe.read();
         vm.roll(block.number + 5);
         probe.store(2);
-        (, , , uint256 second) = probe.read();
+        (,,, uint256 second) = probe.read();
         assertGt(second, first);
     }
 
     function testFuzzStoredValueAndPayment(uint256 value, uint96 payment) public {
         vm.deal(address(this), uint256(payment) + 1 ether);
         probe.store{value: payment}(value);
-        (uint256 stored, uint256 received, , ) = probe.read();
+        (uint256 stored, uint256 received,,) = probe.read();
         assertEq(stored, value);
         assertEq(received, payment);
     }
