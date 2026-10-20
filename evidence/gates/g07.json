@@ -3,9 +3,9 @@
   "gateId": "G07",
   "runState": "blocked",
   "verdict": null,
-  "reason": "funds not requested by instruction; T023 not started, owner funding pending",
+  "reason": "owner funding pending: no plain-HTTP faucet exists; owner request is in MESSAGES.md; 90-minute poll 05:30:51Z..07:00:52Z saw native free 0 and EVM balance 0 (90/90 samples)",
   "startedAt": "2026-10-20T05:01:59Z",
-  "finishedAt": "2026-10-20T05:02:07Z",
+  "finishedAt": "2026-10-20T07:00:52Z",
   "endpoint": "https://test-evm-rpc-v3.portaldot.dev",
   "chainIdObserved": "420420777",
   "commands": [
@@ -26,7 +26,11 @@
   "evidenceFiles": [
     "evidence/raw/g07/01-addresses.txt",
     "evidence/raw/g07/02-balances.txt",
-    "evidence/raw/g07/03-metadata.txt"
+    "evidence/raw/g07/03-metadata.txt",
+    "evidence/raw/g07/05-owner-poll.txt",
+    "evidence/raw/g07/06-faucet-instructions.md",
+    "evidence/raw/g07/07-address-recompute.txt",
+    "evidence/raw/g07/08-owner-poll-summary.txt"
   ],
   "details": {
     "derivation": "secp256k1 -> viem privateKeyToAccount address; candidate A = EVM bytes + twelve 0xEE",
@@ -205,6 +209,17 @@
         "status": "not attempted; only if evidence disproves A after funding"
       }
     },
-    "faucetAddress": "5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE"
+    "faucetAddress": "5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE",
+    "fundingPoll": {
+      "startedAt": "2026-10-20T05:30:51Z",
+      "finishedAt": "2026-10-20T07:00:52Z",
+      "intervalSeconds": 60,
+      "samples": 90,
+      "zeroNativeFreeSamples": 90,
+      "zeroEvmBalanceSamples": 90,
+      "errors": 0,
+      "evidence": "evidence/raw/g07/05-owner-poll.txt",
+      "summary": "evidence/raw/g07/08-owner-poll-summary.txt"
+    }
   }
 }

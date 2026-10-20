@@ -1,0 +1,4 @@
+ticks=44 first=2026-10-20T04:55:59Z last=2026-10-20T07:00:15Z
+evm_ok=42/44 ws_ok=44/44
+window_s=7456 max_gap_s=189 gap=["2026-10-20T06:12:14Z","2026-10-20T06:15:23Z"]
+coverage_pct=103.72 (expected ticks at 180s cadence)
