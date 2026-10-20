@@ -1,0 +1,16 @@
+Compiling 23 files with Solc 0.8.28
+Solc 0.8.28 finished in 587.64ms
+Compiler run successful!
+
+Ran 8 tests for test/tier0/BehaviorProbe.t.sol:BehaviorProbeTest
+[PASS] testBlockNumberIsMonotonic() (gas: 161889)
+[PASS] testBoomRevertsWithReason() (gas: 8741)
+[PASS] testCustomRevertReasonIsPropagated() (gas: 8940)
+[PASS] testEventHasIndexedSenderAndValue() (gas: 128994)
+[PASS] testFuzzStoredValueAndPayment(uint256,uint96) (runs: 256, μ: 135836, ~: 136656)
+[PASS] testPayableValueIsAccepted() (gas: 124400)
+[PASS] testStorageWriteThenRead() (gas: 133461)
+[PASS] testTimestampIsMonotonic() (gas: 161930)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.89ms (2.96ms CPU time)
+
+Ran 1 test suite in 6.82ms (2.89ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
