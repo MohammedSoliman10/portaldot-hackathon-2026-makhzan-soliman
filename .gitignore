@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Keys / wallets
+id.json
+*.keypair
+
+# Node
+node_modules/
+
+# Foundry / build output
+out/
+cache/
+broadcast/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Evidence scratch
+evidence/rpc-log/*.tmp
+
+# OS / editor
+.DS_Store
+*.swp
