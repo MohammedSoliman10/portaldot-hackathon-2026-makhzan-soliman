@@ -1,0 +1,16 @@
+# GitHub publication 2026-10-20T05:28:57Z
+
+$ gh auth status
+logged in as MohammedSoliman10; scopes gist, read:org, repo; protocol ssh (token redacted)
+
+$ secret scan over all 18 commits / all branches
+key_values_scanned=6 history_hits=0 env_file_ever_tracked=False
+
+$ gh repo create portaldot-hackathon-2026-makhzan-soliman --public --source=. --remote=origin --push
+created https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
+pushed main -> origin/main
+
+$ gh repo edit --default-branch main
+default_branch=main visibility=PUBLIC
+url=https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
+sync_folder_pushed=no env_pushed=no
