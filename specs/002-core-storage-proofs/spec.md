@@ -8,6 +8,28 @@
 
 **Input**: User description: "Feature 002-core-storage-proofs (Tier 1, the Oct 24 check-in slice). What: a minimal accountable storage protocol on Portaldot's EVM. A provider bonds tPOT. A client creates a deal for a file (Merkle root, leaf count, size, duration, price, escrowed deposit). The deal owner challenges the provider for a randomly chosen block of the file; the provider answers with the block's bytes plus the Merkle path; the contract verifies them against the deal root at the challenged position. A valid answer passes. A wrong answer, or no answer inside the response window, slashes the provider. A provider daemon answers challenges; a client CLI chunks a file, builds the root, creates the deal and uploads to the provider. Why: it is the core of the project and the check-in deliverable. It proves bonded, challenged storage runs on Portaldot with on-chain, verifiable results."
 
+## Clarifications
+
+### Session 2026-10-21
+
+- Q: How is the bond and how are payments denominated? → A: In the chain's native test currency, sent with the call through the attached value. No token contract is used.
+- Q: Who may challenge a deal? → A: The deal owner only. Permissionless challenges and challenger bonds are out of scope for this tier.
+- Q: How much is slashed for a failed challenge, and to whom? → A: Exactly 20% of the provider's bond at the moment of resolution, paid to the deal owner.
+- Q: How many blocks does one challenge target? → A: One block per round.
+- Q: What is the response window? → A: 50 blocks from the block that opens the challenge, expressed only in block numbers and held as a deployment constant so a timed demo can use a shorter window without changing any deal's semantics.
+- Q: What picks the challenged position? → A: The specification stays neutral; the source is fixed by the randomness gate's verdict during planning, with a documented fallback if the gate finds the source unusable.
+- Q: What is the minimum bond? → A: 10 tPOT.
+- Q: How large is the demo file? → A: 1 MiB.
+- Q: What deal duration is allowed? → A: 1–24 hours, stored as block counts.
+- Q: How do payments work? → A: They accrue linearly per block and the provider may claim any accrued amount at any time. The owner settles after expiry and receives the unaccrued remainder.
+- Q: When may a provider withdraw its bond? → A: Only when it has no open deal and no unresolved challenge.
+- Q: What is the challenge unit? → A: 1 KiB until the gas gate fixes the final size within 1–4 KiB.
+- Q: What is the total deal price? → A: The total price is escrowed in full at creation. Accrued payment is `price × (min(current block, end block) − start block) ÷ (end block − start block)`, capped at the price.
+- Q: When exactly does a wrong or missing answer cause a slash? → A: A wrong answer is rejected and leaves the challenge open; the owner resolves after the deadline, and that resolution performs the slash. A missing answer follows the same resolve path.
+- Q: Does a failed challenge end the deal? → A: No. The deal continues to its end block and is closed only by settlement; the provider's open-deal count falls at settlement.
+- Q: Is there a limit on challenge rounds per deal? → A: At most one open challenge at a time; after a resolution the owner may challenge again while the deal is active. There is no per-deal round cap in this tier; the bond is the economic bound.
+- Q: When is the file uploaded relative to the deal? → A: The provider must acknowledge the complete file before any challenge is issued. Deal creation may happen before or after the upload, but no challenge may be issued before acknowledgement.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - A provider bonds and serves a deal (Priority: P1)
@@ -100,9 +122,9 @@ An observer who trusts neither the provider nor the client can look at the publi
 
 **Challenge, answer and resolution**
 
-- **FR-010**: Only the deal owner MAY open a challenge for an active deal. A deal MUST have at most one open challenge at a time, and a challenge round MUST target exactly one block position.
-- **FR-011**: The challenge position MUST be selected unpredictably from the committed leaf count at challenge time, recorded on-chain, and MUST NOT be supplied or altered by the provider when answering.
-- **FR-012**: A challenge MUST carry a response deadline of 50 blocks from the block in which it is opened. Deadlines MUST be expressed in block numbers, never wall-clock time.
+- **FR-010**: Only the deal owner MAY open a challenge for an active deal. A deal MUST have at most one open challenge at a time, and a challenge round MUST target exactly one block position. After a challenge resolves, the owner MAY open another challenge while the deal is still active; there is no per-deal round cap in this tier.
+- **FR-011**: The challenge position MUST be selected unpredictably from the committed leaf count at challenge time, recorded on-chain, and MUST NOT be supplied or altered by the provider when answering. The source of unpredictability is fixed by the randomness gate's verdict, with a documented fallback if that verdict finds the source unusable.
+- **FR-012**: A challenge MUST carry a response deadline expressed only as a block number. The window is a deployment constant, defaulting to 50 blocks from the block that opens the challenge, so a timed demo can use a shorter window without changing any deal's semantics.
 - **FR-013**: The provider named in the deal, and only that provider, MUST be able to answer before the deadline with the challenged block's bytes and the Merkle path for the challenged position.
 - **FR-014**: The verifier MUST use domain-separated hashing: a distinct prefix for leaves and a distinct prefix for internal nodes. A leaf MUST be hashed from the supplied bytes, never accepted as a precomputed hash. A response that carries only a hash, carries empty bytes, or carries bytes of the wrong length MUST be rejected.
 - **FR-015**: The verifier MUST derive every path direction from the challenged position and the committed leaf count. Path directions MUST NOT be accepted from the prover. The expected path length MUST be derived from the same two values, and a path that is too short or too long MUST be rejected.
@@ -110,14 +132,14 @@ An observer who trusts neither the provider nor the client can look at the publi
 - **FR-017**: The verifier MUST bind the proof to the challenged position: a proof that is valid for position `i` MUST NOT verify for any other position `j`, whether the attacker changes the index, the bytes or the path ordering.
 - **FR-018**: A correct answer before the deadline MUST close the challenge as passed, MUST leave the bond unchanged, and MUST leave the deal active until its end block.
 - **FR-019**: An incorrect answer MUST be rejected without closing the challenge and without moving value. The provider MAY retry with a correct answer until the deadline.
-- **FR-020**: After the deadline, if the challenge has not passed, the owner MUST be able to resolve it as failed. A failed resolution MUST slash exactly 20% of the provider's bond at that moment and pay it to the deal owner.
+- **FR-020**: After the deadline, if the challenge has not passed, the owner MUST be able to resolve it as failed. A failed resolution MUST slash exactly 20% of the provider's bond at that moment and pay it to the deal owner. A failed challenge MUST NOT end the deal: the deal continues to its end block and is closed only by settlement.
 - **FR-021**: A slash MUST never exceed the provider's bond. If the computed share exceeds the bond, the bond itself is the ceiling.
 - **FR-022**: A challenge MUST resolve at most once. A second resolution attempt MUST be refused with no additional transfer.
 - **FR-023**: No challenge may be opened after the deal's end block. An already-open challenge MUST still be resolvable after the end block.
 
 **Payment and settlement**
 
-- **FR-024**: Payment MUST accrue linearly per block between the deal's start and end blocks, capped at the total price. The provider MUST be able to claim accrued-but-unclaimed payment at any time while the deal exists.
+- **FR-024**: Payment MUST accrue linearly per block between the deal's start and end blocks, computed as total price multiplied by elapsed blocks divided by duration in blocks, and capped at the total price. Elapsed blocks MUST use the current block or the end block, whichever is smaller. The provider MUST be able to claim accrued-but-unclaimed payment at any time while the deal exists.
 - **FR-025**: Accrued payment MUST never exceed the deal's escrowed deposit, and cumulative claimed payment MUST never exceed accrued payment.
 - **FR-026**: After the end block and with no open challenge, the deal owner MUST be able to settle the deal. Settlement MUST pay the provider all unpaid accrued payment, return any unaccrued remainder to the owner, close the deal and allow the provider's deal count to fall.
 - **FR-027**: Settlement MUST happen at most once and MUST be refused before the end block or while a challenge is open.
@@ -190,7 +212,8 @@ The reported chain behaviour — roughly 0.079 tPOT per deployed byte, 13 tPOT p
 - The chain's native test currency is tPOT with the decimal relationship established by the funding gate; amounts in this feature are expressed in the chain's smallest unit internally.
 - Block time is about 6 seconds, so 50 blocks is about 5 minutes and a 1–24 hour deal is about 600–14,400 blocks. Deadlines and durations are stored as block counts, never wall-clock timestamps.
 - The default challenge block size is 1 KiB and the permitted range is 1–4 KiB. The gas gate may fix a different size in that range; the protocol's declared size changes with it and the golden vectors are regenerated.
-- The default deal duration range is 1–24 hours, the default slash is 20% of the bond per failed challenge, the default response window is 50 blocks and the default minimum bond is 10 tPOT. These defaults are confirmed during clarification and may be re-set by a recorded decision.
+- The default deal duration range is 1–24 hours, the default slash is 20% of the bond per failed challenge, the default response window is 50 blocks and the default minimum bond is 10 tPOT. These defaults are confirmed in the Clarifications session and may only be re-set by a recorded decision.
+- A failed challenge does not end the deal. The deal runs to its end block and is closed by settlement; the provider's open-deal count falls at settlement. There is no per-deal challenge-round cap, so the bond is the economic bound on repeated failures.
 - The deal owner is the only challenger in this tier; permissionless challenging and challenger bonds are out of scope.
 - One challenge targets one block, and the default demo file is 1 MiB.
 - Payments accrue linearly per block. The provider may claim at any time; the owner settles after expiry and receives the unaccrued remainder.
