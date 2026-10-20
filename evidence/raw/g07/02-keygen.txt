@@ -1,0 +1,12 @@
+
+> makhzan-gates@0.1.0 keygen
+> node src/keygen.ts
+
+wrote six burner keys to /home/mohammed_soliman/hackathons/portaldot-hackathon/.env (mode 600, gitignored)
+provider-1  evm=0xf4ec143c743ff57c0d32e829f50692551cbf6029 accountId32=0xf4ec143c743ff57c0d32e829f50692551cbf6029eeeeeeeeeeeeeeeeeeeeeeee
+provider-2  evm=0x58ada8e939f0fd7b674b7799529d1fadb40cc4f3 accountId32=0x58ada8e939f0fd7b674b7799529d1fadb40cc4f3eeeeeeeeeeeeeeeeeeeeeeee
+provider-3  evm=0x49d271d44fc5eeeb319786539ebf48deac1b86d0 accountId32=0x49d271d44fc5eeeb319786539ebf48deac1b86d0eeeeeeeeeeeeeeeeeeeeeeee
+provider-4  evm=0xf5fc2b88310a23bda47a8b3729c8499c5b7b1287 accountId32=0xf5fc2b88310a23bda47a8b3729c8499c5b7b1287eeeeeeeeeeeeeeeeeeeeeeee
+vault-agent evm=0x9801bda6e0f839b6cdf9634beeaf2a9b15d48e70 accountId32=0x9801bda6e0f839b6cdf9634beeaf2a9b15d48e70eeeeeeeeeeeeeeeeeeeeeeee
+owner       evm=0x0948ebd7637d1c32858a6fc5d947e85a6600205c accountId32=0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee
+Add PORTALDOT_EVM_RPC_URL and PORTALDOT_WS_URL to the same file before running g07.

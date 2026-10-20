@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "gateId": "G07",
+  "runState": "blocked",
+  "verdict": null,
+  "reason": "funds not requested by instruction; T023 not started, owner funding pending",
+  "startedAt": "2026-10-20T05:00:15Z",
+  "finishedAt": "2026-10-20T05:00:24Z",
+  "endpoint": "https://test-evm-rpc-v3.portaldot.dev",
+  "chainIdObserved": "420420777",
+  "commands": [
+    {
+      "command": "node src/gates/runner.ts G07",
+      "cwd": "apps/gates",
+      "exitCode": 2,
+      "rawOutput": "evidence/raw/g07/03-metadata.txt",
+      "ranAt": "2026-10-20T05:00:15Z"
+    }
+  ],
+  "measurements": [],
+  "transactions": [],
+  "errors": [],
+  "verdictReason": null,
+  "classification": null,
+  "adaptation": null,
+  "evidenceFiles": [
+    "evidence/raw/g07/01-addresses.txt",
+    "evidence/raw/g07/02-balances.txt",
+    "evidence/raw/g07/03-metadata.txt"
+  ],
+  "details": {
+    "derivation": "secp256k1 -> viem privateKeyToAccount address; candidate A = EVM bytes + twelve 0xEE",
+    "ss58Prefix": 42,
+    "chain": {
+      "id": 420420777,
+      "name": "Portaldot Testnet V3",
+      "nativeCurrency": {
+        "name": "tPOTv3",
+        "symbol": "tPOT",
+        "decimals": 14
+      }
+    },
+    "metadata": {
+      "specName": "portaldot-v3",
+      "specVersion": "3002",
+      "ss58Prefix": 42,
+      "tokenSymbol": "tPOT",
+      "tokenDecimals": 14,
+      "reviveCalls": [
+        "batchMapAccounts",
+        "call",
+        "dispatchAsFallbackAccount",
+        "ethCall",
+        "ethInstantiateWithCode",
+        "ethSubstrateCall",
+        "ethTransact",
+        "instantiate",
+        "instantiateWithCode",
+        "mapAccount",
+        "removeCode",
+        "setCode",
+        "unmapAccount",
+        "uploadCode"
+      ],
+      "reviveStorage": [
+        "accountInfoOf",
+        "blockHash",
+        "codeInfoOf",
+        "debugSettingsOf",
+        "deletionQueue",
+        "deletionQueueCounter",
+        "ethBlockBuilderFirstValues",
+        "ethBlockBuilderIR",
+        "ethereumBlock",
+        "immutableDataOf",
+        "nativeDepositOf",
+        "originalAccount",
+        "palletVersion",
+        "pristineCode",
+        "receiptInfoData"
+      ],
+      "reviveConstants": [
+        "allowEVMBytecode",
+        "autoMap",
+        "chainId",
+        "codeHashLockupDepositPercent",
+        "debugEnabled",
+        "depositPerByte",
+        "depositPerChildTrieItem",
+        "depositPerItem",
+        "gasScale",
+        "maxEthExtrinsicWeight",
+        "nativeToEthRatio"
+      ]
+    },
+    "accounts": [
+      {
+        "role": "provider-1",
+        "envName": "PROVIDER_1_KEY",
+        "evm": "0xf4ec143c743ff57c0d32e829f50692551cbf6029",
+        "accountId32": "0xf4ec143c743ff57c0d32e829f50692551cbf6029eeeeeeeeeeeeeeeeeeeeeeee",
+        "ss58": "5Hbqft1roeX13KBJHkYY1jSPCR3Ef6yFtxkMgJF9YxM5M3UQ",
+        "native": {
+          "nonce": "0",
+          "free": "0",
+          "reserved": "0",
+          "frozen": "0"
+        },
+        "evmBalanceWei": "0"
+      },
+      {
+        "role": "provider-2",
+        "envName": "PROVIDER_2_KEY",
+        "evm": "0x58ada8e939f0fd7b674b7799529d1fadb40cc4f3",
+        "accountId32": "0x58ada8e939f0fd7b674b7799529d1fadb40cc4f3eeeeeeeeeeeeeeeeeeeeeeee",
+        "ss58": "5E4yfAJJ4AuQ95Y5CxcAAtg6Wax3HgJ1f21EAejsKfdnHgNk",
+        "native": {
+          "nonce": "0",
+          "free": "0",
+          "reserved": "0",
+          "frozen": "0"
+        },
+        "evmBalanceWei": "0"
+      },
+      {
+        "role": "provider-3",
+        "envName": "PROVIDER_3_KEY",
+        "evm": "0x49d271d44fc5eeeb319786539ebf48deac1b86d0",
+        "accountId32": "0x49d271d44fc5eeeb319786539ebf48deac1b86d0eeeeeeeeeeeeeeeeeeeeeeee",
+        "ss58": "5DjVsHjt1r9ruhYnaEqqpG6NQN9m2WsSzYTPeA251b4DWm5W",
+        "native": {
+          "nonce": "0",
+          "free": "0",
+          "reserved": "0",
+          "frozen": "0"
+        },
+        "evmBalanceWei": "0"
+      },
+      {
+        "role": "provider-4",
+        "envName": "PROVIDER_4_KEY",
+        "evm": "0xf5fc2b88310a23bda47a8b3729c8499c5b7b1287",
+        "accountId32": "0xf5fc2b88310a23bda47a8b3729c8499c5b7b1287eeeeeeeeeeeeeeeeeeeeeeee",
+        "ss58": "5HdEVu72g3UbbrqD1zkd9fcNknCzSyXzwKG6TkY8wUbMwUqV",
+        "native": {
+          "nonce": "0",
+          "free": "0",
+          "reserved": "0",
+          "frozen": "0"
+        },
+        "evmBalanceWei": "0"
+      },
+      {
+        "role": "vault-agent",
+        "envName": "VAULT_AGENT_KEY",
+        "evm": "0x9801bda6e0f839b6cdf9634beeaf2a9b15d48e70",
+        "accountId32": "0x9801bda6e0f839b6cdf9634beeaf2a9b15d48e70eeeeeeeeeeeeeeeeeeeeeeee",
+        "ss58": "5FW1epAnGpU66B8ireSpNHnMy45FtaAELHCRTduQ315bEqBN",
+        "native": {
+          "nonce": "0",
+          "free": "0",
+          "reserved": "0",
+          "frozen": "0"
+        },
+        "evmBalanceWei": "0"
+      },
+      {
+        "role": "owner",
+        "envName": "OWNER_KEY",
+        "evm": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+        "accountId32": "0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee",
+        "ss58": "5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE",
+        "native": {
+          "nonce": "0",
+          "free": "0",
+          "reserved": "0",
+          "frozen": "0"
+        },
+        "evmBalanceWei": "0"
+      }
+    ],
+    "allZeroNative": true,
+    "candidates": {
+      "a": {
+        "rule": "20-byte EVM address followed by twelve 0xEE bytes",
+        "status": "assumed; not yet funded",
+        "evmBalanceWei": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      "b": {
+        "rule": "separate Substrate keypair + pallet_revive.map_account",
+        "status": "not attempted; only if evidence disproves A after funding"
+      }
+    },
+    "faucetAddress": "5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE"
+  }
+}

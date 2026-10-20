@@ -1,0 +1,53 @@
+{
+  "specName": "portaldot-v3",
+  "specVersion": "3002",
+  "ss58Prefix": 42,
+  "tokenSymbol": "tPOT",
+  "tokenDecimals": 14,
+  "reviveCalls": [
+    "batchMapAccounts",
+    "call",
+    "dispatchAsFallbackAccount",
+    "ethCall",
+    "ethInstantiateWithCode",
+    "ethSubstrateCall",
+    "ethTransact",
+    "instantiate",
+    "instantiateWithCode",
+    "mapAccount",
+    "removeCode",
+    "setCode",
+    "unmapAccount",
+    "uploadCode"
+  ],
+  "reviveStorage": [
+    "accountInfoOf",
+    "blockHash",
+    "codeInfoOf",
+    "debugSettingsOf",
+    "deletionQueue",
+    "deletionQueueCounter",
+    "ethBlockBuilderFirstValues",
+    "ethBlockBuilderIR",
+    "ethereumBlock",
+    "immutableDataOf",
+    "nativeDepositOf",
+    "originalAccount",
+    "palletVersion",
+    "pristineCode",
+    "receiptInfoData"
+  ],
+  "reviveConstants": [
+    "allowEVMBytecode",
+    "autoMap",
+    "chainId",
+    "codeHashLockupDepositPercent",
+    "debugEnabled",
+    "depositPerByte",
+    "depositPerChildTrieItem",
+    "depositPerItem",
+    "gasScale",
+    "maxEthExtrinsicWeight",
+    "nativeToEthRatio"
+  ]
+}

@@ -59,6 +59,8 @@ export interface GateRecord {
   classification: Classification | null;
   adaptation: string | null;
   evidenceFiles: string[];
+  /** Gate-specific evidence that does not fit the common schema (for example G07 accounts). */
+  details?: Record<string, unknown>;
 }
 
 export interface ValidateOptions {

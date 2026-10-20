@@ -1,0 +1,61 @@
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ a tick records exactly one outcome per endpoint (1.9138ms)
+✔ a tick with both ok and error is rejected (0.7228ms)
+✔ timestamps are ISO-8601 UTC at second precision (0.4858ms)
+✔ the day file rotates on the UTC date (0.6462ms)
+✔ a record without runState is rejected (5.4596ms)
+✔ done without a verdict is rejected (1.9912ms)
+✔ blocked with a verdict is rejected (0.4621ms)
+✔ blocked without a reason is rejected (0.4068ms)
+✔ not_run without a reason is rejected (0.3959ms)
+✔ PASS with a classification is rejected (0.2473ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.3458ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.399399ms)
+✔ a loaded secret value is rejected (0.6378ms)
+✔ a recorded --private-key flag is rejected (0.457ms)
+✔ a missing evidenceFiles path is rejected (0.4863ms)
+✔ timestamps out of order are rejected (0.3239ms)
+✔ a valid blocked record is accepted (0.2688ms)
+node:internal/modules/esm/resolve:272
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/src/keygen.ts' imported from /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/test/keygen.test.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:272:11)
+    at moduleResolve (node:internal/modules/esm/resolve:879:10)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:381:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/src/keygen.ts'
+}
+
+Node.js v24.20.0
+✖ test/keygen.test.ts (107.961496ms)
+✔ method is always recorded (1.4854ms)
+✔ a missing method throws (0.9348ms)
+✔ receipt method requires a txRef (0.3227ms)
+✔ differential requires two labelled samples (0.2899ms)
+✔ differential records both labels (0.943ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 22
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 171.592594
+
+✖ failing tests:
+
+test at test/keygen.test.ts:1:1
+✖ test/keygen.test.ts (107.961496ms)
+  'test failed'

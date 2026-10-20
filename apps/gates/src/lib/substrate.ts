@@ -31,13 +31,20 @@ export interface ChainProperties {
 export async function readProperties(api: ApiPromise): Promise<ChainProperties> {
   const properties = await api.rpc.system.properties();
   const json = properties.toJSON() as Record<string, unknown>;
-  const ss58 = (json.ss58Format ?? 42) as number;
-  const symbols = json.tokenSymbol as string[] | string | undefined;
-  const decimals = json.tokenDecimals as number[] | number | undefined;
+  const plain = (value: unknown): unknown => {
+    if (value && typeof (value as { toJSON?: unknown }).toJSON === "function") {
+      return (value as { toJSON: () => unknown }).toJSON();
+    }
+    return value;
+  };
+  const first = (value: unknown): unknown => {
+    const resolved = plain(value);
+    return Array.isArray(resolved) ? resolved[0] : resolved;
+  };
   return {
-    ss58Prefix: Number(ss58),
-    tokenSymbol: Array.isArray(symbols) ? (symbols[0] ?? null) : (symbols ?? null),
-    tokenDecimals: Array.isArray(decimals) ? (decimals[0] ?? null) : (decimals ?? null),
+    ss58Prefix: Number(first(json.ss58Format) ?? 42),
+    tokenSymbol: (first(json.tokenSymbol) as string | undefined) ?? null,
+    tokenDecimals: (first(json.tokenDecimals) as number | undefined) ?? null,
     raw: json,
   };
 }

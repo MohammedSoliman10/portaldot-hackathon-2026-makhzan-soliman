@@ -1,0 +1,65 @@
+# Phase A1 verification 2026-10-20T05:01:04Z
+
+$ cd apps/gates && npm test
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ a tick records exactly one outcome per endpoint (3.2527ms)
+✔ a tick with both ok and error is rejected (1.5751ms)
+✔ timestamps are ISO-8601 UTC at second precision (0.5111ms)
+✔ the day file rotates on the UTC date (0.6756ms)
+✔ a record without runState is rejected (6.6885ms)
+✔ done without a verdict is rejected (0.6839ms)
+✔ blocked with a verdict is rejected (0.4939ms)
+✔ blocked without a reason is rejected (0.3776ms)
+✔ not_run without a reason is rejected (0.6802ms)
+✔ PASS with a classification is rejected (1.189ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.8679ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.6373ms)
+✔ a loaded secret value is rejected (0.9517ms)
+✔ a recorded --private-key flag is rejected (0.8474ms)
+✔ a missing evidenceFiles path is rejected (0.5903ms)
+✔ timestamps out of order are rejected (0.4618ms)
+✔ a valid blocked record is accepted (0.4102ms)
+✔ implied factor is derived from both observed balances (2.4475ms)
+✔ a zero native balance cannot produce a factor (0.4685ms)
+✔ native to EVM scaling applies the observed factor (0.2208ms)
+✔ a zero EVM balance after mapping attempts is a FAIL (0.2168ms)
+✔ a run that never reached the chain is blocked, never FAIL (0.1882ms)
+✔ a funded and spendable EVM balance passes (0.1268ms)
+✔ the worked example keeps native and EVM amounts distinct (0.2823ms)
+✔ candidate A is the 20 EVM bytes followed by twelve 0xEE bytes (1.2163ms)
+✔ candidate A rejects a non-address (0.6995ms)
+✔ keygen produces six distinct keys (55.555999ms)
+✔ the env file is mode 600 and is never overwritten (20.3335ms)
+✔ method is always recorded (2.3864ms)
+✔ a missing method throws (1.1176ms)
+✔ receipt method requires a txRef (0.9822ms)
+✔ differential requires two labelled samples (0.4784ms)
+✔ differential records both labels (1.1446ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2293.081584
+exit=0
+
+$ cd apps/gates && npm run typecheck
+
+> makhzan-gates@0.1.0 typecheck
+> tsc --noEmit
+
+exit=0
+
+$ cd apps/gates && npm run validate
+
+> makhzan-gates@0.1.0 validate
+> node src/validate.ts
+
+ok   evidence/gates/g07.json
+checked 1 record(s) and 16 raw file(s); evidence dir present
+exit=0

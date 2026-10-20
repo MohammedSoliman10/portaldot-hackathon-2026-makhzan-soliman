@@ -1,0 +1,65 @@
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ a tick records exactly one outcome per endpoint (2.4261ms)
+✔ a tick with both ok and error is rejected (0.978899ms)
+✔ timestamps are ISO-8601 UTC at second precision (0.4636ms)
+✔ the day file rotates on the UTC date (0.8002ms)
+✔ a record without runState is rejected (5.2827ms)
+✔ done without a verdict is rejected (0.7254ms)
+✔ blocked with a verdict is rejected (0.451ms)
+✔ blocked without a reason is rejected (0.4222ms)
+✔ not_run without a reason is rejected (0.3654ms)
+✔ PASS with a classification is rejected (0.4657ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.4386ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.7006ms)
+✔ a loaded secret value is rejected (0.716ms)
+✔ a recorded --private-key flag is rejected (0.7899ms)
+✔ a missing evidenceFiles path is rejected (0.479ms)
+✔ timestamps out of order are rejected (0.3585ms)
+✔ a valid blocked record is accepted (0.2489ms)
+node:internal/modules/esm/resolve:272
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/src/gates/g07.ts' imported from /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/test/g07.test.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:272:11)
+    at moduleResolve (node:internal/modules/esm/resolve:879:10)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:381:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///home/mohammed_soliman/hackathons/portaldot-hackathon/apps/gates/src/gates/g07.ts'
+}
+
+Node.js v24.20.0
+✖ test/g07.test.ts (135.826096ms)
+✔ candidate A is the 20 EVM bytes followed by twelve 0xEE bytes (1.1032ms)
+✔ candidate A rejects a non-address (0.7346ms)
+✔ keygen produces six distinct keys (42.161699ms)
+✔ the env file is mode 600 and is never overwritten (14.5157ms)
+✔ method is always recorded (1.5108ms)
+✔ a missing method throws (0.8425ms)
+✔ receipt method requires a txRef (0.2834ms)
+✔ differential requires two labelled samples (0.4489ms)
+✔ differential records both labels (1.1752ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 26
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 345.78649
+
+✖ failing tests:
+
+test at test/g07.test.ts:1:1
+✖ test/g07.test.ts (135.826096ms)
+  'test failed'
