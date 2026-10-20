@@ -8,6 +8,15 @@
 
 **Input**: User description: "Feature: 001-tier0-gates. Goal: establish, with evidence, which assumptions Makhzan can rely on at the Portaldot V3 testnet before any product code exists."
 
+## Clarifications
+
+### Session 2026-10-20
+
+- Q: How is the final challenge block size chosen within the 1–4 KiB target? → A: The gas gate decides: use the largest size in that range that fits the measured payload and cost limits with a stated margin.
+- Q: How long does network monitoring keep running? → A: It starts before the first gate, runs through the whole gate window, and is left running after the gates finish; gaps are reported, never backfilled.
+- Q: What counts as a hard deployment failure that stops the tier? → A: No successful deployment after two serious attempts with different toolchain paths within 48 hours; individual failed attempts are recorded and retried.
+- Q: Where do pass, partial and fail sit for a gate? → A: Pass means every required measurement was obtained and the assumption holds; partial means it holds only with caveats or some required measurement could not be obtained; fail means the assumption is disproved.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Know whether value can move and state can persist on the target chain (Priority: P1)
@@ -108,7 +117,7 @@ The owner needs continuous evidence of whether the network was reachable while t
 
 ### Functional Requirements
 
-- **FR-001**: The feature MUST begin with continuous network monitoring: reachability, latency and current block height for both the contract endpoint and the event-stream endpoint, recorded at least every three minutes into daily files for the whole measurement window, and left running after the gates finish.
+- **FR-001**: The feature MUST begin with continuous network monitoring: reachability, latency and current block height for both the contract endpoint and the event-stream endpoint, recorded at least every three minutes into daily files for the whole measurement window, and left running after the gates finish until the owner stops it.
 - **FR-002**: Monitoring MUST record failures verbatim with UTC timestamps, and MUST NOT fill gaps after the fact.
 - **FR-003**: The feature MUST fund six distinct accounts — four providers, one vault/agent account and one owner account — using disposable keys supplied only through environment variables, and MUST record each account's funded balance.
 - **FR-004**: The feature MUST document how a natively funded account relates to its contract-visible address, including the exact procedure used, and MUST demonstrate the relationship with at least one value transfer recorded by transaction reference.
@@ -116,17 +125,17 @@ The owner needs continuous evidence of whether the network was reachable while t
 - **FR-006**: The feature MUST deploy a disposable contract to the live network and call it successfully, and MUST record the exact tooling, versions, flags and compiler path that worked.
 - **FR-007**: The feature MUST exercise, on the live network, contract state writes, event emission, a deliberate revert, value transfer, current block time and current block number, and MUST list every observed difference from expected Ethereum behavior.
 - **FR-008**: The feature MUST record the contract size limit actually enforced, whether hashing is cheap or relatively expensive, and which contract compilation path the network accepts.
-- **FR-009**: If the first deployment fails hard, the feature MUST stop and report immediately rather than proceeding to later gates.
+- **FR-009**: A hard deployment failure is no successful deployment after two serious attempts with different toolchain paths within 48 hours. Individual failed attempts MUST be recorded with verbatim errors and retried; on a hard failure the feature MUST stop and report immediately rather than proceeding to later gates.
 - **FR-010**: The feature MUST sample randomness and previous-block references over at least 30 consecutive blocks, state whether the values change, whether the previous block is readable, and whether the result is usable for unpredictable challenge selection; if unusable, it MUST state commit-reveal as the alternative with its cost and latency implications.
 - **FR-011**: The feature MUST measure the maximum transaction payload accepted, with the rejection for exceeding it recorded verbatim.
 - **FR-012**: The feature MUST measure hashing cost for payloads of 1, 4, 16 and 64 KiB.
 - **FR-013**: The feature MUST measure the cost of full Merkle verification using separated leaf and node hashing with index-derived path directions, for a 1 KiB and a 4 KiB leaf block at depths 10, 14 and 20.
-- **FR-014**: The feature MUST compute the largest challenge response that fits within measured limits and MUST recommend a challenge block size within the 1–4 KiB target, with the arithmetic and the gas gate shown.
+- **FR-014**: The feature MUST compute the largest challenge response that fits within measured limits and MUST recommend a challenge block size within the 1–4 KiB target, with the arithmetic and the gas gate shown. The chosen size MUST be the largest in that range that fits both payload and verification-cost limits with a stated margin; if no size in the range fits, this is a hard failure.
 - **FR-015**: The feature MUST measure the storage deposit for a realistic deal record and the marginal cost of storing one additional value, and MUST state the resulting per-deal storage assumption for later tiers.
 - **FR-016**: The feature MUST measure the cost of issuing, answering and resolving one challenge, and MUST compute the test currency required to sustain challenges for 14 days with three providers at 10, 20 and 30 minute intervals.
 - **FR-017**: The feature MUST determine whether an identity service exists and whether a provider account can set and read back an identity, recording the outcome either way.
 - **FR-018**: The feature MUST determine, as an optional check, whether an asset service responds to standard token calls, and MUST record what those calls return without treating absence as a failure.
-- **FR-019**: Every gate MUST end with a verdict of pass, fail or partial, and each verdict MUST cite the commands, raw output, transaction references and error text that support it.
+- **FR-019**: Every gate MUST end with a verdict of pass, fail or partial, and each verdict MUST cite the commands, raw output, transaction references and error text that support it. Pass means every required measurement was obtained and the gate's assumption holds; partial means the assumption holds only with caveats or some required measurement could not be obtained; fail means the assumption is disproved.
 - **FR-020**: Every non-passing gate MUST be classified as either a fallback trigger or a design change; fallback classification MUST be limited to the five defined hard conditions, and every other non-passing gate MUST state its adaptation.
 - **FR-021**: The feature MUST produce a results document containing one row per gate with verdict and evidence reference, plus plain statements of what the findings make possible, impossible and different for the design.
 - **FR-022**: The feature MUST produce a decision record listing each verified or contradicted assumption, the evidence for it, and the consequence for the design.
