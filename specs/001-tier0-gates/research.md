@@ -45,8 +45,8 @@ neither works, that is a fallback trigger, not a design change.
 
 ## D3 — Evidence format
 
-**Decision**: One JSON record per gate (`evidence/gates/Gxx.json`) plus verbatim raw output under
-`evidence/raw/Gxx/`, rolled up into `evidence/tier0-results.md`. JSON records follow a fixed schema
+**Decision**: One JSON record per gate (`evidence/gates/gxx.json`) plus verbatim raw output under
+`evidence/raw/gxx/`, rolled up into `evidence/tier0-results.md`. JSON records follow a fixed schema
 and carry the UTC timestamp, the exact command, the endpoint, and the tx hashes or error text.
 
 **Rationale**: A markdown table alone cannot be checked mechanically; JSON alone is unreadable to a
@@ -107,16 +107,22 @@ may impose a different bound, and that is the point of the gate).
 
 ## D7 — Randomness sampling (G3)
 
-**Decision**: Sample 30+ consecutive blocks, reading in each: `blockhash(n-1)` from a contract call,
-`block.prevrandao`, `block.number` and `block.timestamp`. Record whether values repeat, whether
-`blockhash(n-1)` is readable (non-zero) at execution time, and whether the value is known before the
-block that uses it. Verdict uses the spec's definition: usable means unpredictable to a provider
-before the challenge is issued and readable on-chain at verification time.
+**Decision**: Sample 30+ consecutive blocks by read call, reading in each: `blockhash(n-1)`,
+`block.prevrandao`, `block.number` and `block.timestamp`. Additionally send at least 10 real
+transactions that emit the same values in an event, and compare the two sets. Record whether values
+repeat, whether `blockhash(n-1)` is readable (non-zero) at execution time, whether the value is known
+before the block that uses it, and any disagreement between call and transaction values. Verdict uses
+the spec's definition: usable means unpredictable to a provider before the challenge is issued and
+readable on-chain at verification time.
 
 **Rationale**: `prevrandao` on an Ethereum-shaped chain is the beacon randomness value; on a
 Substrate-based chain it may be a constant, a hash of the parent, or zero. Only sampling consecutive
 blocks shows whether it varies and whether it can be predicted one block ahead. The sample size
 matches the gate's minimum and is enough to detect a constant or a repeating cycle.
+
+**Rationale for the second set**: `eth_call` executes against a node's view and may not reflect
+on-chain execution, so a call-only sample could describe values the contract will never see. The
+event samples come from mined transactions and are the ground truth for verification-time behavior.
 
 **Alternatives considered**: Reading the runtime's randomness source via the Substrate API only
 (rejected: the contract is what needs the value, so it must be read from contract context);
@@ -156,15 +162,21 @@ constitution).
 
 ## D9 — Account mapping and the 14-decimal question (G7)
 
-**Decision**: Create six burner accounts from environment variables. Fund each through the faucet or
-an administrator using its SS58 address. Then, for each account, call `pallet_revive.map_account`
-from the Substrate side and record the resulting EVM address; verify with `eth_getBalance`, a small
-value transfer to the mapped address, and a contract call that reports `msg.value`. Record native
-balance (Substrate `system.account`), EVM balance, and the ratio implied by the token's decimals.
+**Decision**: Generate six burner keys locally into a gitignored `.env` (mode 600, addresses printed,
+never the keys), then fund the owner account first. Before requesting anything, inspect the runtime
+metadata (`revive` calls, storage and constants; SS58 prefix from `system_properties`) and decide
+which Substrate address the faucet must pay for an Ethereum secp256k1 key, recording both candidates:
+(a) the fallback account — the 20-byte EVM address followed by twelve `0xEE` bytes — under the
+assumption that Ethereum-derived accounts need no `map_account`; and (b) the account produced by
+`map_account`. Print the recommended faucet address and fund that one. Then call
+`pallet_revive.map_account` where it applies and verify with `eth_getBalance`, a small value transfer
+and a contract call that reports `msg.value`. Record native balance, EVM balance and the ratio
+implied by the token's decimals.
 
 **Rationale**: Parity's documentation states that a native Substrate account must call
 `pallet_revive.map_account` before its H160 view is usable, and that funding happens on the SS58
-side. The decimal question cannot be answered by reading docs alone because the EVM view may use 18
+side; but an Ethereum-derived key may already control a fallback account, so which address receives
+faucet funds has to be established from metadata and evidence rather than assumed. The decimal question cannot be answered by reading docs alone because the EVM view may use 18
 decimals while the native token uses 14; measuring both sides of one account with worked examples
 is the only way to know the conversion the product must use.
 

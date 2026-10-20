@@ -9,7 +9,8 @@
 Build a measurement harness that answers ten questions about the Portaldot V3 testnet with committed
 evidence, before any Makhzan product code exists. The harness is one Foundry project of disposable
 probe contracts plus one TypeScript CLI in which each gate is a single command that writes a JSON
-record and a raw log. A background probe runs from the first minute and keeps logging reachability,
+record and a raw log. Each record carries a run state (`done`, `blocked`, `not_run`); only completed
+runs carry a verdict. A background probe runs from the first minute and keeps logging reachability,
 latency and block height every three minutes. The output is a gate table in
 `evidence/tier0-results.md`, a decision record in `docs/decisions.md`, and a recommended challenge
 block size derived from measured payload and verification costs.
@@ -57,7 +58,7 @@ overhead per tick.
 - No product features; no WASM/ink!; no frontend; no database.
 - Dependencies minimal, pinned exact, and disclosed in the README with versions and licences.
 
-**Scale/Scope**: 10 gates, 6 burner accounts, ~380 `forge`/`cast`/CLI invocations, ~5 disposable
+**Scale/Scope**: 10 gates, 6 burner accounts, ~380 `forge`/`cast`/CLI invocations, 9 disposable
 probe contracts, 1 background daemon, 2 documents of record.
 
 ## Constitution Check
@@ -117,12 +118,15 @@ specs/001-tier0-gates/
 contracts/                      # Foundry project root
 ├── foundry.toml                # evm_version = paris; solc pinned after G2
 ├── src/tier0/                  # disposable probes, deleted or quarantined before product tier
+│   ├── CounterProbe.sol        # G1: deploy + set/get + event + revert
 │   ├── BehaviorProbe.sol       # G2: storage, events, revert, value, time, block number
+│   ├── SizeProbe.sol           # G2: deployment size ladder
+│   ├── ValueEcho.sol           # G7: reports msg.value, sender, time, number
+│   ├── RandomnessProbe.sol     # G3: reads blockhash(n-1), prevrandao, emits sample event
 │   ├── HashCostProbe.sol       # G4b: keccak over 1/4/16/64 KiB
 │   ├── MerkleProbe.sol         # G4c: domain-separated root + byte-carrying verification
 │   ├── StorageProbe.sol        # G5: deal-record deposit and marginal slot cost
-│   ├── ChallengeProbe.sol      # G6: issue / answer / resolve cost
-│   └── SizeProbe.sol           # G2: deployment size ladder
+│   └── RoundCostProbe.sol      # G6: issue / answer / resolve cost stub, no bond accounting
 ├── test/tier0/                 # unit + fuzz tests, written first
 └── script/tier0/               # forge script deploys (no key on argv)
 
@@ -130,20 +134,20 @@ apps/gates/                     # TypeScript harness (CLI, no UI)
 ├── package.json                # exact-pinned deps
 ├── tsconfig.json
 ├── src/
-│   ├── config.ts               # env loading, chain definition, guards
+│   ├── config.ts               # env loading, chain definition, path resolution, guards
 │   ├── lib/
 │   │   ├── evm.ts              # viem client, signing, tx helpers
 │   │   ├── substrate.ts        # @polkadot/api connection, extrinsics
 │   │   ├── evidence.ts         # record writer, sanitizer, schema checks
 │   │   └── measure.ts          # gas ladder helpers, estimate/receipt fallback
 │   ├── probe/daemon.ts         # G10 background probe
-│   └── gates/g01..g10.ts       # one entry point per gate
+│   └── gates/                  # registry.ts + g01.ts … g09.ts (G10 is the daemon)
 └── test/                       # node:test for validators and formatting
 
 evidence/
 ├── tier0-results.md            # gate table + possible/not possible/design change
-├── gates/G01.json … G10.json   # one machine-readable record per gate
-├── raw/<gate>/                 # verbatim command output, tx receipts
+├── gates/g01.json … g10.json   # one machine-readable record per gate (lowercase paths)
+├── raw/g01/ … raw/g10/         # verbatim command output, tx receipts
 └── rpc-log/YYYY-MM-DD.jsonl    # G10 daily JSON Lines
 
 docs/
@@ -156,7 +160,14 @@ future product contracts. Gate scripts live in `apps/gates/` as a headless CLI: 
 exists for non-contract code, and keeping the harness out of `packages/` avoids implying it is a
 reusable library. Evidence is committed under `evidence/` as the constitution requires, with one
 JSON record per gate and raw output beside it so a verdict can be re-read without re-running
-anything.
+anything. Evidence paths are always resolved from the repository root (derived from the module's own
+location), never from the process working directory, because gate commands are run from
+`apps/gates/`. Record paths use lowercase gate ids (`g01.json`, `raw/g01/`); gate ids stay uppercase
+in display and in the record's `gateId` field.
+
+Every gate record carries a `runState` of `done`, `blocked` or `not_run`. Only `done` records carry a
+verdict; a gate that could not run is blocked, never failed, and `rollup` renders missing or blocked
+gates in the table instead of refusing to run.
 
 ## Complexity Tracking
 

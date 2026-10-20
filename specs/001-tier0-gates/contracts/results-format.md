@@ -15,9 +15,10 @@ Structure is fixed by `contracts/evidence-schema.md` §3. Content rules:
 | --- | --- |
 | Gate | `G10` … `G09`, in brief order |
 | Question | the gate's question, one line |
-| Verdict | PASS / FAIL / PARTIAL / BLOCKED, exactly as in the record |
-| Classification | `FALLBACK-TRIGGER`, `DESIGN-CHANGE`, or `—` for PASS |
-| Evidence | relative link to `gates/<id>.json` plus the most important raw artifact |
+| Run state | `done`, `blocked` or `not_run`, exactly as in the record |
+| Verdict | PASS / PARTIAL / FAIL for `done`; `—` for blocked and not-run rows |
+| Classification | `FALLBACK-TRIGGER`, `DESIGN-CHANGE`, or `—` for PASS and non-`done` rows |
+| Evidence | relative link to `gates/<id>.json` plus the most important raw artifact; for a missing record, `NOT RUN — halted at <gate>` or `BLOCKED — <reason>` |
 
 ### Verdict prose
 
@@ -25,7 +26,9 @@ For each gate, a short block containing:
 - the exact commands (env var names only);
 - the key numbers with units and the measurement method;
 - tx hashes or the verbatim error;
-- one sentence stating why the verdict is not the adjacent one (why PASS not PARTIAL, etc.).
+- one sentence stating why the verdict is not the adjacent one (why PASS not PARTIAL, etc.);
+- for blocked and not-run gates, the reason and the point in the sequence where it stopped, with no
+  verdict claimed.
 
 No adjectives that are not backed by a number. "Affordable", "fast" and "cheap" are replaced by the
 measured value and the comparison it is judged against.
@@ -51,7 +54,7 @@ Append-only log of assumption findings.
 - Date: 2026-10-20
 - Assumption: a funded SS58 account can spend its balance through the EVM address.
 - Finding: <observed, with numbers>
-- Evidence: `evidence/gates/G07.json`, `evidence/raw/G07/03-transfer.txt`
+- Evidence: `evidence/gates/g07.json`, `evidence/raw/g07/03-transfer.txt`
 - Consequence: <design change, or "none">
 - Status: confirmed
 ```
@@ -77,13 +80,16 @@ Append-only log of assumption findings.
 5. even the smallest Merkle proof cannot be verified within transaction limits.
 
 Everything else is `DESIGN-CHANGE` and states the adaptation. A gate that fails one requirement but
-whose core assumption still holds is `PARTIAL`, not a trigger.
+whose core assumption still holds is `PARTIAL`, not a trigger. Blocked and not-run gates carry no
+classification; a gate that could not run because the RPC, the funds or an upstream gate were
+unavailable is blocked, never failed.
 
 ## 4. Checkpoint bundle
 
 After G09 (or at the first hard failure), the harness copies into the sync folder:
-`CHECKPOINT.md`, `spec.md`, `plan.md`, `tasks.md`, the analyze output, `tier0-results.md`,
-`decisions.md` and the gate records. Before copying, `npm run validate` runs over the bundle and
+`CHECKPOINT.md`, `constitution.md`, `spec.md`, `plan.md`, `tasks.md`, the stored analyze report,
+`tier0-results.md`, `decisions.md` and the gate records. The bundle must be writable after a G01
+halt, with not-run gates rendered rather than skipped. Before copying, `npm run validate` runs over the bundle and
 refuses on any secret match. The checkpoint states feature, stage, UTC time,
 `git log --oneline -15`, task status, deviations, risks, test and gas summary, and the exact next
 step, then stops for owner approval.

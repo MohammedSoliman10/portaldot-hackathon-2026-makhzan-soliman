@@ -29,22 +29,23 @@ cd ../../contracts && forge build
 ## Configure
 
 ```bash
-cp .env.example .env    # at repo root; .env is gitignored
+cd apps/gates && npm run keygen
 ```
 
-Fill in:
+`keygen` creates the six burner keys into a gitignored `.env` with mode 600, prints only public
+addresses, and refuses to overwrite an existing `.env`. Add the endpoints to the same file:
 
 ```text
 PORTALDOT_EVM_RPC_URL=
 PORTALDOT_WS_URL=
 PORTALDOT_EXPLORER_URL=        # optional
-PROVIDER_1_KEY= … PROVIDER_4_KEY=
-VAULT_AGENT_KEY=
-OWNER_KEY=
 ```
 
 All keys are burner keys that hold test funds only. Nothing in the harness prints them, and every
 recorded command shows the variable name rather than the value.
+
+Paths: every `evidence/` path resolves from the repository root, not from `apps/gates`, even though
+the commands run there. If evidence appears under `apps/gates/evidence/`, the resolver is wrong.
 
 ## 1. Start the probe (G10) before anything else
 
@@ -54,7 +55,13 @@ cd apps/gates && npm run probe
 
 Expected: a line every 180 s in `evidence/rpc-log/<UTC date>.jsonl` containing
 `evm.ok`, `evm.latencyMs`, `evm.blockNumber`, `ws.ok`, `ws.latencyMs`. Leave it running for the whole
-window and after the gates finish. To check progress without stopping it:
+window and after the gates finish.
+
+Keep the machine awake for the whole window. Under WSL the daemon stops when Windows sleeps, and the
+gap is real evidence: it is recorded as a gap with its start and end times and is never backfilled.
+If the laptop must sleep, note the time so the gap is explained rather than mysterious.
+
+To check progress without stopping it:
 
 ```bash
 tail -n 3 evidence/rpc-log/$(date -u +%F).jsonl
@@ -72,9 +79,13 @@ Expected: unit and fuzz tests pass, including the Merkle position-binding test (
 
 ## 3. Run the gates in order
 
+Funding order matters: the owner account is funded first, and `G01` and `G02` start as soon as that
+one account is usable. The other five are funded in parallel and are only needed from `G06` and
+`G08`.
+
 ```bash
 cd apps/gates
-npm run gate -- G07     # fund six accounts, map SS58 → EVM, answer the decimals question
+npm run gate -- G07     # inspect metadata, derive the faucet address, map SS58 → EVM, answer decimals
 npm run gate -- G01     # deploy and call; records the compiler path that worked
 npm run gate -- G02     # behavior differences, size limit, hash cost, compiler path
 npm run gate -- G03     # 30+ consecutive blocks of randomness
@@ -86,7 +97,9 @@ npm run gate -- G09     # optional: ERC-20 precompile probe
 ```
 
 Stop rule: a hard failure on G01 (two toolchain attempts, 48h) halts the sequence. Every other gate
-records its verdict and continues.
+records its verdict and continues. A gate that cannot run because the RPC, the funds or an upstream
+gate were unavailable is recorded as blocked with a reason, never as failed; gates after a halt are
+recorded as not run, so the table always has ten rows.
 
 ## 4. Validate and roll up
 
@@ -105,12 +118,13 @@ the number of gaps. Review the generated table, then fill the prose sections fro
 | --- | --- |
 | Probe coverage | ≥95% of the window at 3-minute cadence, gaps listed |
 | G01 | a deployed address, a read call result, and the exact compiler path recorded |
-| G02 | every listed behavior observed, differences enumerated, size limit and hash cost measured |
-| G03 | 30+ samples, a verdict on variation and readability, commit-reveal stated if unusable |
+| G07 | the faucet address is derived from metadata and written down before any funding request |
+| G02 | every listed behavior observed, differences enumerated, size limit and both hash ratios recorded |
+| G03 | 30+ call samples and 10+ transaction samples, agreement stated, commit-reveal stated if unusable |
 | G04 | four hash sizes, six Merkle combinations, calldata ceiling, one recommended block size with arithmetic |
 | G05 | deal deposit and marginal slot cost in the chosen unit |
 | G06 | three 14-day figures, each reproducible from per-round costs |
-| G07 | six accounts with native and EVM balances, one proven mapping, worked decimal example |
+| G07 | six accounts with native and EVM balances, one proven mapping route, worked decimal example |
 | G08 | identity read and write outcome |
 | G09 | raw return data per candidate address, or an explicit "no precompile" |
 | Results doc | gate table, possible/not possible/changes, eight starting facts with status |
@@ -124,9 +138,9 @@ record says so.
 
 ## Outage behavior
 
-If the RPC is down, the gate exits 2, writes the verbatim error and UTC time into its raw log, and
-writes no verdict. The probe keeps logging. Retry later; a gate only becomes PARTIAL/FAIL after a
-real attempt returns an answer.
+If the RPC is down, the gate exits 2, writes a `blocked` record with the verbatim error and UTC time,
+and claims no verdict. The probe keeps logging. Retry later; a gate only becomes PARTIAL or FAIL
+after a real attempt returns an answer.
 
 ## Cleanup
 

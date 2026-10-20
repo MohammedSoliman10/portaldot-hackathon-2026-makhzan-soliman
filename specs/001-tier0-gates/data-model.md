@@ -57,38 +57,47 @@ The static description of one question and its measurement procedure.
 | `haltOnHardFailure` | boolean | true for G01 only |
 
 Validation: order values are unique and contiguous; `optional` is true only for `G09`; G10 has
-order 1.
+order 1. The static registry lives in `apps/gates/src/gates/registry.ts`, and both the validator and
+`rollup` read it from there so ids, order and required measurements have one source.
 
 ## GateRecord
 
-One JSON file per gate at `evidence/gates/<id>.json`.
+One JSON file per gate at `evidence/gates/<id-lowercase>.json` (for example `g07.json`).
 
 | Field | Type | Rules |
 | --- | --- | --- |
-| `gateId` | string | matches a Gate |
-| `verdict` | enum | `PASS`, `FAIL`, `PARTIAL`, `BLOCKED` |
+| `gateId` | string | matches a Gate (`G01`…`G10`) |
+| `runState` | enum | `done`, `blocked`, `not_run` |
+| `verdict` | enum \| null | `PASS`, `PARTIAL`, `FAIL`; required when `runState` is `done`, null otherwise |
+| `reason` | string \| null | required when `runState` is `blocked` or `not_run`; why the gate could not run |
 | `startedAt` | string | ISO-8601 UTC, e.g. `2026-10-20T09:14:02Z` |
-| `finishedAt` | string | ISO-8601 UTC, not before `startedAt` |
+| `finishedAt` | string | ISO-8601 UTC, not before `startedAt`; for `not_run` equals the halt time |
 | `endpoint` | string | RPC URL used, no credentials |
 | `chainIdObserved` | string \| null | decimal string as returned |
-| `commands` | CommandRef[] | at least one |
-| `measurements` | CostMeasurement[] | may be empty only for blocked gates |
+| `commands` | CommandRef[] | at least one for `done`, may be empty for `not_run` |
+| `measurements` | CostMeasurement[] | may be empty only for blocked or not-run gates |
 | `transactions` | TransactionRef[] | required for gates that send transactions |
 | `errors` | ErrorRecord[] | required when any command failed |
-| `verdictReason` | string | plain English, states why this verdict rather than another |
-| `classification` | enum \| null | `FALLBACK-TRIGGER`, `DESIGN-CHANGE`, null when PASS |
+| `verdictReason` | string \| null | required when `runState` is `done`; states why this verdict rather than another |
+| `classification` | enum \| null | `FALLBACK-TRIGGER`, `DESIGN-CHANGE`, null when PASS or when not `done` |
 | `adaptation` | string \| null | required when classification is `DESIGN-CHANGE` |
 | `evidenceFiles` | string[] | paths under `evidence/`, must exist |
 
 Validation:
+- `runState` is the primary state. A record without `runState` is malformed and is rejected by
+  `validate`; there is no default.
+- `done` requires a non-null `verdict` from `PASS`, `PARTIAL`, `FAIL`.
+- `blocked` and `not_run` require a non-empty `reason` and MUST NOT carry a verdict. A gate that could
+  not run because the RPC, the funds or an upstream gate was unavailable is `blocked`, never `FAIL`.
 - `verdict` values follow the clarified boundary: PASS requires every required measurement present;
   PARTIAL requires a stated caveat or missing measurement; FAIL requires the assumption to be
-  disproved; BLOCKED means the environment prevented the run and no verdict is claimed.
-- `classification` must be null when `verdict` is `PASS` and non-null otherwise, except `BLOCKED`,
-  which is classified on retry.
+  disproved.
+- `classification` must be null unless `runState` is `done` and `verdict` is `PARTIAL` or `FAIL`.
 - A `FALLBACK-TRIGGER` may only be used for the five conditions in the brief; the record carries the
   matched condition in `verdictReason`.
 - `adaptation` is mandatory for `DESIGN-CHANGE`.
+- A `not_run` record is emitted only when the sequence halts; every gate after the halt gets one, with
+  `reason` naming the halted gate.
 
 ## CommandRef
 
@@ -175,9 +184,11 @@ State: a day file moves `open` → `sealed` at UTC midnight; sealed files are ne
 | `evmBalance` | string \| null | wei string, as returned |
 | `mapped` | boolean | true only after `map_account` succeeds and is evidenced |
 | `fundedAt` | string \| null | ISO-8601 UTC |
+| `keyOrigin` | string | always `local-.env-600`; keys are generated locally, never imported |
 
 Validation: never stores a private key, mnemonic, seed or keystore. Six entries exactly, one per
-role.
+role. The key file is gitignored and mode 600; the keygen step prints only public addresses and
+refuses to overwrite an existing `.env`.
 
 ## AccountMapping
 
@@ -192,9 +203,13 @@ role.
 | `impliedFactor` | string | decimal string, e.g. `10000` |
 | `msgValueSeen` | string \| null | value observed by a contract call |
 | `workedExample` | object | `{native, evm, sentValue, receivedValue}` |
+| `faucetAddress` | string | the SS58 address the faucet must pay, with the candidate rule that produced it |
+| `candidateEvidence` | object | `{fallbackAccount, mappedAccount, metadataSource, chosen}`, each with the observed value |
 
 Validation: `impliedFactor` must be derived from the observed balances, not from docs; the
-worked example must use a realistic magnitude for a deal bond.
+worked example must use a realistic magnitude for a deal bond. `faucetAddress` must be chosen from
+inspected runtime metadata and recorded candidates, never guessed; funds are not requested until it
+is written down.
 
 ## ChallengeBlockRecommendation
 
@@ -217,11 +232,12 @@ stated margin; the arithmetic must reference measured values by `name`.
 
 | Value | Allowed when |
 | --- | --- |
-| `FALLBACK-TRIGGER` | no deploy after two toolchain attempts / 48h; no usable funds by 2026-10-21 after asking admins; RPC unusable several consecutive days; value/state unreliable; smallest Merkle proof cannot be verified within limits |
-| `DESIGN-CHANGE` | any other non-PASS, with a written adaptation |
+| `FALLBACK-TRIGGER` | a `done` gate meets one of: no deploy after two toolchain attempts / 48h; no usable funds by 2026-10-21 after asking admins; RPC unusable several consecutive days; value/state unreliable; smallest Merkle proof cannot be verified within limits |
+| `DESIGN-CHANGE` | any other `done` gate with a non-passing verdict, with a written adaptation |
 
 Validation: the five fallback conditions are enumerated in one place in code; a record claiming
-`FALLBACK-TRIGGER` must match one by id.
+`FALLBACK-TRIGGER` must match one by id. Blocked and not-run gates carry no classification; they carry
+a reason.
 
 ## DecisionEntry
 
@@ -237,21 +253,25 @@ One entry in `docs/decisions.md`.
 | `consequence` | string | what changes in the design, or "none" |
 | `status` | enum | `confirmed`, `contradicted`, `unconfirmed` |
 
-Validation: every gate that is not PASS produces at least one entry; a `contradicted` entry must
-name the adaptation or the fallback condition.
+Validation: every `done` gate with a non-passing verdict produces at least one entry; a
+`contradicted` entry must name the adaptation or the fallback condition.
 
 ## State transitions
 
 ```text
-Gate: pending → running → (PASS | FAIL | PARTIAL | BLOCKED)
-BLOCKED → running (retry) → verdict
-Non-PASS verdict → classified → DecisionEntry written → results table updated
+Gate: pending → running → done(verdict) | blocked(reason)
+       blocked → running (retry) → done(verdict)
+       pending → not_run(reason) when an earlier gate halts the sequence
+done(PARTIAL|FAIL) → classified → DecisionEntry written → results table updated
 Probe day file: open → sealed (UTC midnight)
 BurnerAccount: created → funded → mapped (irreversible in this tier)
 ```
 
 Rules:
-- A gate may move from `BLOCKED` to any verdict, but never from a verdict back to `running`; a rerun
-  writes a new record with a new timestamp and the previous file is kept as `Gxx.<timestamp>.json`.
-- `FAIL` on G01 halts the sequence (FR-009).
+- `runState` is the authoritative state; a `done` record always has a verdict, and `blocked`/`not_run`
+  records never do.
+- A blocked gate may be retried; a completed gate is never moved back to `running`. A rerun writes a
+  new record with a new timestamp and keeps the previous file as `gxx.<timestamp>.json`.
+- `FAIL` on G01 halts the sequence (FR-009); every later gate receives a `not_run` record naming G01
+  as the halt point, so `rollup` can still render a full table.
 - The results table is derived from the records; it is never edited by hand to disagree with them.

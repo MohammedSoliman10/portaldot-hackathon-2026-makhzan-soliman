@@ -74,11 +74,11 @@ The owner needs to know whether on-chain randomness is usable for selecting chal
 
 **Why this priority**: Randomness affects the security story of every challenge. Identity and assets affect two swappable modules. All three are cheaper to substitute now than after product code exists.
 
-**Independent Test**: Sample at least 30 consecutive blocks and confirm from the recorded samples whether the values vary and whether the previous block's value is readable; query identity and asset services and record their responses verbatim.
+**Independent Test**: Sample at least 30 consecutive blocks by read call and at least 10 values from real transactions, confirm whether the sets agree and whether the previous block's value is readable; query identity and asset services and record their responses verbatim.
 
 **Acceptance Scenarios**:
 
-1. **Given** 30 or more consecutive blocks, **When** each block's randomness value and previous-block reference are sampled, **Then** the samples are recorded and a verdict on usability for challenge selection is stated, with a commit-reveal alternative if unusable.
+1. **Given** 30 or more consecutive blocks and at least 10 real transactions, **When** the randomness values and previous-block references are sampled both ways, **Then** both sets are recorded, any disagreement is reported, and a verdict on usability for challenge selection is stated, with a commit-reveal alternative if unusable.
 2. **Given** a funded provider account, **When** an identity is set and read back, **Then** the outcome is recorded as supported or unsupported.
 3. **Given** the optional asset service, **When** standard token calls are made, **Then** the responses are recorded and the gate is reported as optional rather than failed if the service is absent.
 
@@ -102,14 +102,15 @@ The owner needs continuous evidence of whether the network was reachable while t
 
 ### Edge Cases
 
-- The network is unreachable when a gate starts: the exact error and UTC time are recorded, the probe keeps running, the gate is retried later, and the interruption is reported rather than hidden.
+- The network is unreachable when a gate starts: the exact error and UTC time are recorded, the probe keeps running, the gate is retried later, and the interruption is reported rather than hidden. The gate is `blocked`, not `fail`, until a real attempt returns an answer.
 - The endpoint answers but reports a different chain identifier than the starting facts: the mismatch is recorded as a contradiction and flagged, and no later result is presented as if the starting fact held.
 - Funding cannot be obtained by the fallback date because the faucet is dry or admins do not respond: this is a fallback trigger, not a design change.
-- An account is funded natively but its contract-visible balance is zero: the mapping requirement is not satisfied, and the consequence for every later value-carrying gate is stated.
+- An account is funded natively but its contract-visible balance stays zero after the documented mapping attempts: the mapping assumption is disproved and the gate is `fail`, with the consequence for every later value-carrying gate stated.
 - The token's decimal places make native and contract-visible amounts disagree by orders of magnitude: the conversion is documented with worked examples, because a silent factor error would corrupt every cost estimate.
 - A transaction is rejected for exceeding a payload size rather than for cost: the rejection is recorded verbatim and treated as a hard limit, not as a tuning problem.
 - The smallest viable proof exceeds cost or size limits even at depth 10: this is a fallback trigger.
 - Randomness values are constant, or the previous block's value is unreadable: randomness is judged unusable and commit-reveal is stated as the alternative, with its added cost and latency.
+- The values returned by a read call disagree with the values emitted by real transactions: the disagreement is reported, the transaction values are treated as authoritative for on-chain execution, and the verdict is based on them.
 - The optional asset service is absent or errors on standard calls: it is reported as absent and the bond-asset module is marked as needing a substitute, without failing the tier.
 - The probe process stops without being noticed: the gap is visible in the logs and is reported as a gap, never backfilled.
 
@@ -119,14 +120,14 @@ The owner needs continuous evidence of whether the network was reachable while t
 
 - **FR-001**: The feature MUST begin with continuous network monitoring: reachability, latency and current block height for both the contract endpoint and the event-stream endpoint, recorded at least every three minutes into daily files for the whole measurement window, and left running after the gates finish until the owner stops it.
 - **FR-002**: Monitoring MUST record failures verbatim with UTC timestamps, and MUST NOT fill gaps after the fact.
-- **FR-003**: The feature MUST fund six distinct accounts — four providers, one vault/agent account and one owner account — using disposable keys supplied only through environment variables, and MUST record each account's funded balance.
-- **FR-004**: The feature MUST document how a natively funded account relates to its contract-visible address, including the exact procedure used, and MUST demonstrate the relationship with at least one value transfer recorded by transaction reference.
+- **FR-003**: The feature MUST fund six distinct accounts — four providers, one vault/agent account and one owner account — using disposable keys generated locally into a gitignored `.env` with mode 600 and supplied only through environment variables, and MUST record each account's funded balance. The owner/deployer account MUST be funded first, and G01 and G02 MAY proceed as soon as that single account is funded and usable; the remaining five MUST be funded in parallel.
+- **FR-004**: The feature MUST document how a natively funded account relates to its contract-visible address, including the exact procedure used, and MUST demonstrate the relationship with at least one value transfer recorded by transaction reference. It MUST name the Substrate address the faucet must pay for an Ethereum secp256k1 key, chosen from inspected runtime metadata and recorded evidence rather than assumption, and MUST NOT request funds on a guess.
 - **FR-005**: The feature MUST answer the decimal-places question: how native token amounts appear as contract-visible balances and as value sent with a call, with worked examples at realistic magnitudes.
 - **FR-006**: The feature MUST deploy a disposable contract to the live network and call it successfully, and MUST record the exact tooling, versions, flags and compiler path that worked.
 - **FR-007**: The feature MUST exercise, on the live network, contract state writes, event emission, a deliberate revert, value transfer, current block time and current block number, and MUST list every observed difference from expected Ethereum behavior.
-- **FR-008**: The feature MUST record the contract size limit actually enforced, whether hashing is cheap or relatively expensive, and which contract compilation path the network accepts.
+- **FR-008**: The feature MUST record the contract size limit actually enforced, which contract compilation path the network accepts, and hashing cost as two ratios measured with their method: gas of `keccak256` over 32 bytes divided by gas of one new storage-slot write, and gas of `keccak256` over 32 bytes divided by gas of one event. No threshold is applied and no verdict depends on these ratios; the G04 payload ladder remains the authoritative hash-cost measurement.
 - **FR-009**: A hard deployment failure is no successful deployment after two serious attempts with different toolchain paths within 48 hours. Individual failed attempts MUST be recorded with verbatim errors and retried; on a hard failure the feature MUST stop and report immediately rather than proceeding to later gates.
-- **FR-010**: The feature MUST sample randomness and previous-block references over at least 30 consecutive blocks, state whether the values change, whether the previous block is readable, and whether the result is usable for unpredictable challenge selection; if unusable, it MUST state commit-reveal as the alternative with its cost and latency implications.
+- **FR-010**: The feature MUST sample randomness and previous-block references over at least 30 consecutive blocks using read calls, AND MUST record at least 10 values emitted by real transactions, because a read call may not reflect on-chain execution. It MUST compare the two sets, report any disagreement, state whether the values change, whether the previous block is readable, and whether the result is usable for unpredictable challenge selection; if unusable, it MUST state commit-reveal as the alternative with its cost and latency implications.
 - **FR-011**: The feature MUST measure the maximum transaction payload accepted, with the rejection for exceeding it recorded verbatim.
 - **FR-012**: The feature MUST measure hashing cost for payloads of 1, 4, 16 and 64 KiB.
 - **FR-013**: The feature MUST measure the cost of full Merkle verification using separated leaf and node hashing with index-derived path directions, for a 1 KiB and a 4 KiB leaf block at depths 10, 14 and 20.
@@ -135,9 +136,9 @@ The owner needs continuous evidence of whether the network was reachable while t
 - **FR-016**: The feature MUST measure the cost of issuing, answering and resolving one challenge, and MUST compute the test currency required to sustain challenges for 14 days with three providers at 10, 20 and 30 minute intervals.
 - **FR-017**: The feature MUST determine whether an identity service exists and whether a provider account can set and read back an identity, recording the outcome either way.
 - **FR-018**: The feature MUST determine, as an optional check, whether an asset service responds to standard token calls, and MUST record what those calls return without treating absence as a failure.
-- **FR-019**: Every gate MUST end with a verdict of pass, fail or partial, and each verdict MUST cite the commands, raw output, transaction references and error text that support it. Pass means every required measurement was obtained and the gate's assumption holds; partial means the assumption holds only with caveats or some required measurement could not be obtained; fail means the assumption is disproved.
-- **FR-020**: Every non-passing gate MUST be classified as either a fallback trigger or a design change; fallback classification MUST be limited to the five defined hard conditions, and every other non-passing gate MUST state its adaptation.
-- **FR-021**: The feature MUST produce a results document containing one row per gate with verdict and evidence reference, plus plain statements of what the findings make possible, impossible and different for the design.
+- **FR-019**: Every gate MUST end with a run state of `done`, `blocked` or `not_run`. A gate that reaches an answer MUST be `done` and MUST carry a verdict of pass, partial or fail together with the commands, raw output, transaction references and error text that support it. A gate that could not run because the RPC, the funds or an upstream gate were unavailable MUST be `blocked` with a reason, never `fail`, and a gate after a halt MUST be `not_run` with a reason. Pass means every required measurement was obtained and the gate's assumption holds; partial means the assumption holds only with caveats or some required measurement could not be obtained; fail means the assumption is disproved.
+- **FR-020**: Every gate that is `done` with a non-passing verdict MUST be classified as either a fallback trigger or a design change; fallback classification MUST be limited to the five defined hard conditions, and every other non-passing gate MUST state its adaptation.
+- **FR-021**: The feature MUST produce a results document containing one row per gate with run state, verdict where one exists, and evidence reference, plus plain statements of what the findings make possible, impossible and different for the design.
 - **FR-022**: The feature MUST produce a decision record listing each verified or contradicted assumption, the evidence for it, and the consequence for the design.
 - **FR-023**: Starting facts supplied with this feature MUST be treated as unverified and MUST each be confirmed, corrected or marked unconfirmed with evidence.
 - **FR-024**: The feature MUST NOT create any product contract, provider daemon, user interface or agent, and MUST NOT modify the project constitution or Spec Kit templates.
@@ -161,13 +162,13 @@ The owner needs continuous evidence of whether the network was reachable while t
 
 ### Measurable Outcomes
 
-- **SC-001**: All ten gates have a verdict, and 100% of verdicts cite at least one committed artifact containing the command, raw output and reference that support them.
-- **SC-002**: Continuous monitoring covers at least 95% of the measurement window at the stated cadence, with any gaps explicitly reported rather than filled.
+- **SC-001**: All ten gates have a run state, every `done` gate has a verdict, and 100% of `done` verdicts cite at least one committed artifact containing the command, raw output and reference that support them.
+- **SC-002**: Continuous monitoring covers at least 95% of the measurement window — defined as the first gate start to the last gate finish, with the probe's own start and stop timestamps recorded in G10 — at the stated cadence, with any gaps explicitly reported rather than filled.
 - **SC-003**: Six accounts are funded and their balances recorded, with zero accounts funded through a key that is not supplied by environment variable.
 - **SC-004**: A disposable contract is deployed and all six required behaviors are demonstrated on the live network, with a documented reproduction path a second person can follow without private context.
 - **SC-005**: The 14-day challenge requirement is stated in test currency for all three intervals, and each figure is reproducible from recorded per-round measurements.
 - **SC-006**: A challenge block size within the 1–4 KiB target is recommended, and its arithmetic accounts for both payload size and verification cost with a stated margin.
-- **SC-007**: 100% of non-passing gates carry exactly one classification, and every fallback classification maps to one of the five defined hard conditions.
+- **SC-007**: 100% of `done` gates with a non-passing verdict carry exactly one classification, and every fallback classification maps to one of the five defined hard conditions.
 - **SC-008**: The results document states, in plain language, what is possible, what is not possible, and what changes in the design; every starting fact is marked confirmed, corrected or unconfirmed.
 - **SC-009**: Zero credentials, keys or environment values appear in the repository, its logs, its evidence or the checkpoint bundle.
 - **SC-010**: No product contract, daemon, interface or agent is created by this feature, and the constitution and Spec Kit templates are unchanged.
@@ -183,4 +184,6 @@ The owner needs continuous evidence of whether the network was reachable while t
 - A disposable contract is acceptable for all behavior and cost measurements; no product logic is needed to answer any gate.
 - "Usable randomness" means values that are unpredictable to a provider before the challenge is issued and readable on-chain at verification time; a value that is constant or predictable in advance is unusable.
 - "Reproducible" means a second person can repeat the measurement from the committed record without access to the operator's environment.
+- A gate that cannot run because the RPC, the funds or an upstream gate were unavailable is blocked, never failed; only a completed run can produce a fail.
+- The owner account is funded first, and G01 and G02 run on it while the other five accounts are funded in parallel; the five are required from G06 and G08 onward.
 - The 14-day horizon is a design assumption for the demo period, not a commitment to run for 14 days during this feature.
