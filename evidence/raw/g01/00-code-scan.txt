@@ -1,0 +1,30 @@
+{
+  "scannedAt": "2026-10-20T05:34:57Z",
+  "rpc": "https://test-evm-rpc-v3.portaldot.dev",
+  "fromBlock": 113026,
+  "toBlock": 113145,
+  "blocksScanned": 120,
+  "transactionsScanned": 0,
+  "creationsFound": 0,
+  "contracts": [],
+  "chain": {
+    "specName": "portaldot-v3",
+    "specVersion": "3002",
+    "ss58Prefix": 42,
+    "tokenSymbol": "tPOT",
+    "tokenDecimals": 14
+  },
+  "reviveConstants": {
+    "allowEVMBytecode": true,
+    "autoMap": true,
+    "chainId": 420420777,
+    "codeHashLockupDepositPercent": 300000000,
+    "debugEnabled": false,
+    "depositPerByte": 6000000000000,
+    "depositPerChildTrieItem": 150000000000,
+    "depositPerItem": 15000000000000,
+    "gasScale": 5,
+    "maxEthExtrinsicWeight": "0x00000000000000000c7d713b49da0000",
+    "nativeToEthRatio": 10000
+  }
+}
