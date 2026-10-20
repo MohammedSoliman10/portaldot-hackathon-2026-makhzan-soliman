@@ -1,0 +1,50 @@
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ a tick records exactly one outcome per endpoint (2.0178ms)
+✔ a tick with both ok and error is rejected (0.757ms)
+✔ timestamps are ISO-8601 UTC at second precision (0.2724ms)
+✔ the day file rotates on the UTC date (0.523ms)
+✔ a record without runState is rejected (2.4342ms)
+✔ done without a verdict is rejected (0.4469ms)
+✔ blocked with a verdict is rejected (1.5467ms)
+✔ blocked without a reason is rejected (0.243ms)
+✔ not_run without a reason is rejected (0.3657ms)
+✔ PASS with a classification is rejected (0.3732ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.2537ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.3822ms)
+✔ a loaded secret value is rejected (0.4838ms)
+✔ a recorded --private-key flag is rejected (0.4066ms)
+✔ a missing evidenceFiles path is rejected (0.2978ms)
+✔ timestamps out of order are rejected (0.2005ms)
+✔ a valid blocked record is accepted (0.1943ms)
+✔ isFunded is false when both balances are zero (0.8822ms)
+✔ isFunded is true when native free is non-zero (0.204ms)
+✔ isFunded is true when the EVM balance is non-zero (0.1419ms)
+✔ isFunded rejects a malformed value instead of guessing (0.2898ms)
+✔ fundingFlagText records public values only (0.4555ms)
+✔ implied factor is derived from both observed balances (1.5113ms)
+✔ a zero native balance cannot produce a factor (0.317ms)
+✔ native to EVM scaling applies the observed factor (0.1713ms)
+✔ a zero EVM balance after mapping attempts is a FAIL (0.208ms)
+✔ a run that never reached the chain is blocked, never FAIL (0.1095ms)
+✔ a funded and spendable EVM balance passes (0.0967ms)
+✔ the worked example keeps native and EVM amounts distinct (0.1483ms)
+✔ candidate A is the 20 EVM bytes followed by twelve 0xEE bytes (0.996ms)
+✔ candidate A rejects a non-address (0.5027ms)
+✔ keygen produces six distinct keys (35.053202ms)
+✔ the env file is mode 600 and is never overwritten (12.8293ms)
+✔ method is always recorded (1.3711ms)
+✔ a missing method throws (0.6492ms)
+✔ receipt method requires a txRef (0.2199ms)
+✔ differential requires two labelled samples (0.2279ms)
+✔ differential records both labels (0.806ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1372.960472
