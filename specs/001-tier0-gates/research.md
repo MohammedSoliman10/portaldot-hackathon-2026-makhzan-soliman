@@ -163,31 +163,43 @@ constitution).
 ## D9 — Account mapping and the 14-decimal question (G7)
 
 **Decision**: Generate six burner keys locally into a gitignored `.env` (mode 600, addresses printed,
-never the keys), then fund the owner account first. Before requesting anything, inspect the runtime
-metadata (`revive` calls, storage and constants; SS58 prefix from `system_properties`) and decide
-which Substrate address the faucet must pay for an Ethereum secp256k1 key, recording both candidates:
-(a) the fallback account — the 20-byte EVM address followed by twelve `0xEE` bytes — under the
-assumption that Ethereum-derived accounts need no `map_account`; and (b) the account produced by
-`map_account`. Print the recommended faucet address and fund that one. Then call
-`pallet_revive.map_account` where it applies and verify with `eth_getBalance`, a small value transfer
-and a contract call that reports `msg.value`. Record native balance, EVM balance and the ratio
-implied by the token's decimals.
+never the keys), one secp256k1 key per burner. The EVM address is `viem`'s
+`privateKeyToAccount(key).address`. Candidate A, the primary assumption, is that the Substrate account
+the chain uses for an unmapped Ethereum-derived key is the 20-byte EVM address followed by twelve
+`0xEE` bytes, a 32-byte AccountId. `keygen` prints that AccountId32 as hex because the SS58 prefix is
+unknown until the chain is read; `g07` encodes it with the prefix observed from `system_properties`
+and prints the faucet address. The project does not derive a Substrate account from the secp256k1
+public key by blake2 or ECDSA hashing, because that account cannot spend funds signed for the EVM
+address.
 
-**Rationale**: Parity's documentation states that a native Substrate account must call
-`pallet_revive.map_account` before its H160 view is usable, and that funding happens on the SS58
-side; but an Ethereum-derived key may already control a fallback account, so which address receives
-faucet funds has to be established from metadata and evidence rather than assumed. The decimal question cannot be answered by reading docs alone because the EVM view may use 18
-decimals while the native token uses 14; measuring both sides of one account with worked examples
-is the only way to know the conversion the product must use.
+Candidate B is a separate Substrate keypair per account, generated into the same ignored `.env` and
+never derived from the secp256k1 secret, tested with `map_account`. B is used only if evidence
+disproves A after the owner account is funded: the candidate-A account's `eth_getBalance` stays zero,
+or an EVM transaction from the EVM address fails. Adopting B implies Substrate-signed `Revive.call`
+extrinsics instead of viem/forge and is recorded as a design change.
 
-**Alternatives considered**: Funding the EVM address directly (rejected: the faucet pays SS58, and a
-direct transfer would not test the mapping); assuming a 10^4 factor (rejected: the factor is what
+Record the derivation, the EVM address, the candidate-A AccountId32/SS58 and both candidates'
+observed values in `g07.json` so the addresses can be checked against each other. Then fund the
+owner account first and verify with `eth_getBalance`, a small value transfer and a contract call that
+reports `msg.value`. Record native balance, EVM balance and the ratio implied by the token's decimals.
+
+**Rationale**: An Ethereum-derived key controls one H160. A Substrate account derived from the same
+public key by a different hash is a different account whose funds the EVM signature cannot move, so
+the two must not be conflated. Parity's documentation states that a native Substrate account must
+call `pallet_revive.map_account` before its H160 view is usable, but the fallback-account rule for
+Ethereum-derived keys has to be confirmed from metadata and observed behavior. The decimal question
+cannot be answered by reading docs alone because the EVM view may use 18 decimals while the native
+token uses 14; measuring both sides of one account with worked examples is the only way to know the
+conversion the product must use.
+
+**Alternatives considered**: Funding an SS58 address derived from the secp256k1 public key (rejected:
+a different account the EVM key cannot spend); assuming a 10^4 factor (rejected: the factor is what
 the gate measures); using a single account (rejected: the spec requires six roles and per-role
 balances).
 
-**Hypothesis under test**: native balance appears in the EVM view scaled by `10^(18-14)` and
-`msg.value` is denominated in the EVM view. If the measured factor differs, it is a design change
-recorded in `docs/decisions.md`.
+**Hypothesis under test**: candidate A is funded and spendable without `map_account`, native balance
+appears in the EVM view scaled by `10^(18-14)` and `msg.value` is denominated in the EVM view. If
+either hypothesis fails, it is recorded in `docs/decisions.md` and B is evaluated as a design change.
 
 ## D10 — Storage cost measurement (G5)
 

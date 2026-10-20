@@ -32,8 +32,10 @@ cd ../../contracts && forge build
 cd apps/gates && npm run keygen
 ```
 
-`keygen` creates the six burner keys into a gitignored `.env` with mode 600, prints only public
-addresses, and refuses to overwrite an existing `.env`. Add the endpoints to the same file:
+`keygen` creates six secp256k1 burner keys into a gitignored `.env` with mode 600, prints only the
+EVM address and candidate-A AccountId32 (hex) for each, and refuses to overwrite an existing `.env`.
+The SS58 faucet address is printed later by `g07`, using the prefix read from the chain. Add the
+endpoints to the same file:
 
 ```text
 PORTALDOT_EVM_RPC_URL=

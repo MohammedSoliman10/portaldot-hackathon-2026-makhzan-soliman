@@ -178,11 +178,13 @@ State: a day file moves `open` → `sealed` at UTC midnight; sealed files are ne
 | Field | Type | Rules |
 | --- | --- | --- |
 | `role` | enum | `provider-1`…`provider-4`, `vault-agent`, `owner` |
-| `ss58` | string | public address only |
-| `evm` | string \| null | mapped H160, null until mapping is proven |
+| `evm` | string | H160 from `viem` `privateKeyToAccount(key).address` |
+| `accountId32` | string | candidate A as 32-byte hex: the 20 EVM bytes followed by twelve `0xEE` |
+| `ss58` | string \| null | candidate A encoded with the prefix observed from `system_properties`; null until G07 reads it |
+| `derivation` | string | `secp256k1-to-h160-plus-0xEE-fallback`; no blake2/ECDSA Substrate derivation |
 | `nativeBalance` | string | planck string, as returned |
 | `evmBalance` | string \| null | wei string, as returned |
-| `mapped` | boolean | true only after `map_account` succeeds and is evidenced |
+| `mapped` | boolean | true only after a value transfer from the EVM side is evidenced; candidate B is a design change |
 | `fundedAt` | string \| null | ISO-8601 UTC |
 | `keyOrigin` | string | always `local-.env-600`; keys are generated locally, never imported |
 
@@ -194,22 +196,24 @@ refuses to overwrite an existing `.env`.
 
 | Field | Type | Rules |
 | --- | --- | --- |
-| `ss58` | string | source account |
-| `evm` | string | H160 |
-| `method` | string | e.g. `pallet_revive.map_account` |
-| `txRef` | string | extrinsic hash |
+| `ss58` | string | faucet address, candidate A by default |
+| `evm` | string | H160 from the secp256k1 key |
+| `method` | enum | `candidate-a` (fallback account, no mapping call), `candidate-b` (`pallet_revive.map_account`) |
+| `txRef` | string \| null | extrinsic hash when candidate B was used |
+| `disproofOfA` | string \| null | required when `method` is `candidate-b`: zero EVM balance or failed EVM transaction |
 | `nativeBalance` | string | before and after recorded in `measurements` |
 | `evmBalance` | string | |
 | `impliedFactor` | string | decimal string, e.g. `10000` |
 | `msgValueSeen` | string \| null | value observed by a contract call |
 | `workedExample` | object | `{native, evm, sentValue, receivedValue}` |
 | `faucetAddress` | string | the SS58 address the faucet must pay, with the candidate rule that produced it |
-| `candidateEvidence` | object | `{fallbackAccount, mappedAccount, metadataSource, chosen}`, each with the observed value |
+| `candidateEvidence` | object | `{candidateA: {accountId32, ss58, evmBalance}, candidateB: {ss58, mappedEvm, extrinsic}, metadataSource, chosen}` |
 
 Validation: `impliedFactor` must be derived from the observed balances, not from docs; the
 worked example must use a realistic magnitude for a deal bond. `faucetAddress` must be chosen from
 inspected runtime metadata and recorded candidates, never guessed; funds are not requested until it
-is written down.
+is written down. Candidate B is allowed only with `disproofOfA` populated, and adopting it changes
+the transaction path to Substrate-signed `Revive.call` extrinsics.
 
 ## ChallengeBlockRecommendation
 

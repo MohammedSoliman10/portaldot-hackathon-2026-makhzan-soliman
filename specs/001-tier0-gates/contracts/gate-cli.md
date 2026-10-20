@@ -19,8 +19,9 @@ record always carries a run state (`done`, `blocked`, `not_run`); only `done` re
 
 Rules:
 - Keys are generated locally by `npm run keygen` into a gitignored `.env` with mode 600, which prints
-  only public addresses and refuses to overwrite an existing file. Keys are read from the environment
-  (or that `.env`) and used only for in-process signing.
+  only public addresses — the EVM address and candidate-A AccountId32 per burner — and refuses to
+  overwrite an existing file. The SS58 form is printed by `g07` once the prefix is read. Keys are
+  read from the environment (or that `.env`) and used only for in-process signing.
 - No command takes a key as an argument. `--private-key`, `--mnemonic` and `--seed` are rejected by
   a guard in `config.ts` before anything runs.
 - Values are never printed, including in `--verbose` mode.
