@@ -1,0 +1,10 @@
+No files changed, compilation skipped
+
+Ran 4 tests for test/tier0/ValueEcho.t.sol:ValueEchoTest
+[PASS] testEchoReturnsSentValueAndSender() (gas: 35764)
+[PASS] testFuzzValueIsEchoedExactly(uint96) (runs: 256, μ: 159613, ~: 160654)
+[PASS] testRecordStoresValueAndEmits() (gas: 154064)
+[PASS] testRecordWithoutValueStoresZero() (gas: 99991)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 3.52ms (3.62ms CPU time)
+
+Ran 1 test suite in 6.87ms (3.52ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

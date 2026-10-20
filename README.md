@@ -22,6 +22,7 @@ This project is built with AI assistance. AI-assisted parts are marked in commit
 | --- | --- | --- |
 | [GitHub Spec Kit](https://github.com/github/spec-kit) (`specify-cli`) | v1.2.2 | MIT |
 | [Foundry](https://github.com/foundry-rs/foundry) (`forge`, `cast`, `anvil`) | 1.8.5 | MIT / Apache-2.0 |
+| [forge-std](https://github.com/foundry-rs/forge-std) | 1.17.0 | MIT |
 | [Node.js](https://nodejs.org/) | 24.20.0 | MIT |
 | [viem](https://viem.sh/) | 2.57.7 | MIT |
 | [@polkadot/api](https://github.com/polkadot-js/api) | 17.0.2 | Apache-2.0 |
