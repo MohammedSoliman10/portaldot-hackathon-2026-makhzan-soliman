@@ -1,0 +1,241 @@
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+{
+  "mode": "local",
+  "at": "2026-10-20T05:44:05Z",
+  "endpoint": "http://127.0.0.1:8546",
+  "chainId": "420420777",
+  "account": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "behaviorAddress": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+  "hashAddress": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+  "compiler": "0.8.28+commit.7893614a",
+  "evmVersion": "paris",
+  "observations": {
+    "storageWriteRead": {
+      "expected": "42",
+      "observed": "42",
+      "match": true
+    },
+    "payableValue": {
+      "expected": "1",
+      "observed": "1",
+      "match": true
+    },
+    "event": {
+      "expected": "3 topics (signature + sender + value), 64 bytes data (timestamp, number)",
+      "observed": "topics=3, dataBytes=64",
+      "match": true
+    },
+    "customRevert": {
+      "expected": "BehaviorProbe: custom reason",
+      "observed": "The contract function \"fail\" reverted with the following reason:\nBehaviorProbe: custom reason | execution reverted: BehaviorProbe: custom reason | The contract function \"fail\" reverted with the following reason:\nBehaviorProbe: custom reason\n\nContract Call:\n  address:   0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0\n  function:  fail(string reason)\n  args:          (BehaviorProbe: custom reason)\n  sender:    0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266\n\nDocs: https://viem.sh/docs/contract/simulateContract\nDetails: execution reverted: BehaviorProbe: custom reason\nVersion: viem@2.57.7",
+      "match": true
+    },
+    "boomRevert": {
+      "expected": "BehaviorProbe: boom",
+      "observed": "The contract function \"boom\" reverted with the following reason:\nBehaviorProbe: boom | execution reverted: BehaviorProbe: boom | The contract function \"boom\" reverted with the following reason:\nBehaviorProbe: boom\n\nContract Call:\n  address:   0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0\n  function:  boom()\n  sender:    0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266\n\nDocs: https://viem.sh/docs/contract/simulateContract\nDetails: execution reverted: BehaviorProbe: boom\nVersion: viem@2.57.7",
+      "match": true
+    },
+    "timestamp": {
+      "expected": "second > first",
+      "observed": "1792475045 -> 1792475047",
+      "match": true
+    },
+    "blockNumber": {
+      "expected": "second > first",
+      "observed": "4 -> 6",
+      "match": true
+    }
+  },
+  "differences": [],
+  "size": {
+    "lastSuccess": 24576,
+    "firstFailure": {
+      "size": 24577,
+      "error": "deployed code 0 bytes, expected 24577"
+    },
+    "attempts": [
+      {
+        "size": 1,
+        "status": "accepted",
+        "hash": "0x13f7dc0a271f026d6900dcfef66460c0d8688616e2ae546d22a7852a31a09dc5",
+        "gasUsed": "54628",
+        "blockNumber": 11
+      },
+      {
+        "size": 1024,
+        "status": "accepted",
+        "hash": "0xc979fe272fa1f93bb2353bd70718a7662b31d126769793d579ed576d8252ec9c",
+        "gasUsed": "259311",
+        "blockNumber": 12
+      },
+      {
+        "size": 8192,
+        "status": "accepted",
+        "hash": "0xc60a2a914008381bad59636a88af9418ac5011f494a2096bfa76efe25755009b",
+        "gasUsed": "1693709",
+        "blockNumber": 13
+      },
+      {
+        "size": 16384,
+        "status": "accepted",
+        "hash": "0x5e6bb3933388645976d684e441e6fc89da70a30e8fff3db644e921d8e603df7f",
+        "gasUsed": "3333261",
+        "blockNumber": 14
+      },
+      {
+        "size": 24576,
+        "status": "accepted",
+        "hash": "0x120daab97988b7d5337f41b9385c04488a1b30e757c27f55f4a0c8daaa30308d",
+        "gasUsed": "4973069",
+        "blockNumber": 15
+      },
+      {
+        "size": 24577,
+        "status": "rejected",
+        "error": "deployed code 0 bytes, expected 24577"
+      }
+    ]
+  },
+  "hashes": {
+    "hashTx": {
+      "hash": "0x5ee5d2801c02c271a7e23c95069023b3e937defca7aee85c619e2fc6047a527b",
+      "gas": 22440
+    },
+    "slotTx": {
+      "hash": "0xe66a0203a937bd19978254d7690646d33685563bf9e33fac705479193a5eede5",
+      "gas": 43560
+    },
+    "eventTx": {
+      "hash": "0xc626ef33d88d2ff462efd8c44c14aaa2d095ec5cf60fcddcea952ea21a76c67e",
+      "gas": 23786
+    },
+    "hashToSlot": 0.5151515151515151,
+    "hashToEvent": 0.9434120911460523
+  },
+  "transactions": [
+    {
+      "hash": "0xb2c8afee8b8b676efc2187707687818041dfb4a289e0d58c22d9bbe1dd7b38d6",
+      "kind": "deploy BehaviorProbe",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": null,
+      "blockNumber": 3,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0x8022e5b96df759e5e2779b89109fd79eb003b832bb1d93c2ad9b70c51f0eb015",
+      "kind": "store(42) with 1 wei",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+      "blockNumber": 4,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0xc71eb48e676bbe02a63a1436c761aa5055e8be1d0ade05b70684a854781a2934",
+      "kind": "store(43) no value",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+      "blockNumber": 6,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0x6b9ce1bbb4f3512cec30b444c7042d940554ebd4d149ec347bf7f68cbf5f6daf",
+      "kind": "deploy HashProbe",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": null,
+      "blockNumber": 7,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0x5ee5d2801c02c271a7e23c95069023b3e937defca7aee85c619e2fc6047a527b",
+      "kind": "keccak256(32 bytes)",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+      "blockNumber": 8,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0xe66a0203a937bd19978254d7690646d33685563bf9e33fac705479193a5eede5",
+      "kind": "new storage slot write",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+      "blockNumber": 9,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0xc626ef33d88d2ff462efd8c44c14aaa2d095ec5cf60fcddcea952ea21a76c67e",
+      "kind": "event: 1 indexed topic + 32 bytes",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+      "blockNumber": 10,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0x13f7dc0a271f026d6900dcfef66460c0d8688616e2ae546d22a7852a31a09dc5",
+      "kind": "deploy SizeProbe(1)",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": null,
+      "blockNumber": 11,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0xc979fe272fa1f93bb2353bd70718a7662b31d126769793d579ed576d8252ec9c",
+      "kind": "deploy SizeProbe(1024)",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": null,
+      "blockNumber": 12,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0xc60a2a914008381bad59636a88af9418ac5011f494a2096bfa76efe25755009b",
+      "kind": "deploy SizeProbe(8192)",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": null,
+      "blockNumber": 13,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0x5e6bb3933388645976d684e441e6fc89da70a30e8fff3db644e921d8e603df7f",
+      "kind": "deploy SizeProbe(16384)",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": null,
+      "blockNumber": 14,
+      "status": "success",
+      "explorerUrl": null
+    },
+    {
+      "hash": "0x120daab97988b7d5337f41b9385c04488a1b30e757c27f55f4a0c8daaa30308d",
+      "kind": "deploy SizeProbe(24576)",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": null,
+      "blockNumber": 15,
+      "status": "success",
+      "explorerUrl": null
+    }
+  ],
+  "balanceBefore": "9999999679702115124587"
+}
