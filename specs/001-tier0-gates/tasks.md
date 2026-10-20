@@ -116,9 +116,9 @@ written down before any request is made.
 exact tooling, flags and compiler path recorded. **Independent test**: a second person can repeat the
 deploy from the record alone.
 
-- [ ] T028 [US1] Write `contracts/test/tier0/CounterProbe.t.sol` first (set/get, event, revert) against a not-yet-existing `contracts/src/tier0/CounterProbe.sol`; run `forge test` and save the failing run to `evidence/raw/g01/01-red.txt`.
-- [ ] T029 [US1] Implement `contracts/src/tier0/CounterProbe.sol` (uint storage, `set`, `get`, `Set` event, `boom()` that reverts with a reason) until T028 passes.
-- [ ] T029A [US1] Before attempting a deploy, determine which bytecode this chain accepts and prepare both toolchains: inspect the runtime metadata for the Revive code-type rules, run `eth_getCode` on any existing contract on the chain, and read public Portaldot deploy recipes. Prepare solc-to-EVM through `forge` and resolc-to-PolkaVM, record the evidence for which path is more likely first, and pin/disclose any extra compiler or Foundry build in `README.md`.
+- [X] T028 [US1] Write `contracts/test/tier0/CounterProbe.t.sol` first (set/get, event, revert) against a not-yet-existing `contracts/src/tier0/CounterProbe.sol`; run `forge test` and save the failing run to `evidence/raw/g01/01-red.txt`.
+- [X] T029 [US1] Implement `contracts/src/tier0/CounterProbe.sol` (uint storage, `set`, `get`, `Set` event, `boom()` that reverts with a reason) until T028 passes.
+- [X] T029A [US1] Before attempting a deploy, determine which bytecode this chain accepts and prepare both toolchains: inspect the runtime metadata for the Revive code-type rules, run `eth_getCode` on any existing contract on the chain, and read public Portaldot deploy recipes. Prepare solc-to-EVM through `forge` and resolc-to-PolkaVM, record the evidence for which path is more likely first, and pin/disclose any extra compiler or Foundry build in `README.md`.
 - [ ] T030 [US1] Implement `apps/gates/src/gates/g01.ts` to build and deploy the more likely path first — per T029A — via a viem wallet client (no key on argv), call `set(7)` and read `get()`, and capture the exact compiler version, `evm_version`, flags and bytecode size in the record.
 - [ ] T031 [US1] In the same session, attempt the other toolchain from T029A (resolc/PolkaVM or solc/EVM), recording the attempt, the verbatim rejection and which path produced a working deployment; update `contracts/foundry.toml` only after G02.
 - [ ] T032 [US1] Finalize `evidence/gates/g01.json` and `evidence/raw/g01/`, and commit as `feat(tier0): deploy and call probe contract (G01) [ai]`. On a hard failure (two toolchain paths, 48h), write the fallback condition, mark every later gate `not_run` with G01 as the halt point, and stop the sequence.
@@ -134,9 +134,9 @@ recorded fallback trigger.
 with every difference from Ethereum listed, plus the size limit, hash cost and compiler-path verdict.
 **Independent test**: each behavior has a tx hash and an observed-vs-expected row.
 
-- [ ] T033 [US1] Write `contracts/test/tier0/BehaviorProbe.t.sol` first: storage write/read, event emission with indexed args, revert reason propagation, payable value acceptance, `block.timestamp` monotonicity, `block.number` monotonicity; run and keep the failing output in `evidence/raw/g02/01-red.txt`.
-- [ ] T034 [US1] Implement `contracts/src/tier0/BehaviorProbe.sol` until T033 passes.
-- [ ] T035 [US1] Implement `contracts/src/tier0/SizeProbe.sol` with a padding parameter and `apps/gates/src/gates/g02.ts` size ladder (ascending runtime size, binary search, stop at first rejection, verbatim error).
+- [X] T033 [US1] Write `contracts/test/tier0/BehaviorProbe.t.sol` first: storage write/read, event emission with indexed args, revert reason propagation, payable value acceptance, `block.timestamp` monotonicity, `block.number` monotonicity; run and keep the failing output in `evidence/raw/g02/01-red.txt`.
+- [X] T034 [US1] Implement `contracts/src/tier0/BehaviorProbe.sol` until T033 passes.
+- [X] T035 [US1] Implement `contracts/src/tier0/SizeProbe.sol` with a padding parameter and `apps/gates/src/gates/g02.ts` size ladder (ascending runtime size, binary search, stop at first rejection, verbatim error).
 - [ ] T036 [US1] Measure the two hash ratios on the live chain and record them with their method and units: gas(`keccak256` over 32 bytes) / gas(one new storage-slot write), and gas(`keccak256` over 32 bytes) / gas(the reference event: one indexed topic plus 32 bytes of data). State the event shape in the measurement conditions. No threshold is applied and no verdict depends on them; the G04 ladder (T045) is the authoritative hash-cost measurement, and this task cross-references it.
 - [ ] T037 [US1] Run all behaviors live, produce the differences table (every observed deviation, with expected Ethereum behavior and consequence), record the compiler-path conclusion, finalize `evidence/gates/g02.json`, pin `solc` in `contracts/foundry.toml`, and commit as `feat(tier0): measure chain behavior and limits (G02) [ai]`.
 

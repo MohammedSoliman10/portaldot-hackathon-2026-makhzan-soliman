@@ -1,0 +1,7 @@
+Error: Compiler run failed:
+Error (6275): Source "src/tier0/HashProbe.sol" not found: File not found. Searched the following locations: "/home/mohammed_soliman/hackathons/portaldot-hackathon/contracts".
+ParserError: Source "src/tier0/HashProbe.sol" not found: File not found. Searched the following locations: "/home/mohammed_soliman/hackathons/portaldot-hackathon/contracts".
+ --> test/tier0/HashProbe.t.sol:5:1:
+  |
+5 | import {HashProbe} from "../../src/tier0/HashProbe.sol";
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
