@@ -124,15 +124,41 @@ contract PaymentsTest is MakhzanTestBase {
         m.claim(dealId);
 
         vm.roll(_dealEnd(dealId) + 1);
+        uint64 claimedBefore = _deal(dealId).claimed;
         uint256 providerBefore = provider.balance;
         uint256 ownerBefore = client.balance;
         vm.prank(stranger);
         m.settle(dealId);
 
         uint64 claimedNow = _deal(dealId).claimed;
-        assertEq(provider.balance, providerBefore + _wei(PRICE - claimedNow), "unpaid accrued to provider");
+        assertEq(provider.balance, providerBefore + _wei(PRICE - claimedBefore), "unpaid accrued to provider");
         assertEq(client.balance, ownerBefore, "no remainder after full accrual");
-        assertTrue(claimedNow <= PRICE, "claimed never exceeds price");
+        assertEq(claimedNow, PRICE, "claimed becomes the total paid at settlement");
+    }
+
+    /// @dev C1 (fund-safety review): settlement marks the whole price as paid before it transfers.
+    function test_settleSetsClaimedToPriceBeforePaying() public {
+        uint32 dealId = _createDeal();
+        vm.roll(_dealEnd(dealId) + 1);
+        vm.prank(stranger);
+        m.settle(dealId);
+
+        assertEq(_deal(dealId).claimed, PRICE, "claimed is the total paid after settlement");
+        (uint64 accrued, uint64 claimable) = m.accruedOf(dealId);
+        assertEq(accrued, PRICE, "accrual is capped at the price");
+        assertEq(claimable, 0, "nothing is claimable after settlement");
+    }
+
+    /// @dev C1: the settled flag still wins over the (now zero) claimable amount.
+    function test_claimAfterSettleRevertsAlreadySettled() public {
+        uint32 dealId = _createDeal();
+        vm.roll(_dealEnd(dealId) + 1);
+        vm.prank(stranger);
+        m.settle(dealId);
+
+        vm.prank(provider);
+        vm.expectRevert(IMakhzan.AlreadySettled.selector);
+        m.claim(dealId);
     }
 
     /// @dev A stranger's settle must move exactly the same value as the owner's settle.

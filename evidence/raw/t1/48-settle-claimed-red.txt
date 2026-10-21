@@ -1,0 +1,26 @@
+# C1 red — settlement must record the whole price as claimed (fund-safety review)
+# UTC: 2026-10-21T12:24:40Z
+# Local Foundry only; no RPC, no keys. Red for the right reason: the behavioural assertions fail,
+# the suite compiles and the other 15 payment tests pass.
+
+$ forge test --match-path test/makhzan/Payments.t.sol
+[PASS] test_accrualAtMidpointIsFlooredLinearShare() (gas: 154365)
+[PASS] test_accrualCapsAtPriceAfterEndBlock() (gas: 154057)
+[PASS] test_accrualIsZeroAtStartBlock() (gas: 135942)
+[PASS] test_claimAfterSettleRevertsAlreadySettled() (gas: 232588)
+[PASS] test_claimByStrangerRevertsNotProvider() (gas: 178975)
+[PASS] test_claimOnUnknownDealRevertsNoDeal() (gas: 34520)
+[PASS] test_claimWithNoAccrualRevertsZeroClaim() (gas: 163837)
+[PASS] test_cumulativeClaimsNeverExceedPrice() (gas: 324118)
+[PASS] test_midDealClaimPaysAccruedAndUpdatesClaimed() (gas: 232212)
+[PASS] test_secondImmediateClaimRevertsZeroClaim() (gas: 226491)
+[PASS] test_secondSettleRevertsAlreadySettled() (gas: 225624)
+[PASS] test_settleBeforeEndRevertsBeforeEnd() (gas: 157216)
+[PASS] test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 240499)
+[FAIL: claimed becomes the total paid at settlement: 250000000000000 != 500000000000000] test_settlePaysProviderUnpaidAccrued() (gas: 314931)
+[FAIL: claimed is the total paid after settlement: 0 != 500000000000000] test_settleSetsClaimedToPriceBeforePaying() (gas: 214110)
+[PASS] test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 227028)
+[PASS] test_strangerSettleMatchesOwnerSettle() (gas: 391837)
+Suite result: FAILED. 15 passed; 2 failed; 0 skipped; finished in 3.27ms (4.36ms CPU time)
+[FAIL: claimed becomes the total paid at settlement: 250000000000000 != 500000000000000] test_settlePaysProviderUnpaidAccrued() (gas: 314931)
+[FAIL: claimed is the total paid after settlement: 0 != 500000000000000] test_settleSetsClaimedToPriceBeforePaying() (gas: 214110)
