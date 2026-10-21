@@ -5,6 +5,8 @@ pragma solidity 0.8.28;
 /// @notice Domain-separated Merkle tree with promotion, per contracts/merkle.md.
 /// @dev Internal library: inlined into Makhzan, no separate deployment.
 library MerkleLib {
+    error NotImplemented();
+
     /// @notice keccak256(0x00 || data)
     function leafHash(bytes memory data) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(bytes1(0x00), data));
@@ -41,6 +43,24 @@ library MerkleLib {
             idx /= 2;
             count = (count + 1) / 2;
         }
+    }
+
+    /// @notice Verify data at index after enforcing its expected byte length (T015).
+    function verifyLeaf(
+        bytes32 expectedRoot,
+        bytes memory data,
+        uint32 index,
+        uint32 leafCount,
+        uint256 expectedLen,
+        bytes32[] memory path
+    ) internal pure returns (bool) {
+        expectedRoot;
+        data;
+        index;
+        leafCount;
+        expectedLen;
+        path;
+        revert NotImplemented();
     }
 
     /// @notice Verify data at index against expectedRoot; directions come from index/count only.
