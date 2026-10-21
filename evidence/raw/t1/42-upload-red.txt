@@ -1,0 +1,20 @@
+# T044 red — upload envelope suite fails on behaviour
+# UTC: 2026-10-21T12:32:57Z
+# Local Node only; no RPC, no keys, temp dirs. The matrix from contracts/cli-daemon.md: extra field,
+# missing field, wrong block size, index out of range, wrong data length, out-of-order block, a
+# declared root that does not match the recomputed root, size/leafCount disagreement, malformed
+# value types, and the positive case (a complete file acknowledged with root, size, leafCount).
+
+$ node --test test/upload.test.ts
+✖ a complete valid file is acknowledged with (root, size, leafCount) (0.937599ms)
+✖ an extra field is rejected (0.1635ms)
+✖ a missing field is rejected (0.1333ms)
+✖ a wrong block size is rejected (0.1134ms)
+✖ an out-of-range index is rejected (0.137399ms)
+✖ a wrong data length is rejected (0.1317ms)
+✖ a block out of order is rejected (0.1354ms)
+✖ a declared root that does not match the recomputed root is rejected (0.1149ms)
+✖ size and leaf count must agree with ceil(size/blockSize) (0.1335ms)
+✖ a malformed value type is rejected with a verbatim reason (0.2057ms)
+ℹ tests 10
+ℹ pass 0
