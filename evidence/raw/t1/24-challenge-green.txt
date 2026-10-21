@@ -1,0 +1,57 @@
+# T026 — challenge, answer and resolve implemented (T025 suite)
+# UTC: 2026-10-21T11:53:33Z
+# Local Foundry only; no RPC, no keys. Selector is the D5 single internal function:
+# keccak256(parent hash, prevrandao, dealId) % leafCount. Not claimed unpredictable until G03;
+# the commit-reveal fallback swaps inside that one function. CEI in resolve: flag cleared, then
+# slash, then the transfer to the deal owner.
+
+$ forge test --match-path test/makhzan/Challenge.t.sol
+[PASS] test_answerAfterDeadlineRevertsWindowOpen() (gas: 1003438)
+[PASS] test_answerAfterEndBlockButBeforeDeadlinePasses() (gas: 3029632)
+[PASS] test_answerWithoutChallengeRevertsNoChallenge() (gas: 934220)
+[PASS] test_challengeOnExpiredDealRevertsDealExpired() (gas: 175021)
+[FAIL: NotImplemented()] test_challengeOnSettledDealReverts() (gas: 172032)
+[PASS] test_challengeOnUnknownDealRevertsNoDeal() (gas: 35224)
+[PASS] test_challengeOpenedEventCarriesFields() (gas: 181390)
+[PASS] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 212810)
+[PASS] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 1831435)
+[PASS] test_onlyDealOwnerCanChallenge() (gas: 157131)
+[PASS] test_onlyProviderCanAnswer() (gas: 982015)
+[PASS] test_openChallengeStaysResolvableAfterEndBlock() (gas: 282945)
+[PASS] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 332186)
+[PASS] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 215948)
+[PASS] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 212176)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 277566)
+[PASS] test_strangerResolvePaysOwnerNotCaller() (gas: 291099)
+[PASS] test_validAnswerBeforeDeadlinePasses() (gas: 1060317)
+Suite result: FAILED. 17 passed; 1 failed; 0 skipped; finished in 7.36ms (22.06ms CPU time)
+[FAIL: NotImplemented()] test_challengeOnSettledDealReverts() (gas: 172032)
+
+# 17 of 18 pass. The remaining test settles a deal before challenging, so it needs the T030
+# settlement stub; it is re-run green in 28-payments-green.txt. No test was changed.
+
+$ forge test --match-path test/makhzan/ChallengeIndex.t.sol
+[PASS] test_everyLeafIndexAcceptsItsOwnAnswer() (gas: 4117600)
+[PASS] test_lastLeafAcceptsOnlyTheExactByteLength() (gas: 981293)
+[PASS] test_selectorVariesAcrossBlocksAndPrevrandao() (gas: 33069153)
+[PASS] test_singleLeafDealAcceptsEmptyPath() (gas: 309788)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 85.02ms (94.13ms CPU time)
+
+$ forge test --match-path test/makhzan/StorageLayout.t.sol
+[PASS] test_challengeUsesOnlyTheExistingDealSlots() (gas: 51681)
+[PASS] test_configPacksIntoOneSlot() (gas: 6946)
+[PASS] test_dealUsesThreeSlots() (gas: 12358)
+[PASS] test_providerUsesTwoSlots() (gas: 10513)
+[PASS] test_twoChallengeRoundsAddNoStorage() (gas: 158214)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.35ms (844.60µs CPU time)
+
+$ forge test --match-path test/makhzan/Interface.t.sol
+[PASS] test_abiIsExactlyTheDocumentedSurface() (gas: 604421)
+[PASS] test_peekReturnsRawSlotsInRequestOrder() (gas: 23163)
+[PASS] test_unimplementedStubsStillRevertNotImplemented() (gas: 49484)
+[PASS] test_unknownIdsReadAsZero() (gas: 35570)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.18ms (2.71ms CPU time)
+
+$ forge build --sizes
+| Makhzan           | 7,930            | 8,493             | 16,646             | 40,659              |
+| MakhzanHarness    | 8,300            | 8,876             | 16,276             | 40,276              |

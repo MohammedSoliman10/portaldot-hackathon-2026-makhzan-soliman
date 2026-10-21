@@ -201,20 +201,58 @@ contract Makhzan is IMakhzan {
     // ------------------------------------------------------------------ challenge
 
     function challenge(uint32 dealId) external override {
-        dealId;
-        revert NotImplemented();
+        Deal storage d = deals[dealId];
+        if (d.owner == address(0)) revert NoDeal();
+        if (msg.sender != d.owner) revert NotOwner();
+        if (block.number > d.endBlock) revert DealExpired();
+        if (d.flags & DEAL_CHALLENGE_OPEN != 0) revert ChallengeOpen();
+        uint256 deadline = block.number + challengeWindow;
+        if (deadline > type(uint32).max) revert BadParams();
+
+        uint32 index = _selectIndex(dealId, d.leafCount);
+        d.challengeIndex = index;
+        d.challengeStart = uint32(block.number);
+        d.flags |= DEAL_CHALLENGE_OPEN;
+        emit ChallengeOpened(dealId, index, uint32(deadline));
+    }
+
+    /// @dev D5 selector: one internal swap point. Parent hash + prevrandao + deal id, modulo the
+    ///      committed leaf count. Not claimed unpredictable until the randomness gate (G03) rules;
+    ///      the documented fallback is a commit-reveal path in this same function.
+    function _selectIndex(uint32 dealId, uint24 leafCount) internal view returns (uint32) {
+        bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), block.prevrandao, dealId));
+        return uint32(uint256(seed) % leafCount);
     }
 
     function answer(uint32 dealId, bytes calldata data, bytes32[] calldata path) external override {
-        dealId;
-        data;
-        path;
-        revert NotImplemented();
+        Deal storage d = deals[dealId];
+        if (d.owner == address(0)) revert NoDeal();
+        if (msg.sender != providers[d.providerId - 1].addr) revert NotProvider();
+        if (d.flags & DEAL_CHALLENGE_OPEN == 0) revert NoChallenge();
+        if (block.number > d.challengeStart + challengeWindow) revert WindowOpen();
+
+        uint256 expectedLen = challengeBlockSize;
+        if (d.challengeIndex == d.leafCount - 1) {
+            expectedLen = uint256(d.size) - uint256(d.leafCount - 1) * challengeBlockSize;
+        }
+        if (!MerkleLib.verifyLeaf(d.root, data, d.challengeIndex, d.leafCount, expectedLen, path)) {
+            revert ProofRejected();
+        }
+
+        d.flags &= ~DEAL_CHALLENGE_OPEN;
+        emit ChallengePassed(dealId);
     }
 
     function resolve(uint32 dealId) external override {
-        dealId;
-        revert NotImplemented();
+        Deal storage d = deals[dealId];
+        if (d.flags & DEAL_CHALLENGE_OPEN == 0) revert NoChallenge();
+        if (block.number <= d.challengeStart + challengeWindow) revert WindowOpen();
+
+        d.flags &= ~DEAL_CHALLENGE_OPEN;
+        BondLib.Provider storage p = providers[d.providerId - 1];
+        uint64 slash = BondLib.slash(p, slashBps);
+        emit ChallengeFailed(dealId, slash);
+        BondLib.pay(d.owner, uint256(slash) * WEI_PER_UNIT);
     }
 
     function challengeStateOf(uint32 dealId)

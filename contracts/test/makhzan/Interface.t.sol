@@ -84,19 +84,12 @@ contract InterfaceTest is Test {
         }
     }
 
-    /// @dev Only the entry points that are still stubs. registerProvider, addBond, withdrawBond and
-    ///      createDeal are implemented and covered by Registry.t.sol and Deals.t.sol; asserting they
-    ///      revert NotImplemented would now be false.
+    /// @dev Only the entry points that are still stubs. registerProvider, addBond, withdrawBond,
+    ///      createDeal, challenge, answer and resolve are implemented and covered by their suites;
+    ///      asserting they revert NotImplemented would now be false.
     function test_unimplementedStubsStillRevertNotImplemented() public {
         Makhzan m = _deploy();
-        bytes32[] memory emptyPath = new bytes32[](0);
 
-        vm.expectRevert(IMakhzan.NotImplemented.selector);
-        m.challenge(1);
-        vm.expectRevert(IMakhzan.NotImplemented.selector);
-        m.answer(1, "", emptyPath);
-        vm.expectRevert(IMakhzan.NotImplemented.selector);
-        m.resolve(1);
         vm.expectRevert(IMakhzan.NotImplemented.selector);
         m.claim(1);
         vm.expectRevert(IMakhzan.NotImplemented.selector);
