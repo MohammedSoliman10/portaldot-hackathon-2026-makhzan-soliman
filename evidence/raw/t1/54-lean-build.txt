@@ -1,0 +1,25 @@
+# STEP 1 — lean-build measurements (scratch copies outside the repo; nothing cut)
+# UTC: 2026-10-21T12:29:55Z
+# Method: one pristine src/makhzan copy per variant under /tmp/opencode/lean-*, fresh out/ each,
+# same solc 0.8.28 / paris / optimizer true / runs 1 / bytecode_hash none / cbor_metadata false.
+# Command per variant: forge build --sizes  (runtime column for Makhzan).
+# Deploy estimate (owner formula): 0.079 * runtimeBytes + 13 tPOT.
+
+variant                                runtime   delta   deploy est
+baseline (runs=1)                          9210 B              740.6 tPOT
+no peek                                    8837 B     -373     711.1 tPOT
+no events                                  8537 B     -673     687.4 tPOT
+no guards                                  9154 B      -56     736.2 tPOT
+optimizer_runs=200                         9274 B      +64     745.6 tPOT
+optimizer_runs=10000                      11886 B    +2676     952.0 tPOT
+via_ir                                     6378 B    -2832     516.9 tPOT
+via_ir + no peek                           6098 B    -3112     494.7 tPOT
+via_ir + no events                         5879 B    -3331     477.4 tPOT
+via_ir + no peek + no events               5595 B    -3615     455.0 tPOT
+via_ir + no peek + no events + no guards   5576 B    -3634     453.5 tPOT
+
+$ cd contracts && forge build --sizes   # repository baseline, unchanged by this step
+| Makhzan           | 9,210            | 9,773             | 15,366             | 39,379              |
+
+Recommendation: target <= 5600 B (via_ir + no peek + no events = 5595 B, ~455 tPOT).
+Decision required before any cut; the repository contract is unchanged.
