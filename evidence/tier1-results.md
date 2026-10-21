@@ -1,40 +1,104 @@
-# Tier 1 Results — Core Storage Proofs
+# Tier 1 results — `002-core-storage-proofs`
 
-**Feature**: `002-core-storage-proofs` | **Generated from**: `evidence/raw/t1/`
+**Status**: local evidence only. Every number below comes from anvil on `127.0.0.1:8549`
+(chain id `420420777`) with anvil's public default accounts. No live RPC was called, no contract was
+deployed, no real key was used. Rows marked `[pending live run]` have not run on the live chain and
+must not be read as results.
 
-Every number in this report must be traceable to a raw file. Before G05 has a verdict, every tPOT
-cell is an **estimate**.
+**Raw evidence**: `evidence/raw/t1/48-e2e-local.txt` (full run), `59-daemon-evidence-green.txt`
+(daemon suite + re-run), `49-size-check.txt`, `50-size-overrun.txt`, `51-gas-snapshot.txt`,
+`52-ci-local.txt`, `54-evidence-green.txt`, `55-secret-scan.txt`, `56-scope.txt`,
+`57-final-local.txt`.
 
-## Local (anvil-local)
+## What ran
 
-| Item | Status | Command | Raw evidence |
+| Item | Value |
+| --- | --- |
+| Network | local anvil, `http://127.0.0.1:8549`, chain id `420420777` |
+| Contract | `Makhzan` at `0x5fbdb2315678afecb367f032d93f642f64180aa3` (local anvil deploy, not deployed anywhere) |
+| Compiler | solc `0.8.28`, evm `paris`, optimizer runs `1`, `via_ir = true` (DR-012) |
+| File | 1 MiB, 1,024 blocks of 1,024 B |
+| Root | `0x3bb74aa75b7de7d472983940cc20bf821a9b222b8d2dd58dfce541928a36f7b8` |
+| Deal | id 1, provider 1, price 1,000,000,000,000,000 units, bond 10,000,000,000,000,000 units, slash 2,000 bps |
+| Unit price | `WEI_PER_UNIT = 10,000` wei `[assumption]` until G07 is measured |
+
+## Round 1 — answered, passed (SC-001)
+
+| Step | Tx hash | Block | Status |
 | --- | --- | --- | --- |
-| Setup and compiler pins | pending | see tasks T001–T006 | `00`–`04-*.txt` |
-| Shared golden vectors | pending | `node packages/merkle-vectors/generate.ts --check` | `05-vectors.txt` |
-| Merkle library and verifier | pending | `forge test --match-path 'test/makhzan/*Merkle*'` | `06`–`13-*.txt` |
-| Provider registry, bond, deals | pending | `forge test --match-path 'test/makhzan/*Registry*'` | `16`–`21-*.txt` |
-| Challenge, answer, resolve, slash | pending | `forge test --match-path 'test/makhzan/*Challenge*'` | `23`–`26-*.txt` |
-| Payments and settlement | pending | `forge test --match-path 'test/makhzan/*Payments*'` | `27`–`28-*.txt` |
-| Invariants | pending | `forge test --match-path 'test/makhzan/invariant/*'` | `32`–`34-*.txt` |
-| TypeScript components | pending | `npm test` in `apps/makhzan` | `35`–`54-*.txt` |
-| Final local gate | pending | `forge fmt --check && forge build --sizes && forge test -vvv` | `57-final-local.txt` |
+| challenge | `0xe6fff2362993d544303246aef9226e590a6b9efbff9b4d09c579a74caa8fec38` | 4 | success |
+| answer (index 54, path length 10) | `0xd64e51e45c08c6701b4d12879be451cb57b724c875d403e2543324c015527068` | 5 | success |
 
-## Live (portaldot-v3)
+Read-back: `challengeStateOf(1).open = false`. Provider bond before and after
+`10,000,000,000,000,000` units — a pass costs the provider nothing but gas.
 
-| Item | Status | Raw evidence |
-| --- | --- | --- |
-| Deployment | BLOCKED — Tier 0 gates and funding pending | `59-live-deploy.txt` |
-| Live passed round | BLOCKED — Tier 0 gates and funding pending | `60-live-pass.txt` |
-| Live slashed round | BLOCKED — Tier 0 gates and funding pending | `61-live-slash.txt` |
-| Live results published | BLOCKED — Tier 0 gates and funding pending | `63-live-results.txt` |
+## Round 2 — deliberately unanswered, slashed (SC-002)
 
-## Budget (estimates until G05)
+| Step | Tx hash | Block | Status |
+| --- | --- | --- | --- |
+| challenge (index 58) | `0xfb76e56babe0461c6d57a767bd418cfb89054fb9f9b9b01d3df16d93a9ba2d18` | 6 | success |
+| resolve, after a 10-block window | `0x6f835f73df96d577fb472286b6a928dff1aa4dfec0dc001991442574b0c2e400` | 18 | success |
 
-| Operation | Deployed bytes | Slots | tPOT (deposit) | tPOT (gas) | Confirmed by |
-| --- | --- | --- | --- | --- | --- |
-| deploy + 2 config slots | runtime size at build | 2 | estimate code deposit + contract charge + 2 slots | estimate deploy gas × price | G05 |
-| register provider | 0 | 2 | estimate 2 × slot deposit | estimate receipt gas × price | G05 |
-| create deal | 0 | 3 | estimate 3 × slot deposit | estimate receipt gas × price | G05 |
-| challenge / answer / resolve / claim / settle | 0 | 0 new | estimate 0 | estimate receipt gas × price | G05 |
+The provider daemon skipped the answer on purpose (`drill: "skip"`), so the round was still open at
+the deadline. Read-back after `resolve`: provider bond `10,000,000,000,000,000` →
+`8,000,000,000,000,000` units (exactly 2,000 bps, 20%), deal owner balance
+`9,989,996,767,439,178,360,684` → `10,009,996,767,439,178,360,684` wei, credit
+`20,000,000,000,000,000,000` wei (= slash × `WEI_PER_UNIT`, gas-free to the owner because `resolve`
+already paid for it). The daemon's own record only became `failed` after that read-back
+(`daemonStatusAfterResolve: "failed"`), never from the skipped send.
 
-Slot facts: provider 2 slots, deal 3 slots, active challenge 0 new slots, 0 growth per round.
+## Settle
+
+| Step | Tx hash | Block | Status |
+| --- | --- | --- | --- |
+| settle (stranger account) | `0x8de3cea6e509b43fe8b43f14723da1ac7d9786cc36993fb159c01991c3ea5faf` | 55 | success |
+
+Provider balance `9,899,999,695,509,565,813,977` → `9,909,999,695,509,565,813,977` wei (credit
+`10,000,000,000,000,000,000` wei = price × `WEI_PER_UNIT`), `claimed = 1,000,000,000,000,000`
+(= the whole price, so `claim` afterwards reverts `AlreadySettled`), `accrued.claimable = 0`,
+settled flag `1`.
+
+## Size budget
+
+| Measurement | Bytes | Budget | Margin |
+| --- | --- | --- | --- |
+| `Makhzan` runtime (deployed) | 6,378 | 10,240 | 3,862 |
+| `Makhzan` creation | 6,966 | — | — |
+
+Measured with `via_ir = true` (DR-012); `scripts/check-size.mjs` exits 1 one byte over budget
+(`50-size-overrun.txt`). Storage slots: config 1, provider 2, deal 3, active challenge 0 extra,
+0 growth per round — `StorageLayout.t.sol`.
+
+## Gas snapshot (local)
+
+`forge snapshot --check` exits 0. Representative success-path rows from `contracts/.gas-snapshot`:
+challenge 206,955 (`test_challengeRecordsIndexDeadlineAndPathLength`), answer 983,069 before the
+deadline / 2,571,840 at the end block (`test_answerBeforeDeadlinePasses`,
+`test_answerAfterEndBlockButBeforeDeadlinePasses`), resolve with a 20% slash 322,736
+(`test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner`), claim at the exact end block 289,607,
+settle 219,416 (claimed-before-pay path) / 306,616 (pays accrued). These are local Foundry gas
+numbers, not a live fee estimate.
+
+## Tests
+
+| Suite | Result |
+| --- | --- |
+| Foundry | 21 suites, 144 tests, 0 failed |
+| Fuzz | 8 × 1,000 runs, 0 failed |
+| Invariants | 6 × 256 runs × 50 depth (12,800 calls), 0 violations |
+| TypeScript | 70 tests, 0 failed; `tsc --noEmit` clean |
+| Vector parity | `contracts` and `apps/makhzan` copies agree with the golden vectors |
+| CI command list | 10/10 commands exit 0 locally (`52-ci-local.txt`) |
+
+## Not done — `[pending live run]`
+
+| Item | Status |
+| --- | --- |
+| Live deployment and address | `[pending live run]` — BLOCKED on G02 (chain parameters) |
+| Live register/challenge/answer/resolve/settle | `[pending live run]` — BLOCKED, no live evidence exists |
+| Live fee schedule (G05) and `WEI_PER_UNIT` confirmation (G07) | `[pending live run]` — BLOCKED |
+| Retrieval window / block-time behaviour on the live chain | `[pending live run]` — BLOCKED |
+| Live runbook | `docs/live-runbook.md` (commands only, nothing executed) |
+
+The live plan is in `docs/live-runbook.md`. Nothing in this file may be copied into a live evidence
+folder without replacing every local hash and number with the live one.

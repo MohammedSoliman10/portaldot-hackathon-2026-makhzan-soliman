@@ -25,7 +25,7 @@ import { pollOnce } from "../src/daemon.ts";
 import { blockPathFor, emptyState, writeState } from "../src/state.ts";
 
 const CHAIN_ID = 420420777;
-const PORT = 8549;
+const PORT = Number(process.env.E2E_PORT ?? 8549);
 const RPC = `http://127.0.0.1:${PORT}`;
 const CHAIN = {
   id: CHAIN_ID,

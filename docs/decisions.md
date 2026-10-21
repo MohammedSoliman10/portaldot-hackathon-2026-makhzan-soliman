@@ -177,3 +177,71 @@ typecheck pass. No behaviour changed.
 the compiler pin and `evm_version` remain provisional until then. Further cuts (`peek`, events) are a
 separate decision and are not taken here. A future change that pushes runtime back over 10,240 B
 stops the work, per the standing rule.
+
+## DR-013 — DECIDED: one Makhzan contract, not a split (2026-10-22, Tier 1)
+
+**Context.** Registry, deals, challenges and payments could be separate contracts, or one contract
+behind `IMakhzan` as the constitution's modular rule allows.
+
+**Decision: one contract.** The interface stays `IMakhzan`; the bond asset and identity link are
+still swappable modules behind it. One address keeps the daemon's poll to one `challengeStateOf`
+read, avoids cross-contract calls inside the challenge window (each one is reentrancy surface and
+extra gas on the hot path), and fits the 10,240-byte runtime budget: 6,378 B measured with `via_ir`
+(DR-012). A split would add linking and call overhead for no Tier-1 gain.
+
+**Consequences.** The size budget in `contracts/size-budget.json` is the guard: a split would need a
+new deployment and a new size argument. The monolith must keep the per-area tests
+(`test/makhzan/*`) so a refactor into modules stays verifiable.
+
+## DR-014 — DECIDED: the D5 fallback is the challenge index until G03 (2026-10-22, Tier 1)
+
+**Context.** G03 (randomness) has not returned a verdict. The challenge needs an index the provider
+cannot choose.
+
+**Decision:** derive the index from parent hash, `prevrandao` and deal id (the D5 fallback). Do not
+claim it is unpredictable, and do not add a beacon dependency before G03.
+
+**Consequences.** `docs/EXPLAIN.md`, the README limits and `contracts/challenge.md` name it as a
+fallback. If G03 rules in a beacon, the selector is one internal function; the vectors and the
+challenge tests pin today's derivation so a change is visible. A provider that can bias block
+production is out of scope for the local claim.
+
+## DR-015 — DECIDED: budget numbers are estimates until G05 (2026-10-22, Tier 1)
+
+**Context.** `contracts/size-budget.json` holds exact bytes (6,378 measured against 10,240), but the
+tPOT cost of a deploy and the per-operation fees are estimates from the owner's planning formula
+(≈ 517 tPOT for the deploy, `WEI_PER_UNIT = 10,000` wei), not live measurements.
+
+**Decision:** label every tPOT/fee figure an estimate in `docs/`, `evidence/tier1-results.md` and the
+README until G05 (fee schedule) and G07 (unit price) are measured on the live chain. Exact byte counts
+may be quoted as measured.
+
+**Consequences.** No live number may be derived from a local one. The live runbook opens with the G05
+/ G07 checks, and every live evidence row carries its own timestamp. If G05 changes the unit, the
+local evidence stays valid as local evidence and is not retro-edited.
+
+## DR-016 — DECIDED: the deploy-less lens is deferred (2026-10-22, Tier 1)
+
+**Context.** A read-only "lens" (observing chain state without deploying our contract) would let a
+demo show real blocks and fees without spending funds.
+
+**Decision: defer it.** Tier 1 verifies with a real local deployment and the local e2e. The lens adds
+a second, unverified read path whose numbers could be mistaken for product evidence, and G02 (does the
+live chain accept the IR bytecode) has not ruled yet.
+
+**Consequences.** No lens code is written or claimed. If it is built later it must be labelled as an
+observation tool, not a Makhzan result, and it must not be presented as a live run.
+
+## DR-017 — DECIDED: 1,024-byte blocks as the working size, pending G04 (2026-10-22, Tier 1)
+
+**Context.** G04 (block size / block time) has not ruled. The contract bounds the block size
+(1,024–4,096 B in the deal validation), and the CLI defaults `challengeBlockSize` to 1,024.
+
+**Decision:** ship 1,024 B as the working size for Tier 1 and the local e2e (1 MiB = 1,024 blocks,
+path length 10), while keeping the on-chain bound so a deal may use up to 4,096 B. G04 decides the
+live default; it is not changed by assumption.
+
+**Consequences.** `contracts/deals.md`, the CLI default and the local evidence all say 1,024 B. If G04
+rules a different size, the default and the docs change in one commit, and the e2e re-runs; the
+contract bound does not need to change. Gas figures scale with the block size and are re-measured
+then.
