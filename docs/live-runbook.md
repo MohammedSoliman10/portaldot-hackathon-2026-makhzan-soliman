@@ -65,6 +65,13 @@ replace both references with the environment-keyed viem deploy path; until then 
 
 ## Step 2 — live passed round (T065)
 
+**Gap to close before this step**: `apps/makhzan` has the CLI and daemon *logic* (`parseCommand`,
+`execute`, `pollOnce`, `startUploadServer`) and tests for them, but no executable entry point yet:
+`npm run cli` / `npm run daemon` run modules that only export functions, the daemon drill mode is a
+function option (not an env switch), and there is no `resolve` command. T064/T065 must add the entry
+points and env wiring, with tests, before any live step runs. The commands below are the intended
+sequence, not a runnable path today.
+
 ```bash
 cd apps/makhzan
 export MAKHZAN_RPC_URL=... MAKHZAN_ADDRESS=...   # address from step 1
@@ -87,14 +94,14 @@ npm run cli -- watch 1                           # expect "passed", bond unchang
 ## Step 3 — live slashed round (T066)
 
 ```bash
-# restart the daemon in drill mode: wrong answer or skipped answer
-MAKHZAN_DRILL=skip npm run daemon &
+# restart the daemon in drill mode: wrong answer or skipped answer (drill is a function option today;
+# T066 must expose it through the daemon entry point, not a key or argv)
+npm run daemon -- --drill skip &
 npm run cli -- challenge 1
 npm run cli -- watch 1                           # expect "failed" only after the read-back
 # after the window, anyone may resolve:
-# resolve is permissionless; run it through the CLI/script path that reads the key from the
-# environment, so the key never appears on a command line:
-npm run cli -- resolve 1
+# resolve is permissionless, but the CLI has no `resolve` command yet (T065 gap). Add it through the
+# environment-keyed path; do not put a key on a command line.
 npm run cli -- claim 1
 npm run cli -- settle 1
 ```

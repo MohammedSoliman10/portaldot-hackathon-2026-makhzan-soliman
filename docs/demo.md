@@ -41,9 +41,11 @@ the port is busy the script fails fast rather than reusing another chain.
 
 ## Path B — manual walkthrough (2–3 min, if asked)
 
-**Not runnable in this repository today**: the deploy step below is the quickstart's planned path and
-`contracts/script/makhzan/Deploy.s.sol` does not exist yet (T064 gap, see `docs/live-runbook.md`).
-Use Path A for the demo; show Path B only as the intended sequence.
+**Not runnable in this repository today**: the quickstart's deploy script
+(`contracts/script/makhzan/Deploy.s.sol`) does not exist yet, and `npm run cli` / `npm run daemon` run
+modules that export functions but have no `main()` entry point, no env wiring and no `resolve` command
+(T064/T065 gap, see `docs/live-runbook.md`). Use Path A for the demo; show Path B only as the
+intended sequence.
 
 ```bash
 anvil --chain-id 420420777 &                       # local chain, no live funds
