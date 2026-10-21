@@ -52,7 +52,7 @@ async function main(): Promise<void> {
       if (hub2) {
         try {
           const hub = await systemAccount(connection.api, hub2);
-          hub2Log = ` hub2_free=${hub.free} hub2_reserved=${hub.reserved}`;
+          hub2Log = ` hub2_free=${BigInt(hub.free)} hub2_reserved=${BigInt(hub.reserved)}`;
         } catch (error) {
           hub2Log = ` hub2_error=${(error as Error).name}: ${(error as Error).message}`;
         }
