@@ -26,6 +26,27 @@ contract ChallengeIndexTest is MakhzanTestBase {
         revert("could not force the wanted index");
     }
 
+    /// @dev The selector must vary with block/prevrandao: 40 samples on a 4-leaf deal must show at
+    ///      least three distinct indices, and never an index outside the committed leaf count.
+    function test_selectorVariesAcrossBlocksAndPrevrandao() public {
+        uint32 dealId = _createDeal();
+        uint256 seenMask;
+
+        for (uint256 i; i < 40; i++) {
+            vm.prevrandao(uint256(keccak256(abi.encode("m4", i))));
+            uint32 index = _openChallenge(dealId);
+            assertLt(index, LEAF_COUNT, "index is inside the leaf count");
+            seenMask |= uint256(1) << index;
+            _answerAt(dealId, index);
+        }
+
+        uint256 distinct;
+        for (uint256 b; b < LEAF_COUNT; b++) {
+            if (seenMask & (uint256(1) << b) != 0) distinct++;
+        }
+        assertGe(distinct, 3, "at least three distinct indices over 40 samples");
+    }
+
     /// @dev Every leaf position 0..3 must accept its own block and proof.
     function test_everyLeafIndexAcceptsItsOwnAnswer() public {
         uint32 dealId = _createDeal();
