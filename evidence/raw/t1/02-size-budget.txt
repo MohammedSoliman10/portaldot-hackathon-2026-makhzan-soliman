@@ -1,0 +1,9 @@
+$ cat contracts/size-budget.json
+{
+  "runtimeBytes": 10240,
+  "dealSlots": 3,
+  "providerSlots": 2,
+  "activeChallengeExtraSlots": 1,
+  "challengeRoundGrowthSlots": 0,
+  "source": "spec FR-036; re-set from G05 before the [LIVE] phase"
+}
