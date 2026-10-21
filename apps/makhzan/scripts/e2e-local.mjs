@@ -214,6 +214,12 @@ try {
       if (receipt.status !== "success") throw new Error("answer reverted");
       return { hash };
     },
+    async blockNumber() {
+      return Number(await publicClient.getBlockNumber());
+    },
+    async bondOf() {
+      return (await readFn("providerOf", [provider.address]))[1];
+    },
   };
   const polled = await pollOnce({ client: daemonClient, state, stateFile, drill: "skip" });
   assert.deepEqual(polled.skipped, [dealId], "the daemon skipped the answer");
@@ -228,6 +234,12 @@ try {
   const slashed = bondBefore - bondAfter;
   assert.equal(slashed, (bondBefore * SLASH_BPS) / 10_000n, "slash is exactly 20% of the bond");
   assert.equal(ownerAfter - ownerBefore, slashed * WEI, "the owner was credited the slash");
+
+  // The daemon only labels the round failed from this read-back, not from the skipped send.
+  const reprobe = await pollOnce({ client: daemonClient, state, stateFile });
+  assert.equal(state.deals[String(dealId)].lastChallenge.status, "failed", "daemon reads the slash back");
+  assert.deepEqual(reprobe.failed, [dealId]);
+  say(`daemon re-read the round: ${state.deals[String(dealId)].lastChallenge.status}`);
   rounds.push({
     outcome: "slashed", dealId, index: index2, skipped: true,
     challengeTx: ch2.hash, resolveTx: resolved.hash,

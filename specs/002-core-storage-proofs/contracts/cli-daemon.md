@@ -33,9 +33,10 @@ math only and rejected when not an exact multiple of `WEI_PER_UNIT`; no float co
 | Endpoint / cycle | Behaviour |
 | --- | --- |
 | `POST /upload` (local, loopback) | validate the envelope (bounded fields, exact root/size/leafCount, ordered block index, byte lengths), write blocks under `.state/files/<root>/`, return an acknowledgement containing `(root, size, leafCount)`. Rejects anything malformed with a verbatim reason |
-| poll cycle (every ≤ 6 s) | for each known active deal: read `challengeStateOf`; on an open challenge, read the block at `challengeIndex`, rebuild the path, submit `answer`, record the five statuses |
-| bad-answer drill mode | a flag to deliberately answer with the wrong bytes or skip an answer, used only to produce the required failed-and-slashed evidence, recorded as such |
-| recovery | on restart, re-read state, re-derive paths from stored blocks, resume polling; report what it cannot serve instead of guessing |
+| poll cycle (every ≤ 6 s) | for each known active deal, inside its own try/catch so one failure never stops the others: read `challengeStateOf`; on an open challenge, read the block at `challengeIndex`, rebuild the path, submit `answer` |
+| round labels | a send alone never proves anything. After sending, the round is `submitted` and the tx hash and block number are recorded. It becomes `passed` only when a fresh read-back shows the challenge closed **and** the provider bond unchanged, and `failed` only when the read-back shows the bond was slashed. A thrown or reverted answer stays `pending` and is retried on the next poll while `block < deadline`, up to `MAX_ANSWER_ATTEMPTS = 3`; a round still unresolved at the deadline, or with retries exhausted, becomes `unanswered`. A round the daemon never sent successfully can never become `passed` |
+| bad-answer drill mode | a flag to deliberately answer with the wrong bytes or skip an answer, used only to produce the required failed-and-slashed evidence, recorded as such; a skipped answer is `pending` with its retries exhausted, and turns `failed` only after the slash is read back |
+| recovery | on restart, re-read state, re-derive paths from stored blocks, resume polling; a `submitted` round is re-read, never re-sent; report what it cannot serve instead of guessing |
 
 Discovery is **state polling only**. The daemon never calls `eth_getLogs` over a historical range
 (the public RPC prunes state; tier-0 DR-001). If a challenge is open on a deal the daemon has never
@@ -50,7 +51,9 @@ heard of, it reports `unanswerable: unknown deal` and records it.
   "lastBlock": 123456,
   "files": { "<root>": { "size": 1048576, "leafCount": 1024, "path": ".state/files/<root>" } },
   "deals": { "1": { "role": "provider" | "client", "owner": "0x..", "providerId": 1,
-                    "lastChallenge": { "index": 7, "start": 123000, "status": "passed" } } }
+                    "lastChallenge": { "index": 7, "start": 123000, "status": "passed",
+                                       "attempts": 1, "hash": "0x…", "blockNumber": 123004,
+                                       "bondBefore": "10000000000000000" } } }
 }
 ```
 

@@ -1,0 +1,99 @@
+# D1 green — evidence-based round labels, per-deal isolation and bounded retries
+# UTC: 2026-10-21T23:16:52Z
+# Local Node only; no RPC, no keys, temp dirs. A send is recorded as "submitted" with its tx hash and
+# block number; "passed" needs a read-back showing the challenge closed and the bond unchanged;
+# "failed" needs a read-back showing the slash; a thrown/reverted answer stays "pending" and is
+# retried next poll while block < deadline, up to MAX_ANSWER_ATTEMPTS, then "unanswered". Each deal is
+# isolated, so one failure cannot stop the others. A round the daemon never sent cannot become passed.
+
+$ node --test test/daemon.test.ts
+✔ a poll cycle reads challengeStateOf and never queries logs (4.6741ms)
+✔ a closed challenge submits nothing and records nothing (1.0589ms)
+✔ a failed answer attempt stays pending and is retried on the next poll (2.3615ms)
+✔ a reverted answer is never labelled passed (1.1809ms)
+✔ one failing deal does not stop the next deal (1.7249ms)
+✔ a late answer ends as unanswered without sending (1.149ms)
+✔ drill mode answers with the wrong bytes, records submitted, and only then failed on a slash (1.2987ms)
+✔ drill mode can skip the answer and still ends failed after the slash (1.1175ms)
+✔ a challenge on an unknown deal is reported unanswerable (0.7352ms)
+✔ a restart resumes without re-answering an already handled round (0.7901ms)
+✔ a submitted round is re-read after a restart, never re-sent (0.6367ms)
+✔ a missing block is reported, never guessed (0.8779ms)
+ℹ tests 12
+ℹ pass 12
+ℹ fail 0
+
+$ npm test && npm run typecheck
+ℹ tests 64
+ℹ pass 64
+ℹ fail 0
+> tsc --noEmit
+
+
+$ node scripts/e2e-local.mjs   # re-run with the daemon read-back assertion
+chain id 420420777 on http://127.0.0.1:8549 (local anvil)
+
+== deploy ==
+Makhzan deployed at 0x5fbdb2315678afecb367f032d93f642f64180aa3 (tx 0x8d03db9de05b23a374441ef4d995754cd1e8b10631c2b2c63fae19cccb3ea538)
+
+== register provider ==
+provider 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 id=1 bond=10000000000000000 units (tx 0xf7809cfa53a18fba195192aedc734c2bbacd15f2fd7502961149bb0644aac5fc)
+
+== chunk, build and upload 1 MiB ==
+root 0x3bb74aa75b7de7d472983940cc20bf821a9b222b8d2dd58dfce541928a36f7b8 size 1048576 leafCount 1024 acknowledged
+
+== create deal ==
+deal 1 created, owner 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, end block 53 (tx 0xea6dfade70b4619b39a5d9e97c5b8d4ae5e0eedc65a392c455dfbde008f0117f)
+
+== challenge 1 - answered (expected pass) ==
+index 737, path length 10, answer 0x9f78a13f80bc18512a5a423101ea7e8efd7a6818ba7f44d3825a512ac0a5d20c, bond unchanged
+
+== challenge 2 - skipped on purpose (expected slash) ==
+daemon re-read the round: failed
+index 877, slash 2000000000000000 units, owner credited 20000000000000000000 wei
+
+== settle ==
+settle tx 0xc66c2681042ab4f3959ec6315020c9a782b225c64c689490bbde5a8259a2e47a; provider +10000000000000000000 wei; claimed 1000000000000000
+
+== summary ==
+{
+  "tier1LocalRun": {
+    "chainId": 420420777,
+    "rpc": "http://127.0.0.1:8549",
+    "makhzan": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+    "dealId": 1,
+    "providerId": 1,
+    "root": "0x3bb74aa75b7de7d472983940cc20bf821a9b222b8d2dd58dfce541928a36f7b8",
+    "size": 1048576,
+    "leafCount": 1024,
+    "blockSize": 1024,
+    "priceUnits": "1000000000000000",
+    "minBondUnits": "10000000000000000",
+    "slashBps": "2000",
+    "rounds": [
+      {
+        "outcome": "passed",
+        "dealId": 1,
+        "index": 737,
+        "pathLength": 10,
+        "challengeTx": "0xe6fff2362993d544303246aef9226e590a6b9efbff9b4d09c579a74caa8fec38",
+        "answerTx": "0x9f78a13f80bc18512a5a423101ea7e8efd7a6818ba7f44d3825a512ac0a5d20c",
+        "bondAfter": "10000000000000000"
+      },
+      {
+        "outcome": "slashed",
+        "dealId": 1,
+        "index": 877,
+        "skipped": true,
+        "challengeTx": "0xe888ea9c649f442cbe538e48906c0a762636abc505754832eb0de5a8ac7a70c4",
+        "resolveTx": "0xbebc627123819416df39d6ff1f95ee461dd86b2dd267f04417414178fe960e67",
+        "bondBefore": "10000000000000000",
+        "bondAfter": "8000000000000000",
+        "slashed": "2000000000000000",
+        "ownerCreditWei": "20000000000000000000"
+      }
+    ]
+  }
+}
+
+PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil
