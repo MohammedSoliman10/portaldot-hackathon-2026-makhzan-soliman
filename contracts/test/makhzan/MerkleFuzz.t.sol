@@ -102,6 +102,11 @@ contract MerkleFuzzTest is Test {
         for (uint32 i; i < leafCount; i++) {
             uint256 len = 1 + (uint256(keccak256(abi.encodePacked(seed, "len", i))) % dataLen);
             t.leaves[i] = _leafData(i, seed, len);
+            // Embed the position in byte 0 so leaves are pairwise distinct even when dataLen is 1.
+            // Identical blocks legitimately share a proof (FR-017 exception); that case is covered by
+            // MerklePositionBinding.t.sol, and letting it into this campaign would make property (b)
+            // fail on content equality instead of on position binding.
+            t.leaves[i][0] = bytes1(uint8(i));
         }
         bytes32[] memory hashes = _leafHashes(t.leaves);
         t.root = _rootOf(hashes);
@@ -121,7 +126,8 @@ contract MerkleFuzzTest is Test {
 
     // ---------------------------------------------------------------- (b) position binding
 
-    /// @dev The same proof at any other index j != i is rejected.
+    /// @dev The same proof at any other index j != i is rejected. Leaf contents are pairwise distinct
+    ///      by construction (byte 0 holds the index), so this tests binding, not the FR-017 exception.
     function testFuzz_proofRejectedAtEveryOtherIndex(uint8 countSeed, uint32 indexSeed, uint8 lenSeed) public {
         uint32 leafCount = 1 + uint32(countSeed) % 64;
         uint32 index = indexSeed % leafCount;

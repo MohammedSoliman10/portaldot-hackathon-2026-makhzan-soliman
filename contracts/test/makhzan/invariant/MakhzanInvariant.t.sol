@@ -118,6 +118,9 @@ contract MakhzanInvariantTest is StdInvariant, Test {
     }
 
     /// @notice (8) A proof accepted for position i never verifies for any other position.
+    /// @dev The tree fixture's four leaves are pairwise distinct (byte 0 of each block is seeded from
+    ///      its index), so this asserts binding rather than the FR-017 exception. A byte-identical
+    ///      leaf is skipped explicitly, which is the only exception that can exist in a 4-leaf tree.
     function invariant_proofIsPositionBound() public view {
         if (!handler.hasAnswer()) return;
         (uint32 dealId, uint32 index, bytes memory data, bytes32[] memory path) = handler.lastProof();
@@ -125,7 +128,21 @@ contract MakhzanInvariantTest is StdInvariant, Test {
         assertTrue(MerkleLib.verify(d.root, data, index, d.leafCount, path), "the accepted proof verifies at i");
         for (uint32 j; j < d.leafCount; j++) {
             if (j == index) continue;
+            if (keccak256(tree.leaf(d.size, BLOCK_SIZE, j)) == keccak256(data)) continue; // documented limit
             assertFalse(MerkleLib.verify(d.root, data, j, d.leafCount, path), "the proof must fail at j != i");
+        }
+    }
+
+    /// @notice The handler's tree has pairwise-distinct leaves, so invariant (8) is meaningful.
+    function test_fixtureLeavesArePairwiseDistinct() public view {
+        uint32 count = tree.leafCount(SIZE, BLOCK_SIZE);
+        for (uint32 i; i < count; i++) {
+            for (uint32 j = i + 1; j < count; j++) {
+                assertTrue(
+                    keccak256(tree.leaf(SIZE, BLOCK_SIZE, i)) != keccak256(tree.leaf(SIZE, BLOCK_SIZE, j)),
+                    "fixture leaves must be pairwise distinct"
+                );
+            }
         }
     }
 

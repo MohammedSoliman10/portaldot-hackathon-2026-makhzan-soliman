@@ -1,0 +1,34 @@
+# D2 — documented-limit test + pairwise-distinct fuzz/invariant leaves
+# UTC: 2026-10-21T11:52:28Z
+# Local only; no RPC, no keys. MerklePositionBinding asserts the limit (identical adjacent
+# blocks share a proof) and the property (distinct blocks never do). MerkleFuzz embeds the
+# position in byte 0 of every leaf so property (b) cannot fail on content equality.
+
+$ forge test --match-path test/makhzan/MerklePositionBinding.t.sol
+[PASS] test_distinctBlocksNeverShareAProof() (gas: 818304)
+[PASS] test_identicalAdjacentBlocksShareAProof() (gas: 593509)
+
+$ forge test --match-path test/makhzan/MerkleFuzz.t.sol
+[PASS] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 1000, μ: 99115, ~: 56194)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 142905, ~: 69710)
+[PASS] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 1000, μ: 110412, ~: 68661)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 141990, ~: 102887)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 144414, ~: 71352)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 214462, ~: 90497)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 175010, ~: 114928)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 221035, ~: 206610)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 770.15ms (5.62s CPU time)
+
+$ forge test --match-path "test/makhzan/invariant/*"
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1742890)
+[FAIL: two challenge rounds were never reached: 0 <= 1] test_handlerReachesEveryValuePath() (gas: 1001311)
+Suite result: FAILED. 2 passed; 1 failed; 0 skipped; finished in 4.47s (4.47s CPU time)
+[FAIL: two challenge rounds were never reached: 0 <= 1] test_handlerReachesEveryValuePath() (gas: 1001311)
