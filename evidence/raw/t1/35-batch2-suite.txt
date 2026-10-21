@@ -1,0 +1,39 @@
+# Batch 2 full local suite snapshot (2026-10-21)
+# UTC: 2026-10-21T07:36:49Z
+# Local Foundry only; no RPC, no keys. The failing suites are the committed RED suites for
+# T025/T027/T029/T031/T033/T034/T036; they fail on NotImplemented by design, never on compile
+# or setup. Green suites are batch-1 regression plus the implemented T016-T024 surface.
+
+$ forge test
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 418.80µs (124.30µs CPU time)
+Suite result: FAILED. 3 passed; 2 failed; 0 skipped; finished in 790.00µs (210.10µs CPU time)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.18ms (724.30µs CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.36ms (2.73ms CPU time)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.73ms (3.30ms CPU time)
+Suite result: FAILED. 0 passed; 5 failed; 0 skipped; finished in 4.27ms (613.30µs CPU time)
+Suite result: FAILED. 0 passed; 17 failed; 0 skipped; finished in 6.84ms (5.12ms CPU time)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 7.34ms (155.10µs CPU time)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 3.92ms (3.65ms CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 49.57ms (49.27ms CPU time)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 67.45ms (67.38ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 107.59ms (108.07ms CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 918.97ms (918.77ms CPU time)
+Suite result: FAILED. 3 passed; 12 failed; 0 skipped; finished in 920.07ms (1.71ms CPU time)
+Suite result: ok. 15 passed; 0 failed; 0 skipped; finished in 953.32ms (20.95ms CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 949.62ms (6.58s CPU time)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 953.88ms (953.60ms CPU time)
+Suite result: FAILED. 2 passed; 11 failed; 0 skipped; finished in 953.68ms (1.78ms CPU time)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 3.65s (3.62s CPU time)
+Ran 19 test suites in 3.65s (9.55s CPU time): 84 tests passed, 49 failed, 0 skipped (133 total tests)
+Encountered 17 failing tests in test/makhzan/Challenge.t.sol:ChallengeTest
+Encountered 11 failing tests in test/makhzan/Guards.t.sol:GuardsTest
+Encountered 5 failing tests in test/makhzan/InvariantEdges.t.sol:InvariantEdgesTest
+Encountered 12 failing tests in test/makhzan/Payments.t.sol:PaymentsTest
+Encountered 1 failing test in test/makhzan/Rounds.t.sol:RoundsTest
+Encountered 2 failing tests in test/makhzan/StorageLayout.t.sol:StorageLayoutTest
+Encountered 1 failing test in test/makhzan/invariant/MakhzanInvariant.t.sol:MakhzanInvariantTest
+Encountered a total of 49 failing tests, 84 tests succeeded
+
+$ forge build --sizes
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |
