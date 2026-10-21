@@ -1,0 +1,20 @@
+# T052 — the size check fails on a one-byte overrun
+# UTC: 2026-10-21T23:17:40Z
+# Local Foundry only. Same artifact as T051 (runtime 6,378 B). First the budget file is temporarily set
+# to the measured runtime minus one byte (6,377), so the contract is one byte over; then it is restored
+# to the real budget (10,240). Every run keeps its exit code.
+
+# temporary edit: contracts/size-budget.json runtimeBytes = 6377 (measured - 1)
+budget now: 6377
+
+$ node scripts/check-size.mjs   # 1 B over budget
+exit=1
+
+# restored: contracts/size-budget.json runtimeBytes = 10240 (committed value)
+
+$ node scripts/check-size.mjs   # at the real budget
+Makhzan runtime 6378 B <= budget 10240 B (margin 3862 B)
+exit=0
+
+# the budget file is byte-identical to the committed one:
+git diff contracts/size-budget.json: clean
