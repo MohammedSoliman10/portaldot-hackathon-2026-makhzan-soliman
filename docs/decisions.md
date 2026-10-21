@@ -82,3 +82,26 @@ and records both heads. The reported numbers are re-measured, not assumed.
 
 **Consequences.** G03's latest-state sampling (DR-001) remains correct; a receipt is authoritative
 for event values. A limited `eth_getLogs` is recorded as an RPC limitation, not as a gate failure.
+
+## DR-010 — Tier 0 live spending caps (2026-10-21)
+
+**Context.** The reported funding stash is about 1,500 tPOT, delivered to native SS58 addresses.
+The Tier 1 deploy is estimated at about 718 tPOT, and the Tier 0 probes must not consume it. Recon on
+2026-10-21T07:10:22Z observed HUB2
+`5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp` at 500 tPOT free, not the reported 1,500.
+
+**Decision.**
+- The owner keeps an **untouched 800 tPOT reserve** for the Tier 1 deploy.
+- Total Tier 0 live spend, gas **and** storage deposits included, is capped at **250 tPOT**.
+- No single probe deposit may exceed **60 tPOT**. The 2 KiB and 4 KiB size rungs are therefore
+  `eth_estimateGas` dry runs only; they are not deployed.
+- Before every live deploy, print the estimate and abort if it would break either cap.
+- Record every transaction hash and the balance before and after the transaction.
+
+**Consequences.** A probe whose estimate exceeds 60 tPOT is not sent. If the owner's spendable
+balance cannot cover both the 800 tPOT reserve and the live probes, the live phase stops and reports
+the shortfall rather than spending the reserve. The observed 500 tPOT HUB2 balance cannot fund both
+the 800 tPOT reserve and the 75% fan-out; the fan-out plan records the conflict and does not move
+funds without the owner's decision.
+
+**Evidence.** `evidence/raw/g07/09-funding-recon.txt`, `evidence/raw/g07/10-fanout-plan.txt`.
