@@ -58,7 +58,7 @@ One table, regenerated from measurements, not hand-edited:
 
 | Operation | Deployed bytes | Slots | tPOT (deposit) | tPOT (gas) | Confirmed by |
 | --- | --- | --- | --- | --- | --- |
-| deploy | runtime size at build | 0 | code deposit + contract charge | deploy gas × price | G05 |
+| deploy | runtime size at build | 2 fixed config slots | code deposit + contract charge + 2 slot deposits | deploy gas × price | G05 |
 | register provider | 0 | 2 | 2 × slot deposit | receipt gas × price | G05 |
 | create deal | 0 | 3 | 3 × slot deposit | receipt gas × price | G05 |
 | challenge / answer / resolve / claim / settle | 0 | 0 new | 0 | receipt gas × price | G05 |
