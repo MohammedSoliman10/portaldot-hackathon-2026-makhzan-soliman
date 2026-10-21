@@ -120,7 +120,7 @@ config slot 0 uses 8/32 bytes instead of 29/32.
 setter are deleted; the constructor loses its `admin_` parameter and zero-address check. A future
 emergency stop needs an explicit admin FR, a layout change and its own tests.
 
-## DR-011 — OPEN: position binding vs identical adjacent blocks (2026-10-21, Tier 1)
+## DR-011 — DECIDED (B): position binding vs identical adjacent blocks (2026-10-21, Tier 1)
 
 **Finding.** FR-041(8) and `contracts/merkle.md` state that a proof for index `i` never verifies for
 `j != i`. With `leafHash = keccak256(0x00 || data)` the leaf does not commit to its index. When blocks
@@ -144,5 +144,12 @@ enforced, and Tier 2's position-sensitive claims would inherit the hole.
   with distinct content, and document that identical adjacent blocks are interchangeable (no code
   change, no vector churn, but a MUST becomes a caveat).
 
-**Status.** No T026+ implementation was started because both options touch the commitment scheme that
-`answer` verifies against. This entry is closed when the owner picks A or B.
+**Decision (owner, 2026-10-21): B — narrow the claim.** The leaf hash stays
+`keccak256(0x00 || data)`; no vector, fixture or TypeScript change. Reason: identical blocks are
+interchangeable by design — same bytes, same proof — a provider saves nothing by that, and binding the
+index would add churn and bytes for no storage guarantee. Consequences: FR-017 and FR-041(8), this
+record, `spec.md`, `plan.md`, `data-model.md` and `contracts/merkle.md` state the exception;
+`MerklePositionBinding.t.sol` keeps the reproduction as a documented-limit test and proves distinct
+blocks never share a proof; the Merkle fuzz property uses pairwise-distinct leaf contents so it stays
+meaningful. The invariant can no longer be reported as an unconditional MUST, and the checkpoint says
+so.

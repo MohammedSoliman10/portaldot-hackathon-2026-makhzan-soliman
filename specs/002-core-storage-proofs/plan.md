@@ -148,7 +148,7 @@ contracts/                              # Foundry project (existing root)
 │       ├── BondLib.sol                 # provider registry, bond accounting, exit guard
 │       └── PayLib.sol                  # accrual, claim, settle, slash arithmetic
 ├── test/makhzan/
-│   ├── MerkleLib.t.sol                 # unit + fuzz: root, path, promotion, position binding
+│   ├── MerkleLib.t.sol                 # unit + fuzz: root, path, promotion, position binding (identical-block exception in merkle.md)
 │   ├── GoldenVectors.t.sol             # reads the shared vectors file
 │   ├── Verifier.t.sol                  # answer accept/reject matrix (bytes, depth, order)
 │   ├── Registry.t.sol                  # register, top-up, withdraw guards
@@ -221,7 +221,7 @@ single swap point, per the specification's neutrality and the pending randomness
 - `contracts/storage-layout.md`: the slot map and the arithmetic that keeps a deal at 3 slots, a
   provider at 2 slots and an active challenge at 0 new slots.
 - `contracts/merkle.md`: the normative algorithm (prefixes, pairing, promotion, direction rule,
-  expected path length, expected leaf length, position binding) plus worked vectors.
+  expected path length, expected leaf length, position binding with the byte-identical-block exception) plus worked vectors.
 - `contracts/state-machine.md`: legal transitions and the guards that make an illegal transition
   revert, including at-most-one resolution and no-challenge-after-expiry.
 - `contracts/cli-daemon.md`: commands, upload envelope and acknowledgement, polling discovery,

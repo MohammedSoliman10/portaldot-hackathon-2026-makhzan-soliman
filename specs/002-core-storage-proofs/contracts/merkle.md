@@ -83,10 +83,18 @@ they cannot drift. The TypeScript test reads `packages/merkle-vectors/vectors.js
 
 ## Position binding
 
-The verifier binds a proof to `(root, index, leafCount, data, path)`. Two properties are fuzzed:
+The verifier binds a proof to `(root, index, leafCount, data, path)`; path directions come from
+`index` and `count`, never from the prover. Two properties are tested:
 
 1. A proof produced for index `i` is accepted at `i` and rejected at every `j ≠ i` (the same path
-   replayed at another index).
+   replayed at another index), with one documented exception: when the bytes at `i` and `j` and every
+   sibling hash that differs between the two paths make the two root computations identical — which
+   happens only when the blocks, or whole subtrees, involved are byte-identical — the proof is
+   accepted at both. This is deliberate. The answer still proves possession of exactly those bytes,
+   and one stored copy honestly answers either challenge; it does not reduce what a provider must
+   store. `MerklePositionBinding.t.sol` documents the exception and proves distinct blocks never
+   share a proof; the fuzz property uses pairwise-distinct leaf contents so it tests the binding
+   rather than the exception.
 2. A path with the elements reordered, or with one element added or removed, is rejected.
 
 ## Change control
