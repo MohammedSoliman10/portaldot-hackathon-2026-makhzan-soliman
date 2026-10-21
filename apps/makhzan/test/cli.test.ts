@@ -11,6 +11,7 @@ function harness(receipt: Partial<{ status: "success" | "reverted"; reason: stri
   const order: string[] = [];
   const sent: TxRequest[] = [];
   const deps: CommandDeps = {
+    contract: CONTRACT,
     chain: {
       async estimateGas() {
         order.push("estimate");

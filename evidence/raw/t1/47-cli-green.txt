@@ -1,0 +1,37 @@
+# T049 green — client CLI and shared error mapping
+# UTC: 2026-10-21T16:38:07Z
+# Local Node only; no RPC, no keys, no network. parseCommand validates the documented arguments and
+# rejects missing/extra/unknown ones, malformed root/size/leafCount/duration/price, a price that is not
+# a whole number of units, the uint64 cap, and any key flag on argv without echoing the value.
+# execute builds the transaction with gas = estimate x 1.2, maxFeePerGas = chain gas price and
+# maxPriorityFeePerGas = 0, sends, records included/executed/finalized in order, and reads back only
+# after finality. A reverted receipt is mapped to the documented message and stops before any read-back;
+# an RPC failure propagates verbatim. The 17 custom errors map to their documented text (WindowOpen
+# names both window directions) and an unknown revert is surfaced verbatim (FR-045).
+
+$ node --test test/errors.test.ts test/cli.test.ts
+✔ each command parses its documented arguments (1.9296ms)
+✔ missing, extra and unknown arguments are rejected (0.9631ms)
+✔ invalid values are rejected before any transaction is built (0.8639ms)
+✔ a key on argv is refused and never echoed (0.2748ms)
+✔ create applies the documented fee policy and waits for finality before reading (1.858399ms)
+✔ a reverted receipt is reported with the mapped reason and takes no read-back (0.7282ms)
+✔ an RPC failure is surfaced verbatim, never treated as success (0.5078ms)
+✔ upload reports the acknowledgement and report names the report file (0.275ms)
+✔ watch polls the deal until it resolves, then reads it back (0.2269ms)
+✔ all 17 custom errors map to their documented message (0.7735ms)
+✔ a revert string in either shape resolves to the documented message (1.097ms)
+✔ WindowOpen says it covers both directions of the window (0.1962ms)
+✔ an unknown error string is surfaced verbatim, never swallowed (1.093199ms)
+ℹ tests 13
+ℹ pass 13
+ℹ fail 0
+
+$ npm test
+ℹ tests 59
+ℹ pass 59
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
