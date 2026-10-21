@@ -1,0 +1,20 @@
+# M3 — deterministic index coverage and last-block length rules (RED)
+# UTC: 2026-10-21T11:24:01Z
+# Local Foundry only; no RPC, no keys. _forceChallenge retries prevrandao/block pairs with
+# snapshotState/revertToState until challengeStateOf reports the wanted index, so it does not
+# depend on how T026 derives the selector. All three cases stop at the challenge stub.
+
+$ forge test --match-path test/makhzan/ChallengeIndex.t.sol
+Ran 3 tests for test/makhzan/ChallengeIndex.t.sol:ChallengeIndexTest
+[FAIL: NotImplemented()] test_everyLeafIndexAcceptsItsOwnAnswer() (gas: 155907)
+[FAIL: NotImplemented()] test_lastLeafAcceptsOnlyTheExactByteLength() (gas: 155932)
+[FAIL: NotImplemented()] test_singleLeafDealAcceptsEmptyPath() (gas: 177142)
+Suite result: FAILED. 0 passed; 3 failed; 0 skipped; finished in 2.45ms (673.10µs CPU time)
+Ran 1 test suite in 6.57ms (2.45ms CPU time): 0 tests passed, 3 failed, 0 skipped (3 total tests)
+[FAIL: NotImplemented()] test_everyLeafIndexAcceptsItsOwnAnswer() (gas: 155907)
+[FAIL: NotImplemented()] test_lastLeafAcceptsOnlyTheExactByteLength() (gas: 155932)
+[FAIL: NotImplemented()] test_singleLeafDealAcceptsEmptyPath() (gas: 177142)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |
