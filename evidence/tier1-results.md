@@ -6,7 +6,7 @@ deployed, no real key was used. Rows marked `[pending live run]` have not run on
 must not be read as results.
 
 **Raw evidence**: `evidence/raw/t1/48-e2e-local.txt` (full run), `59-daemon-evidence-green.txt`
-(daemon suite + re-run), `49-size-check.txt`, `50-size-overrun.txt`, `51-gas-snapshot.txt`,
+(daemon suite + re-run), `49-size-check.txt`, `50-size-check-red.txt`, `51-gas-snapshot.txt`,
 `52-ci-local.txt`, `54-evidence-green.txt`, `55-secret-scan.txt`, `56-scope.txt`,
 `57-final-local.txt`.
 
@@ -66,7 +66,7 @@ settled flag `1`.
 | `Makhzan` creation | 6,966 | — | — |
 
 Measured with `via_ir = true` (DR-012); `scripts/check-size.mjs` exits 1 one byte over budget
-(`50-size-overrun.txt`). Storage slots: config 1, provider 2, deal 3, active challenge 0 extra,
+(`50-size-check-red.txt`). Storage slots: config 1, provider 2, deal 3, active challenge 0 extra,
 0 growth per round — `StorageLayout.t.sol`.
 
 ## Gas snapshot (local)
