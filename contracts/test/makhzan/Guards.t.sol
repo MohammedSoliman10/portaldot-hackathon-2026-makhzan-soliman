@@ -242,6 +242,67 @@ contract GuardsTest is MakhzanTestBase {
         assertEq(bond, MIN_BOND, "bond survives the reverted withdrawal");
     }
 
+    /// @dev M6: the owner/provider re-enters claim, settle, resolve and withdrawBond together
+    ///      (mode 5) from every payout. Each authorised path must pay exactly once: the receiver ends
+    ///      with exactly the wei it paid in, and the contract keeps only the unrelated provider's bond.
+    function test_combinedModeFiveReentryPaysEachPathOnce() public {
+        _maliciousDeal();
+        uint64 bondStart = _maliciousBond();
+        uint64 slash = uint64(uint256(bondStart) * SLASH_BPS / 10_000);
+        mal.configure(1, 5, false);
+
+        // Claim: the reentrant claim has nothing new, settle is before the end, resolve has no
+        // challenge and withdrawBond sees an open deal.
+        vm.roll(block.number + DURATION / 2);
+        (uint64 accrued,) = m.accruedOf(1);
+        uint256 before = address(mal).balance;
+        mal.claim(1);
+        assertEq(address(mal).balance - before, _wei(accrued), "claim paid exactly once");
+        assertEq(_deal(1).claimed, accrued, "claimed updated once");
+        assertEq(mal.attempts(), 4, "all four reentrant calls were attempted");
+
+        // Resolve: the slash plus the accrual that grew since the claim; settle and withdrawals stay
+        // blocked, and the reentrant resolve hits NoChallenge.
+        mal.challenge(1);
+        (,,, uint32 deadline,) = m.challengeStateOf(1);
+        vm.roll(deadline + 1);
+        (uint64 accruedAtResolve,) = m.accruedOf(1);
+        uint64 claimedBeforeResolve = _deal(1).claimed;
+        before = address(mal).balance;
+        mal.resolve(1);
+        assertEq(
+            address(mal).balance - before,
+            _wei(slash) + _wei(accruedAtResolve - claimedBeforeResolve),
+            "resolve paid one slash plus the new accrual"
+        );
+        assertEq(_maliciousBond(), bondStart - slash, "bond slashed exactly once");
+        assertEq(mal.attempts(), 8, "mode 5 attempted four calls again");
+
+        // Settle: the escrow remainder plus the bond refund, both authorised, each once. The
+        // reentrant settle and claim fail; the reentrant withdrawBond is the authorised refund.
+        vm.roll(_dealEnd(1) + 1);
+        uint64 claimedBeforeSettle = _deal(1).claimed;
+        before = address(mal).balance;
+        mal.settle(1);
+
+        assertEq(
+            address(mal).balance - before,
+            _wei(PRICE - claimedBeforeSettle) + _wei(bondStart - slash),
+            "settle paid the remainder plus one bond refund"
+        );
+        assertEq(mal.attempts(), 12, "mode 5 attempted four calls on the settlement transfer");
+        assertEq(_dealFlags(1) & 1, 1, "settled once");
+        (uint16 id, uint64 bondAfter,, bool registered) = m.providerOf(address(mal));
+        assertEq(id, 0, "reentrant withdrawBond cleared the registration");
+        assertEq(bondAfter, 0, "bond cleared");
+        assertFalse(registered, "not registered");
+
+        // Nothing was paid twice: every wei the receiver sent in came back exactly once, and the
+        // contract still holds only the unrelated fixture provider's bond.
+        assertEq(address(mal).balance, 1_000 ether, "receiver broke even exactly");
+        assertEq(address(m).balance, _wei(MIN_BOND), "only the fixture provider's bond remains");
+    }
+
     function _maliciousDeal() internal {
         mal.registerProvider{value: _wei(MIN_BOND)}();
         mal.createDeal{value: _wei(PRICE)}(1, root, LEAF_COUNT, SIZE, DURATION, PRICE);

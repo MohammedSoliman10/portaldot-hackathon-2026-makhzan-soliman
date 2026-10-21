@@ -9,6 +9,8 @@ contract MaliciousReceiver {
     uint32 internal dealId;
     uint8 internal mode; // 0 none, 1 claim, 2 settle, 3 resolve, 4 withdrawBond, 5 all four
     bool internal rejectValue;
+    /// @dev Counts every re-entrant call this contract actually attempted.
+    uint8 public attempts;
 
     constructor(IMakhzan m_) {
         m = m_;
@@ -59,15 +61,19 @@ contract MaliciousReceiver {
         if (rejectValue) revert("no value accepted");
         if (mode == 0) return;
         if (mode == 1 || mode == 5) {
+            attempts++;
             try m.claim(dealId) {} catch {}
         }
         if (mode == 2 || mode == 5) {
+            attempts++;
             try m.settle(dealId) {} catch {}
         }
         if (mode == 3 || mode == 5) {
+            attempts++;
             try m.resolve(dealId) {} catch {}
         }
         if (mode == 4 || mode == 5) {
+            attempts++;
             try m.withdrawBond() {} catch {}
         }
     }
