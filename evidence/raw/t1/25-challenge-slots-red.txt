@@ -1,0 +1,19 @@
+# T027 — challenge storage growth suite (RED before T028; no implementation in batch 2)
+# UTC: 2026-10-21T07:28:16Z
+# Local Foundry only; no RPC, no keys. The two new cases fail on the NotImplemented challenge stub;
+# the three slot-budget cases from T022 stay green.
+
+$ forge test --match-path test/makhzan/StorageLayout.t.sol
+[FAIL: NotImplemented()] test_challengeUsesOnlyTheExistingDealSlots() (gas: 31890)
+[PASS] test_dealUsesThreeSlots() (gas: 12358)
+[PASS] test_providerUsesTwoSlots() (gas: 10513)
+[FAIL: NotImplemented()] test_twoChallengeRoundsAddNoStorage() (gas: 32508)
+[PASS] test_twoConfigSlotsAreWrittenOnce() (gas: 7653)
+Suite result: FAILED. 3 passed; 2 failed; 0 skipped; finished in 1.12ms (690.10µs CPU time)
+Ran 1 test suite in 8.57ms (1.12ms CPU time): 3 tests passed, 2 failed, 0 skipped (5 total tests)
+[FAIL: NotImplemented()] test_challengeUsesOnlyTheExistingDealSlots() (gas: 31890)
+[FAIL: NotImplemented()] test_twoChallengeRoundsAddNoStorage() (gas: 32508)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan        | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness | 6,017            | 6,654             | 18,559             | 42,498              |

@@ -92,4 +92,49 @@ contract StorageLayoutTest is Test {
         assertEq(uint64(c >> 184), 0, "claimed in slot C 23..30");
         assertEq(c >> 248, 0, "slot C uses 31 bytes");
     }
+
+    function test_challengeUsesOnlyTheExistingDealSlots() public {
+        bytes32 base = _dealSlot(1);
+        uint256 aBefore = _load(base);
+        uint256 bBefore = _load(bytes32(uint256(base) + 1));
+        uint256 cBefore = _load(bytes32(uint256(base) + 2));
+
+        vm.prank(client);
+        m.challenge(1);
+
+        uint256 aAfter = _load(base);
+        uint256 bAfter = _load(bytes32(uint256(base) + 1));
+        uint256 cAfter = _load(bytes32(uint256(base) + 2));
+        assertEq(_load(bytes32(uint256(base) + 3)), 0, "an open challenge adds no fourth slot");
+        assertEq(bAfter, bBefore, "root slot unchanged");
+        assertEq(uint8(aAfter >> 240), 2, "challengeOpen flag lives in slot A");
+        assertEq(uint32(aAfter >> 160), uint32(aBefore >> 160), "startBlock unchanged");
+        assertEq(uint32(aAfter >> 192), uint32(aBefore >> 192), "endBlock unchanged");
+        assertEq(uint16(aAfter >> 224), uint16(aBefore >> 224), "providerId unchanged");
+        assertEq(uint24(cAfter), uint24(cBefore), "leafCount unchanged");
+        assertEq(uint32(cAfter >> 24), uint32(cBefore >> 24), "size unchanged");
+        assertEq(uint64(cAfter >> 120), uint64(cBefore >> 120), "price unchanged");
+        assertEq(uint64(cAfter >> 184), uint64(cBefore >> 184), "claimed unchanged");
+        assertLt(uint32(cAfter >> 56), 4, "challengeIndex in slot C");
+        assertEq(uint32(cAfter >> 88), uint32(block.number), "challengeStart in slot C");
+    }
+
+    function test_twoChallengeRoundsAddNoStorage() public {
+        bytes32 base = _dealSlot(1);
+        vm.prank(client);
+        m.challenge(1);
+        (,,, uint32 deadline,) = m.challengeStateOf(1);
+        vm.roll(deadline + 1);
+        vm.prank(client);
+        m.resolve(1);
+
+        vm.prank(client);
+        m.challenge(1);
+
+        assertEq(_load(bytes32(uint256(base) + 3)), 0, "second round adds no slot");
+        assertTrue(_load(base) != 0, "slot A still the record");
+        assertTrue(_load(bytes32(uint256(base) + 1)) != 0, "slot B still the record");
+        assertTrue(_load(bytes32(uint256(base) + 2)) != 0, "slot C still the record");
+        assertEq(uint8(_load(base) >> 240), 2, "second round is open in slot A");
+    }
 }
