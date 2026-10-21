@@ -133,6 +133,20 @@ contract MakhzanInvariantTest is StdInvariant, Test {
         }
     }
 
+    /// @notice The handler really routes a payout to the malicious recipient, which re-enters.
+    /// @dev Deterministic script: the receiver registers (actor index 3), owns a deal, the deal is
+    ///      settled past its end block, and the payout triggers its mode-5 receive.
+    function test_handlerUsesTheMaliciousRecipient() public {
+        handler.register(3, MIN_BOND);
+        assertGt(handler.registers(), 0, "receiver registered");
+        handler.createDeal(3, 0, 10, MIN_DURATION);
+        assertGt(handler.creations(), 0, "receiver owns a deal");
+        handler.warp(1200); // bound() wraps, so pass the cap to advance past the 600-block deal
+        handler.settleDeal(0, 1);
+        assertGt(handler.settles(), 0, "the deal settled");
+        assertGt(handler.maliciousAttempts(), 0, "the recipient re-entered from a payout");
+    }
+
     /// @notice The handler's tree has pairwise-distinct leaves, so invariant (8) is meaningful.
     function test_fixtureLeavesArePairwiseDistinct() public view {
         uint32 count = tree.leafCount(SIZE, BLOCK_SIZE);

@@ -1,0 +1,29 @@
+# T035 — invariant handler green: 256 sequences x 50 calls, zero violations
+# UTC: 2026-10-21T11:59:08Z
+# Local Foundry only; no RPC, no keys. Config: foundry.toml [invariant] runs = 256, depth = 50,
+# fail_on_revert = false. The handler now includes the malicious receiver as a fourth recipient
+# actor (mode 5): when the handler creates a deal it owns, it configures the receiver with that
+# deal id, so any payout to it attempts claim, settle, resolve and withdrawBond once each.
+# test_handlerUsesTheMaliciousRecipient is the deterministic proof that the actor is exercised.
+# Reverts counted (5568) are expected protocol rejections caught by try/catch, not violations.
+
+$ rm -rf cache/invariant && forge test --match-path "test/makhzan/invariant/*"
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+ MakhzanInvariantTest invariants (runs: 256, calls: 12800, reverts: 5595)
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1742912)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2971504)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 692440)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 3.44s (3.44s CPU time)
+
+$ forge build --sizes
+| Makhzan           | 9,128            | 9,691             | 15,448             | 39,461              |
+| MakhzanHarness    | 9,498            | 10,074            | 15,078             | 39,078              |
+
+# Handler is test-only (no size limit); Makhzan runtime is the gated number.

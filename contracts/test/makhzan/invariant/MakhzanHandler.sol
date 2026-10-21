@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {IMakhzan} from "../../../src/makhzan/IMakhzan.sol";
 import {TreeHarness} from "../harness/TreeHarness.sol";
+import {MaliciousReceiver} from "../harness/MaliciousReceiver.sol";
 
 /// @notice T034 — bounded actor handler for the five invariants of FR-041.
 /// @dev Every action is wrapped in try/catch so an expected protocol rejection is counted, never
@@ -19,6 +20,9 @@ contract MakhzanHandler is Test {
 
     IMakhzan internal immutable m;
     TreeHarness internal immutable tree;
+    /// @dev A recipient actor that re-enters every exit path from receive (mode 5). Its deal id is
+    ///      configured when the handler creates a deal it owns, so a payout to it always re-enters.
+    MaliciousReceiver internal immutable malicious;
     bytes32 internal immutable root;
     uint32 internal immutable size;
     uint16 internal immutable blockSize;
@@ -79,10 +83,13 @@ contract MakhzanHandler is Test {
         root = root_;
         size = size_;
         blockSize = blockSize_;
+        malicious = new MaliciousReceiver(m_);
         for (uint256 i; i < actors_.length; i++) {
             actors.push(actors_[i]);
             vm.deal(actors_[i], 1_000_000 ether);
         }
+        actors.push(address(malicious));
+        vm.deal(address(malicious), 1_000_000 ether);
     }
 
     // ------------------------------------------------------------------ wiring
@@ -174,6 +181,8 @@ contract MakhzanHandler is Test {
         try m.createDeal{value: uint256(price) * WPU}(providerId, root, 4, size, duration, price) {
             creations++;
             dealIds.push(id);
+            // Any payout to this owner re-enters claim/settle/resolve/withdrawBond once each.
+            if (owner == address(malicious)) malicious.configure(id, 5, false);
         } catch {
             rejected++;
         }
@@ -273,6 +282,11 @@ contract MakhzanHandler is Test {
     }
 
     // ------------------------------------------------------------------ views
+
+    /// @notice How many re-entrant calls the malicious recipient has attempted so far.
+    function maliciousAttempts() external view returns (uint8) {
+        return malicious.attempts();
+    }
 
     function dealCount() external view returns (uint256) {
         return dealIds.length;
