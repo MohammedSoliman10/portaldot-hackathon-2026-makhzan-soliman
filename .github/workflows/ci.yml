@@ -1,3 +1,5 @@
+# Compiler, optimizer and via_ir flags live only in contracts/foundry.toml (DR-012). CI must never
+# duplicate them: both jobs inherit that profile, so a local run and a CI run cannot disagree.
 name: ci
 
 on:
