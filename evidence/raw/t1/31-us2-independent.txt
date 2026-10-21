@@ -1,0 +1,14 @@
+# T033 — US2 independent: one passed round and one slashed round on the same deal, then settle (RED)
+# UTC: 2026-10-21T07:31:25Z
+# Local Foundry only; no RPC, no keys. challenge/answer/resolve/settle still revert NotImplemented.
+
+$ forge test --match-path test/makhzan/Rounds.t.sol
+Ran 1 test for test/makhzan/Rounds.t.sol:RoundsTest
+[FAIL: NotImplemented()] test_onePassedAndOneFailedRoundOnTheSameDealThenSettle() (gas: 188425)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 2.06ms (98.00µs CPU time)
+Ran 1 test suite in 6.41ms (2.06ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+[FAIL: NotImplemented()] test_onePassedAndOneFailedRoundOnTheSameDealThenSettle() (gas: 188425)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |
