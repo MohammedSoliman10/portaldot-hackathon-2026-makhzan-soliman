@@ -14,3 +14,6 @@ cbor_metadata = false
 # The compiler pin and evm_version are provisional until G02 records which
 # compilation path the live chain accepts. Do not change them for a product
 # reason before that gate has a verdict.
+
+[fuzz]
+runs = 1000

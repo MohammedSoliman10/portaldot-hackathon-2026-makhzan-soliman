@@ -1,0 +1,67 @@
+$ forge test --match-path test/makhzan/MerkleLib.t.sol
+Compiling 2 files with Solc 0.8.28
+Solc 0.8.28 finished in 509.89ms
+Compiler run successful!
+
+Ran 8 tests for test/makhzan/MerkleLib.t.sol:MerkleLibTest
+[PASS] test_everyValidPathVerifies() (gas: 146534)
+[PASS] test_proofForOneIndexIsRejectedAtEveryOtherIndex() (gas: 253057)
+[PASS] test_sevenLeafRootAndPathLengths() (gas: 22159)
+[PASS] test_shortenedReorderedAndExtendedPathsAreRejected() (gas: 36070)
+[PASS] test_singleLeafRootIsTheLeafHash() (gas: 2387)
+[PASS] test_threeLeafRootPromotesTheOddNode() (gas: 10785)
+[PASS] test_wrongBytesAreRejected() (gas: 14553)
+[PASS] test_zeroLeafCountAndOutOfRangeIndexAreRejected() (gas: 6413)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.51ms (2.25ms CPU time)
+
+Ran 1 test suite in 6.55ms (1.51ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+
+$ forge test --match-path test/makhzan/MerkleLib.t.sol --fuzz-runs 1000
+No files changed, compilation skipped
+
+Ran 8 tests for test/makhzan/MerkleLib.t.sol:MerkleLibTest
+[PASS] test_everyValidPathVerifies() (gas: 146534)
+[PASS] test_proofForOneIndexIsRejectedAtEveryOtherIndex() (gas: 253057)
+[PASS] test_sevenLeafRootAndPathLengths() (gas: 22159)
+[PASS] test_shortenedReorderedAndExtendedPathsAreRejected() (gas: 36070)
+[PASS] test_singleLeafRootIsTheLeafHash() (gas: 2387)
+[PASS] test_threeLeafRootPromotesTheOddNode() (gas: 10785)
+[PASS] test_wrongBytesAreRejected() (gas: 14553)
+[PASS] test_zeroLeafCountAndOutOfRangeIndexAreRejected() (gas: 6413)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.32ms (2.08ms CPU time)
+
+Ran 1 test suite in 6.37ms (1.32ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+
+$ forge build --sizes
+No files changed, compilation skipped
+
+╭---------------+------------------+-------------------+--------------------+---------------------╮
+| Contract      | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
++=================================================================================================+
+| BehaviorProbe | 721              | 752               | 23,855             | 48,400              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| CounterProbe  | 246              | 276               | 24,330             | 48,876              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| HashProbe     | 338              | 369               | 24,238             | 48,783              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| SizeProbe     | 9                | 72                | 24,567             | 49,080              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| ValueEcho     | 501              | 532               | 24,075             | 48,620              |
+╰---------------+------------------+-------------------+--------------------+---------------------╯
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
