@@ -170,7 +170,7 @@ contract DealsTest is Test {
     function test_escrowAndActiveDealCount() public {
         uint32 dealId = _valid();
         dealId;
-        assertEq(address(m).balance, VALUE, "escrow held in wei");
+        assertEq(address(m).balance, VALUE + uint256(MIN_BOND) * WPU, "bond + escrow held in wei");
         (uint16 id, uint64 bond, uint24 activeDeals, bool registered) = m.providerOf(provider);
         assertEq(id, 1, "provider id");
         assertEq(bond, MIN_BOND, "bond unchanged");
@@ -180,14 +180,19 @@ contract DealsTest is Test {
 
     function test_idsAreUniqueAndMonotone() public {
         uint32 first = _valid();
-        uint32 second = _valid();
+        vm.prank(client);
+        m.createDeal{value: VALUE}(1, ROOT, LEAF_COUNT, SIZE, MIN_DURATION, PRICE);
+
+        DealView memory firstView = _dealView(first);
+        DealView memory secondView = _dealView(2);
+        DealView memory thirdView = _dealView(3);
         assertEq(first, 1, "first id");
-        assertEq(second, 2, "second id");
-        DealView memory secondView = _dealView(second);
+        assertEq(firstView.owner, client, "first deal owner");
         assertEq(secondView.owner, client, "second deal owner");
         assertEq(secondView.price, PRICE, "second deal price");
-        DealView memory firstView = _dealView(first);
-        assertEq(firstView.claimed, 0, "first deal is separate");
+        assertEq(secondView.root, ROOT, "second deal root");
+        assertEq(secondView.startBlock, firstView.startBlock, "distinct records in the same block");
+        assertEq(thirdView.owner, address(0), "no third deal");
     }
 
     function test_eventCarriesDocumentedFields() public {

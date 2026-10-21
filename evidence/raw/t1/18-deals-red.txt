@@ -1,6 +1,6 @@
-# T020 — deal creation and escrow suite (RED before T021)
-# UTC: 2026-10-21T07:24:25Z
-# Local Foundry only; no RPC, no keys. Every failure is the NotImplemented createDeal stub (T016).
+# T020 — deal creation and escrow suite (RED before T021), regenerated against the corrected suite
+# UTC: 2026-10-21T07:24:55Z
+# Local Foundry only; no RPC, no keys. Makhzan reverted to the T020 commit for this run; every failure is the NotImplemented createDeal stub.
 
 $ forge test --match-path test/makhzan/Deals.t.sol
 [FAIL: Error != expected error: NotImplemented() != BadParams()] test_durationOutOfRangeRejected() (gas: 40859)
@@ -17,8 +17,8 @@ $ forge test --match-path test/makhzan/Deals.t.sol
 [FAIL: Error != expected error: NotImplemented() != BadParams()] test_valueMustEqualPriceTimesUnit() (gas: 40692)
 [FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroRootRejected() (gas: 40920)
 [FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroSizeRejected() (gas: 41052)
-Suite result: FAILED. 0 passed; 14 failed; 0 skipped; finished in 1.42ms (2.23ms CPU time)
-Ran 1 test suite in 7.07ms (1.42ms CPU time): 0 tests passed, 14 failed, 0 skipped (14 total tests)
+Suite result: FAILED. 0 passed; 14 failed; 0 skipped; finished in 1.57ms (2.62ms CPU time)
+Ran 1 test suite in 6.61ms (1.57ms CPU time): 0 tests passed, 14 failed, 0 skipped (14 total tests)
 [FAIL: Error != expected error: NotImplemented() != BadParams()] test_durationOutOfRangeRejected() (gas: 40859)
 [FAIL: NotImplemented()] test_escrowAndActiveDealCount() (gas: 40653)
 [FAIL: NotImplemented()] test_eventCarriesDocumentedFields() (gas: 44084)
@@ -34,6 +34,5 @@ Ran 1 test suite in 7.07ms (1.42ms CPU time): 0 tests passed, 14 failed, 0 skipp
 [FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroRootRejected() (gas: 40920)
 [FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroSizeRejected() (gas: 41052)
 
-$ forge build --sizes | grep Makhzan
-| Makhzan        | 4,295            | 4,917             | 20,281             | 44,235              |
-| MakhzanHarness | 4,770            | 5,407             | 19,806             | 43,745              |
+$ forge build --sizes | grep Makhzan (T020 skeleton + registry)
+| Makhzan | 4,295 | 4,917 | 20,281 | 44,235 |

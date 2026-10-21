@@ -140,13 +140,33 @@ contract Makhzan is IMakhzan {
         uint32 durationBlocks,
         uint64 price
     ) external payable override {
-        providerId;
-        root;
-        leafCount;
-        size;
-        durationBlocks;
-        price;
-        revert NotImplemented();
+        if (paused != 0 || root == bytes32(0) || size == 0 || leafCount == 0 || price == 0) {
+            revert BadParams();
+        }
+        if (durationBlocks < minDurationBlocks || durationBlocks > maxDurationBlocks) revert BadParams();
+        if (providerId == 0 || providerId > providerCount) revert BadParams();
+        BondLib.Provider storage p = providers[providerId - 1];
+        if (!BondLib.isRegistered(p) || p.bond < minBond) revert BadParams();
+        uint256 expectedLeaves = (uint256(size) + challengeBlockSize - 1) / challengeBlockSize;
+        if (leafCount != expectedLeaves) revert BadParams();
+        if (msg.value != uint256(price) * WEI_PER_UNIT) revert BadParams();
+        if (nextDealId == type(uint32).max) revert BadParams();
+        if (block.number > type(uint32).max - durationBlocks) revert BadParams();
+
+        uint32 dealId = ++nextDealId;
+        uint32 start = uint32(block.number);
+        uint32 end = start + durationBlocks;
+        Deal storage d = deals[dealId];
+        d.owner = msg.sender;
+        d.startBlock = start;
+        d.endBlock = end;
+        d.providerId = providerId;
+        d.root = root;
+        d.leafCount = leafCount;
+        d.size = size;
+        d.price = price;
+        p.activeDeals += 1;
+        emit DealCreated(dealId, msg.sender, providerId, root, size, end, price);
     }
 
     function dealOf(uint32 dealId)

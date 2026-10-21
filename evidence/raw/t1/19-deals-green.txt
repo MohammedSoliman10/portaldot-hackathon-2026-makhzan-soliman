@@ -1,0 +1,27 @@
+# T021 — createDeal + validation (GREEN)
+# UTC: 2026-10-21T07:24:55Z
+# Local Foundry only; no RPC, no keys.
+
+$ forge test --match-path test/makhzan/Deals.t.sol
+Ran 14 tests for test/makhzan/Deals.t.sol:DealsTest
+[PASS] test_durationOutOfRangeRejected() (gas: 81394)
+[PASS] test_escrowAndActiveDealCount() (gas: 140704)
+[PASS] test_eventCarriesDocumentedFields() (gas: 132642)
+[PASS] test_idsAreUniqueAndMonotone() (gas: 291434)
+[PASS] test_leafCountMustMatchSizeAndBlockSize() (gas: 92154)
+[PASS] test_nonMultipleValueRejected() (gas: 50968)
+[PASS] test_pausedProtocolRejectsNewDeals() (gas: 70150)
+[PASS] test_providerBelowMinimumBondRejected() (gas: 80095)
+[PASS] test_unknownProviderRejected() (gas: 45617)
+[PASS] test_validDealStoresEveryField() (gas: 143136)
+[PASS] test_valueAboveUnitCapRejected() (gas: 51756)
+[PASS] test_valueMustEqualPriceTimesUnit() (gas: 133834)
+[PASS] test_zeroRootRejected() (gas: 43133)
+[PASS] test_zeroSizeRejected() (gas: 43279)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 1.36ms (2.34ms CPU time)
+
+Ran 1 test suite in 6.70ms (1.36ms CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)
+
+$ forge build --sizes | grep Makhzan
+| Makhzan        | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness | 6,017            | 6,654             | 18,559             | 42,498              |
