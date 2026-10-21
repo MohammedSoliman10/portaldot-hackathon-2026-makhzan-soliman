@@ -1,0 +1,51 @@
+# C2 green — challenge refuses a settled deal (AlreadySettled, no new error)
+# UTC: 2026-10-21T12:26:06Z
+# Local Foundry only; no RPC, no keys. Order of checks: NoDeal, NotOwner, DealExpired,
+# AlreadySettled, ChallengeOpen. The existing challengeOnSettledDealReverts test (settled past the
+# end block) still expects DealExpired and still passes, because expiry is checked first.
+# Invariant: no deal is both settled and holding an open challenge (256 x 50, zero violations).
+
+$ forge test
+Ran 21 test suites in 3.25s (8.57s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+
+$ forge test --match-path test/makhzan/Challenge.t.sol
+[PASS] test_answerAfterDeadlineRevertsWindowOpen() (gas: 1003579)
+[PASS] test_answerAfterEndBlockButBeforeDeadlinePasses() (gas: 3306595)
+[PASS] test_answerWithoutChallengeRevertsNoChallenge() (gas: 934220)
+[PASS] test_challengeOnDealSettledAtTheEndBlockReverts() (gas: 248613)
+[PASS] test_challengeOnExpiredDealRevertsDealExpired() (gas: 175043)
+[PASS] test_challengeOnSettledDealReverts() (gas: 231540)
+[PASS] test_challengeOnUnknownDealRevertsNoDeal() (gas: 35246)
+[PASS] test_challengeOpenedEventCarriesFields() (gas: 181554)
+[PASS] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 212973)
+[PASS] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 1831598)
+[PASS] test_onlyDealOwnerCanChallenge() (gas: 157153)
+[PASS] test_onlyProviderCanAnswer() (gas: 982157)
+[PASS] test_openChallengeStaysResolvableAfterEndBlock() (gas: 283087)
+[PASS] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 332327)
+[PASS] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 216112)
+[PASS] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 212483)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 277707)
+[PASS] test_strangerResolvePaysOwnerNotCaller() (gas: 291262)
+[PASS] test_validAnswerBeforeDeadlinePasses() (gas: 1060459)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 6.79ms (24.25ms CPU time)
+
+$ forge test --match-path "test/makhzan/invariant/*"
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noSettledDealHasOpenChallenge
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+ MakhzanInvariantTest invariants (runs: 256, calls: 12800, reverts: 5642)
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1742934)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2972101)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 695529)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.76s (2.76s CPU time)
+
+$ forge build --sizes
+| Makhzan           | 9,210            | 9,773             | 15,366             | 39,379              |
+| MakhzanHarness    | 9,580            | 10,156            | 14,996             | 38,996              |

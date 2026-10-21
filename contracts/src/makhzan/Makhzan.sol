@@ -206,6 +206,9 @@ contract Makhzan is IMakhzan {
         if (d.owner == address(0)) revert NoDeal();
         if (msg.sender != d.owner) revert NotOwner();
         if (block.number > d.endBlock) revert DealExpired();
+        // C2: at block == endBlock settlement is already legal, so a settled deal must refuse the
+        // challenge itself (otherwise the bond could be withdrawn before the slash lands).
+        if (d.flags & DEAL_SETTLED != 0) revert AlreadySettled();
         if (d.flags & DEAL_CHALLENGE_OPEN != 0) revert ChallengeOpen();
         uint256 deadline = block.number + challengeWindow;
         if (deadline > type(uint32).max) revert BadParams();
