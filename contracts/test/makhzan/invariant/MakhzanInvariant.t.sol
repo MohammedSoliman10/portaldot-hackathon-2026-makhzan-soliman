@@ -129,11 +129,39 @@ contract MakhzanInvariantTest is StdInvariant, Test {
         }
     }
 
-    /// @notice Coverage gate: every value path must be reachable by the fuzz, not just compile.
-    function invariant_reachablePathsAreExercised() public view {
-        assertGt(handler.challenges(), 0, "no challenge was reachable");
-        assertGt(handler.answers(), 0, "no answer was reachable");
-        assertGt(handler.resolves(), 0, "no resolve was reachable");
-        assertGt(handler.settles(), 0, "no settle was reachable");
+    /// @notice M2: every handler action must actually reach the protocol, not just compile.
+    /// @dev Fixed seeds, no fuzz: register, top up, create, pass a round, fail a round, claim at the
+    ///      end block, settle, then withdraw. `claim` runs before `settle` because settlement pays the
+    ///      remaining accrual and would leave nothing claimable. Foundry re-checks invariants after
+    ///      every call, so the coverage gate lives here as a plain test instead of an invariant.
+    function test_handlerReachesEveryValuePath() public {
+        handler.register(0, MIN_BOND);
+        handler.addBond(0, 1e14);
+        handler.createDeal(1, 0, 1e12, MIN_DURATION);
+
+        handler.challengeDeal(0, 1);
+        handler.answerDeal(0);
+        handler.challengeDeal(0, 1);
+
+        handler.warp(60); // past the 50-block deadline of the second round
+        handler.resolveDeal(0, 2);
+
+        handler.warp(1200);
+        handler.warp(1200); // past endBlock = start + 600
+
+        handler.claimDeal(0, 1);
+        handler.settleDeal(0, 2);
+        handler.withdrawBond(0);
+
+        assertGt(handler.registers(), 0, "register was never reached");
+        assertGt(handler.bonds(), 0, "addBond was never reached");
+        assertGt(handler.creations(), 0, "createDeal was never reached");
+        assertGt(handler.challenges(), 1, "two challenge rounds were never reached");
+        assertGt(handler.answers(), 0, "answer was never reached");
+        assertGt(handler.resolves(), 0, "resolve was never reached");
+        assertGt(handler.claims(), 0, "claim was never reached");
+        assertGt(handler.settles(), 0, "settle was never reached");
+        assertGt(handler.withdrawals(), 0, "withdrawBond was never reached");
+        assertEq(handler.rejected(), 0, "every driven call succeeded");
     }
 }

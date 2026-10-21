@@ -1,0 +1,31 @@
+# M2 — the coverage gate is now test_handlerReachesEveryValuePath (RED)
+# UTC: 2026-10-21T11:23:06Z
+# Local Foundry only; no RPC, no keys. Foundry re-checks invariants after every call, so a coverage
+# invariant failed at call 1 of every run even on complete code. The same coverage is now a plain
+# test with fixed seeds; it fails here on the first unimplemented action (challenge).
+# [invariant] fail_on_revert stays false.
+
+$ grep -A3 "^\[invariant\]" foundry.toml
+[invariant]
+runs = 256
+depth = 50
+fail_on_revert = false
+
+$ forge test --match-path "test/makhzan/invariant/*"
+Ran 2 tests for test/makhzan/invariant/MakhzanInvariant.t.sol:MakhzanInvariantTest
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+[FAIL: two challenge rounds were never reached: 0 <= 1] test_handlerReachesEveryValuePath() (gas: 1003809)
+Suite result: FAILED. 1 passed; 1 failed; 0 skipped; finished in 4.08s (4.08s CPU time)
+Ran 1 test suite in 4.08s (4.08s CPU time): 1 tests passed, 1 failed, 0 skipped (2 total tests)
+[FAIL: two challenge rounds were never reached: 0 <= 1] test_handlerReachesEveryValuePath() (gas: 1003809)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |
