@@ -38,13 +38,14 @@ interface Fake extends ChainClient {
   challenge: { open: boolean; index: number; start: number };
 }
 
-function fakeClient(challenge: { open: boolean; index: number; start: number }): Fake {
+function fakeClient(challenge: { open: boolean; index: number; start: number }, only?: number): Fake {
   const f: Fake = {
     calls: [],
     logQueries: 0,
     challenge,
-    async challengeStateOf() {
-      return { ...f.challenge, deadline: f.challenge.start + 50, expectedPathLength: 2 };
+    async challengeStateOf(dealId) {
+      const open = only === undefined ? f.challenge.open : only === dealId && f.challenge.open;
+      return { ...f.challenge, open, deadline: f.challenge.start + 50, expectedPathLength: 2 };
     },
     async answer(dealId, data, path) {
       f.calls.push({ dealId, data, path });
@@ -98,7 +99,7 @@ test("drill mode can skip the answer and still records the round as failed", asy
 
 test("a challenge on an unknown deal is reported unanswerable", async () => {
   const fx = fixture();
-  const client = fakeClient({ open: true, index: 0, start: START });
+  const client = fakeClient({ open: true, index: 0, start: START }, 2);
   const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, dealIds: [2] });
   assert.deepEqual(result.unanswerable, ["unanswerable: unknown deal 2"]);
   assert.deepEqual(result.unknownDeal, [2]);

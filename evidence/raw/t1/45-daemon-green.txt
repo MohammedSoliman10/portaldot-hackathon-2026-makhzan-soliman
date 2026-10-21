@@ -1,0 +1,29 @@
+# T047 green — provider daemon challenge answering
+# UTC: 2026-10-21T16:35:38Z
+# Local Node only; no RPC, no keys, temp dirs. pollOnce walks the deal ids it was told about plus the
+# state, reads challengeStateOf only (no log query), rebuilds the tree from the stored blocks, checks
+# the path length the contract expects, and submits answer. Drill mode answers with corrupted bytes or
+# skips; both record the round as failed. An unknown deal, a missing block, a root mismatch and a
+# path-length mismatch are reported as unanswerable, never guessed. A handled round is not re-answered
+# after a restart. lastChallenge is persisted through the atomic state writer.
+
+$ node --test test/daemon.test.ts
+✔ a poll cycle reads challengeStateOf and never queries logs (4.6592ms)
+✔ a closed challenge submits nothing and records nothing (1.1051ms)
+✔ drill mode answers with the wrong bytes and records the round as failed (1.8871ms)
+✔ drill mode can skip the answer and still records the round as failed (1.2703ms)
+✔ a challenge on an unknown deal is reported unanswerable (0.8093ms)
+✔ a restart resumes without re-answering an already handled round (0.648ms)
+✔ a missing block is reported, never guessed (0.8595ms)
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+
+$ npm test
+ℹ tests 46
+ℹ pass 46
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
