@@ -1,0 +1,21 @@
+# T039 green — challenge-block chunker
+# UTC: 2026-10-21T12:30:45Z
+# Local Node only; no RPC, no keys. ceil(size/blockSize) leaves, every block except the last is
+# exactly blockSize, the last is the remainder, a sub-block file is one leaf, empty input and
+# out-of-range block sizes are rejected, and the output does not alias the input buffer.
+
+$ node --test test/chunk.test.ts
+✔ 1 MiB with 1 KiB blocks yields 1024 leaves (7.891093ms)
+✔ every block except the last is exactly blockSize and the last is the remainder (0.6297ms)
+✔ a file smaller than one block yields one leaf with the whole file (0.1168ms)
+✔ an exact multiple of the block size has no empty last block (0.0941ms)
+✔ a zero-length file is rejected (0.4009ms)
+✔ the block size must be an integer inside 1..65535 (0.2398ms)
+✔ the input is copied, not aliased (0.139499ms)
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
