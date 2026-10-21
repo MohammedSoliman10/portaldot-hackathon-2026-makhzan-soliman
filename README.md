@@ -27,7 +27,7 @@ the live plan is [docs/live-runbook.md](docs/live-runbook.md).
 | Provider daemon: poll, rebuild the path, submit, label only from read-back, per-deal isolation, bounded retries | implemented, local | `evidence/raw/t1/44-daemon-red.txt`, `59-daemon-evidence-green.txt` |
 | Client CLI: upload, create, challenge, watch, claim, settle, report; env-only keys | implemented, local | `evidence/raw/t1/46-cli-red.txt`, `47-cli-green.txt` |
 | Sanitised round evidence writer and the report hook | implemented, local | `evidence/raw/t1/53-evidence-red.txt`, `54-evidence-green.txt` |
-| Deployed size budget, enforced in CI (10,240 B; actual 6,378 B with `via_ir`) | implemented, local | `evidence/raw/t1/49-size-check.txt`, `50-size-overrun.txt` |
+| Deployed size budget, enforced in CI (10,240 B; actual 6,378 B with `via_ir`) | implemented, local | `evidence/raw/t1/49-size-check.txt`, `50-size-check-red.txt` |
 | Gas snapshot and drift check | implemented, local | `evidence/raw/t1/51-gas-snapshot.txt` |
 | Full CI command list, both jobs, one compiler profile | implemented, local | `evidence/raw/t1/52-ci-local.txt` |
 | 1 MiB / 1,024-block pass and slash round, then settle, on anvil | implemented, local | `evidence/raw/t1/48-e2e-local.txt` |

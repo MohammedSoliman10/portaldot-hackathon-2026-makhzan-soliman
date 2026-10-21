@@ -41,6 +41,10 @@ the port is busy the script fails fast rather than reusing another chain.
 
 ## Path B — manual walkthrough (2–3 min, if asked)
 
+**Not runnable in this repository today**: the deploy step below is the quickstart's planned path and
+`contracts/script/makhzan/Deploy.s.sol` does not exist yet (T064 gap, see `docs/live-runbook.md`).
+Use Path A for the demo; show Path B only as the intended sequence.
+
 ```bash
 anvil --chain-id 420420777 &                       # local chain, no live funds
 export MAKHZAN_RPC_URL=http://127.0.0.1:8545
@@ -62,8 +66,9 @@ npm run cli -- watch 1                             # expect "failed", bond down 
 npm run cli -- claim 1 ; npm run cli -- settle 1
 ```
 
-This is the same sequence as `specs/002-core-storage-proofs/quickstart.md` §4. Path A automates it so
-the three-minute slot is not spent waiting for prompts or typing hashes.
+This is the sequence in `specs/002-core-storage-proofs/quickstart.md` §4. Path A automates the same
+steps (with an artifact deploy) so the three-minute slot is not spent waiting for prompts or typing
+hashes.
 
 ## If something is down
 
