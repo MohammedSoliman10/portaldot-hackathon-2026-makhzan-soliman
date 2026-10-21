@@ -1,0 +1,44 @@
+# T061 — scope verification against main
+# UTC: 2026-10-21T23:26:12Z
+# Local only. The feature branch is compared with its fork point from main (main has moved on with
+# tier-0 work). Every changed path must sit in a tier-1 area; the tier-0 probes, the Spec Kit
+# templates and the constitution must be untouched, and no .env file may be tracked.
+
+$ git merge-base main HEAD
+403dbf72be27357d2f4f7b1da58f0613da2c7ffb
+
+$ git diff --stat main...HEAD | tail -3
+ specs/002-core-storage-proofs/spec.md              |   234 +
+ specs/002-core-storage-proofs/tasks.md             |   274 +
+ 168 files changed, 63537 insertions(+), 8 deletions(-)
+
+$ git diff --name-only main...HEAD | top-level areas
+     87 evidence
+     25 apps/makhzan
+     23 contracts/test
+     14 specs
+      5 docs
+      5 contracts/src
+      2 scripts
+      2 packages/merkle-vectors
+      1 contracts/size-budget.json
+      1 contracts/foundry.toml
+      1 contracts/.gas-snapshot
+      1 README.md
+      1 .github
+
+$ git diff --name-only main...HEAD -- contracts/src/tier0 .specify/templates
+(end — empty means unchanged)
+
+$ git diff --name-only main...HEAD -- apps/gates contracts/src/tier0
+(end — empty means the tier-0 harness and probes are unchanged)
+
+$ git ls-files | grep -E "(^|/)\.env$"
+(none tracked)
+
+$ git diff --name-only main...HEAD | check every path against the tier-1 allowlist
+0 paths outside the allowlist
+
+$ git status --short
+ M evidence/tier1-results.md
+?? evidence/raw/t1/56-scope.txt
