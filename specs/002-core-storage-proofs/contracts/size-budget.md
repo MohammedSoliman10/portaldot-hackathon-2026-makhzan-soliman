@@ -34,6 +34,8 @@ regression fails the build before tests are read.
 
 `contracts/test/makhzan/StorageLayout.t.sol`:
 
+- assert the two fixed config slots exist once at deployment (≈ 7.8 tPOT estimate, part of the
+  deploy budget, not a per-operation cost);
 - populate one provider and one deal with maximal realistic values;
 - compute the provider element slot (`keccak256(uint256(3)) + index`) and assert it is non-zero and
   the next slot is zero (2-slot budget: element + id mapping entry);

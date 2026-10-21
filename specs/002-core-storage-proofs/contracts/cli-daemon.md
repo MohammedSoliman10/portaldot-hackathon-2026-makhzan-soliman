@@ -10,7 +10,7 @@ operator tools). No server, no database, one JSON state file.
 | Command | Inputs | Effect | Writes |
 | --- | --- | --- | --- |
 | `upload <file> --provider <id>` | file path, provider id | chunk the file by the deployment's `challengeBlockSize`, build leaves/root/paths, send every block to the daemon in order, wait for the daemon's acknowledgement of `(root, size, leafCount)` | `evidence/raw/t1/upload-<root>.txt`, state entry |
-| `create --root <root> --size <n> --leaf-count <n> --provider <id> --duration <blocks> --price <tPOT>` | committed values | call `createDeal` with `msg.value == price`, wait for finality, read the deal back | evidence record with the five statuses |
+| `create --root <root> --size <n> --leaf-count <n> --provider <id> --duration <blocks> --price <tPOT>` | committed values | convert the decimal tPOT price to wei with integer math only (`tPOT × 10^18`), reject non-multiples of `WEI_PER_UNIT`, call `createDeal` with that `msg.value`, wait for finality, read the deal back | evidence record with the five statuses |
 | `challenge <dealId>` | deal id | call `challenge`, read the opened index and deadline back | evidence record |
 | `watch <dealId>` | deal id | poll `challengeStateOf` until the round resolves, then read back the outcome and the provider bond | evidence record |
 | `claim <dealId>` / `settle <dealId>` | deal id | call the payment function, read balances back | evidence record |
@@ -18,7 +18,8 @@ operator tools). No server, no database, one JSON state file.
 
 All commands: sign in-process with `viem` from environment variables; `gas = estimate × 1.2`;
 `maxFeePerGas = chain gas price`; `maxPriorityFeePerGas = 0`; never print a key; never accept a key
-on argv (the tier-0 argv guard is reused).
+on argv (the tier-0 argv guard is reused). Decimal tPOT inputs are parsed as strings with integer
+math only and rejected when not an exact multiple of `WEI_PER_UNIT`; no float conversion is used.
 
 ## Provider daemon (`npm run daemon`)
 

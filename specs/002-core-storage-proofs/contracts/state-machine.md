@@ -18,8 +18,8 @@
 | none → Active | provider registered, bond ≥ minBond, `msg.value == price`, ids and sizes valid, duration in range, `paused == 0` | deal written; provider's `activeDeals += 1` |
 | Active → Active (challenge round) | owner only; `block.number ≤ endBlock`; no open challenge | index and start written; open flag set |
 | Active → Active (pass) | provider only; before deadline; bytes and path verify | open flag cleared; nothing else changes |
-| Active → Active (fail) | permissionless; after deadline; challenge open | 20% of bond to owner; open flag cleared; deal continues |
-| Active/Expired → Settled | owner only; `block.number > endBlock`; no open challenge; not settled | unpaid accrued to provider; remainder to owner; settled flag set; `activeDeals -= 1` |
+| Active → Active (fail) | permissionless; after deadline; challenge open | 20% of bond to the deal owner (not the caller); open flag cleared; deal continues |
+| Active/Expired → Settled | permissionless; `block.number > endBlock`; no open challenge; not settled | unpaid accrued to provider; remainder to the deal owner (not the caller); settled flag set; `activeDeals -= 1` |
 
 `Active` means "not yet settled". A challenge may only be opened **on or before** `endBlock`; an
 already-open challenge stays resolvable after `endBlock`.
@@ -46,8 +46,8 @@ There is no path that pays twice for one round, and no path that accepts an answ
 
 | Action | Guard | Effect |
 | --- | --- | --- |
-| `claim` | deal exists; not settled; `accrued − claimed > 0` | `claimed = accrued`; pays the provider `accrued − claimed` |
-| `settle` | owner; `block.number > endBlock`; no open challenge; not settled | pays provider `accrued − claimed`; pays owner `price − accrued`; settled flag; `activeDeals -= 1` |
+| `claim` | provider only; deal exists; not settled; `accrued − claimed > 0` | `claimed = accrued`; pays the provider `(accrued − claimed) × WEI_PER_UNIT` |
+| `settle` | anyone; `block.number > endBlock`; no open challenge; not settled | pays provider `(accrued − claimed) × WEI_PER_UNIT`; pays deal owner `(price − accrued) × WEI_PER_UNIT`; settled flag; `activeDeals -= 1` |
 
 `accrued = price × min(block.number, endBlock) − startBlock ÷ (endBlock − startBlock)`, integer floor,
 computed in `uint256`. Because the cap is the end block, `accrued ≤ price` always; because `claimed` is
@@ -66,6 +66,9 @@ only ever set to an accrued value, `claimed ≤ accrued` always.
 ## Ordering rule (why nothing re-enters)
 
 Every value transfer happens **after** the state change that authorises it, and every transfer that
-fails reverts the whole call. The open-challenge flag is cleared before the slash transfer, so a
+fails reverts the whole call. `withdrawBond`, `claim`, `settle` and `resolve` clear or update the
+authorising state first; no reentrancy-guard slot is needed. A rejecting contract recipient can
+block its own payout and, through `resolve`, the counterparty's exit; Tier 1 assumes EOAs and pull
+payments are a Tier 2 item. The open-challenge flag is cleared before the slash transfer, so a
 re-entrant `resolve` would fail the `NoChallenge` guard. The settled flag is set before settlement
 pays out for the same reason.

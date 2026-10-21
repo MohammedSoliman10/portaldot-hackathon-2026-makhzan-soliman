@@ -2,17 +2,18 @@
 
 **Feature**: `002-core-storage-proofs` | **Status**: Design contract for `contracts/src/makhzan/`
 
-One deployed contract `Makhzan` behind this interface. All amounts are the chain's smallest unit
-(tPOT with 14 decimals). All deadlines are block numbers. Every function either performs its stated
-effect or reverts; none silently succeeds.
+One deployed contract `Makhzan` behind this interface. Amounts are stored as native units (planck,
+tPOT with 14 decimals); `msg.value` is 18-decimal wei and must be an exact multiple of
+`WEI_PER_UNIT = 10_000` (`[assumption]` until G07 confirms it). All deadlines are block numbers.
+Every function either performs its stated effect or reverts; none silently succeeds.
 
 ## Functions
 
 ### Provider
 
 ```solidity
-function registerProvider() external payable;        // value >= minBond, <= uint64 max
-function addBond() external payable;                 // registered caller; bond stays <= uint64 max
+function registerProvider() external payable;        // wei multiple of 10_000; units >= minBond, <= uint64 max
+function addBond() external payable;                 // registered caller; wei multiple; units stay <= uint64 max
 function withdrawBond() external;                    // requires activeDeals == 0; clears registration
 function providerOf(address who) external view returns (
     uint16 id, uint64 bond, uint24 activeDeals, bool registered
@@ -29,7 +30,7 @@ function createDeal(
     uint32 size,
     uint32 durationBlocks,
     uint64 price
-) external payable;                                  // msg.value == price
+) external payable;                                  // msg.value == price * 10_000
 
 function dealOf(uint32 dealId) external view returns (
     address owner, uint32 startBlock, uint32 endBlock, uint16 providerId, uint8 flags,
@@ -43,7 +44,7 @@ function dealOf(uint32 dealId) external view returns (
 ```solidity
 function challenge(uint32 dealId) external;          // deal owner; deal active; no open challenge
 function answer(uint32 dealId, bytes calldata data, bytes32[] calldata path) external;
-function resolve(uint32 dealId) external;            // permissionless after the deadline
+function resolve(uint32 dealId) external;            // permissionless after deadline; slash to deal owner
 function challengeStateOf(uint32 dealId) external view returns (
     bool open, uint32 index, uint32 start, uint32 deadline, uint32 expectedPathLength
 );
@@ -52,8 +53,8 @@ function challengeStateOf(uint32 dealId) external view returns (
 ### Payments
 
 ```solidity
-function claim(uint32 dealId) external;              // permissionless; pays the deal's provider
-function settle(uint32 dealId) external;             // deal owner; after endBlock; no open challenge
+function claim(uint32 dealId) external;              // deal provider only; pays the provider
+function settle(uint32 dealId) external;             // permissionless; after endBlock; no open challenge; remainder to owner
 function accruedOf(uint32 dealId) external view returns (uint64 accrued, uint64 claimable);
 ```
 
@@ -117,7 +118,11 @@ be gone from the deployed contract (asserted by the final local gate, T062).
 
 - Guaranteed by the contract: proof verification is on-chain and consults no off-chain input; a pass
   requires the challenged bytes; a slash never exceeds the bond; a challenge resolves at most once;
-  settlement pays the provider before returning anything to the owner.
+  settlement pays the provider before returning anything to the owner. `resolve` and `settle` are
+  permissionless but cannot redirect value; `withdrawBond`, `claim`, `settle` and `resolve` follow
+  checks-effects-interactions and revert on a failed transfer.
+- Tier 1 assumes EOA recipients. A contract owner or provider that rejects incoming value can block
+  its own payout and, through `resolve`, the counterparty's exit; pull payments are a Tier 2 item.
 - **Not** guaranteed: that the provider keeps the whole file. A passed challenge proves possession of
   one randomly chosen block at one moment. The protocol's answer to a lost file is the challenge
   probability and the slash, not exhaustive auditing. This is stated in `docs/EXPLAIN.md`.

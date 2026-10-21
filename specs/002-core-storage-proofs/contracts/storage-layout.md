@@ -42,9 +42,12 @@ one read away and the mapping is the same value used for access control.
 
 ## Amount caps (validated, not truncated)
 
-`uint64` amounts cap at `18,446,744,073,709,551,615` smallest units ≈ 184,467 tPOT at 14 decimals.
-Registration, bond top-up, deal creation and settlement all validate that the value fits before
-writing. A value that does not fit is rejected with `BadParams`, never silently wrapped.
+Amounts are stored as native units (planck, 14 decimals), not wei. `msg.value` is 18-decimal wei and
+must be an exact multiple of `WEI_PER_UNIT = 10_000` (`[assumption]` until G07 confirms it); the
+contract converts once on entry and pays `units × WEI_PER_UNIT`, so it never creates or moves dust.
+`uint64` units cap at `18,446,744,073,709,551,615` planck ≈ 184,467 tPOT. Registration, bond top-up,
+deal creation and settlement all validate that the unit value fits before writing. A value that does
+not fit, or a non-multiple, is rejected with `BadParams`, never silently wrapped or truncated.
 
 ## Slot-cost note
 

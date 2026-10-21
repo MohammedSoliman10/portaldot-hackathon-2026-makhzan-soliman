@@ -62,9 +62,9 @@ A client takes a real file, splits it into fixed-size blocks, builds a single co
 1. **Given** an open deal, **When** the deal owner challenges it, **Then** exactly one block position is selected unpredictably, recorded, and given a response deadline in blocks.
 2. **Given** an open challenge, **When** the provider submits the correct bytes and path before the deadline, **Then** the challenge is recorded as passed, the bond is unchanged, and the deal continues.
 3. **Given** an open challenge, **When** the provider submits only a hash, empty bytes, the wrong bytes, a path for another position, or a path of the wrong depth, **Then** the answer is rejected and no challenge passes.
-4. **Given** an open challenge with no accepted answer, **When** the owner resolves after the deadline, **Then** the challenge is recorded as failed and a slash is paid to the owner.
+4. **Given** an open challenge with no accepted answer, **When** any account resolves after the deadline, **Then** the challenge is recorded as failed and a slash is paid to the deal owner, not the caller.
 5. **Given** a challenge that has already resolved, **When** anyone tries to resolve it again, **Then** the attempt is refused and no second slash occurs.
-6. **Given** a deal whose duration has ended, **When** the owner settles it, **Then** the provider receives all unpaid accrued payment, the owner receives any unaccrued remainder, and the deal can never be settled or challenged again.
+6. **Given** a deal whose duration has ended, **When** any account settles it, **Then** the provider receives all unpaid accrued payment, the deal owner receives any unaccrued remainder, and the deal can never be settled or challenged again.
 
 ---
 
@@ -132,7 +132,7 @@ An observer who trusts neither the provider nor the client can look at the publi
 - **FR-017**: The verifier MUST bind the proof to the challenged position: a proof that is valid for position `i` MUST NOT verify for any other position `j`, whether the attacker changes the index, the bytes or the path ordering.
 - **FR-018**: A correct answer before the deadline MUST close the challenge as passed, MUST leave the bond unchanged, and MUST leave the deal active until its end block.
 - **FR-019**: An incorrect answer MUST be rejected without closing the challenge and without moving value. The provider MAY retry with a correct answer until the deadline.
-- **FR-020**: After the deadline, if the challenge has not passed, the owner MUST be able to resolve it as failed. A failed resolution MUST slash exactly 20% of the provider's bond at that moment and pay it to the deal owner. A failed challenge MUST NOT end the deal: the deal continues to its end block and is closed only by settlement.
+- **FR-020**: After the deadline, if the challenge has not passed, ANY account MUST be able to resolve it as failed. A failed resolution MUST slash exactly 20% of the provider's bond at that moment and pay it to the deal owner, never to the caller. A failed challenge MUST NOT end the deal: the deal continues to its end block and is closed only by settlement. Permissionless resolve exists so an absent owner cannot lock a provider's bond forever.
 - **FR-021**: A slash MUST never exceed the provider's bond. If the computed share exceeds the bond, the bond itself is the ceiling.
 - **FR-022**: A challenge MUST resolve at most once. A second resolution attempt MUST be refused with no additional transfer.
 - **FR-023**: No challenge may be opened after the deal's end block. An already-open challenge MUST still be resolvable after the end block.
@@ -141,9 +141,10 @@ An observer who trusts neither the provider nor the client can look at the publi
 
 - **FR-024**: Payment MUST accrue linearly per block between the deal's start and end blocks, computed as total price multiplied by elapsed blocks divided by duration in blocks, and capped at the total price. Elapsed blocks MUST use the current block or the end block, whichever is smaller. The provider MUST be able to claim accrued-but-unclaimed payment at any time while the deal exists.
 - **FR-025**: Accrued payment MUST never exceed the deal's escrowed deposit, and cumulative claimed payment MUST never exceed accrued payment.
-- **FR-026**: After the end block and with no open challenge, the deal owner MUST be able to settle the deal. Settlement MUST pay the provider all unpaid accrued payment, return any unaccrued remainder to the owner, close the deal and allow the provider's deal count to fall.
-- **FR-027**: Settlement MUST happen at most once and MUST be refused before the end block or while a challenge is open.
-- **FR-028**: The protocol's balance MUST at all times be at least the sum of provider bonds, remaining escrow and any unclaimed payouts recorded by the protocol.
+- **FR-026**: After the end block and with no open challenge, ANY account MUST be able to settle the deal. Settlement MUST pay the provider all unpaid accrued payment and return any unaccrued remainder to the deal owner, never to the caller. It MUST close the deal and allow the provider's deal count to fall. Permissionless settle exists so an absent owner cannot lock the provider's bond forever.
+- **FR-027**: Settlement MUST happen at most once and MUST be refused before the end block or while a challenge is open. The caller does not need to be the owner.
+- **FR-028**: The protocol's balance MUST at all times be at least the sum of provider bonds, remaining escrow and any unclaimed payouts recorded by the protocol, compared in wei (`units × WEI_PER_UNIT`). `withdrawBond`, `claim`, `settle` and `resolve` MUST follow checks-effects-interactions: every state write completes before any value transfer, a failed transfer reverts the whole call, and no reentrancy-guard storage slot is used. Tier 1 assumes EOA recipients; a contract recipient that rejects value can block its own payout and, through `resolve`, the counterparty's exit, and pull payments are a Tier 2 item.
+- **FR-046**: The contract MUST store every amount (bond, price, claimed, accrued, slash) as a count of native units (planck), with ONE constant `WEI_PER_UNIT = 10_000` declared once and marked `[assumption]` until G07's measured implied factor confirms it. Every incoming `msg.value` MUST be an exact multiple of `WEI_PER_UNIT` or revert `BadParams`. Every payout MUST be `units × WEI_PER_UNIT`, so the contract never creates or moves dust. Amounts remain `uint64` in units (cap ≈ 184,467 tPOT), validated and documented; slash is `floor(bondUnits × 20 / 100)`; accrual is computed in `uint256` and stored in `uint64` units with floor rounding. The TypeScript CLI MUST convert decimal tPOT strings to wei with integer math only and reject non-multiples.
 
 **Off-chain components and status honesty**
 
@@ -209,7 +210,7 @@ The reported chain behaviour — roughly 0.079 tPOT per deployed byte, 13 tPOT p
 
 ## Assumptions
 
-- The chain's native test currency is tPOT with the decimal relationship established by the funding gate; amounts in this feature are expressed in the chain's smallest unit internally.
+- The chain's native test currency is tPOT with 14 decimals. `msg.value` and EVM balances are in 18-decimal wei; pallet-revive splits an incoming value into native planck plus sub-unit dust. Amounts are stored as native units (planck), and `WEI_PER_UNIT = 10_000` is the `[assumption]` from G07 metadata `nativeToEthRatio` until G07's measured implied factor confirms it. `uint64` units cap at ≈184,467 tPOT.
 - Block time is about 6 seconds, so 50 blocks is about 5 minutes and a 1–24 hour deal is about 600–14,400 blocks. Deadlines and durations are stored as block counts, never wall-clock timestamps.
 - The default challenge block size is 1 KiB and the permitted range is 1–4 KiB. The gas gate may fix a different size in that range; the protocol's declared size changes with it and the golden vectors are regenerated.
 - The default deal duration range is 1–24 hours, the default slash is 20% of the bond per failed challenge, the default response window is 50 blocks and the default minimum bond is 10 tPOT. These defaults are confirmed in the Clarifications session and may only be re-set by a recorded decision.

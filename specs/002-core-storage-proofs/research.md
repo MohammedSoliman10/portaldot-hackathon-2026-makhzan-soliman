@@ -63,9 +63,10 @@ until the deploy-less `eth_call` check has a recorded pass.
 - A challenge writes only `challengeIndex`, `challengeStart` and one flag bit inside the deal's
   existing slot C and slot A → **0 new slots per challenge round**.
 
-Amounts are `uint64` (cap ≈ 184,467 tPOT at 14 decimals, checked on every entry point), the provider
-id is `uint16`, the leaf count is `uint24` (≤ 16,777,215 leaves ≈ 16 GiB at 1 KiB) and the byte size
-is `uint32`.
+Amounts are `uint64` native units (planck; cap ≈ 184,467 tPOT), checked on every entry point, the
+provider id is `uint16`, the leaf count is `uint24` (≤ 16,777,215 leaves ≈ 16 GiB at 1 KiB) and the
+byte size is `uint32`. `msg.value` is 18-decimal wei and `WEI_PER_UNIT = 10_000` converts it to
+native units; the constant is an `[assumption]` until the G07 implied factor confirms it.
 
 **Rationale**: Packing is what keeps a deal at three slots and a provider at two, which are
 published budgets. Storing a `providerId` instead of a 20-byte address is the single change that
@@ -156,8 +157,9 @@ more state); paying the provider only at settlement (violates the clarified "cla
 
 ## D8 — Slash arithmetic and payment safety
 
-**Decision**: A failed resolution computes `slash = bond × 2000 ÷ 10000` (20%), clamps it to the
-bond, decrements the bond, clears the open flag, emits the outcome, then transfers to the owner.
+**Decision**: A failed resolution computes `slash = floor(bondUnits × 2000 ÷ 10000)` (20%),
+clamps it to the bond, decrements the bond, clears the open flag, emits the outcome, then transfers
+`slash × WEI_PER_UNIT` to the deal owner (never the caller).
 Transfers use a low-level call with the whole gas budget and revert on failure, after all state
 changes (checks-effects-interactions). There is no reentrancy surface that can double-resolve
 because the open flag is cleared before the transfer and a second resolve reverts on that flag.
@@ -171,15 +173,15 @@ is retried instead.
 
 ## D9 — Access control
 
-**Decision**: `challenge` and `settle` require the deal owner; `answer` requires the address stored
-for the deal's provider id; `withdrawBond` requires zero open deals; `resolve` is permissionless
-after the deadline (the outcome is deterministic and the slash goes to the owner), so a stalled
-owner cannot leave a failed challenge unresolved. `claim` is permissionless (payment goes to the
-provider's stored address).
+**Decision**: `challenge` requires the deal owner; `answer` requires the address stored for the
+deal's provider id; `withdrawBond` requires zero open deals; `resolve` and `settle` are permissionless
+(the outcome is deterministic and value goes to the deal owner/provider, never the caller), so a
+stalled owner cannot leave a failed challenge unresolved or lock the provider's bond forever.
+`claim` is provider-only; the payment goes to the provider's stored address.
 
 **Rationale**: The spec makes the owner the only challenger and the provider the only answerer, and
-those two are enforced directly. Making `resolve` and `claim` permissionless adds liveness without
-adding authority, because neither can redirect funds.
+those two are enforced directly. Permissionless `resolve`/`settle` adds liveness without adding
+authority because recipients are fixed by the deal and value cannot be redirected.
 
 **Alternatives considered**: owner-only resolve (a stalled owner freezes the slash); anyone-can-answer
 (rejected by scope).

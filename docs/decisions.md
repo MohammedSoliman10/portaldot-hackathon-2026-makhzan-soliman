@@ -37,3 +37,64 @@ if G02 has to run on PVM, that limitation is recorded rather than papered over.
 solc `0.8.28` for both paths.
 
 **Evidence.** `evidence/raw/g01/05-resolc.txt`, `evidence/raw/g01/CounterProbe.pvm`.
+
+
+## DR-006 — Amounts are stored in native units, not wei (2026-10-21, Tier 1)
+
+**Context.** `msg.value` and EVM balances use 18 decimals, but G07 metadata reports
+`nativeToEthRatio = 10000` and pallet-revive splits an incoming value into native units plus sub-unit
+dust. Storing `uint64` wei would cap a single amount at about 18.4 tPOT.
+
+**Decision.** Every stored amount is a count of native units (planck, 14 decimals). One constant
+`WEI_PER_UNIT = 10_000` converts wei to units and is marked `[assumption]` until G07's measured
+implied factor confirms it. Incoming value must be an exact multiple or `BadParams`; payouts are
+`units × WEI_PER_UNIT`. `uint64` units cap at about 184,467 tPOT. Slash is
+`floor(bondUnits × 20 / 100)`; accrual is computed in `uint256` and stored in `uint64` units with
+floor rounding. T063 asserts the G07 factor equals the constant and stops if it does not.
+
+**Consequences.** No dust is ever created or moved. A value that is not a whole number of planck is
+rejected rather than rounded. The CLI parses decimal tPOT strings with integer math only and rejects
+non-multiples. The earlier “184,467 tPOT” wording referred to units, not wei; it is corrected.
+
+**Evidence.** `specs/002-core-storage-proofs/spec.md` FR-046, `data-model.md`, `contracts/imakhzan.md`.
+
+## DR-007 — `resolve` and `settle` are permissionless (2026-10-21, Tier 1)
+
+**Context.** Owner-only `resolve` and `settle` let an absent owner leave a failed challenge
+unresolved and lock the provider's bond forever.
+
+**Decision.** Any account may call `resolve` after the deadline and `settle` after the end block with
+no open challenge. Recipients are fixed by the deal: slash to the deal owner, accrued payment to the
+provider, remainder to the deal owner. `challenge` stays owner-only and `claim` stays provider-only.
+
+**Consequences.** Liveness improves without adding authority, because the caller cannot redirect
+value. Tests compare a stranger's settle/resolve recipients and amounts with the owner's.
+
+**Evidence.** `spec.md` FR-020/FR-026/FR-027, `contracts/state-machine.md`, `contracts/imakhzan.md`.
+
+## DR-008 — Checks-effects-interactions without a reentrancy slot (2026-10-21, Tier 1)
+
+**Context.** Four exit paths transfer native value. A reentrancy guard would spend a storage slot and
+the contract is size-constrained.
+
+**Decision.** `withdrawBond`, `claim`, `settle` and `resolve` finish every state write before any
+value transfer. Transfers use a low-level call and revert on failure; there is no guard slot. A
+test-only malicious receiver re-enters all four paths. Tier 1 assumes EOA recipients; a contract
+recipient that rejects value can block its own payout and, through `resolve`, the counterparty's
+exit. Pull payments are a Tier 2 item.
+
+**Consequences.** No double payout through a reentrant recipient. The known limitation is documented
+in the explainer plan rather than hidden.
+
+**Evidence.** `spec.md` FR-028, `tasks.md` T031/T034/T059, `contracts/state-machine.md`.
+
+## DR-009 — Config slots are part of the deploy budget (2026-10-21, Tier 1)
+
+**Context.** Deployment writes two fixed config slots in addition to code and the contract deposit.
+The earlier demo total omitted them.
+
+**Decision.** The budget table and demo total include the two config slots at ≈ 7.8 tPOT (estimate
+pending G05). Every Solidity commit records `forge build --sizes` runtime bytes in its evidence
+file; a runtime above 10,240 B stops the work and is reported rather than trimmed silently.
+
+**Evidence.** `plan.md` budget table, `contracts/size-budget.md`.

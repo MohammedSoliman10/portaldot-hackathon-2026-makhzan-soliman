@@ -45,7 +45,9 @@ target for every run; the Portaldot V3 testnet is used only in the final `[LIVE]
 
 **Target Platform**: Local Foundry node first, then Portaldot V3 testnet — EVM RPC
 `https://test-evm-rpc-v3.portaldot.dev` (chain id `420420777`), native test currency tPOT with 14
-decimals (G07). Block time assumed ~6 s; all deadlines are block counts.
+decimals (G07). `msg.value` is 18-decimal wei; the contract stores native units (planck) with
+`WEI_PER_UNIT = 10_000` `[assumption]` until G07's measured implied factor confirms it. Block time
+assumed ~6 s; all deadlines are block counts.
 
 **Project Type**: One deployed contract plus two headless TypeScript components (daemon and CLI).
 No UI, no agent, no database.
@@ -57,10 +59,19 @@ not assumed here). Demo: a 1 MiB file builds its tree and uploads in well under 
 
 **Constraints**:
 - One deployed contract, `Makhzan`, behind `IMakhzan`; modularity is source-level (internal
-  libraries + interface), not a second deployment.
+  libraries + interface), not a second deployment. `resolve` and `settle` are permissionless;
+  recipients are fixed by the deal, so a caller cannot redirect value. `challenge` stays owner-only;
+  `claim` stays provider-only.
+- `withdrawBond`, `claim`, `settle` and `resolve` use checks-effects-interactions, no
+  reentrancy-guard slot, and revert on a failed transfer. Tier 1 assumes EOA recipients; a rejecting
+  contract recipient can block its own payout and, through `resolve`, the counterparty's exit.
 - Deployed runtime ≤ 10 KB; deal ≤ 3 slots; provider ≤ 2 slots; active challenge ≤ 1 reused slot;
   zero storage growth per challenge round. Budgets re-set from the storage-cost gate (G05).
-- Native tPOT only, through `msg.value`. No token contract.
+- Native tPOT only, through `msg.value`. No token contract. Every incoming value is an exact
+  multiple of `WEI_PER_UNIT = 10_000`; payouts multiply units by that constant; amounts are `uint64`
+  units (cap ≈ 184,467 tPOT) and never carry dust.
+- Every Solidity commit records `forge build --sizes` runtime bytes in its evidence file. If runtime
+  exceeds 10,240 B, STOP and report instead of trimming features silently.
 - Burner keys only, from environment variables, signed in-process by `viem`; never on argv, never
   logged. `apps/gates/src/config.ts` argv guards are reused.
 - Evidence committed in small increments; no `.env` value in any artifact.
@@ -229,7 +240,7 @@ implementation tasks): a skeleton carrying every planned entry point and nine ev
 
 | Operation | Deployed bytes | Record slots | tPOT attributable to deposit (estimate) |
 | --- | --- | --- | --- |
-| One-time deploy | 8,926 (target ≤ 10,240) | — | ≈ 718 (≈ 705 code + 13 contract) |
+| One-time deploy + 2 config slots | 8,926 (target ≤ 10,240) | 2 config | ≈ 726 (≈ 705 code + 13 contract + 7.8 config) |
 | Register provider | — | 2 | ≈ 7.8 |
 | Add to bond | — | 0 | — |
 | Create deal | — | 3 | ≈ 11.7 |
@@ -242,7 +253,8 @@ implementation tasks): a skeleton carrying every planned entry point and nine ev
 Rates used are the reported chain numbers (0.079 tPOT per deployed byte, 13 tPOT per contract,
 3.9 tPOT per new slot, slots refunded when cleared). **They are planning estimates and G05 must
 confirm them**; the budgets in the spec are re-set from the confirmed numbers before the `[LIVE]`
-phase. A conservative demo total with one provider and one deal is ≈ 737 tPOT plus gas.
+phase. A conservative demo total with one provider, one deal and the two config slots is ≈ 745 tPOT plus
+gas. The config slots are ≈ 7.8 tPOT at the planning rate.
 
 Budget compliance so far: deal 3 ≤ 3; provider 1 element + 1 id entry = 2 ≤ 2; active challenge 0
 ≤ 1; per-round growth 0; runtime 8,926 ≤ 10,240 with a 1,314-byte margin that the real
