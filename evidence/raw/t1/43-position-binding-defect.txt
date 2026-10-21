@@ -1,0 +1,33 @@
+# Position binding defect — deterministic reproduction (RED)
+# UTC: 2026-10-21T11:29:33Z
+# Local Foundry only; no RPC, no keys. FR-041(8) and contracts/merkle.md say a proof for index i
+# never verifies at j != i. With leafHash = keccak256(0x00 || data) that is false when two
+# adjacent blocks are byte-identical: nodeHash(L, L) makes their proofs interchangeable.
+#
+# First found by the T009a fuzz campaign (persisted counterexample countSeed=108, indexSeed=511,
+# lenSeed=0 -> leafCount 45, index 16, verified at 17; fuzz seed 0xb9b20a43...). The 1-byte
+# leaves collided into an identical sibling pair. The cache file was deleted after diagnosis;
+# this 4-leaf case is the minimal deterministic reproduction and needs no cache.
+
+$ forge test --match-path test/makhzan/MerklePositionBinding.t.sol
+[FAIL: FR-041(8): a proof for i must fail at j != i] test_identicalAdjacentBlocksShareAProof() (gas: 27545)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 292.20µs (145.00µs CPU time)
+[FAIL: FR-041(8): a proof for i must fail at j != i] test_identicalAdjacentBlocksShareAProof() (gas: 27545)
+
+$ forge test --match-path test/makhzan/MerkleFuzz.t.sol --fuzz-runs 1000
+[PASS] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 1000, μ: 92408, ~: 49394)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 139589, ~: 70818)
+[PASS] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 1000, μ: 103347, ~: 60506)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 132632, ~: 82529)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 141103, ~: 72364)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 205265, ~: 75834)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 170371, ~: 109366)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 214539, ~: 197255)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 614.62ms (4.82s CPU time)
+
+# NOTE: the fuzz suite above may pass on a given random seed. The property is false regardless;
+# the deterministic test is the evidence. This is why the defect is reported, not dismissed.
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,523            | 6,086             | 19,053             | 43,066              |
+| MakhzanHarness    | 5,893            | 6,469             | 18,683             | 42,683              |
