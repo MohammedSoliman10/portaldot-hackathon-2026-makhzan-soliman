@@ -4,6 +4,8 @@ pragma solidity 0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {IMakhzan} from "../../src/makhzan/IMakhzan.sol";
 import {MakhzanHarness} from "./harness/MakhzanHarness.sol";
+import {TreeHarness} from "./harness/TreeHarness.sol";
+import {MerkleLib} from "../../src/makhzan/lib/MerkleLib.sol";
 
 /// @notice T020 — deal creation validation and escrow (FR-005–FR-008, FR-046).
 contract DealsTest is Test {
@@ -19,6 +21,7 @@ contract DealsTest is Test {
     uint24 internal constant LEAF_COUNT = 4;
 
     MakhzanHarness internal m;
+    TreeHarness internal tree;
     address internal provider = address(0xA11CE);
     address internal client = address(0xC11E17);
 
@@ -45,6 +48,7 @@ contract DealsTest is Test {
 
     function setUp() public {
         m = new MakhzanHarness(address(this), 50, BLOCK_SIZE, 2000, MIN_BOND, MIN_DURATION, MAX_DURATION);
+        tree = new TreeHarness();
         vm.deal(provider, 1_000 ether);
         vm.deal(client, 1_000 ether);
         vm.prank(provider);
@@ -201,5 +205,34 @@ contract DealsTest is Test {
         emit IMakhzan.DealCreated(1, client, 1, ROOT, SIZE, end, PRICE);
         vm.prank(client);
         m.createDeal{value: VALUE}(1, ROOT, LEAF_COUNT, SIZE, MIN_DURATION, PRICE);
+    }
+
+    /// @dev T024 — US1 independent test: a produced block-and-path verifies against the stored root.
+    function test_producedPathVerifiesAgainstStoredRoot() public {
+        bytes32 treeRoot = tree.root(SIZE, BLOCK_SIZE);
+        vm.prank(client);
+        m.createDeal{value: VALUE}(1, treeRoot, LEAF_COUNT, SIZE, MIN_DURATION, PRICE);
+
+        DealView memory d = _dealView(1);
+        assertEq(d.root, treeRoot, "deal commits the built root");
+        assertEq(d.leafCount, tree.leafCount(SIZE, BLOCK_SIZE), "leaf count implied by size");
+
+        for (uint32 i; i < d.leafCount; i++) {
+            bytes memory blockData = tree.leaf(SIZE, BLOCK_SIZE, i);
+            bytes32[] memory proof = tree.path(SIZE, BLOCK_SIZE, i);
+            uint256 expectedLen = tree.leafLength(SIZE, BLOCK_SIZE, i);
+            assertEq(blockData.length, expectedLen, "block has the committed length");
+            assertTrue(
+                MerkleLib.verifyLeaf(d.root, blockData, i, d.leafCount, expectedLen, proof),
+                "produced path verifies at its own index"
+            );
+            if (i != 0) {
+                assertFalse(
+                    MerkleLib.verifyLeaf(d.root, blockData, 0, d.leafCount, expectedLen, proof),
+                    "same path does not verify at another index"
+                );
+            }
+        }
+        assertEq(tree.leafLength(SIZE, BLOCK_SIZE, d.leafCount - 1), 100, "short last block");
     }
 }
