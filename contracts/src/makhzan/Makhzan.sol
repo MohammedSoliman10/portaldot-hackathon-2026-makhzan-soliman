@@ -3,6 +3,7 @@ pragma solidity 0.8.28;
 
 import {IMakhzan} from "./IMakhzan.sol";
 import {MerkleLib} from "./lib/MerkleLib.sol";
+import {BondLib} from "./lib/BondLib.sol";
 
 /// @title Makhzan
 /// @notice Bonded storage with retrieval challenges. Skeleton: reads implemented, state-changing
@@ -11,17 +12,8 @@ contract Makhzan is IMakhzan {
     /// @dev [assumption] until G07's measured implied factor confirms it. Declared exactly once.
     uint256 internal constant WEI_PER_UNIT = 10_000;
 
-    uint8 internal constant PROVIDER_REGISTERED = 1;
     uint8 internal constant DEAL_SETTLED = 1;
     uint8 internal constant DEAL_CHALLENGE_OPEN = 2;
-
-    /// @dev 32/32 per contracts/storage-layout.md. One array element is one slot.
-    struct Provider {
-        address addr; // 20
-        uint64 bond; // 8
-        uint24 activeDeals; // 3
-        uint8 flags; // 1
-    }
 
     /// @dev 3 slots (A, B, C) per contracts/storage-layout.md.
     struct Deal {
@@ -58,7 +50,7 @@ contract Makhzan is IMakhzan {
 
     // slot 2, 3, 4
     mapping(address => uint16) internal providerIdOf;
-    Provider[] internal providers;
+    BondLib.Provider[] internal providers;
     mapping(uint32 => Deal) internal deals;
 
     constructor(
@@ -87,15 +79,43 @@ contract Makhzan is IMakhzan {
     // ------------------------------------------------------------------ provider
 
     function registerProvider() external payable override {
-        revert NotImplemented();
+        if (providerIdOf[msg.sender] != 0) revert AlreadyRegistered();
+        if (providerCount == type(uint16).max) revert BadParams();
+        uint256 units = _toUnits(msg.value);
+        if (units < minBond) revert BondTooSmall();
+        uint16 id = ++providerCount;
+        providers.push();
+        BondLib.Provider storage p = providers[id - 1];
+        p.addr = msg.sender;
+        BondLib.credit(p, units);
+        p.flags = BondLib.REGISTERED;
+        providerIdOf[msg.sender] = id;
+        emit ProviderRegistered(msg.sender, id, p.bond);
     }
 
     function addBond() external payable override {
-        revert NotImplemented();
+        uint16 id = providerIdOf[msg.sender];
+        if (id == 0) revert NotRegistered();
+        BondLib.Provider storage p = providers[id - 1];
+        BondLib.credit(p, _toUnits(msg.value));
+        emit BondAdded(msg.sender, p.bond);
     }
 
     function withdrawBond() external override {
-        revert NotImplemented();
+        uint16 id = providerIdOf[msg.sender];
+        if (id == 0) revert NotRegistered();
+        BondLib.Provider storage p = providers[id - 1];
+        if (p.activeDeals != 0) revert HasOpenDeal();
+        uint64 units = BondLib.clear(p);
+        delete providerIdOf[msg.sender];
+        emit BondWithdrawn(msg.sender, units);
+        BondLib.pay(msg.sender, uint256(units) * WEI_PER_UNIT);
+    }
+
+    /// @dev Wei must be a whole number of native units; dust is rejected, never rounded.
+    function _toUnits(uint256 value) internal pure returns (uint256) {
+        if (value % WEI_PER_UNIT != 0) revert BadParams();
+        return value / WEI_PER_UNIT;
     }
 
     function providerOf(address who)
@@ -106,8 +126,8 @@ contract Makhzan is IMakhzan {
     {
         id = providerIdOf[who];
         if (id == 0) return (0, 0, 0, false);
-        Provider storage p = providers[id - 1];
-        return (id, p.bond, p.activeDeals, p.flags & PROVIDER_REGISTERED != 0);
+        BondLib.Provider storage p = providers[id - 1];
+        return (id, p.bond, p.activeDeals, BondLib.isRegistered(p));
     }
 
     // ------------------------------------------------------------------ deals

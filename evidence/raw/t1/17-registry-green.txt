@@ -1,0 +1,22 @@
+# T019 — BondLib + registry implementation (GREEN)
+# UTC: 2026-10-21T07:22:49Z
+# Local Foundry only; no RPC, no keys.
+
+$ forge test --match-path test/makhzan/Registry.t.sol
+
+Ran 9 tests for test/makhzan/Registry.t.sol:RegistryTest
+[PASS] test_addBondByStrangerRevertsNotRegistered() (gas: 41687)
+[PASS] test_nonMultipleValueRevertsBadParams() (gas: 182101)
+[PASS] test_registerBelowMinimumRevertsBondTooSmall() (gas: 44282)
+[PASS] test_registerEventCarriesDocumentedFields() (gas: 117245)
+[PASS] test_registerStoresBondAndStableId() (gas: 243287)
+[PASS] test_secondRegistrationRevertsAlreadyRegistered() (gas: 146264)
+[PASS] test_topUpUpdatesBondReadBack() (gas: 165836)
+[PASS] test_unitsAboveUint64CapRevertBadParams() (gas: 234112)
+[PASS] test_withdrawBondClearsRegistrationAndPaysFullBond() (gas: 156718)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.03ms (1.54ms CPU time)
+
+Ran 1 test suite in 6.35ms (1.03ms CPU time): 9 tests passed, 0 failed, 0 skipped (9 total tests)
+
+$ forge build --sizes | grep Makhzan
+| Makhzan       | 4,295            | 4,917             | 20,281             | 44,235              |

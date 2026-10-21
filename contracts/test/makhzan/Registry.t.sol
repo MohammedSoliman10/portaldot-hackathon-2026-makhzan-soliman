@@ -34,7 +34,7 @@ contract RegistryTest is Test {
 
     function test_registerStoresBondAndStableId() public {
         vm.startPrank(provider);
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         vm.stopPrank();
 
         (uint16 id, uint64 bond, uint24 activeDeals, bool registered) = m.providerOf(provider);
@@ -44,7 +44,7 @@ contract RegistryTest is Test {
         assertTrue(registered, "registered flag");
 
         vm.startPrank(other);
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         vm.stopPrank();
         (uint16 otherId,,,) = m.providerOf(other);
         assertEq(otherId, 2, "second provider id");
@@ -54,9 +54,9 @@ contract RegistryTest is Test {
 
     function test_secondRegistrationRevertsAlreadyRegistered() public {
         vm.startPrank(provider);
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         vm.expectRevert(IMakhzan.AlreadyRegistered.selector);
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         vm.stopPrank();
     }
 
@@ -69,11 +69,11 @@ contract RegistryTest is Test {
 
     function test_topUpUpdatesBondReadBack() public {
         vm.startPrank(provider);
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
 
         vm.expectEmit(true, false, false, true, address(m));
         emit IMakhzan.BondAdded(provider, MIN_BOND + TOP_UP);
-        m.addBond{value: _wei(TOP_UP)};
+        m.addBond{value: _wei(TOP_UP)}();
         vm.stopPrank();
 
         (uint16 id, uint64 bond,,) = m.providerOf(provider);
@@ -86,7 +86,7 @@ contract RegistryTest is Test {
         vm.expectRevert(IMakhzan.BadParams.selector);
         m.registerProvider{value: _wei(MIN_BOND) + 1}();
 
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         vm.expectRevert(IMakhzan.BadParams.selector);
         m.addBond{value: 1}();
         vm.stopPrank();
@@ -99,7 +99,7 @@ contract RegistryTest is Test {
         vm.expectRevert(IMakhzan.BadParams.selector);
         m.registerProvider{value: overCap}();
 
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         vm.expectRevert(IMakhzan.BadParams.selector);
         m.addBond{value: _wei(type(uint64).max)}();
         vm.stopPrank();
@@ -107,7 +107,7 @@ contract RegistryTest is Test {
 
     function test_withdrawBondClearsRegistrationAndPaysFullBond() public {
         vm.startPrank(provider);
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         uint256 before = provider.balance;
 
         vm.expectEmit(true, false, false, true, address(m));
@@ -127,7 +127,7 @@ contract RegistryTest is Test {
         vm.startPrank(provider);
         vm.expectEmit(true, true, false, true, address(m));
         emit IMakhzan.ProviderRegistered(provider, 1, MIN_BOND);
-        m.registerProvider{value: _wei(MIN_BOND)};
+        m.registerProvider{value: _wei(MIN_BOND)}();
         vm.stopPrank();
     }
 }
