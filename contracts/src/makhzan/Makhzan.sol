@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {IMakhzan} from "./IMakhzan.sol";
 import {MerkleLib} from "./lib/MerkleLib.sol";
 import {BondLib} from "./lib/BondLib.sol";
+import {PayLib} from "./lib/PayLib.sol";
 
 /// @title Makhzan
 /// @notice Bonded storage with retrieval challenges. Skeleton: reads implemented, state-changing
@@ -273,13 +274,39 @@ contract Makhzan is IMakhzan {
     // ------------------------------------------------------------------ payments
 
     function claim(uint32 dealId) external override {
-        dealId;
-        revert NotImplemented();
+        Deal storage d = deals[dealId];
+        if (d.owner == address(0)) revert NoDeal();
+        BondLib.Provider storage p = providers[d.providerId - 1];
+        if (msg.sender != p.addr) revert NotProvider();
+        if (d.flags & DEAL_SETTLED != 0) revert AlreadySettled();
+
+        uint64 accrued = _accrued(d);
+        uint64 claimable = accrued > d.claimed ? accrued - d.claimed : 0;
+        if (claimable == 0) revert ZeroClaim();
+
+        d.claimed = accrued;
+        emit Claimed(dealId, claimable);
+        BondLib.pay(msg.sender, uint256(claimable) * WEI_PER_UNIT);
     }
 
     function settle(uint32 dealId) external override {
-        dealId;
-        revert NotImplemented();
+        Deal storage d = deals[dealId];
+        if (d.owner == address(0)) revert NoDeal();
+        if (d.flags & DEAL_SETTLED != 0) revert AlreadySettled();
+        if (block.number < d.endBlock) revert BeforeEnd();
+        if (d.flags & DEAL_CHALLENGE_OPEN != 0) revert ChallengeOpen();
+
+        d.flags |= DEAL_SETTLED;
+        BondLib.Provider storage p = providers[d.providerId - 1];
+        if (p.activeDeals != 0) p.activeDeals -= 1;
+
+        uint64 accrued = _accrued(d);
+        uint64 toProvider = accrued > d.claimed ? accrued - d.claimed : 0;
+        uint64 remainder = d.price > accrued ? d.price - accrued : 0;
+        emit Settled(dealId, toProvider, remainder);
+
+        if (toProvider != 0) BondLib.pay(p.addr, uint256(toProvider) * WEI_PER_UNIT);
+        if (remainder != 0) BondLib.pay(d.owner, uint256(remainder) * WEI_PER_UNIT);
     }
 
     function accruedOf(uint32 dealId) external view override returns (uint64 accrued, uint64 claimable) {
@@ -290,11 +317,7 @@ contract Makhzan is IMakhzan {
     }
 
     function _accrued(Deal storage d) internal view returns (uint64) {
-        uint256 at = block.number < d.endBlock ? block.number : d.endBlock;
-        if (at <= d.startBlock) return 0;
-        uint256 duration = uint256(d.endBlock) - d.startBlock;
-        if (duration == 0) return 0;
-        return uint64(uint256(d.price) * (at - d.startBlock) / duration);
+        return PayLib.accrued(d.price, d.startBlock, d.endBlock, block.number);
     }
 
     // ------------------------------------------------------------------ reads

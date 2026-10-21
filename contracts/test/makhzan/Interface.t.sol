@@ -84,18 +84,6 @@ contract InterfaceTest is Test {
         }
     }
 
-    /// @dev Only the entry points that are still stubs. registerProvider, addBond, withdrawBond,
-    ///      createDeal, challenge, answer and resolve are implemented and covered by their suites;
-    ///      asserting they revert NotImplemented would now be false.
-    function test_unimplementedStubsStillRevertNotImplemented() public {
-        Makhzan m = _deploy();
-
-        vm.expectRevert(IMakhzan.NotImplemented.selector);
-        m.claim(1);
-        vm.expectRevert(IMakhzan.NotImplemented.selector);
-        m.settle(1);
-    }
-
     /// @dev Salt a raw slot without a product function: this only seeds state a real deal would own.
     function _dealSlot(uint32 dealId) internal pure returns (bytes32) {
         return keccak256(abi.encode(uint256(dealId), uint256(3)));
