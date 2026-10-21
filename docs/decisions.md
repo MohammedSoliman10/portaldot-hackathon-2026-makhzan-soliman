@@ -119,3 +119,30 @@ config slot 0 uses 8/32 bytes instead of 29/32.
 **Consequences.** The pause cases in `Deals.t.sol` and `Guards.t.sol` and the `setPaused` harness
 setter are deleted; the constructor loses its `admin_` parameter and zero-address check. A future
 emergency stop needs an explicit admin FR, a layout change and its own tests.
+
+## DR-011 — OPEN: position binding vs identical adjacent blocks (2026-10-21, Tier 1)
+
+**Finding.** FR-041(8) and `contracts/merkle.md` state that a proof for index `i` never verifies for
+`j != i`. With `leafHash = keccak256(0x00 || data)` the leaf does not commit to its index. When blocks
+`i` and `i+1` are byte-identical, `nodeHash(L, L)` is symmetric, so the two proofs are
+interchangeable: a 4-leaf tree of repeated 1024-byte blocks verifies a proof for index 0 at index 1.
+This is reproduced deterministically by
+`contracts/test/makhzan/MerklePositionBinding.t.sol::test_identicalAdjacentBlocksShareAProof` (RED) and
+was first found by the T009a fuzz campaign (leafCount 45, index 16 verified at 17).
+
+**Why it matters.** No funds are at risk: answering a challenge with byte-identical data still proves
+possession of the challenged bytes. But the invariant as written is false, so it cannot be reported as
+enforced, and Tier 2's position-sensitive claims would inherit the hole.
+
+**Options (not decided; owner's call).**
+- **A — bind the index into the leaf:** `leafHash = keccak256(0x00 || index || data)`. Makes
+  FR-041(8) literally true. Cost: regenerate the golden vectors and fixture, update
+  `packages/merkle-vectors/generate.ts`, `apps/makhzan/src/merkle.ts`, both test tree builders and
+  `contracts/merkle.md`; the contract grows by a few bytes. The challenge and payment logic does not
+  change shape.
+- **B — narrow the claim:** amend FR-041(8) and `merkle.md` to say position binding holds for blocks
+  with distinct content, and document that identical adjacent blocks are interchangeable (no code
+  change, no vector churn, but a MUST becomes a caveat).
+
+**Status.** No T026+ implementation was started because both options touch the commitment scheme that
+`answer` verifies against. This entry is closed when the owner picks A or B.
