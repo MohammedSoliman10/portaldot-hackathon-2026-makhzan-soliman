@@ -105,3 +105,25 @@ the 800 tPOT reserve and the 75% fan-out; the fan-out plan records the conflict 
 funds without the owner's decision.
 
 **Evidence.** `evidence/raw/g07/09-funding-recon.txt`, `evidence/raw/g07/10-fanout-plan.txt`.
+
+## DR-011 — Reduced live cap until the missing tokens arrive (2026-10-21)
+
+**Context.** Recon at 2026-10-21T07:10:22Z found HUB2
+`5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp` holding 500 tPOT, not the reported ~1,500.
+DR-010's untouched 800 tPOT reserve cannot be funded from the balance that exists, so the live phase
+uses a reduced envelope until the remaining tokens arrive.
+
+**Decision.** DR-011 supersedes DR-010 while HUB2 holds less than the reported stash:
+- Total Tier 0 live spend, deposits and gas included, is capped at **100 tPOT**.
+- No single deposit may exceed **60 tPOT**.
+- The 2 KiB and 4 KiB probes are `eth_estimateGas` dry runs only.
+- Before every live deploy, print the estimate and abort if a cap would break.
+- Record every transaction hash and the balance before and after.
+- The owner is funded **1 tPOT now** and, after T024 passes, **one more tranche so the owner holds
+  150 tPOT in total**. HUB2 keeps the rest.
+
+**Consequences.** The Tier 1 reserve is 150 tPOT until more tokens arrive, not 800 tPOT. The fan-out
+plan is recomputed for a 500 tPOT HUB2 balance and excludes provider-1. If a live task would exceed
+100 tPOT total or a 60 tPOT single deposit, it stops and reports the cost instead of spending.
+
+**Evidence.** `evidence/raw/g07/10-fanout-plan.txt`, `evidence/raw/g07/09-funding-recon.txt`.
