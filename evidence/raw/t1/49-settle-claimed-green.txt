@@ -1,0 +1,46 @@
+# C1 green — settle writes claimed = accrued before paying (checks-effects-interactions)
+# UTC: 2026-10-21T12:25:05Z
+# Local Foundry only; no RPC, no keys. `claimed` now means total paid: after settlement it equals
+# the price (accrued at/after the end block) and accruedOf reports claimable 0 while a later claim
+# still reverts AlreadySettled. Conservation, the invariants and 20% slash behaviour are unchanged.
+
+$ forge test
+Ran 21 test suites in 3.07s (8.44s CPU time): 143 tests passed, 0 failed, 0 skipped (143 total tests)
+
+$ forge test --match-path test/makhzan/Payments.t.sol
+[PASS] test_accrualAtMidpointIsFlooredLinearShare() (gas: 154365)
+[PASS] test_accrualCapsAtPriceAfterEndBlock() (gas: 154057)
+[PASS] test_accrualIsZeroAtStartBlock() (gas: 135942)
+[PASS] test_claimAfterSettleRevertsAlreadySettled() (gas: 235677)
+[PASS] test_claimByStrangerRevertsNotProvider() (gas: 178975)
+[PASS] test_claimOnUnknownDealRevertsNoDeal() (gas: 34520)
+[PASS] test_claimWithNoAccrualRevertsZeroClaim() (gas: 163837)
+[PASS] test_cumulativeClaimsNeverExceedPrice() (gas: 324118)
+[PASS] test_midDealClaimPaysAccruedAndUpdatesClaimed() (gas: 232212)
+[PASS] test_secondImmediateClaimRevertsZeroClaim() (gas: 226491)
+[PASS] test_secondSettleRevertsAlreadySettled() (gas: 228713)
+[PASS] test_settleBeforeEndRevertsBeforeEnd() (gas: 157216)
+[PASS] test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 243588)
+[PASS] test_settlePaysProviderUnpaidAccrued() (gas: 314724)
+[PASS] test_settleSetsClaimedToPriceBeforePaying() (gas: 225260)
+[PASS] test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 227028)
+[PASS] test_strangerSettleMatchesOwnerSettle() (gas: 398015)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 3.22ms (4.06ms CPU time)
+
+$ forge test --match-path "test/makhzan/invariant/*"
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+ MakhzanInvariantTest invariants (runs: 256, calls: 12800, reverts: 5648)
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1742912)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2971793)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 695529)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.47s (2.47s CPU time)
+
+$ forge build --sizes
+| Makhzan           | 9,169            | 9,732             | 15,407             | 39,420              |

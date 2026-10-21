@@ -303,6 +303,8 @@ contract Makhzan is IMakhzan {
         uint64 accrued = _accrued(d);
         uint64 toProvider = accrued > d.claimed ? accrued - d.claimed : 0;
         uint64 remainder = d.price > accrued ? d.price - accrued : 0;
+        // C1: `claimed` means total paid, so it reaches the accrued total before any transfer.
+        d.claimed = accrued;
         emit Settled(dealId, toProvider, remainder);
 
         if (toProvider != 0) BondLib.pay(p.addr, uint256(toProvider) * WEI_PER_UNIT);
