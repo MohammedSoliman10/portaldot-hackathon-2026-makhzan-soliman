@@ -1,0 +1,25 @@
+$ cd apps/gates && npm ci
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @substrate/connect@0.8.11: versions below 1.x are no longer maintained
+
+added 75 packages, and audited 76 packages in 7s
+
+15 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+$ cd apps/makhzan && npm install
+
+added 16 packages, and audited 17 packages in 7s
+
+10 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+$ cd apps/makhzan && npm run typecheck
+
+> makhzan@0.1.0 typecheck
+> tsc --noEmit
+

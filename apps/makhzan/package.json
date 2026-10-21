@@ -1,0 +1,23 @@
+{
+  "name": "makhzan",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "daemon": "node src/daemon.ts",
+    "cli": "node src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.ts",
+    "e2e:local": "node scripts/e2e-local.mjs"
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "5.9.3"
+  }
+}
