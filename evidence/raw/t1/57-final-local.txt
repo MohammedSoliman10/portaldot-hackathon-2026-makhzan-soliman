@@ -1,0 +1,96 @@
+# T062 — final local gate (constitution order, real output)
+# UTC: 2026-10-21T23:29:15Z
+# Local only: no live RPC, no keys, no deployment. Every command below is the constitution's local
+# gate, run in order; each line keeps its exit code. The last section asserts the T016 scaffold error
+# is gone from the code paths and that the external ABI is exactly the documented one.
+#
+# Note: the only change to contracts/.gas-snapshot in this batch is InterfaceTest's
+# test_abiIsExactlyTheDocumentedSurface (+662 gas) after a comment-only edit to Makhzan.sol. The
+# runtime and creation bytecode sizes are unchanged (6,378 / 6,966 B), so no behaviour changed and the
+# snapshot was regenerated rather than the check being skipped.
+
+$ forge fmt --check
+exit=0
+
+$ forge build --sizes | grep Makhzan
+| Makhzan           | 6,378            | 6,966             | 18,198             | 42,186              |
+exit=0
+
+$ node scripts/check-size.mjs
+Makhzan runtime 6378 B <= budget 10240 B (margin 3862 B)
+exit=0
+
+$ forge test -vvv
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 7.71s (7.77s CPU time)
+
+Ran 21 test suites in 7.72s (27.83s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ forge snapshot --check
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 5.71s (5.74s CPU time)
+
+Ran 21 test suites in 5.72s (15.16s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ npm ci
+  run `npm fund` for details
+
+found 0 vulnerabilities
+exit=0
+
+$ npm run typecheck
+> makhzan-gates@0.1.0 typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm test
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2760.596729
+exit=0
+
+$ npm ci
+  run `npm fund` for details
+
+found 0 vulnerabilities
+exit=0
+
+$ npm run typecheck
+> makhzan@0.1.0 typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm test
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1713.404774
+exit=0
+
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed
+exit=0
+
+$ node apps/makhzan/scripts/e2e-local.mjs
+}
+
+PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil
+exit=0
+
+$ grep -rn "revert NotImplemented" contracts/src/makhzan
+(no match) exit=1 — no entry point reverts NotImplemented
+
+$ grep -rn "NotImplemented" contracts/src/makhzan
+contracts/src/makhzan/Makhzan.sol:12:///         NotImplemented any more; the error stays declared in the interface as documentation.
+contracts/src/makhzan/IMakhzan.sol:29:    error NotImplemented();
+exit=0 (matches are documentation only: one interface declaration, one comment)
+
+$ forge test --match-contract "InterfaceTest" -vv
+[PASS] test_abiIsExactlyTheDocumentedSurface() (gas: 544677)
+[PASS] test_peekReturnsRawSlotsInRequestOrder() (gas: 23226)
+[PASS] test_unknownIdsReadAsZero() (gas: 36423)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.21ms (3.70ms CPU time)
+exit=0

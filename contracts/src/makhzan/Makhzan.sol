@@ -7,8 +7,9 @@ import {BondLib} from "./lib/BondLib.sol";
 import {PayLib} from "./lib/PayLib.sol";
 
 /// @title Makhzan
-/// @notice Bonded storage with retrieval challenges. Skeleton: reads implemented, state-changing
-///         entry points revert NotImplemented until their task lands.
+/// @notice Bonded storage with retrieval challenges: registry, deals, challenges, slashing and
+///         pull payments in one contract behind IMakhzan (DR-013). No entry point reverts
+///         NotImplemented any more; the error stays declared in the interface as documentation.
 contract Makhzan is IMakhzan {
     /// @dev [assumption] until G07's measured implied factor confirms it. Declared exactly once.
     uint256 internal constant WEI_PER_UNIT = 10_000;

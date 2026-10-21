@@ -65,7 +65,7 @@ GuardsTest:test_withdrawBondBlockedWhileDealOpenAndAllowedAfterSettle() (gas: 29
 HashProbeTest:testHashMatchesKeccak() (gas: 27628)
 HashProbeTest:testReferenceEventShape() (gas: 33793)
 HashProbeTest:testWriteSlotStores() (gas: 51587)
-InterfaceTest:test_abiIsExactlyTheDocumentedSurface() (gas: 544015)
+InterfaceTest:test_abiIsExactlyTheDocumentedSurface() (gas: 544677)
 InterfaceTest:test_peekReturnsRawSlotsInRequestOrder() (gas: 23226)
 InterfaceTest:test_unknownIdsReadAsZero() (gas: 36423)
 InvariantEdgesTest:test_claimAtExactEndBlockPaysTheWholePrice() (gas: 289607)
