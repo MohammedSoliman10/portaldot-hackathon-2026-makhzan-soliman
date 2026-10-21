@@ -19,11 +19,33 @@ contract GoldenVectorsTest is Test {
         _checkVector(json, ".vectors.leafCount1000", 1000);
     }
 
-    /// @dev T010 red: the walk is wired in T011.
-    function _checkVector(string memory json, string memory key, uint32 leafCount) internal view {
-        json;
-        key;
-        leafCount;
-        assertTrue(false, "golden vector walk not wired");
+    function _checkVector(string memory json, string memory key, uint32 leafCount) internal pure {
+        bytes[] memory leaves = json.readBytesArray(string.concat(key, ".leaves"));
+        bytes32[] memory leafHashes = json.readBytes32Array(string.concat(key, ".leafHashes"));
+        bytes32 declaredRoot = json.readBytes32(string.concat(key, ".root"));
+        uint256[] memory pathLengths = json.readUintArray(string.concat(key, ".pathLengths"));
+        bytes32[] memory siblings = json.readBytes32Array(string.concat(key, ".siblingHashes"));
+
+        assertEq(leaves.length, leafCount, "leaf count");
+        assertEq(leafHashes.length, leafCount, "leaf hash count");
+        assertEq(pathLengths.length, leafCount, "path length count");
+
+        for (uint32 i = 0; i < leafCount; i++) {
+            assertEq(MerkleLib.leafHash(leaves[i]), leafHashes[i], "leaf hash");
+        }
+        assertEq(MerkleLib.root(leafHashes), declaredRoot, "root");
+
+        uint256 offset = 0;
+        for (uint32 i = 0; i < leafCount; i++) {
+            uint256 len = pathLengths[i];
+            assertEq(MerkleLib.pathLength(i, leafCount), len, "derived path length");
+            bytes32[] memory path = new bytes32[](len);
+            for (uint256 j = 0; j < len; j++) {
+                path[j] = siblings[offset + j];
+            }
+            offset += len;
+            assertTrue(MerkleLib.verify(declaredRoot, leaves[i], i, leafCount, path), "path verifies");
+        }
+        assertEq(offset, siblings.length, "all siblings consumed");
     }
 }
