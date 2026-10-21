@@ -153,3 +153,27 @@ record, `spec.md`, `plan.md`, `data-model.md` and `contracts/merkle.md` state th
 blocks never share a proof; the Merkle fuzz property uses pairwise-distinct leaf contents so it stays
 meaningful. The invariant can no longer be reported as an unconditional MUST, and the checkpoint says
 so.
+
+## DR-012 — DECIDED: `via_ir = true` for the size budget (2026-10-21, Tier 1)
+
+**Context.** After the batch-4 fund-safety fixes `Makhzan` compiled to 9,210 runtime bytes, about
+741 tPOT on the owner's planning formula (`0.079 tPOT/byte + 13`). `docs/lean-build.md` measured the
+candidate cuts on scratch copies: `via_ir` alone was 6,378 B (−2,832 B, no source change), while
+dropping `peek` saved 373 B, dropping events 673 B, and optimizer runs 200/10,000 made it larger.
+The owner now holds about 1,500 tPOT across two wallets.
+
+**Decision (owner, 2026-10-21): enable `via_ir = true` and nothing else.** `peek` and the events
+stay. `solc 0.8.28`, `evm_version = paris`, `optimizer_runs = 1`, `bytecode_hash = none` and
+`cbor_metadata = false` are unchanged. CI has no separate optimizer flags; it inherits
+`contracts/foundry.toml`, so the workflow needs no edit.
+
+**Measured result (local, cold build).** Runtime 9,210 → **6,378 B**; creation 9,773 → **6,966 B**;
+planning estimate ≈ 517 tPOT. Wall time for a cold `forge build --sizes` 36 s. `forge fmt --check`
+clean; 21 suites / 144 tests; 8 fuzz functions × 1000 runs; 6 invariants × 256 sequences × 50 calls
+(12,800 calls) zero violations; golden vectors match on both copies; 39 TypeScript tests and the
+typecheck pass. No behaviour changed.
+
+**Consequences.** G02 must confirm the live chain accepts the IR bytecode before any live deployment;
+the compiler pin and `evm_version` remain provisional until then. Further cuts (`peek`, events) are a
+separate decision and are not taken here. A future change that pushes runtime back over 10,240 B
+stops the work, per the standing rule.

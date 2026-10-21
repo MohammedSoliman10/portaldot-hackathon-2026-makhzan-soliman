@@ -21,11 +21,12 @@ gate are satisfied.
 **Language/Version**: Solidity `0.8.28` compiled for `evm_version = paris`; TypeScript on Node
 `24.20.0` (LTS, native type stripping, no build step).
 
-**Compiler settings**: `optimizer = true`, `optimizer_runs = 1`, `bytecode_hash = "none"`,
-`cbor_metadata = false`. `via_ir` is **off** unless a measured build is smaller with it on, in which
-case the measured saving is recorded in the budget entry. These pins replace the provisional
-`optimizer_runs = 200` in `contracts/foundry.toml`; the compiler pin itself (`solc 0.8.28` / `paris`)
-is confirmed or replaced by the Tier 0 compiler gate (G02) before live work. See `research.md` §D1.
+**Compiler settings**: `optimizer = true`, `optimizer_runs = 1`, `via_ir = true`,
+`bytecode_hash = "none"`, `cbor_metadata = false`. `via_ir` was enabled on 2026-10-21 (DR-012)
+because it measured 2,832 B smaller with no source change: runtime 9,210 → 6,378 B. The compiler pin
+itself (`solc 0.8.28` / `paris`) is confirmed or replaced by the Tier 0 compiler gate (G02) before
+live work, and G02 must also confirm that the live chain accepts the IR bytecode; the pin stays
+provisional until then. See `research.md` §D1 and `docs/lean-build.md`.
 
 **Primary Dependencies**: Foundry `1.8.5` (`forge`, `cast`, `anvil`); `forge-std` `1.17.0` (tests
 only); `viem` `2.57.7`; `typescript` `5.9.3` and `@types/node` `24.19.2` as dev-only. No

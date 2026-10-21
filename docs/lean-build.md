@@ -51,22 +51,25 @@ applied**; the contract in the repository is unchanged by this document.
 5. Individual savings do not add linearly (via_ir + peek + events = 3,615, while the three
    deltas sum to 3,878), so combinations must be measured as combinations.
 
-## Recommended lean target
+## Decision (owner, 2026-10-21)
 
-**Target: `Makhzan` ≤ 5,600 runtime bytes (≈ 455 tPOT at the planning formula).**
+**`via_ir = true` and nothing else is enabled** (DR-012). `peek` and the events stay; solc 0.8.28,
+`evm_version = paris` and `optimizer_runs = 1` are unchanged. Measured in the repository after the
+change: runtime **9,210 → 6,378 B**, creation **9,773 → 6,966 B**, planning estimate ≈ **517 tPOT**
+against ~1,500 tPOT available. All test, fuzz, invariant, vector and TypeScript suites were re-run
+green; a cold build takes 36 s. G02 must still confirm the live chain accepts the IR bytecode.
 
-Route: `via_ir = true`, drop `peek`, drop events. That is 5,595 B measured, leaving ~45 tPOT of the
-500 tPOT budget for the deployment transaction's calldata/overhead and the demo transactions
-(five or six signed calls). If events must stay for observability, the next-best combination is
-`via_ir` + drop `peek` at 6,098 B (495 tPOT): it fits, but with ~5 tPOT of margin, which is too
-thin to call safe before G05 measures the real fee schedule.
+The table above remains the record of what the other cuts would have bought; they are **not**
+applied, so the "recommended lean target" below is optional follow-up, not the current plan.
 
-**Decision needed from the owner** (nothing is cut yet):
+## Recommended lean target (not taken)
 
-- approve `via_ir` + drop `peek` + drop events → 5,595 B, or
-- approve `via_ir` + drop `peek` → 6,098 B and accept a ~5 tPOT margin, or
-- keep the full surface at 9,210 B and fund ~741 tPOT instead of 500.
+The measurement suggested a ≤ 5,600 B target via `via_ir` + drop `peek` + drop events (5,595 B,
+≈ 455 tPOT). **The owner chose a smaller step (DR-012): `via_ir` only.** That lands at 6,378 B and
+≈ 517 tPOT, comfortably inside the ~1,500 tPOT now available, with `peek` and events intact.
+Dropping `peek` (373 B) and events (673 B) remains available as optional follow-up if a later
+feature needs the headroom; both are behaviour or observability changes and were not taken.
 
-Note: `via_ir` changes codegen, so it must be followed by the full `forge test`, fuzz, invariant and
-gas-snapshot re-run, and G02 must confirm the live chain accepts the resulting bytecode. The
-optimizer/compiler pin itself is provisional until G02, and this document does not change it.
+Note: `via_ir` changed codegen, so the full `forge test`, fuzz, invariant and TypeScript suites were
+re-run green and the vectors still match. G02 must confirm the live chain accepts the IR bytecode;
+the compiler pin is provisional until that verdict.

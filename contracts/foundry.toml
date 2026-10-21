@@ -9,12 +9,15 @@ solc = "0.8.28"
 evm_version = "paris"
 optimizer = true
 optimizer_runs = 1
+via_ir = true
 bytecode_hash = "none"
 cbor_metadata = false
 
 # The compiler pin and evm_version are provisional until G02 records which
 # compilation path the live chain accepts. Do not change them for a product
-# reason before that gate has a verdict.
+# reason before that gate has a verdict. via_ir is DR-012 (2026-10-21): it is
+# size-only, behaviour-neutral, and G02 must still confirm the live chain accepts
+# the IR bytecode. CI inherits this profile; there is no second copy of the flags.
 
 [fuzz]
 runs = 1000
