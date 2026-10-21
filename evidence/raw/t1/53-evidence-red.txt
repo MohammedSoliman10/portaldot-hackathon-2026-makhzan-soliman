@@ -1,0 +1,16 @@
+# T055 red — round evidence suite fails on behaviour
+# UTC: 2026-10-21T23:20:11Z
+# Local Node only; no RPC, no keys. Requires the five statuses (submitted, included, executed,
+# finalized, readBack) on every round; a heuristic finality must name its confirmation depth; a
+# key-like field or a key flag is rejected by the sanitiser; a blocked item renders as
+# "BLOCKED — <reason>"; local and live records are labelled distinctly.
+
+$ node --test test/evidence.test.ts
+✖ a record is rejected when any one of the five statuses is missing (12.3643ms)
+✖ a heuristic finality must label its depth (1.0202ms)
+✖ a key-like value is rejected by the sanitiser (0.6096ms)
+✖ a blocked item renders as BLOCKED with its reason (0.3554ms)
+✖ local and live records carry distinct labels (0.244ms)
+✖ a rendered round names the label, the outcome and the read-back (0.265ms)
+ℹ tests 6
+ℹ pass 0
