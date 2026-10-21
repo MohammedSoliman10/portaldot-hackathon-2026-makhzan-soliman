@@ -1,6 +1,6 @@
 import { parseEventLogs, type Abi, type Address, type Hex } from "viem";
 import { loadConfig } from "../config.ts";
-import { loadArtifact } from "../lib/artifacts.ts";
+import { forgeBuildViaIr, loadArtifact, loadArtifactFrom, VIA_IR_OUT } from "../lib/artifacts.ts";
 import { walletForMode } from "../lib/accounts.ts";
 import { getEvmBalance, publicClientFor } from "../lib/evm.ts";
 import { deployProbe, type DeployPath } from "../lib/deploy.ts";
@@ -331,6 +331,66 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       });
     }
 
+    // ---- via_ir probe (Tier 1 compiler setting) -------------------------
+    let viaIrSummary: Record<string, unknown> | null = null;
+    let viaIrError: string | null = null;
+    let viaIrArtifact: Awaited<ReturnType<typeof loadArtifactFrom>> | null = null;
+    try {
+      forgeBuildViaIr();
+      viaIrArtifact = await loadArtifactFrom("CounterProbe", VIA_IR_OUT);
+    } catch (error) {
+      viaIrError = errorText(error);
+    }
+    if (viaIrArtifact) {
+      const viaDeployed = await deployProbe({
+        path: "evm",
+        wallet,
+        client,
+        contract: "CounterProbe",
+        artifact: viaIrArtifact,
+        args: [],
+        budget: budget ?? undefined,
+      });
+      const viaCode = await client.getCode({ address: viaDeployed.address });
+      const viaRuntimeBytes = viaCode && viaCode !== "0x" ? (viaCode.length - 2) / 2 : 0;
+      transactions.push({
+        hash: viaDeployed.hash,
+        kind: "deploy CounterProbe (via_ir, runs=1)",
+        from: account,
+        to: null,
+        blockNumber: Number(viaDeployed.receipt.blockNumber),
+        status: viaDeployed.receipt.status,
+        explorerUrl: explorer(viaDeployed.hash),
+      });
+      measurements.push({
+        name: "via-ir-runtime-size",
+        value: viaRuntimeBytes,
+        unit: "bytes",
+        method: "receipt",
+        conditions: {
+          contract: "CounterProbe",
+          compiler: viaDeployed.compiler,
+          evmVersion: viaDeployed.evmVersion ?? "unknown",
+          viaIR: "true",
+          optimizerRuns: 1,
+        },
+        txRef: viaDeployed.hash,
+      });
+      viaIrSummary = {
+        contract: "CounterProbe",
+        address: viaDeployed.address,
+        hash: viaDeployed.hash,
+        blockNumber: Number(viaDeployed.receipt.blockNumber),
+        bytecodeBytes: viaDeployed.bytecodeBytes,
+        runtimeBytes: viaRuntimeBytes,
+        compiler: viaDeployed.compiler,
+        evmVersion: viaDeployed.evmVersion,
+        viaIR: true,
+        optimizerRuns: 1,
+        outDir: VIA_IR_OUT,
+      };
+    }
+
     const observations = {
       storageWriteRead: { expected: "42", observed: firstRead[0].toString(), match: firstRead[0] === 42n },
       payableValue: { expected: "1", observed: firstRead[1].toString(), match: firstRead[1] === 1n },
@@ -364,6 +424,8 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       observations,
       differences,
       size: { lastSuccess, firstFailure, attempts: sizeAttempts, codeSizeKey, codeSizeLimit: codeSizeKey ? reviveConstants[codeSizeKey] : null },
+      viaIr: viaIrSummary,
+      viaIrError,
       hashes: { hashTx, slotTx, eventTx, hashToSlot: hashToSlot.value, hashToEvent: hashToEvent.value },
       transactions,
       balanceBefore: balance.toString(),
@@ -380,7 +442,7 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
 
     if (mode === "local") return 0;
 
-    const verdict = differences.length === 0 && firstFailure ? "PASS" : "PARTIAL";
+    const verdict = differences.length === 0 && firstFailure && !viaIrError && viaIrSummary ? "PASS" : "PARTIAL";
     const record: GateRecord = {
       schemaVersion: 1,
       gateId: "G02",
@@ -400,8 +462,8 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       errors,
       verdictReason:
         verdict === "PASS"
-          ? `all behaviors matched Ethereum; first rejected runtime size ${firstFailure?.size} bytes`
-          : `${differences.length} behavioral difference(s); ${firstFailure ? `first rejected runtime size ${firstFailure.size} bytes` : `no size rejection observed up to ${lastSuccess} bytes`}`,
+          ? `all behaviors matched Ethereum; three small size probes completed; via_ir probe ${viaIrSummary?.runtimeBytes ?? "missing"} bytes`
+          : `${differences.length} behavioral difference(s); ${firstFailure ? `first rejected runtime size ${firstFailure.size} bytes` : `no size rejection observed up to ${lastSuccess} bytes`}; via_ir ${viaIrSummary ? `recorded ${viaIrSummary.runtimeBytes} bytes` : `not run: ${viaIrError ?? "unknown"}`}`,
       classification: verdict === "PASS" ? null : "DESIGN-CHANGE",
       adaptation:
         verdict === "PASS"
