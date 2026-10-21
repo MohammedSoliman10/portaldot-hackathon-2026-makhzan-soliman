@@ -1,0 +1,28 @@
+# T018 — provider registry suite (RED before T019)
+# UTC: 2026-10-21T07:21:13Z
+# Local Foundry only; no RPC, no keys. Every failure is the NotImplemented stub (T016).
+
+$ forge test --match-path test/makhzan/Registry.t.sol
+[FAIL: Error != expected error: NotImplemented() != NotRegistered()] test_addBondByStrangerRevertsNotRegistered() (gas: 39118)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_nonMultipleValueRevertsBadParams() (gas: 39105)
+[FAIL: Error != expected error: NotImplemented() != BondTooSmall()] test_registerBelowMinimumRevertsBondTooSmall() (gas: 39239)
+[FAIL: expected an emit, but no logs were emitted afterwards. you might have mismatched events or not enough events were emitted] test_registerEventCarriesDocumentedFields() (gas: 10565)
+[FAIL: first provider id: 0 != 1] test_registerStoresBondAndStableId() (gas: 17318)
+[FAIL: call didn't revert at a lower depth than cheatcode call depth] test_secondRegistrationRevertsAlreadyRegistered() (gas: 8884)
+[FAIL: id unchanged: 0 != 1] test_topUpUpdatesBondReadBack() (gas: 20053)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_unitsAboveUint64CapRevertBadParams() (gas: 40155)
+[FAIL: NotImplemented()] test_withdrawBondClearsRegistrationAndPaysFullBond() (gas: 34704)
+Suite result: FAILED. 0 passed; 9 failed; 0 skipped; finished in 1.32ms (1.73ms CPU time)
+Ran 1 test suite in 6.89ms (1.32ms CPU time): 0 tests passed, 9 failed, 0 skipped (9 total tests)
+[FAIL: Error != expected error: NotImplemented() != NotRegistered()] test_addBondByStrangerRevertsNotRegistered() (gas: 39118)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_nonMultipleValueRevertsBadParams() (gas: 39105)
+[FAIL: Error != expected error: NotImplemented() != BondTooSmall()] test_registerBelowMinimumRevertsBondTooSmall() (gas: 39239)
+[FAIL: expected an emit, but no logs were emitted afterwards. you might have mismatched events or not enough events were emitted] test_registerEventCarriesDocumentedFields() (gas: 10565)
+[FAIL: first provider id: 0 != 1] test_registerStoresBondAndStableId() (gas: 17318)
+[FAIL: call didn't revert at a lower depth than cheatcode call depth] test_secondRegistrationRevertsAlreadyRegistered() (gas: 8884)
+[FAIL: id unchanged: 0 != 1] test_topUpUpdatesBondReadBack() (gas: 20053)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_unitsAboveUint64CapRevertBadParams() (gas: 40155)
+[FAIL: NotImplemented()] test_withdrawBondClearsRegistrationAndPaysFullBond() (gas: 34704)
+
+$ forge build --sizes | grep Makhzan
+| Makhzan       | 2,958            | 3,580             | 21,618             | 45,572              |
