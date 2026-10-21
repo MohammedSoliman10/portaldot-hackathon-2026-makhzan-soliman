@@ -1,35 +1,42 @@
-at=2026-10-21T07:45:00Z
-policy=DR-011 (supersedes DR-010)
-reported_stash_tpot=1500
-observed_hub2_free_planck=50000000000000000
-observed_hub2_free_tpot=500.00000000000000
-B=500.00000000000000 tPOT
+at=2026-10-21T16:31:00Z
+policy=DR-012 (supersedes DR-011 owner target; caps unchanged)
+reported_extra_funding=1000 tPOT from HUB1, more reportedly tomorrow
+observed_hub1_before_tpot=1000.00000000000000
+observed_hub2_before_tpot=500.00000000000000
 tier0_total_live_spend_cap_tpot=100
 single_deposit_cap_tpot=60
-owner_total_after_second_tranche_tpot=150.00000000000000
+owner_target_total_tpot=800.00000000000000
+owner_untouched_tier1_reserve_tpot=650.00000000000000
+provider_1_target_tpot=60.00000000000000
 
 recipient_owner:
   ss58=5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE
   evm=0x0948ebd7637d1c32858a6fc5d947e85a6600205c
-  first_transfer_now_tpot=1.00000000000000
-  second_tranche_rule=send (150 - owner_current_free) tPOT so the owner holds exactly 150 tPOT
-  second_tranche_estimate_tpot=149.00000000000000 before T024 gas
+  first_transfer_now=1.00000000000000 tPOT from HUB1
+  second_transfer_after_T024=send (800.00000000000000 - owner_current_free_tpot) tPOT from HUB1
+  second_transfer_nominal=799.00000000000000 tPOT plus any T024 gas spent
 
-hub2_remainder:
-  ss58=5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp
-  evm=none (32-byte native account, not EVM-shaped: 0xfccad851ccfba1fc9e8500919eb5350c8bd67f6bc3ed6cecd488da9a28f77a20)
-  remainder_after_owner_150_tpot=350.00000000000000 (before sender fees)
+recipient_provider_1:
+  ss58=5Hbqft1roeX13KBJHkYY1jSPCR3Ef6yFtxkMgJF9YxM5M3UQ
+  evm=0xf4ec143c743ff57c0d32e829f50692551cbf6029
+  transfer_after_T024=60.00000000000000 tPOT from HUB2
+
+remaining:
+  HUB1_after_owner_800_tpot=200.00000000000000 (before sender fees)
+  HUB2_after_provider_60_tpot=440.00000000000000 (before sender fees)
+  HUB1 ss58=5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF
+  HUB2 ss58=5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp
 
 sequence:
-  1. human sends 1.00000000000000 tPOT from HUB2 to owner candidate A.
+  1. human sends 1.00000000000000 tPOT from HUB1 to owner candidate A.
   2. wait for evidence/raw/g07/owner-funded.flag, record T023, run T024.
-  3. after T024 passes, read the owner's free balance and print the exact second tranche:
-     amount = 150.00000000000000 - owner_free_tpot.
-  4. human sends that exact amount; wait until the owner holds 150 tPOT before any deploy.
-  5. T026, G01, G02 under the 100 tPOT total and 60 tPOT per-deposit caps.
-  6. HUB2 keeps the rest, about 350 tPOT before sender fees.
+  3. after T024 passes, read owner free balance and print the exact second tranche:
+     amount = 800.00000000000000 - owner_current_free_tpot, sent from HUB1.
+  4. human sends 60.00000000000000 tPOT from HUB2 to provider-1.
+  5. wait until the owner holds 800 tPOT before any deploy.
+  6. T026, G01, G02 under the 100 tPOT total and 60 tPOT per-deposit caps.
+  7. HUB1 keeps about 200 tPOT and HUB2 keeps about 440 tPOT before sender fees.
 
 notes:
-  no provider-1 transfer under DR-011
   no key or seed is requested; the human sends from his wallet
-  no single probe deposit above 60 tPOT; 2 KiB and 4 KiB probes are estimateGas dry runs only
+  if HUB1 is below 1000 tPOT at fan-out time, STOP and report the real balance

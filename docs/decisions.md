@@ -127,3 +127,30 @@ plan is recomputed for a 500 tPOT HUB2 balance and excludes provider-1. If a liv
 100 tPOT total or a 60 tPOT single deposit, it stops and reports the cost instead of spending.
 
 **Evidence.** `evidence/raw/g07/10-fanout-plan.txt`, `evidence/raw/g07/09-funding-recon.txt`.
+
+## DR-012 — HUB1 funding and 800 tPOT owner target (2026-10-21)
+
+**Context.** Recon at 2026-10-21T16:30:48Z found HUB1
+`5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF` holding exactly 1,000 tPOT free.
+HUB2 still holds 500 tPOT. The reported additional funding has not arrived. DR-012 supersedes
+DR-011's owner target; the live spending caps do not change.
+
+**Decision.**
+- Total Tier 0 live spend, deposits and gas included, stays capped at **100 tPOT**.
+- No single deposit may exceed **60 tPOT**; the 2 KiB and 4 KiB probes remain
+  `eth_estimateGas` dry runs only.
+- Before every live deploy, print the estimate and abort if a cap would break.
+- Record every transaction hash and the balance before and after.
+- The owner target is **800 tPOT in total**. The owner keeps an **untouched 650 tPOT reserve**
+  for the Tier 1 deploy, leaving at most 150 tPOT for Tier 0 live spend inside the 100 tPOT cap.
+- Provider-1 target is **60 tPOT**. HUB1 and HUB2 keep the rest.
+- Fan-out: first 1 tPOT from HUB1 to the owner; after the flag and T024 pass, the remainder needed
+  to bring the owner to 800 tPOT from HUB1, and 60 tPOT from HUB2 to provider-1.
+
+**Consequences.** HUB1 is exactly at the 1,000 tPOT threshold, so no extra margin is assumed. If T024
+spends gas, the second tranche is slightly above the nominal 799 tPOT so that the owner lands on
+800 tPOT. If HUB1 falls below 1,000 tPOT before the fan-out, the plan stops and reports the real
+balance rather than spending into the reserve.
+
+**Evidence.** `evidence/raw/g07/11-funding-recon-2.txt`,
+`evidence/raw/g07/10-fanout-plan.txt`.
