@@ -1,0 +1,15 @@
+# T042 red — local state store suite fails on behaviour
+# UTC: 2026-10-21T12:32:02Z
+# Local Node only; no RPC, no keys, temp dirs under the OS temp root. Asserts: atomic write with no
+# surviving temp file and an exact round-trip; a failed encode leaves the committed file intact; a
+# corrupt file is reported and never replaced; a missing file is an empty, rebuildable state; and a
+# restart re-derives block paths, reporting the files it cannot serve.
+
+$ node --test test/state.test.ts
+✖ an atomic write leaves no partial file and round-trips (0.8114ms)
+✖ a failed write leaves the previous file intact (0.1629ms)
+✖ a corrupt state file is reported and never replaced (0.7656ms)
+✖ a missing file is an empty state that can be rebuilt (0.1842ms)
+✖ a restart re-derives block paths from the stored tree (0.1526ms)
+ℹ tests 5
+ℹ pass 0
