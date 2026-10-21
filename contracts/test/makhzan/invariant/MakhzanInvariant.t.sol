@@ -36,6 +36,10 @@ contract MakhzanInvariantTest is StdInvariant, Test {
         bytes32 root = tree.root(SIZE, BLOCK_SIZE);
         handler = new MakhzanHandler(IMakhzan(address(m)), tree, root, SIZE, BLOCK_SIZE, [actorA, actorB, actorC]);
         targetSelector(FuzzSelector({addr: address(handler), selectors: handler.actionSelectors()}));
+        // The harnesses expose test-only setters; fuzzing them would violate invariants by fiat.
+        excludeContract(address(m));
+        excludeContract(address(tree));
+        excludeContract(address(this));
     }
 
     struct Deal {
