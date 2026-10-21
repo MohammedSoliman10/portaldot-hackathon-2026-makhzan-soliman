@@ -39,7 +39,17 @@ const PREFIX_NODE = Uint8Array.of(0x01);
 /** Deterministic block bytes: unique per (leafCount, index), no RNG. */
 function blockBytes(leafCount, index) {
   const out = new Uint8Array(BLOCK_SIZE);
-  for (let j = 0; j < BLOCK_SIZE; j += 1) {
+  // The first eight bytes carry the identity, so leaves never repeat within a
+  // vector even when counts differ by a multiple of 256.
+  out[0] = (index >>> 24) & 0xff;
+  out[1] = (index >>> 16) & 0xff;
+  out[2] = (index >>> 8) & 0xff;
+  out[3] = index & 0xff;
+  out[4] = (leafCount >>> 24) & 0xff;
+  out[5] = (leafCount >>> 16) & 0xff;
+  out[6] = (leafCount >>> 8) & 0xff;
+  out[7] = leafCount & 0xff;
+  for (let j = 8; j < BLOCK_SIZE; j += 1) {
     out[j] = (index * 31 + j * 17 + leafCount) & 0xff;
   }
   return out;
