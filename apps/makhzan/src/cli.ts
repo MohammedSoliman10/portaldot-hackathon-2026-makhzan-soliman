@@ -3,6 +3,7 @@ import { encodeFunctionData } from "viem";
 import { mapContractError } from "./errors.ts";
 import type { Hex } from "./merkle.ts";
 import { markExecuted, markFinalized, markIncluded, markSubmitted, newRecord, type Finality, type TxRecord } from "./status.ts";
+import { writeRound, type RoundRecord } from "./evidenceWriter.ts";
 import { MAX_UNITS, tPotToUnits, unitsToWei } from "./units.ts";
 
 export type CommandName = "upload" | "create" | "challenge" | "watch" | "claim" | "settle" | "report";
@@ -248,6 +249,12 @@ export async function execute(command: ParsedCommand, deps: CommandDeps): Promis
   markFinalized(record, await deps.chain.waitForFinality(receipt));
   record.readBack = await deps.chain.read(command.name === "create" ? "created" : command.dealId);
   return record;
+}
+
+/** The `report` command's implementation: sanitised round records written to one file. */
+export async function reportRounds(records: RoundRecord[], path: string): Promise<string> {
+  for (const record of records) await writeRound(record, path);
+  return path;
 }
 
 /** Reads the signing key at run time. It is never logged, never put on argv and never stored. */
