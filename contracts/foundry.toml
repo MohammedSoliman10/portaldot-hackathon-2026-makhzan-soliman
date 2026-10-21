@@ -4,7 +4,7 @@ test = "test"
 script = "script"
 out = "out"
 libs = ["lib"]
-fs_permissions = [{ access = "read", path = "./test/fixtures" }]
+fs_permissions = [{ access = "read", path = "./test/fixtures" }, { access = "read", path = "./out" }]
 solc = "0.8.28"
 evm_version = "paris"
 optimizer = true
