@@ -194,7 +194,10 @@ try {
   assert.equal(bondAfterPass, MIN_BOND_UNITS, "a pass does not touch the bond");
   rounds.push({
     outcome: "passed", dealId, index: index1, pathLength: getPath(tree, index1).length,
-    challengeTx: ch1.hash, answerTx: answer1.hash, bondAfter: bondAfterPass.toString(),
+    challengeTx: ch1.hash, challengeBlock: String(ch1.receipt.blockNumber), challengeStatus: ch1.receipt.status,
+    answerTx: answer1.hash, answerBlock: String(answer1.receipt.blockNumber), answerStatus: answer1.receipt.status,
+    challengeOpenAfter: cs1After[0],
+    bondBefore: MIN_BOND_UNITS.toString(), bondAfter: bondAfterPass.toString(),
   });
   say(`index ${index1}, path length ${getPath(tree, index1).length}, answer ${answer1.hash}, bond unchanged`);
 
@@ -242,8 +245,11 @@ try {
   say(`daemon re-read the round: ${state.deals[String(dealId)].lastChallenge.status}`);
   rounds.push({
     outcome: "slashed", dealId, index: index2, skipped: true,
-    challengeTx: ch2.hash, resolveTx: resolved.hash,
+    challengeTx: ch2.hash, challengeBlock: String(ch2.receipt.blockNumber), challengeStatus: ch2.receipt.status,
+    resolveTx: resolved.hash, resolveBlock: String(resolved.receipt.blockNumber), resolveStatus: resolved.receipt.status,
+    daemonStatusAfterResolve: state.deals[String(dealId)].lastChallenge.status,
     bondBefore: bondBefore.toString(), bondAfter: bondAfter.toString(), slashed: slashed.toString(),
+    ownerBalanceBeforeWei: String(ownerBefore), ownerBalanceAfterWei: String(ownerAfter),
     ownerCreditWei: (ownerAfter - ownerBefore).toString(),
   });
   say(`index ${index2}, slash ${slashed} units, owner credited ${ownerAfter - ownerBefore} wei`);
@@ -267,6 +273,13 @@ try {
 
   round("summary");
   const summary = {
+    settle: {
+      tx: settled.hash, block: String(settled.receipt.blockNumber), status: settled.receipt.status,
+      providerBalanceBeforeWei: String(providerBefore), providerBalanceAfterWei: String(providerAfter),
+      providerCreditWei: (providerAfter - providerBefore).toString(),
+      claimed: dealAfter[10].toString(), claimableAfter: accrued[1].toString(),
+      settledFlag: Number(dealAfter[4]) & 1,
+    },
     chainId,
     rpc: RPC,
     makhzan,
