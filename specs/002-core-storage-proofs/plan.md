@@ -156,7 +156,7 @@ contracts/                              # Foundry project (existing root)
 │   ├── Challenge.t.sol                 # open, deadline, pass, retry, timeout, double resolve
 │   ├── Payments.t.sol                  # accrual, claim, settle, remainder, rounding
 │   ├── StorageLayout.t.sol             # asserts 3 deal slots / 1 provider element / no challenge growth
-│   └── invariant/MakhzanInvariant.t.sol# handler + 5 invariants
+│   └── invariant/MakhzanInvariant.t.sol# handler + 6 invariants (5 FR-041 + no-trapped-value)
 ├── test/fixtures/vectors.json          # generated; read by GoldenVectors.t.sol
 ├── script/makhzan/Deploy.s.sol         # local + live deploy script (no key on argv)
 └── .gas-snapshot                       # committed forge snapshot

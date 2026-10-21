@@ -63,21 +63,29 @@ contract MakhzanInvariantTest is StdInvariant, Test {
         d = abi.decode(ret, (Deal));
     }
 
-    /// @notice (1) The balance covers every bond, every escrowed deposit and every unclaimed payout.
-    function invariant_balanceCoversLiabilities() public view {
-        uint256 liabilities;
+    /// @notice Sum of every bond and every unclaimed deposit, in wei.
+    function _liabilities() internal view returns (uint256 total) {
         address[] memory providers = handler.knownProviderSet();
         for (uint256 i; i < providers.length; i++) {
             (, uint64 bond,,) = m.providerOf(providers[i]);
-            liabilities += uint256(bond) * WPU;
+            total += uint256(bond) * WPU;
         }
         uint32[] memory dealIds = handler.knownDealIds();
         for (uint256 i; i < dealIds.length; i++) {
             Deal memory d = _deal(dealIds[i]);
             if (d.flags & 1 == 1) continue; // settled: the deposit has left escrow
-            liabilities += uint256(d.price - d.claimed) * WPU;
+            total += uint256(d.price - d.claimed) * WPU;
         }
-        assertGe(address(m).balance, liabilities, "balance >= bonds + escrow + unclaimed payouts");
+    }
+
+    /// @notice (1) The balance covers every bond, every escrowed deposit and every unclaimed payout.
+    function invariant_balanceCoversLiabilities() public view {
+        assertGe(address(m).balance, _liabilities(), "balance >= bonds + escrow + unclaimed payouts");
+    }
+
+    /// @notice M1: no value is trapped or created — the balance is exactly the accounted-for wei.
+    function invariant_noTrappedValue() public view {
+        assertEq(address(m).balance, _liabilities(), "balance == bonds + unclaimed deposits exactly");
     }
 
     /// @notice (2) A slash never exceeds the bond it is taken from.

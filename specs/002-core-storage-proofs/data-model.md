@@ -128,6 +128,7 @@ Illegal transitions that MUST revert:
 | 2 | Slash ≤ bond, in units | `resolve` (clamped) |
 | 3 | At most one resolution per challenge | `answer` (pass) and `resolve` (fail) both clear the open flag; state is cleared before the slash transfer |
 | 4 | Accrued ≤ deposit, and `claimed ≤ accrued` | `_accrued` (cap at `price`), `claim`, `settle` |
+| 1e | Balance in wei == Σ `bond × WEI_PER_UNIT` + Σ `(price − claimed) × WEI_PER_UNIT` exactly (no trapped or created value) | same entry points as (1); all value enters and leaves through the contract's own calls |
 | 8 | A valid proof for `i` never verifies for `j` | `MerkleLib.verify` + the on-chain index/path-length binding |
 
 ## Off-chain state (cache only)
