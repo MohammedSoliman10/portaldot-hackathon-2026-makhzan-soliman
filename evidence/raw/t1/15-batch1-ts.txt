@@ -1,0 +1,31 @@
+$ date -u
+2026-10-21T06:18:43Z
+
+$ cd apps/makhzan && npm run typecheck
+
+> makhzan@0.1.0 typecheck
+> tsc --noEmit
+
+
+$ cd apps/makhzan && npm test
+
+> makhzan@0.1.0 test
+> node --test test/*.test.ts
+
+✔ builder matches every shared vector (28.8485ms)
+✔ every shared path is reproduced and verifies (132.1006ms)
+✔ a path replayed at another index is rejected (313.934901ms)
+✔ wrong bytes, wrong depth, reordered path and empty bytes are rejected (0.6706ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 693.648301
+
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed

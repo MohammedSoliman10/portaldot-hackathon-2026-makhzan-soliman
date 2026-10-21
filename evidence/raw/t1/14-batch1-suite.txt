@@ -1,0 +1,107 @@
+$ date -u
+2026-10-21T06:18:39Z
+
+$ forge fmt --check
+
+$ forge build --sizes
+No files changed, compilation skipped
+
+╭---------------+------------------+-------------------+--------------------+---------------------╮
+| Contract      | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
++=================================================================================================+
+| BehaviorProbe | 721              | 752               | 23,855             | 48,400              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| CounterProbe  | 246              | 276               | 24,330             | 48,876              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| HashProbe     | 338              | 369               | 24,238             | 48,783              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| SizeProbe     | 9                | 72                | 24,567             | 49,080              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| ValueEcho     | 501              | 532               | 24,075             | 48,620              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| VerifyHarness | 2,091            | 2,122             | 22,485             | 47,030              |
+╰---------------+------------------+-------------------+--------------------+---------------------╯
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+
+$ forge test -vvv
+No files changed, compilation skipped
+
+Ran 3 tests for test/tier0/HashProbe.t.sol:HashProbeTest
+[PASS] testHashMatchesKeccak() (gas: 27530)
+[PASS] testReferenceEventShape() (gas: 33556)
+[PASS] testWriteSlotStores() (gas: 51588)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 410.70µs (151.40µs CPU time)
+
+Ran 8 tests for test/makhzan/MerkleLib.t.sol:MerkleLibTest
+[PASS] test_everyValidPathVerifies() (gas: 146534)
+[PASS] test_proofForOneIndexIsRejectedAtEveryOtherIndex() (gas: 253057)
+[PASS] test_sevenLeafRootAndPathLengths() (gas: 22159)
+[PASS] test_shortenedReorderedAndExtendedPathsAreRejected() (gas: 36070)
+[PASS] test_singleLeafRootIsTheLeafHash() (gas: 2387)
+[PASS] test_threeLeafRootPromotesTheOddNode() (gas: 10785)
+[PASS] test_wrongBytesAreRejected() (gas: 14553)
+[PASS] test_zeroLeafCountAndOutOfRangeIndexAreRejected() (gas: 6413)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 19.78ms (5.33ms CPU time)
+
+Ran 2 tests for test/tier0/SizeProbe.t.sol:SizeProbeTest
+[PASS] testDeploysExactlyRequestedSize(uint16) (runs: 1000, μ: 4539, ~: 4539)
+[PASS] testSmallLadder() (gas: 7810)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 20.71ms (16.70ms CPU time)
+
+Ran 5 tests for test/tier0/CounterProbe.t.sol:CounterProbeTest
+[PASS] testBoomRevertsWithReason() (gas: 8631)
+[PASS] testFuzzSetGet(uint256) (runs: 1000, μ: 52409, ~: 52834)
+[PASS] testSetEmitsIndexedValue() (gas: 54095)
+[PASS] testSetThenGet() (gas: 52967)
+[PASS] testStartsAtZero() (gas: 7646)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 20.84ms (20.75ms CPU time)
+
+Ran 8 tests for test/tier0/BehaviorProbe.t.sol:BehaviorProbeTest
+[PASS] testBlockNumberIsMonotonic() (gas: 162005)
+[PASS] testBoomRevertsWithReason() (gas: 9126)
+[PASS] testCustomRevertReasonIsPropagated() (gas: 9140)
+[PASS] testEventHasIndexedSenderAndValue() (gas: 129290)
+[PASS] testFuzzStoredValueAndPayment(uint256,uint96) (runs: 1000, μ: 136210, ~: 136717)
+[PASS] testPayableValueIsAccepted() (gas: 124552)
+[PASS] testStorageWriteThenRead() (gas: 133480)
+[PASS] testTimestampIsMonotonic() (gas: 161936)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 21.02ms (19.76ms CPU time)
+
+Ran 7 tests for test/makhzan/Verifier.t.sol:VerifierTest
+[PASS] test_correctAnswerIsAccepted() (gas: 139837)
+[PASS] test_emptyPayloadIsRejected() (gas: 135692)
+[PASS] test_hashUsedAsPayloadIsRejected() (gas: 135952)
+[PASS] test_pathForAnotherIndexIsRejected() (gas: 139890)
+[PASS] test_pathOneElementShortAndLongIsRejected() (gas: 151510)
+[PASS] test_payloadOneByteShortAndLongIsRejected() (gas: 143965)
+[PASS] test_reorderedPathIsRejected() (gas: 139901)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 20.73ms (3.93ms CPU time)
+
+Ran 4 tests for test/tier0/ValueEcho.t.sol:ValueEchoTest
+[PASS] testEchoReturnsSentValueAndSender() (gas: 35796)
+[PASS] testFuzzValueIsEchoedExactly(uint96) (runs: 1000, μ: 160329, ~: 160995)
+[PASS] testRecordStoresValueAndEmits() (gas: 154306)
+[PASS] testRecordWithoutValueStoresZero() (gas: 100112)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 20.99ms (20.70ms CPU time)
+
+Ran 1 test for test/makhzan/GoldenVectors.t.sol:GoldenVectorsTest
+[PASS] test_allSharedVectors() (gas: 177015006)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 530.06ms (529.89ms CPU time)
+
+Ran 8 test suites in 531.16ms (654.54ms CPU time): 38 tests passed, 0 failed, 0 skipped (38 total tests)
