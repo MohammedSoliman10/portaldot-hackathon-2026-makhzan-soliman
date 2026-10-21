@@ -11,6 +11,10 @@ https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
 Tier 0 in progress: a measurement harness verifies the Portaldot chain assumptions before any
 Makhzan product code exists. No product contract, provider daemon, UI or agent has been written.
 
+## Known limits
+
+- Identical blocks, and whole identical subtrees, are interchangeable in a Merkle proof by design: one stored copy answers either challenge and this does not reduce what a provider must store (FR-017, DR-011).
+
 ## AI assistance
 
 This project is built with AI assistance. AI-assisted parts are marked in commits with `[ai]` and disclosed here as they appear:
