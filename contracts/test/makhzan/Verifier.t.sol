@@ -126,4 +126,69 @@ contract VerifierTest is Test {
         (path[0], path[1]) = (path[1], path[0]);
         assertFalse(harness.verifyLeaf(root, _leaf(3), 3, 7, expectedLen, path), "reordered path");
     }
+
+    // ------------------------------------------------------------------ short last block
+
+    /// @dev Blocks for a file of `size` bytes at `blockSize`: full blocks except the last remainder.
+    function _blocks(uint32 size, uint16 blockSize) internal pure returns (bytes[] memory blocks) {
+        uint32 count = uint32((uint256(size) + blockSize - 1) / blockSize);
+        blocks = new bytes[](count);
+        for (uint32 i; i < count; i++) {
+            uint256 len = i == count - 1 ? uint256(size) - uint256(count - 1) * blockSize : blockSize;
+            bytes memory b = new bytes(len);
+            for (uint256 j; j < len; j++) {
+                b[j] = bytes1(uint8(uint256(i) * 31 + j + 1));
+            }
+            blocks[i] = b;
+        }
+    }
+
+    function _hashesOf(bytes[] memory blocks) internal view returns (bytes32[] memory hashes) {
+        hashes = new bytes32[](blocks.length);
+        for (uint256 i; i < blocks.length; i++) {
+            hashes[i] = harness.leafHash(blocks[i]);
+        }
+    }
+
+    /// @dev A 3-leaf tree whose last block (8 bytes) is shorter than the 16-byte block size.
+    function test_threeLeafShortLastBlockVerifiesWithRemainderLength() public view {
+        uint32 size = 40;
+        uint16 blockSize = 16;
+        bytes[] memory blocks = _blocks(size, blockSize);
+        assertEq(blocks.length, 3, "three leaves");
+        assertEq(blocks[2].length, 8, "last block is the 8-byte remainder");
+        bytes32[] memory hashes = _hashesOf(blocks);
+        bytes32 root = _root(hashes);
+        uint32 leafCount = uint32(blocks.length);
+
+        bytes32[] memory lastPath = _path(hashes, 2, leafCount);
+        assertEq(lastPath.length, 1, "promoted index 2 path");
+        assertTrue(harness.verifyLeaf(root, blocks[2], 2, leafCount, 8, lastPath), "short last block accepted");
+        assertFalse(harness.verifyLeaf(root, blocks[2], 2, leafCount, blockSize, lastPath), "full-size length rejected");
+
+        bytes32[] memory firstPath = _path(hashes, 0, leafCount);
+        assertTrue(harness.verifyLeaf(root, blocks[0], 0, leafCount, blockSize, firstPath), "full block accepted");
+        assertFalse(harness.verifyLeaf(root, blocks[0], 0, leafCount, 8, firstPath), "short length rejected");
+    }
+
+    /// @dev A 7-leaf tree (53 bytes, 8-byte blocks) whose last block is 5 bytes.
+    function test_sevenLeafShortLastBlockVerifiesWithRemainderLength() public view {
+        uint32 size = 53;
+        uint16 blockSize = 8;
+        bytes[] memory blocks = _blocks(size, blockSize);
+        assertEq(blocks.length, 7, "seven leaves");
+        assertEq(blocks[6].length, 5, "last block is the 5-byte remainder");
+        bytes32[] memory hashes = _hashesOf(blocks);
+        bytes32 root = _root(hashes);
+        uint32 leafCount = uint32(blocks.length);
+
+        bytes32[] memory lastPath = _path(hashes, 6, leafCount);
+        assertEq(lastPath.length, 2, "promoted index 6 path");
+        assertTrue(harness.verifyLeaf(root, blocks[6], 6, leafCount, 5, lastPath), "short last block accepted");
+        assertFalse(harness.verifyLeaf(root, blocks[6], 6, leafCount, blockSize, lastPath), "full-size length rejected");
+
+        bytes32[] memory midPath = _path(hashes, 5, leafCount);
+        assertTrue(harness.verifyLeaf(root, blocks[5], 5, leafCount, blockSize, midPath), "full block accepted");
+        assertFalse(harness.verifyLeaf(root, blocks[5], 5, leafCount, 5, midPath), "short length rejected");
+    }
 }
