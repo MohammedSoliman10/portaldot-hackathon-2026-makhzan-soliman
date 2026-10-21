@@ -18,3 +18,8 @@ cbor_metadata = false
 
 [fuzz]
 runs = 1000
+
+[invariant]
+runs = 256
+depth = 50
+fail_on_revert = false
