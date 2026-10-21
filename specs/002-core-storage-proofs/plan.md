@@ -158,7 +158,7 @@ contracts/                              # Foundry project (existing root)
 │   ├── StorageLayout.t.sol             # asserts 3 deal slots / 1 provider element / no challenge growth
 │   └── invariant/MakhzanInvariant.t.sol# handler + 6 invariants (5 FR-041 + no-trapped-value)
 ├── test/fixtures/vectors.json          # generated; read by GoldenVectors.t.sol
-├── script/makhzan/Deploy.s.sol         # local + live deploy script (no key on argv)
+├── script/makhzan/Deploy.s.sol         # local + live deploy script (no key on argv; minBond in units)
 └── .gas-snapshot                       # committed forge snapshot
 
 apps/makhzan/                           # TypeScript daemon + CLI (no UI)

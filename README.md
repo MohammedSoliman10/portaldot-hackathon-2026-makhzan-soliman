@@ -14,6 +14,10 @@ Makhzan product code exists. No product contract, provider daemon, UI or agent h
 ## Known limits
 
 - Identical blocks, and whole identical subtrees, are interchangeable in a Merkle proof by design: one stored copy answers either challenge and this does not reduce what a provider must store (FR-017, DR-011).
+- The protocol proves retrieval of one challenged block inside a response window, not continuous local storage.
+- One bond is not locked per deal: it backs every deal the provider holds, so the bond is the economic bound, not a per-deal deposit.
+- A contract owner or provider that rejects incoming value can block its own payouts and the counterparty's exit; Tier 1 assumes externally owned accounts for both roles.
+- The challenge index source is the D5 fallback (parent hash, prevrandao, deal id) until the randomness gate (G03) rules; it is not claimed unpredictable yet.
 
 ## AI assistance
 

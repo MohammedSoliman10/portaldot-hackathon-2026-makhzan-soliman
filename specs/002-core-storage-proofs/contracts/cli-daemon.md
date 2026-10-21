@@ -16,6 +16,13 @@ operator tools). No server, no database, one JSON state file.
 | `claim <dealId>` / `settle <dealId>` | deal id | call the payment function, read balances back | evidence record |
 | `report` | — | collect state records into `evidence/tier1-results.md` | report file |
 
+**Units at the boundary.** The deploy script, the CLI and the daemon pass `minBond` and every other
+contract amount in native units, never in wei: 10 tPOT is `1e15` units, one unit is `1e-14` tPOT, and
+the smallest unit is indivisible. Wei appears only where the EVM requires it, as
+`msg.value = units * WEI_PER_UNIT` (`WEI_PER_UNIT = 10_000`, `[assumption]` until G07), and every
+wei figure is computed from a unit value, never the other way round. `apps/makhzan/src/units.ts`
+owns the integer-only conversion and `test/units.test.ts` asserts the 10 tPOT = 1e15 identity.
+
 All commands: sign in-process with `viem` from environment variables; `gas = estimate × 1.2`;
 `maxFeePerGas = chain gas price`; `maxPriorityFeePerGas = 0`; never print a key; never accept a key
 on argv (the tier-0 argv guard is reused). Decimal tPOT inputs are parsed as strings with integer
