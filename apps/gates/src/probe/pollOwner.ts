@@ -21,6 +21,7 @@ async function main(): Promise<void> {
   const ss58 = arg("ss58");
   const evm = arg("evm") as `0x${string}`;
   const label = arg("label");
+  const hub2 = process.argv.includes("--hub2") ? arg("hub2") : null;
   const flagArg = process.argv.includes("--flag") ? arg("flag") : null;
   const outArg = process.argv.includes("--out") ? arg("out") : "evidence/raw/g07/05-owner-poll.txt";
   const durationArg = process.argv.includes("--duration-ms") ? Number(arg("duration-ms")) : null;
@@ -39,7 +40,7 @@ async function main(): Promise<void> {
   const connection = await connectSubstrate(wsUrl);
   const started = Date.now();
 
-  await appendFile(out, `# ${label} poll started ${stamp(new Date())} ss58=${ss58} evm=${evm} interval_ms=${intervalMs} duration_ms=${durationMs} flag=${flag ?? "none"}\n`);
+  await appendFile(out, `# ${label} poll started ${stamp(new Date())} ss58=${ss58} evm=${evm} hub2=${hub2 ?? "none"} interval_ms=${intervalMs} duration_ms=${durationMs} flag=${flag ?? "none"}\n`);
   let flagWritten = false;
 
   const poll = async (): Promise<void> => {
@@ -47,7 +48,16 @@ async function main(): Promise<void> {
     try {
       const native = await systemAccount(connection.api, ss58);
       const evmWei = (await client.getBalance({ address: evm })).toString();
-      await appendFile(out, `${at} native_free=${native.free} native_reserved=${native.reserved} evm_wei=${evmWei}\n`);
+      let hub2Log = "";
+      if (hub2) {
+        try {
+          const hub = await systemAccount(connection.api, hub2);
+          hub2Log = ` hub2_free=${hub.free} hub2_reserved=${hub.reserved}`;
+        } catch (error) {
+          hub2Log = ` hub2_error=${(error as Error).name}: ${(error as Error).message}`;
+        }
+      }
+      await appendFile(out, `${at} native_free=${native.free} native_reserved=${native.reserved} evm_wei=${evmWei}${hub2Log}\n`);
       if (flag && !flagWritten && isFunded(native.free, evmWei)) {
         await writeFile(flag, fundingFlagText({ label, ss58, evm, nativeFree: native.free, evmWei, at }));
         flagWritten = true;
