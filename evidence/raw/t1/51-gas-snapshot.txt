@@ -1,0 +1,22 @@
+# T053 — gas snapshot created and checked (via_ir profile, DR-012)
+# UTC: 2026-10-21T23:18:15Z
+# Local Foundry only. `forge snapshot` writes contracts/.gas-snapshot from the current via_ir build;
+# `forge snapshot --check` must then exit 0, so gas drift fails CI. The numbers are local gas, not a
+# live-chain cost estimate (G05 still open).
+
+$ forge snapshot
+Ran 21 test suites in 4.16s (13.13s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ forge snapshot --check
+Ran 21 test suites in 4.23s (15.51s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ wc -l contracts/.gas-snapshot; grep key tier-1 paths
+149 contracts/.gas-snapshot
+InvariantEdgesTest:test_settleInTheSameBlockAChallengeFails() (gas: 324074)
+PaymentsTest:test_settleBeforeEndRevertsBeforeEnd() (gas: 153855)
+PaymentsTest:test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 237156)
+PaymentsTest:test_settlePaysProviderUnpaidAccrued() (gas: 306616)
+PaymentsTest:test_settleSetsClaimedToPriceBeforePaying() (gas: 219416)
+PaymentsTest:test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 221377)
