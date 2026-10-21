@@ -133,6 +133,17 @@ contract MakhzanInvariantTest is StdInvariant, Test {
         }
     }
 
+    /// @notice C2: no deal is ever both settled and holding an open challenge.
+    function invariant_noSettledDealHasOpenChallenge() public view {
+        uint32[] memory ids = handler.knownDealIds();
+        for (uint256 i; i < ids.length; i++) {
+            Deal memory d = _deal(ids[i]);
+            bool settled = d.flags & 1 != 0;
+            bool open = d.flags & 2 != 0;
+            assertFalse(settled && open, "a settled deal must never take a challenge");
+        }
+    }
+
     /// @notice The handler really routes a payout to the malicious recipient, which re-enters.
     /// @dev Deterministic script: the receiver registers (actor index 3), owns a deal, the deal is
     ///      settled past its end block, and the payout triggers its mode-5 receive.

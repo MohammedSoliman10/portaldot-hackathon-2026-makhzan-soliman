@@ -212,6 +212,21 @@ contract ChallengeTest is MakhzanTestBase {
         assertTrue(_bond() < bondBefore, "resolve after the end block still slashes");
     }
 
+    /// @dev C2 (fund-safety review): settlement is allowed at block == endBlock and so is a
+    ///      challenge, so the challenge itself must refuse a settled deal. Otherwise the provider
+    ///      could answer nothing, resolve a slash, withdraw the bond first and dodge it.
+    function test_challengeOnDealSettledAtTheEndBlockReverts() public {
+        uint32 dealId = _createDeal();
+        vm.roll(_dealEnd(dealId)); // exactly the end block: settle is allowed here
+        vm.prank(stranger);
+        m.settle(dealId);
+        assertEq(_dealFlags(dealId) & 1, 1, "the deal is settled");
+
+        vm.prank(client);
+        vm.expectRevert(IMakhzan.AlreadySettled.selector);
+        m.challenge(dealId);
+    }
+
     function test_challengeOnSettledDealReverts() public {
         uint32 dealId = _createDeal();
         vm.roll(_dealEnd(dealId) + 1);
