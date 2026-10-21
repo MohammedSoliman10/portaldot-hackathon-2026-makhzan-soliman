@@ -7,6 +7,7 @@ import { bytesToHex } from "viem";
 import { chunkFile } from "../src/chunk.ts";
 import { buildTree } from "../src/merkle.ts";
 import { UploadReceiver } from "../src/upload.ts";
+import { startUploadServer } from "../src/daemon.ts";
 
 const BLOCK_SIZE = 1024;
 
@@ -34,7 +35,7 @@ function envelope(
   };
 }
 
-function receiver(): { r: UploadReceiver; dir?: string } {
+function receiver(): { r: UploadReceiver; dir: string } {
   const dir = mkdtempSync(join(tmpdir(), "makhzan-upload-"));
   return { r: new UploadReceiver({ blockSize: BLOCK_SIZE, storeDir: dir }), dir };
 }
@@ -74,7 +75,7 @@ test("a wrong block size is rejected", () => {
 test("an out-of-range index is rejected", () => {
   const { r } = receiver();
   const f = file(2048);
-  assert.throws(() => r.accept(envelope(f, 2, { index: 5 })), /index 5 is outside 0\.\.1/);
+  assert.throws(() => r.accept(envelope(f, 0, { index: 5 })), /index 5 is outside 0\.\.1/);
   assert.throws(() => r.accept(envelope(f, 0, { index: -1 })), /index -1 is outside/);
 });
 
@@ -120,4 +121,28 @@ test("a malformed value type is rejected with a verbatim reason", () => {
   assert.throws(() => r.accept("not an object"), /envelope must be an object/);
   assert.throws(() => r.accept(envelope(f, 0, { root: "0x1234" })), /root must be 32 bytes/);
   assert.throws(() => r.accept(envelope(f, 0, { data: "zz" })), /data must be 0x-prefixed bytes/);
+});
+
+test("the loopback endpoint acknowledges through the receiver", async () => {
+  const { r, dir } = receiver();
+  const f = file(2048);
+  const server = await startUploadServer(r, 0);
+  const address = server.address();
+  assert.ok(address && typeof address === "object");
+  const url = `http://127.0.0.1:${address.port}/upload`;
+  const post = (body: unknown) =>
+    fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+
+  const first = await post(envelope(f, 0));
+  assert.equal(first.status, 202);
+  const second = await post(envelope(f, 1));
+  assert.equal(second.status, 200);
+  assert.deepEqual(await second.json(), { root: f.root, size: 2048, leafCount: 2 });
+
+  const bad = await post({ ...envelope(f, 0, { root: "0x00" }) });
+  assert.equal(bad.status, 400);
+  assert.match(((await bad.json()) as { error: string }).error, /root must be 32 bytes/);
+
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  rmSync(dir, { recursive: true, force: true });
 });
