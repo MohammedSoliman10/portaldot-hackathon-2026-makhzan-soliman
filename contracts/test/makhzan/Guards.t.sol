@@ -5,7 +5,7 @@ import {IMakhzan} from "../../src/makhzan/IMakhzan.sol";
 import {MakhzanTestBase} from "./harness/MakhzanTestBase.sol";
 import {MaliciousReceiver} from "./harness/MaliciousReceiver.sol";
 
-/// @notice T031 — exit guards, pause, error coverage and malicious-receiver reentrancy (FR-003, FR-004, FR-028).
+/// @notice T031 — exit guards, error coverage and malicious-receiver reentrancy (FR-003, FR-004, FR-028).
 contract GuardsTest is MakhzanTestBase {
     MaliciousReceiver internal mal;
 
@@ -56,13 +56,6 @@ contract GuardsTest is MakhzanTestBase {
         _openChallenge(first);
         (bool open,,,,) = m.challengeStateOf(first);
         assertTrue(open, "existing deal still accepts challenges");
-    }
-
-    function test_pausedProtocolRejectsNewDeal() public {
-        m.setPaused(1);
-        vm.prank(client);
-        vm.expectRevert(IMakhzan.BadParams.selector);
-        m.createDeal{value: _wei(PRICE)}(1, root, LEAF_COUNT, SIZE, DURATION, PRICE);
     }
 
     function test_registryErrorsAreReachable() public {

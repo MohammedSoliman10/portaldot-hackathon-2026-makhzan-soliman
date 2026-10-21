@@ -12,7 +12,7 @@ contract InvariantEdgesTest is MakhzanTestBase {
 
     function setUp() public override {
         super.setUp();
-        fast = new MakhzanHarness(address(this), 5, BLOCK_SIZE, SLASH_BPS, MIN_BOND, 1, 2);
+        fast = new MakhzanHarness(5, BLOCK_SIZE, SLASH_BPS, MIN_BOND, 1, 2);
         vm.prank(provider);
         fast.registerProvider{value: uint256(MIN_BOND) * WPU}();
     }

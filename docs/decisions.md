@@ -98,3 +98,24 @@ pending G05). Every Solidity commit records `forge build --sizes` runtime bytes 
 file; a runtime above 10,240 B stops the work and is reported rather than trimmed silently.
 
 **Evidence.** `plan.md` budget table, `contracts/size-budget.md`.
+
+**Amended 2026-10-21 by DR-010.** Removing the unused admin address and pause flag lets the whole
+config pack into one 30/32-byte slot, so the deploy now writes **one** config slot (≈ 3.9 tPOT at the
+planning rate) instead of two.
+
+## DR-010 — No admin and no pause flag (2026-10-21, Tier 1)
+
+**Context.** The skeleton carried an `admin` address and a one-byte `paused` flag, with a
+`paused == 0` guard on `createDeal`. A search of `spec.md`, `plan.md` and `contracts/*.md` found no
+requirement for a pause or admin function: `data-model.md` described `admin` as "may pause (future)"
+and no FR, guarantee or acceptance outcome depends on either field.
+
+**Decision.** Remove `admin`, `paused`, the `createDeal` pause check and the test-only setter. Tier 1
+has no privileged address: `challenge` is owner-checked, `answer`/`claim` are provider-checked, and
+`resolve`/`settle` are permissionless with recipients fixed by the deal. A pause would be a new FR and
+a new authority surface, not scaffolding. Measured effect: `Makhzan` runtime 5,542 → 5,523 B and
+config slot 0 uses 8/32 bytes instead of 29/32.
+
+**Consequences.** The pause cases in `Deals.t.sol` and `Guards.t.sol` and the `setPaused` harness
+setter are deleted; the constructor loses its `admin_` parameter and zero-address check. A future
+emergency stop needs an explicit admin FR, a layout change and its own tests.

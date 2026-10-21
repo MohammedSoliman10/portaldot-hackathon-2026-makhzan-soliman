@@ -16,7 +16,7 @@ contract RegistryTest is Test {
     address internal other = address(0xB0B);
 
     function setUp() public {
-        m = new Makhzan(address(this), 50, 1024, 2000, MIN_BOND, 600, 14_400);
+        m = new Makhzan(50, 1024, 2000, MIN_BOND, 600, 14_400);
         vm.deal(provider, 1_000 ether);
         vm.deal(other, 1_000 ether);
     }

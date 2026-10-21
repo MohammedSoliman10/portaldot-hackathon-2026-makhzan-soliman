@@ -47,7 +47,7 @@ contract DealsTest is Test {
     }
 
     function setUp() public {
-        m = new MakhzanHarness(address(this), 50, BLOCK_SIZE, 2000, MIN_BOND, MIN_DURATION, MAX_DURATION);
+        m = new MakhzanHarness(50, BLOCK_SIZE, 2000, MIN_BOND, MIN_DURATION, MAX_DURATION);
         tree = new TreeHarness();
         vm.deal(provider, 1_000 ether);
         vm.deal(client, 1_000 ether);
@@ -140,13 +140,6 @@ contract DealsTest is Test {
 
     function test_providerBelowMinimumBondRejected() public {
         m.setBond(1, MIN_BOND - 1);
-        vm.prank(client);
-        vm.expectRevert(IMakhzan.BadParams.selector);
-        m.createDeal{value: VALUE}(1, ROOT, LEAF_COUNT, SIZE, MIN_DURATION, PRICE);
-    }
-
-    function test_pausedProtocolRejectsNewDeals() public {
-        m.setPaused(1);
         vm.prank(client);
         vm.expectRevert(IMakhzan.BadParams.selector);
         m.createDeal{value: VALUE}(1, ROOT, LEAF_COUNT, SIZE, MIN_DURATION, PRICE);

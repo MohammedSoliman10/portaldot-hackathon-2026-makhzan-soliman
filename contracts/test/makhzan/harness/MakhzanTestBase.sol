@@ -27,7 +27,7 @@ abstract contract MakhzanTestBase is Test {
     address internal stranger = address(0x57A);
 
     function setUp() public virtual {
-        m = new MakhzanHarness(address(this), WINDOW, BLOCK_SIZE, SLASH_BPS, MIN_BOND, DURATION, 14_400);
+        m = new MakhzanHarness(WINDOW, BLOCK_SIZE, SLASH_BPS, MIN_BOND, DURATION, 14_400);
         tree = new TreeHarness();
         root = tree.root(SIZE, BLOCK_SIZE);
         vm.deal(provider, 1_000 ether);

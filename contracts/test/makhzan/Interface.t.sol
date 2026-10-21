@@ -31,7 +31,7 @@ contract InterfaceTest is Test {
     }
 
     function _deploy() internal returns (Makhzan) {
-        return new Makhzan(address(this), 50, 1024, 2000, 1e15, 600, 14_400);
+        return new Makhzan(50, 1024, 2000, 1e15, 600, 14_400);
     }
 
     function _selector(string memory signature) internal pure returns (bytes4) {
@@ -105,7 +105,7 @@ contract InterfaceTest is Test {
 
     /// @dev Salt a raw slot without a product function: this only seeds state a real deal would own.
     function _dealSlot(uint32 dealId) internal pure returns (bytes32) {
-        return keccak256(abi.encode(uint256(dealId), uint256(4)));
+        return keccak256(abi.encode(uint256(dealId), uint256(3)));
     }
 
     function test_peekReturnsRawSlotsInRequestOrder() public {

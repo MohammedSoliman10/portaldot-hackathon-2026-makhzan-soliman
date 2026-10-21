@@ -34,27 +34,23 @@ contract Makhzan is IMakhzan {
         uint64 claimed; // 8
     }
 
-    // slot 0: admin(20) | challengeWindow(4) | challengeBlockSize(2) | slashBps(2) | paused(1)
-    address internal admin;
+    // slot 0: challengeWindow(4) | challengeBlockSize(2) | slashBps(2) | minBond(8)
+    //         | nextDealId(4) | providerCount(2) | minDurationBlocks(4) | maxDurationBlocks(4) = 30/32
     uint32 internal challengeWindow;
     uint16 internal challengeBlockSize;
     uint16 internal slashBps;
-    uint8 internal paused;
-
-    // slot 1: minBond(8) | nextDealId(4) | providerCount(2) | minDurationBlocks(4) | maxDurationBlocks(4)
     uint64 internal minBond;
     uint32 internal nextDealId;
     uint16 internal providerCount;
     uint32 internal minDurationBlocks;
     uint32 internal maxDurationBlocks;
 
-    // slot 2, 3, 4
+    // slot 1, 2, 3
     mapping(address => uint16) internal providerIdOf;
     BondLib.Provider[] internal providers;
     mapping(uint32 => Deal) internal deals;
 
     constructor(
-        address admin_,
         uint32 challengeWindow_,
         uint16 challengeBlockSize_,
         uint16 slashBps_,
@@ -63,11 +59,10 @@ contract Makhzan is IMakhzan {
         uint32 maxDurationBlocks_
     ) {
         if (
-            admin_ == address(0) || challengeWindow_ == 0 || challengeBlockSize_ < 1024 || challengeBlockSize_ > 4096
-                || slashBps_ == 0 || slashBps_ > 10_000 || minBond_ == 0 || minDurationBlocks_ == 0
+            challengeWindow_ == 0 || challengeBlockSize_ < 1024 || challengeBlockSize_ > 4096 || slashBps_ == 0
+                || slashBps_ > 10_000 || minBond_ == 0 || minDurationBlocks_ == 0
                 || maxDurationBlocks_ < minDurationBlocks_
         ) revert BadParams();
-        admin = admin_;
         challengeWindow = challengeWindow_;
         challengeBlockSize = challengeBlockSize_;
         slashBps = slashBps_;
@@ -140,9 +135,7 @@ contract Makhzan is IMakhzan {
         uint32 durationBlocks,
         uint64 price
     ) external payable override {
-        if (paused != 0 || root == bytes32(0) || size == 0 || leafCount == 0 || price == 0) {
-            revert BadParams();
-        }
+        if (root == bytes32(0) || size == 0 || leafCount == 0 || price == 0) revert BadParams();
         if (durationBlocks < minDurationBlocks || durationBlocks > maxDurationBlocks) revert BadParams();
         if (providerId == 0 || providerId > providerCount) revert BadParams();
         BondLib.Provider storage p = providers[providerId - 1];

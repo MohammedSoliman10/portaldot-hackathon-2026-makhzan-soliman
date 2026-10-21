@@ -7,22 +7,20 @@ file, which is a cache and never a source of truth for a payout.
 
 ## Entities
 
-### Config (deployment, 2 slots)
+### Config (deployment, 1 slot)
 
 | Field | Type | Bytes | Slot | Constraint |
 | --- | --- | --- | --- | --- |
-| `admin` | `address` | 20 | 0 | non-zero; may pause (future) but cannot move deal funds |
 | `challengeWindow` | `uint32` | 4 | 0 | blocks; default 50; > 0 |
 | `challengeBlockSize` | `uint16` | 2 | 0 | 1024 default; in 1024–4096; set from G04 |
 | `slashBps` | `uint16` | 2 | 0 | 2000 (20%); 1–10000 |
-| `paused` | `uint8` | 1 | 0 | 0 by default; a paused protocol accepts no new deal |
-| `minBond` | `uint64` | 8 | 1 | 10 tPOT = `10 * 10^14` smallest units |
-| `nextDealId` | `uint32` | 4 | 1 | starts at 0; first deal id is 1 |
-| `providerCount` | `uint16` | 2 | 1 | ≤ 65,535 |
-| `minDurationBlocks` | `uint32` | 4 | 1 | 600 (≈ 1 h at 6 s blocks) |
-| `maxDurationBlocks` | `uint32` | 4 | 1 | 14,400 (≈ 24 h) |
+| `minBond` | `uint64` | 8 | 0 | 10 tPOT = `10 * 10^14` smallest units |
+| `nextDealId` | `uint32` | 4 | 0 | starts at 0; first deal id is 1 |
+| `providerCount` | `uint16` | 2 | 0 | ≤ 65,535 |
+| `minDurationBlocks` | `uint32` | 4 | 0 | 600 (≈ 1 h at 6 s blocks) |
+| `maxDurationBlocks` | `uint32` | 4 | 0 | 14,400 (≈ 24 h) |
 
-Two fixed slots; no per-operation storage.
+One fixed slot (30 of 32 bytes); no per-operation storage.
 
 ### Provider (2 slots: one array element + one id mapping entry)
 
@@ -33,8 +31,8 @@ Two fixed slots; no per-operation storage.
 | `activeDeals` | `uint24` | 3 | deals whose escrow has not been settled |
 | `flags` | `uint8` | 1 | bit0 `registered` |
 
-Placement: `providers` array at slot 3 (`providerId - 1` is the index), `providerIdOf` mapping at
-slot 2 keyed by address. A provider record occupies **2 slots** (one element, one mapping entry).
+Placement: `providers` array at slot 2 (`providerId - 1` is the index), `providerIdOf` mapping at
+slot 1 keyed by address. A provider record occupies **2 slots** (one element, one mapping entry).
 
 **Validation**: `registerProvider` requires a non-zero `msg.value ≥ minBond`, exactly divisible by
 `WEI_PER_UNIT`, no existing id, and `msg.value / WEI_PER_UNIT ≤ type(uint64).max`. `addBond` requires

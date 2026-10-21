@@ -240,11 +240,11 @@ implementation tasks): a skeleton carrying every planned entry point and nine ev
 
 | Operation | Deployed bytes | Record slots | tPOT attributable to deposit (estimate) |
 | --- | --- | --- | --- |
-| One-time deploy + 2 config slots | 8,926 (target ≤ 10,240) | 2 config | ≈ 726 (≈ 705 code + 13 contract + 7.8 config) |
+| One-time deploy + 1 config slot | 8,926 planning baseline; 5,523 B measured (DR-010) | 1 config | ≈ 722 (≈ 705 code + 13 contract + 3.9 config) |
 | Register provider | — | 2 | ≈ 7.8 |
 | Add to bond | — | 0 | — |
 | Create deal | — | 3 | ≈ 11.7 |
-| Open challenge | — | 0 new (reuses the deal's slot 2) | — |
+| Open challenge | — | 0 new (reuses the deal's record slot) | — |
 | Answer (pass) | — | 0 | — |
 | Resolve (slash) | — | 0 | — |
 | Claim / settle | — | 0 | — |
@@ -253,12 +253,13 @@ implementation tasks): a skeleton carrying every planned entry point and nine ev
 Rates used are the reported chain numbers (0.079 tPOT per deployed byte, 13 tPOT per contract,
 3.9 tPOT per new slot, slots refunded when cleared). **They are planning estimates and G05 must
 confirm them**; the budgets in the spec are re-set from the confirmed numbers before the `[LIVE]`
-phase. A conservative demo total with one provider, one deal and the two config slots is ≈ 745 tPOT plus
-gas. The config slots are ≈ 7.8 tPOT at the planning rate.
+phase. A conservative demo total with one provider, one deal and the single config slot is ≈ 741 tPOT
+plus gas. The config slot is ≈ 3.9 tPOT at the planning rate.
 
 Budget compliance so far: deal 3 ≤ 3; provider 1 element + 1 id entry = 2 ≤ 2; active challenge 0
 ≤ 1; per-round growth 0; runtime 8,926 ≤ 10,240 with a 1,314-byte margin that the real
-implementation must defend (the skeleton omits the pause guard, a few validations and any lens).
+implementation must defend (the skeleton omits a few validations and any lens; the unused admin and
+pause flag were removed under DR-010, which frees 19 runtime bytes).
 Overrun policy: `contracts/size-budget.json` is the single source of the number, CI fails the build
 on overrun, and any accepted overrun requires a written justification in this plan's Complexity
 Tracking plus an owner-approved budget change.
@@ -282,7 +283,7 @@ Until then, live tasks are `blocked` and every local acceptance item is still pr
 
 | Risk | Mitigation |
 | --- | --- |
-| Runtime exceeds 10 KB once pause, validation and getters land | Keep events minimal and use auto-generated getters; `runs=1`; custom errors; measure at every commit; if still over, shrink the read surface before touching verification logic, and record a justification |
+| Runtime exceeds 10 KB once validation and the challenge/payment paths land | Keep events minimal and use auto-generated getters; `runs=1`; custom errors; measure at every commit; if still over, shrink the read surface before touching verification logic, and record a justification |
 | Randomness source unusable (constant `prevrandao`/unreadable parent hash) | Selector is one internal function with a reserve commit-reveal path; the gate verdict picks, the spec stays neutral, the change is recorded in `docs/decisions.md` |
 | Public RPC prunes history | Challenge discovery polls current state only; no `eth_getLogs` history; daemon records the block hash of every observation |
 | Finality is not exposed by the RPC | `status.ts` tries the `finalized` block tag; if absent it labels the observation as a confirmation heuristic with its depth, and no payout decision depends on it |

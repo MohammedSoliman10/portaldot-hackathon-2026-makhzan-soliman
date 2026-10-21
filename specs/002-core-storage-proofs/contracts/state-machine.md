@@ -15,7 +15,7 @@
 
 | Transition | Guard | Effect |
 | --- | --- | --- |
-| none → Active | provider registered, bond ≥ minBond, `msg.value == price`, ids and sizes valid, duration in range, `paused == 0` | deal written; provider's `activeDeals += 1` |
+| none → Active | provider registered, bond ≥ minBond, `msg.value == price`, ids and sizes valid, duration in range (no pause: see DR-010) | deal written; provider's `activeDeals += 1` |
 | Active → Active (challenge round) | owner only; `block.number ≤ endBlock`; no open challenge | index and start written; open flag set |
 | Active → Active (pass) | provider only; before deadline; bytes and path verify | open flag cleared; nothing else changes |
 | Active → Active (fail) | permissionless; after deadline; challenge open | 20% of bond to the deal owner (not the caller); open flag cleared; deal continues |

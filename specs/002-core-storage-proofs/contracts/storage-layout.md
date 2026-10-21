@@ -5,12 +5,12 @@
 ## Layout
 
 ```text
-slot 0  admin(20) | challengeWindow(4) | challengeBlockSize(2) | slashBps(2) | paused(1)   = 29/32
-slot 1  minBond(8) | nextDealId(4) | providerCount(2) | minDurationBlocks(4)
-        | maxDurationBlocks(4)                                                        = 22/32
-slot 2  mapping(address => uint16) providerIdOf
-slot 3  Provider[] providers            (length at slot 3; elements at keccak256(3) + index)
-slot 4  mapping(uint32 => Deal) deals
+slot 0  challengeWindow(4) | challengeBlockSize(2) | slashBps(2) | minBond(8)
+        | nextDealId(4) | providerCount(2) | minDurationBlocks(4)
+        | maxDurationBlocks(4)                                                        = 30/32
+slot 1  mapping(address => uint16) providerIdOf
+slot 2  Provider[] providers            (length at slot 2; elements at keccak256(2) + index)
+slot 3  mapping(uint32 => Deal) deals
 ```
 
 ```text
@@ -28,7 +28,7 @@ Deal (3 slots)
 
 | Budget | Target | This layout | Check |
 | --- | --- | --- | --- |
-| Deployed runtime | ≤ 10,240 B | 8,926 B (scratch skeleton, nine events, every entry point) | `scripts/check-size.mjs` in CI |
+| Deployed runtime | ≤ 10,240 B | 8,926 B planning baseline; **5,523 B measured** at `ed7ae70` + M7 (US1 implemented, US2 still stubbed) | `scripts/check-size.mjs` in CI |
 | Slots per deal | ≤ 3 | 3 exactly | `StorageLayout.t.sol` reads slots A/B/C and asserts the next slot is zero |
 | Slots per provider | ≤ 2 | 2 (array element + id mapping entry) | same suite, provider element + 1 asserted zero |
 | Active challenge | ≤ 1 reused slot | 0 new slots; fields live in deal slots A and C | same suite, before/after a challenge |

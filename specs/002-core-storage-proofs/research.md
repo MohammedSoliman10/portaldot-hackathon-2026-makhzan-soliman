@@ -53,11 +53,12 @@ until the deploy-less `eth_call` check has a recorded pass.
 
 **Decision**: The measured layout in `contracts/storage-layout.md`:
 
-- Config: slot 0 (`admin`, `challengeWindow`, `challengeBlockSize`, `slashBps`, `paused`) and slot 1
-  (`minBond`, `nextDealId`, `providerCount`, `minDurationBlocks`, `maxDurationBlocks`).
-- `providers`: array at slot 3; each element is exactly 32 bytes (`addr` 20, `bond` 8,
-  `activeDeals` 3, `flags` 1). `providerIdOf` mapping at slot 2 → **2 slots per provider**.
-- `deals`: mapping at slot 4; each `Deal` is 3 slots — slot A (`owner` 20, `startBlock` 4, `endBlock`
+- Config: one slot 0 (`challengeWindow`, `challengeBlockSize`, `slashBps`, `minBond`, `nextDealId`,
+  `providerCount`, `minDurationBlocks`, `maxDurationBlocks` = 30/32 bytes; DR-010 removed the admin
+  address and pause flag that used to push two fields into a second slot).
+- `providers`: array at slot 2; each element is exactly 32 bytes (`addr` 20, `bond` 8,
+  `activeDeals` 3, `flags` 1). `providerIdOf` mapping at slot 1 → **2 slots per provider**.
+- `deals`: mapping at slot 3; each `Deal` is 3 slots — slot A (`owner` 20, `startBlock` 4, `endBlock`
   4, `providerId` 2, `flags` 1), slot B (`root` 32), slot C (`leafCount` 3, `size` 4, `challengeIndex`
   4, `challengeStart` 4, `price` 8, `claimed` 8).
 - A challenge writes only `challengeIndex`, `challengeStart` and one flag bit inside the deal's

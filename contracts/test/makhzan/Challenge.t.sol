@@ -224,7 +224,7 @@ contract ChallengeTest is MakhzanTestBase {
 
     /// @dev M5: the deal ending does not close an already-open round; the deadline does.
     function test_answerAfterEndBlockButBeforeDeadlinePasses() public {
-        MakhzanHarness late = new MakhzanHarness(address(this), 700, BLOCK_SIZE, SLASH_BPS, MIN_BOND, DURATION, 14_400);
+        MakhzanHarness late = new MakhzanHarness(700, BLOCK_SIZE, SLASH_BPS, MIN_BOND, DURATION, 14_400);
         vm.prank(provider);
         late.registerProvider{value: _wei(MIN_BOND)}();
         vm.prank(client);

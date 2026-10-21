@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {MakhzanHarness} from "./harness/MakhzanHarness.sol";
 
 /// @notice T022 — storage slot budget (FR-036, contracts/storage-layout.md).
-/// @dev Slots: 0 config A, 1 config B, 2 providerIdOf, 3 providers, 4 deals.
+/// @dev Slots: 0 config, 1 providerIdOf, 2 providers, 3 deals.
 contract StorageLayoutTest is Test {
     uint256 internal constant WPU = 10_000;
     uint64 internal constant MIN_BOND = 1e15;
@@ -20,7 +20,7 @@ contract StorageLayoutTest is Test {
     address internal client = address(0xC11E17);
 
     function setUp() public {
-        m = new MakhzanHarness(address(this), 50, BLOCK_SIZE, 2000, MIN_BOND, 600, 14_400);
+        m = new MakhzanHarness(50, BLOCK_SIZE, 2000, MIN_BOND, 600, 14_400);
         vm.deal(provider, 100 ether);
         vm.deal(client, 100 ether);
         vm.prank(provider);
@@ -32,29 +32,28 @@ contract StorageLayoutTest is Test {
     }
 
     function _providerSlot(uint16 id) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(uint256(3)))) + (id - 1));
+        return bytes32(uint256(keccak256(abi.encode(uint256(2)))) + (id - 1));
     }
 
     function _dealSlot(uint32 id) internal pure returns (bytes32) {
-        return keccak256(abi.encode(uint256(id), uint256(4)));
+        return keccak256(abi.encode(uint256(id), uint256(3)));
     }
 
     function _load(bytes32 slot) internal view returns (uint256) {
         return uint256(vm.load(address(m), slot));
     }
 
-    function test_twoConfigSlotsAreWrittenOnce() public view {
-        assertTrue(_load(bytes32(uint256(0))) != 0, "config slot 0 written");
-        assertTrue(_load(bytes32(uint256(1))) != 0, "config slot 1 written");
-        // Slot 0 packs admin | window | blockSize | slashBps | paused into 29 of 32 bytes.
-        assertEq(_load(bytes32(uint256(0))) >> 232, 0, "config slot 0 uses 29 bytes");
-        // Slot 1 packs minBond | nextDealId | providerCount | durations into 22 of 32 bytes.
-        assertEq(_load(bytes32(uint256(1))) >> 176, 0, "config slot 1 uses 22 bytes");
+    function test_configPacksIntoOneSlot() public view {
+        assertTrue(_load(bytes32(uint256(0))) != 0, "config slot written");
+        // Removing admin and paused lets window | blockSize | slashBps | minBond | nextDealId
+        // | providerCount | durations pack into 30 of 32 bytes of a single slot.
+        assertEq(_load(bytes32(uint256(0))) >> 240, 0, "config uses 30 bytes");
+        assertEq(_load(bytes32(uint256(1))), 0, "config does not spill into a second slot");
     }
 
     function test_providerUsesTwoSlots() public view {
         bytes32 element = _providerSlot(1);
-        bytes32 idEntry = keccak256(abi.encode(provider, uint256(2)));
+        bytes32 idEntry = keccak256(abi.encode(provider, uint256(1)));
         uint256 packed = _load(element);
 
         assertTrue(packed != 0, "provider element written");

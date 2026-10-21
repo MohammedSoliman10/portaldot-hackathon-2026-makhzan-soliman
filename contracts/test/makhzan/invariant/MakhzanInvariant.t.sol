@@ -31,7 +31,7 @@ contract MakhzanInvariantTest is StdInvariant, Test {
     address internal actorC = address(0xC11E17);
 
     function setUp() public {
-        m = new MakhzanHarness(address(this), WINDOW, BLOCK_SIZE, SLASH_BPS, MIN_BOND, MIN_DURATION, MAX_DURATION);
+        m = new MakhzanHarness(WINDOW, BLOCK_SIZE, SLASH_BPS, MIN_BOND, MIN_DURATION, MAX_DURATION);
         tree = new TreeHarness();
         bytes32 root = tree.root(SIZE, BLOCK_SIZE);
         handler = new MakhzanHandler(IMakhzan(address(m)), tree, root, SIZE, BLOCK_SIZE, [actorA, actorB, actorC]);
