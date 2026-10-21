@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {Vm} from "forge-std/Vm.sol";
 import {IMakhzan} from "../../src/makhzan/IMakhzan.sol";
 import {MakhzanTestBase} from "./harness/MakhzanTestBase.sol";
+import {MakhzanHarness} from "./harness/MakhzanHarness.sol";
 
 /// @notice T025 — challenge, answer, resolve and slash (FR-010–FR-023).
 contract ChallengeTest is MakhzanTestBase {
@@ -219,5 +220,43 @@ contract ChallengeTest is MakhzanTestBase {
         vm.prank(client);
         vm.expectRevert(IMakhzan.DealExpired.selector);
         m.challenge(dealId);
+    }
+
+    /// @dev M5: the deal ending does not close an already-open round; the deadline does.
+    function test_answerAfterEndBlockButBeforeDeadlinePasses() public {
+        MakhzanHarness late = new MakhzanHarness(address(this), 700, BLOCK_SIZE, SLASH_BPS, MIN_BOND, DURATION, 14_400);
+        vm.prank(provider);
+        late.registerProvider{value: _wei(MIN_BOND)}();
+        vm.prank(client);
+        late.createDeal{value: _wei(PRICE)}(1, root, LEAF_COUNT, SIZE, DURATION, PRICE);
+        uint32 dealId = 1;
+
+        vm.prank(client);
+        late.challenge(dealId);
+        (bool open, uint32 index,, uint32 deadline,) = late.challengeStateOf(dealId);
+        assertTrue(open, "challenge open");
+        assertEq(deadline, uint32(block.number) + 700, "long 700-block window");
+
+        // The deal's end block lands 100 blocks before the deadline.
+        (,, uint32 endBlock,,) = _dealFields(late, dealId);
+        vm.roll(endBlock + 10);
+        assertLt(block.number, deadline, "still inside the response window");
+
+        bytes memory data = tree.leaf(SIZE, BLOCK_SIZE, index);
+        bytes32[] memory proof = tree.path(SIZE, BLOCK_SIZE, index);
+        vm.prank(provider);
+        late.answer(dealId, data, proof);
+
+        (bool openAfter,,,,) = late.challengeStateOf(dealId);
+        assertFalse(openAfter, "an answer after the end block still passes");
+    }
+
+    /// @dev Minimal end-block read for a harness deployed inside a test.
+    function _dealFields(MakhzanHarness target, uint32 dealId)
+        internal
+        view
+        returns (address owner, uint32 startBlock, uint32 endBlock, uint16 providerId, uint8 flags)
+    {
+        (owner, startBlock, endBlock, providerId, flags,,,,,,,) = target.dealOf(dealId);
     }
 }

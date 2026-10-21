@@ -104,7 +104,7 @@ Short, argument-free errors, mapped to messages by the off-chain components.
 | `ChallengeOpen` | a challenge is already open on this deal |
 | `NoChallenge` | no open challenge on this deal |
 | `ProofRejected` | bytes or path failed verification, or the length is wrong |
-| `WindowOpen` | the response window has not closed yet |
+| `WindowOpen` | the response window has not closed yet, or an answer arrived after its deadline (the same error covers both directions of the window; the off-chain mapping must say so, FR-045) |
 | `ZeroClaim` | nothing has accrued since the last claim |
 | `AlreadySettled` | the deal is already settled |
 | `BeforeEnd` | settlement attempted before the end block |

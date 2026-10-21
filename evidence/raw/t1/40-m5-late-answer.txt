@@ -1,0 +1,34 @@
+# M5 — an answer after the end block but before the deadline passes (RED)
+# UTC: 2026-10-21T11:25:05Z
+# Local Foundry only; no RPC, no keys. The round is opened with a 700-block window on a
+# 600-block deal: endBlock falls 100 blocks before the deadline, so block endBlock+10 is inside
+# the response window. The state machine allows a pass while the round is open, even after the
+# deal ends. The same WindowOpen error covers a late answer (documented in contracts/imakhzan.md).
+
+$ forge test --match-path test/makhzan/Challenge.t.sol
+Ran 18 tests for test/makhzan/Challenge.t.sol:ChallengeTest
+[FAIL: NotImplemented()] test_answerAfterDeadlineRevertsWindowOpen() (gas: 154156)
+[FAIL: NotImplemented()] test_answerAfterEndBlockButBeforeDeadlinePasses() (gas: 1698929)
+[FAIL: Error != expected error: NotImplemented() != NoChallenge()] test_answerWithoutChallengeRevertsNoChallenge() (gas: 929556)
+[FAIL: Error != expected error: NotImplemented() != DealExpired()] test_challengeOnExpiredDealRevertsDealExpired() (gas: 174792)
+[FAIL: NotImplemented()] test_challengeOnSettledDealReverts() (gas: 174292)
+[FAIL: Error != expected error: NotImplemented() != NoDeal()] test_challengeOnUnknownDealRevertsNoDeal() (gas: 33047)
+[FAIL: NotImplemented()] test_challengeOpenedEventCarriesFields() (gas: 155095)
+[FAIL: NotImplemented()] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 167739)
+[FAIL: NotImplemented()] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 154684)
+[FAIL: Error != expected error: NotImplemented() != NotOwner()] test_onlyDealOwnerCanChallenge() (gas: 157028)
+[FAIL: NotImplemented()] test_onlyProviderCanAnswer() (gas: 154310)
+[FAIL: NotImplemented()] test_openChallengeStaysResolvableAfterEndBlock() (gas: 173726)
+[FAIL: NotImplemented()] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 173748)
+[FAIL: NotImplemented()] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 154527)
+[FAIL: NotImplemented()] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 154461)
+[FAIL: NotImplemented()] test_secondResolveRevertsNoChallenge() (gas: 154219)
+[FAIL: NotImplemented()] test_strangerResolvePaysOwnerNotCaller() (gas: 173902)
+[FAIL: NotImplemented()] test_validAnswerBeforeDeadlinePasses() (gas: 173553)
+Suite result: FAILED. 0 passed; 18 failed; 0 skipped; finished in 4.82ms (6.26ms CPU time)
+Ran 1 test suite in 6.82ms (4.82ms CPU time): 0 tests passed, 18 failed, 0 skipped (18 total tests)
+[FAIL: NotImplemented()] test_answerAfterDeadlineRevertsWindowOpen() (gas: 154156)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |
