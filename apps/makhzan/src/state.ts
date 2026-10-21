@@ -12,6 +12,8 @@ export interface DealState {
   role: "provider" | "client";
   owner: string;
   providerId: number;
+  /** Committed root of the file this deal serves; required to rebuild an answer path. */
+  root?: string;
   lastChallenge?: { index: number; start: number; status: "passed" | "failed" | "pending" };
 }
 

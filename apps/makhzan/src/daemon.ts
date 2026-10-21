@@ -35,7 +35,34 @@ export function startUploadServer(receiver: UploadReceiver, port = 0): Promise<S
   });
 }
 
-/** T046/T047: poll challenges for known deals and answer them. */
-export function pollOnce(_receiver: UploadReceiver, _client: unknown): Promise<void> {
+/** T046/T047: the polling half. */
+export interface ChainClient {
+  challengeStateOf(dealId: number): Promise<{
+    open: boolean;
+    index: number;
+    start: number;
+    deadline: number;
+    expectedPathLength: number;
+  }>;
+  answer(dealId: number, data: `0x${string}`, path: `0x${string}`[]): Promise<{ hash: `0x${string}` }>;
+}
+
+export interface PollContext {
+  client: ChainClient;
+  state: import("./state.ts").StateFile;
+  stateFile: string;
+  /** Deal ids to check even when the state has never heard of them. */
+  dealIds?: number[];
+  drill?: "wrong" | "skip";
+}
+
+export interface PollResult {
+  answered: number[];
+  skipped: number[];
+  unanswerable: string[];
+  unknownDeal: number[];
+}
+
+export async function pollOnce(_ctx: PollContext): Promise<PollResult> {
   throw new Error("not implemented");
 }

@@ -1,0 +1,22 @@
+# T046 red — daemon poll/answer suite fails on behaviour
+# UTC: 2026-10-21T16:35:09Z
+# Local Node only; no RPC, no keys, temp dirs. The suite drives pollOnce through an injected fake
+# client: state read via challengeStateOf, never a log query; the block and path come from the stored
+# tree; drill mode can answer wrong or skip; an unknown deal is reported unanswerable; a restart does
+# not re-answer a handled round; a missing block is reported instead of guessed.
+
+$ node --test test/daemon.test.ts
+✖ a poll cycle reads challengeStateOf and never queries logs (2.7581ms)
+✖ a closed challenge submits nothing and records nothing (1.131ms)
+✖ drill mode answers with the wrong bytes and records the round as failed (1.2472ms)
+✖ drill mode can skip the answer and still records the round as failed (0.92ms)
+✖ a challenge on an unknown deal is reported unanswerable (0.9772ms)
+✖ a restart resumes without re-answering an already handled round (0.8188ms)
+✖ a missing block is reported, never guessed (0.8756ms)
+ℹ tests 7
+ℹ pass 0
+ℹ fail 7
+
+$ node --test test/daemon.test.ts   # reason (first failure)
+  Error: not implemented
+  Error: not implemented
