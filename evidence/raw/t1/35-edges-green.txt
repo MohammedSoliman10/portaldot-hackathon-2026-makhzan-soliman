@@ -1,0 +1,17 @@
+# T037 — invariant boundary cases green (InvariantEdges.t.sol; no contract change needed)
+# UTC: 2026-10-21T11:59:17Z
+# Local Foundry only; no RPC, no keys. Boundaries: slash exactly at a minBond bond, slash at the
+# uint64 bond cap, claim at the exact end block (full price), settle in the same block a challenge
+# fails, and conservation across two deals on one provider. No boundary violation was found, so
+# Makhzan.sol is unchanged by this task; invariants 2 and 4 hold at both extremes.
+
+$ forge test --match-path test/makhzan/InvariantEdges.t.sol
+[PASS] test_claimAtExactEndBlockPaysTheWholePrice() (gas: 296851)
+[PASS] test_settleInTheSameBlockAChallengeFails() (gas: 327818)
+[PASS] test_slashAtMinimumBondLeavesEightyPercent() (gas: 288114)
+[PASS] test_slashAtUint64BondCapDoesNotOverflow() (gas: 374539)
+[PASS] test_twoDealsOneProviderConserveValue() (gas: 1395639)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 8.36ms (6.20ms CPU time)
+
+$ forge build --sizes
+| Makhzan           | 9,128            | 9,691             | 15,448             | 39,461              |
