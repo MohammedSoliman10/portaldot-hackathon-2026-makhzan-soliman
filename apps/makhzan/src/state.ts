@@ -8,13 +8,27 @@ export interface FileEntry {
   path: string;
 }
 
+export type ChallengeStatus = "pending" | "submitted" | "passed" | "failed" | "unanswered";
+
+export interface ChallengeRecord {
+  index: number;
+  start: number;
+  /** `passed`/`failed` are only written from a read-back, never from a send. */
+  status: ChallengeStatus;
+  attempts?: number;
+  hash?: string;
+  blockNumber?: number;
+  /** Provider bond (units) observed just before the answer was sent. */
+  bondBefore?: string;
+}
+
 export interface DealState {
   role: "provider" | "client";
   owner: string;
   providerId: number;
   /** Committed root of the file this deal serves; required to rebuild an answer path. */
   root?: string;
-  lastChallenge?: { index: number; start: number; status: "passed" | "failed" | "pending" };
+  lastChallenge?: ChallengeRecord;
 }
 
 export interface StateFile {

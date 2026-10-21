@@ -40,7 +40,13 @@ export function startUploadServer(receiver: UploadReceiver, port = 0): Promise<S
 }
 
 /** T046/T047: the polling half. */
+export const MAX_ANSWER_ATTEMPTS = 3;
+
 export interface ChainClient {
+  /** Current block height, used for the deadline and for the record. */
+  blockNumber(): Promise<number>;
+  /** Provider bond of the deal, in native units, used to detect a slash. */
+  bondOf(dealId: number): Promise<bigint>;
   challengeStateOf(dealId: number): Promise<{
     open: boolean;
     index: number;
@@ -62,13 +68,17 @@ export interface PollContext {
 
 export interface PollResult {
   answered: number[];
+  passed: number[];
+  failed: number[];
   skipped: number[];
   unanswerable: string[];
   unknownDeal: number[];
 }
 
 export async function pollOnce(ctx: PollContext): Promise<PollResult> {
-  const result: PollResult = { answered: [], skipped: [], unanswerable: [], unknownDeal: [] };
+  const result: PollResult = {
+    answered: [], passed: [], failed: [], skipped: [], unanswerable: [], unknownDeal: [],
+  };
   const ids = new Set<number>(Object.keys(ctx.state.deals).map(Number));
   for (const id of ctx.dealIds ?? []) ids.add(id);
 
