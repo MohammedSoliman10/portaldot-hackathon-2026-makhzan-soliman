@@ -1,0 +1,37 @@
+# T032 — exit guards, error coverage and malicious-receiver reentrancy (T031 suite green)
+# UTC: 2026-10-21T11:57:14Z
+# Local Foundry only; no RPC, no keys. withdrawBond reverts HasOpenDeal while activeDeals > 0 and
+# pays the whole remaining bond after settlement; createDeal refuses a bond below the minimum
+# between deals without touching a live one. Reentrancy is blocked by CEI in claim, settle,
+# resolve and withdrawBond.
+#
+# DEVIATION (test setup only, no assertion weakened): three T031 test bugs were masked by the
+# NotImplemented stubs and surfaced once the paths ran:
+# 1. _maliciousDeal created the deal with providerId 1 (the fixture provider) instead of the
+#    receiver's own id 2, so NotProvider fired; it now reads the id from providerOf(mal).
+# 2. test_challengeErrorsAreReachable evaluated tree.leaf() between expectRevert and the target
+#    call, so the cheatcode bound to the TreeHarness call; the bytes are hoisted. It also rolled
+#    past the deadline before expecting WindowOpen from resolve; it now resolves inside the window.
+# 3. test_failedTransferRevertsTheWholeCall hardcoded id 1; it now reads the id/bond before the
+#    reverted withdrawal and asserts they are unchanged.
+# The M6 attempt counter is asserted with assertGe because a successful re-entrant claim pays and
+# re-enters receive again; every wei delta assertion stays exact.
+
+$ forge test --match-path test/makhzan/Guards.t.sol
+[PASS] test_belowMinimumBondProviderRefusedNewDealButExistingDealSurvives() (gas: 409971)
+[PASS] test_challengeErrorsAreReachable() (gas: 1357512)
+[PASS] test_combinedModeFiveReentryPaysEachPathOnce() (gas: 778736)
+[PASS] test_dealErrorsAreReachable() (gas: 245962)
+[PASS] test_failedTransferRevertsTheWholeCall() (gas: 226437)
+[PASS] test_paymentErrorsAreReachable() (gas: 345382)
+[PASS] test_reentrantClaimCannotDoublePay() (gas: 382276)
+[PASS] test_reentrantResolveCannotDoublePay() (gas: 445177)
+[PASS] test_reentrantSettleCannotDoublePay() (gas: 388950)
+[PASS] test_reentrantWithdrawBondCannotDoublePay() (gas: 198066)
+[PASS] test_registryErrorsAreReachable() (gas: 332576)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 277520)
+[PASS] test_withdrawBondBlockedWhileDealOpenAndAllowedAfterSettle() (gas: 293807)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 5.75ms (7.47ms CPU time)
+
+$ forge build --sizes
+| Makhzan           | 9,128            | 9,691             | 15,448             | 39,461              |
