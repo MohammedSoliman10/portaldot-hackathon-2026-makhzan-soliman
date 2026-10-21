@@ -1,0 +1,19 @@
+# Batch 3 step 1 — full project green after T026/T028/T030/T032/T033/T035/T037
+# UTC: 2026-10-21T11:59:36Z
+# Local Foundry only; no RPC, no keys, no deployment. Covers tier-0 gate contracts and every
+# tier-1 suite together.
+
+$ forge fmt --check
+fmt: clean
+
+$ forge test
+Ran 21 test suites in 3.84s (7.15s CPU time): 141 tests passed, 0 failed, 0 skipped (141 total tests)
+
+$ forge test --match-path "test/makhzan/*"
+Ran 16 test suites in 3.89s (7.27s CPU time): 119 tests passed, 0 failed, 0 skipped (119 total tests)
+
+$ forge build --sizes
+| Makhzan           | 9,128            | 9,691             | 15,448             | 39,461              |
+| MakhzanHarness    | 9,498            | 10,074            | 15,078             | 39,078              |
+
+# Makhzan runtime 9128 of 10240 bytes: 1112 bytes of headroom. No trim performed.
