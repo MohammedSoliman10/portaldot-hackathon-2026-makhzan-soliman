@@ -1,0 +1,43 @@
+$ forge fmt --check
+
+$ forge build --sizes
+Compiling 29 files with Solc 0.8.28
+Solc 0.8.28 finished in 1.08s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+  --> src/tier0/HashProbe.sol:13:5:
+   |
+13 |     function hashOnly(bytes32 input) external returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+╭---------------+------------------+-------------------+--------------------+---------------------╮
+| Contract      | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
++=================================================================================================+
+| BehaviorProbe | 721              | 752               | 23,855             | 48,400              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| CounterProbe  | 246              | 276               | 24,330             | 48,876              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| HashProbe     | 338              | 369               | 24,238             | 48,783              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| SizeProbe     | 9                | 72                | 24,567             | 49,080              |
+|---------------+------------------+-------------------+--------------------+---------------------|
+| ValueEcho     | 501              | 532               | 24,075             | 48,620              |
+╰---------------+------------------+-------------------+--------------------+---------------------╯
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
