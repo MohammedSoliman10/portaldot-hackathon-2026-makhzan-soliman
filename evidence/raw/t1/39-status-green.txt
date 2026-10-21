@@ -1,0 +1,20 @@
+# T041 green — five-state transaction pipeline
+# UTC: 2026-10-21T12:31:29Z
+# Local Node only; no RPC, no keys. Every stage is recorded once, in order; finalized needs an
+# explicit observation (finalized tag or a positive confirmation count); a reverted record keeps
+# its verbatim reason, refuses action and refuses a read-back, so it can never be reported as
+# success (FR-031, FR-033).
+
+$ node --test test/status.test.ts
+✔ the five state slots fill in order (1.273ms)
+✔ a record refuses to act before executed (0.4845ms)
+✔ finalized requires an observed finality and cannot precede execution (0.1655ms)
+✔ a reverted transaction keeps the verbatim reason and takes no read-back (0.162699ms)
+✔ stages cannot be skipped or rewritten (0.3893ms)
+ℹ tests 5
+ℹ pass 5
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
