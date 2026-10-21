@@ -1,0 +1,11 @@
+# T051 — deployed size budget check (runtime 10,240 B)
+# UTC: 2026-10-21T23:17:29Z
+# Local Foundry only. contracts/size-budget.json holds runtimeBytes = 10240. The check measures the
+# deployed bytecode in contracts/out/Makhzan.sol/Makhzan.json (with via_ir, DR-012) and compares it.
+
+$ node scripts/check-size.mjs
+Makhzan runtime 6378 B <= budget 10240 B (margin 3862 B)
+exit=0
+
+$ forge build --sizes | grep Makhzan
+| Makhzan           | 6,378            | 6,966             | 18,198             | 42,186              |
