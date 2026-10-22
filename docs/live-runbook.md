@@ -44,16 +44,26 @@ balance is below the DR-012 cap. Record the raw output even when it fails.
 ```bash
 cd contracts
 forge build --sizes                     # record the runtime/creation bytes for the live build
-node ../scripts/check-size.mjs          # must exit 0
-# Deploy path: T064 must provide one that reads the key from the environment. The repository does NOT
-# contain contracts/script/makhzan/Deploy.s.sol today (the local e2e deploys from the Foundry artifact
-# with viem). Do not run a script that does not exist.
-node apps/makhzan/scripts/deploy-live.mjs   # [to be written in T064] key from env only
+cd ..
+node scripts/check-size.mjs             # must exit 0
+export MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=... MAKHZAN_CHAIN_ID=...
+export MAKHZAN_PRIVATE_KEY=...          # env only, never on argv, never printed
+node scripts/deploy.mjs --dry-run \
+  --min-bond <wei> --window <blocks> --block-size <1024..4096> --slash-bps 2000 \
+  --min-duration <blocks> --max-duration <blocks>
+node scripts/deploy.mjs \
+  --min-bond <wei> --window <blocks> --block-size <1024..4096> --slash-bps 2000 \
+  --min-duration <blocks> --max-duration <blocks>
 ```
 
-**Open gap (recorded, not hidden)**: the quickstart's `forge script script/makhzan/Deploy.s.sol` and
-this step name a deploy script that has not been written yet. T064 must either add that script or
-replace both references with the environment-keyed viem deploy path; until then no live step may run.
+**Prerequisite closed in batch 7 (local only)**: `scripts/deploy.mjs` (library
+`apps/makhzan/src/deploy.ts`) is the environment-keyed viem deploy path. It requires
+`MAKHZAN_NETWORK` explicitly, refuses a non-whole-unit `--min-bond`, runs `eth_estimateGas` and
+refuses below the DR-012 reserve, verifies the deployed code length against the artifact runtime,
+reads the constructor values back from packed slot 0, and writes the deployment record. Tests and a
+real anvil deploy: `evidence/raw/t1/60-deploy-red.txt`, `61-deploy-green.txt`,
+`64-e2e-process.txt`. `--artifact` accepts a different compiler output (for example `resolc`) after
+G01/G02. **The live run is still `[pending live run]`; no live RPC has been called.**
 
 - Wait for `executed: success`, then observe finality (tag or labelled heuristic with its depth),
   then read the contract back (`providerOf`, `dealOf`, `challengeStateOf` on an unknown id).
@@ -65,18 +75,23 @@ replace both references with the environment-keyed viem deploy path; until then 
 
 ## Step 2 — live passed round (T065)
 
-**Gap to close before this step**: `apps/makhzan` has the CLI and daemon *logic* (`parseCommand`,
-`execute`, `pollOnce`, `startUploadServer`) and tests for them, but no executable entry point yet:
-`npm run cli` / `npm run daemon` run modules that only export functions, the daemon drill mode is a
-function option (not an env switch), and there is no `resolve` command. T064/T065 must add the entry
-points and env wiring, with tests, before any live step runs. The commands below are the intended
-sequence, not a runnable path today.
+**Prerequisite closed in batch 7 (local only)**: `npm run cli` and `npm run daemon` now have real
+`main()` functions (`apps/makhzan/src/cliMain.ts`, `daemonMain.ts`) with viem wiring for every
+`CommandDeps` and `ChainClient` method. Settings come from `MAKHZAN_NETWORK`, `MAKHZAN_RPC_URL`,
+`MAKHZAN_CHAIN_ID`, `MAKHZAN_CONTRACT`, `MAKHZAN_PRIVATE_KEY`, `MAKHZAN_STATE_DIR`,
+`MAKHZAN_DAEMON_PORT`, `MAKHZAN_POLL_MS`, `MAKHZAN_BLOCK_SIZE`, `MAKHZAN_PROVIDER_ID` and
+`MAKHZAN_DRILL`. There is no default network; keys never appear on argv, in logs or in the state
+file. `resolve` exists and is permissionless. Evidence: `evidence/raw/t1/62-entrypoints-red.txt`,
+`63-entrypoints-green.txt`, `64-e2e-process.txt`. **Every live row below is still
+`[pending live run]`.**
 
 ```bash
 cd apps/makhzan
-export MAKHZAN_RPC_URL=... MAKHZAN_ADDRESS=...   # address from step 1
-export PROVIDER_KEY=... OWNER_KEY=...            # env only, never printed
+export MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=... MAKHZAN_CHAIN_ID=...
+export MAKHZAN_CONTRACT=...                      # address from step 1
+export MAKHZAN_PRIVATE_KEY=...                   # provider key; env only, never printed
 npm run daemon &                                 # poll loop, evidence-based labels
+export MAKHZAN_PRIVATE_KEY=...                   # owner key for the client commands
 npm run cli -- upload demo.bin --provider 1
 npm run cli -- create --root 0x… --size 1048576 --leaf-count 1024 \
   --provider 1 --duration 7200 --price 5
@@ -94,14 +109,11 @@ npm run cli -- watch 1                           # expect "passed", bond unchang
 ## Step 3 — live slashed round (T066)
 
 ```bash
-# restart the daemon in drill mode: wrong answer or skipped answer (drill is a function option today;
-# T066 must expose it through the daemon entry point, not a key or argv)
-npm run daemon -- --drill skip &
+# restart the daemon in drill mode: wrong answer or skipped answer, through the environment
+MAKHZAN_DRILL=skip npm run daemon &
 npm run cli -- challenge 1
-npm run cli -- watch 1                           # expect "failed" only after the read-back
-# after the window, anyone may resolve:
-# resolve is permissionless, but the CLI has no `resolve` command yet (T065 gap). Add it through the
-# environment-keyed path; do not put a key on a command line.
+# after the window, anyone may resolve (permissionless); the daemon cannot answer in skip mode
+npm run cli -- resolve 1
 npm run cli -- claim 1
 npm run cli -- settle 1
 ```
