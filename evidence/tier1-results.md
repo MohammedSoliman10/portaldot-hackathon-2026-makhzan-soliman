@@ -8,7 +8,8 @@ must not be read as results.
 **Raw evidence**: `evidence/raw/t1/48-e2e-local.txt` (full run), `59-daemon-evidence-green.txt`
 (daemon suite + re-run), `49-size-check.txt`, `50-size-check-red.txt`, `51-gas-snapshot.txt`,
 `52-ci-local.txt`, `54-evidence-green.txt`, `55-secret-scan.txt`, `56-scope.txt`,
-`57-final-local.txt`.
+`57-final-local.txt`, `60-deploy-red.txt`, `61-deploy-green.txt`, `62-entrypoints-red.txt`,
+`63-entrypoints-green.txt`, `64-e2e-process.txt`, `65-gate-b7.txt`.
 
 ## What ran
 
@@ -86,9 +87,19 @@ numbers, not a live fee estimate.
 | Foundry | 21 suites, 144 tests, 0 failed |
 | Fuzz | 8 × 1,000 runs, 0 failed |
 | Invariants | 6 × 256 runs × 50 depth (12,800 calls), 0 violations |
-| TypeScript | 70 tests, 0 failed; `tsc --noEmit` clean |
+| TypeScript | 93 tests, 0 failed; `tsc --noEmit` clean |
 | Vector parity | `contracts` and `apps/makhzan` copies agree with the golden vectors |
 | CI command list | 10/10 commands exit 0 locally (`52-ci-local.txt`) |
+
+## Batch 7 — deploy command, entry points and process e2e (local only)
+
+| Item | Result | Evidence |
+| --- | --- | --- |
+| Deploy command | dry run prints a tPOT estimate and sends nothing; below-reserve and unset-network refusals; anvil deploy record checked against the chain | `60-deploy-red.txt`, `61-deploy-green.txt` |
+| CLI / daemon entry points | explicit network, env-only key, viem wiring, `resolve`, graceful stop, five-state logs | `62-entrypoints-red.txt`, `63-entrypoints-green.txt` |
+| Process-level e2e | separate deploy, daemon and CLI processes; pass round then claim/settle; skip drill, `resolve` after the deadline | `64-e2e-process.txt` |
+| Slash check | bond `10,000,000,000,000,000 -> 8,000,000,000,000,000` units; owner credited `20,000,000,000,000,000,000` wei (slash × `WEI_PER_UNIT`) | `64-e2e-process.txt`, `evidence/deployments/` |
+| Full gate | Foundry 144, makhzan 93, gates 45, size 6,378 B, snapshot check, except one pre-existing false positive in `specs/001-tier0-gates/tasks.md` | `65-gate-b7.txt` |
 
 ## Not done — `[pending live run]`
 
