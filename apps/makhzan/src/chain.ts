@@ -64,7 +64,7 @@ const ABI = [
     type: "event", name: "DealCreated",
     inputs: [
       { name: "dealId", type: "uint32", indexed: true }, { name: "owner", type: "address", indexed: true },
-      { name: "providerId", type: "uint16", indexed: false }, { name: "root", type: "bytes32", indexed: false },
+      { name: "providerId", type: "uint16", indexed: true }, { name: "root", type: "bytes32", indexed: false },
       { name: "size", type: "uint32", indexed: false }, { name: "endBlock", type: "uint32", indexed: false },
       { name: "price", type: "uint64", indexed: false },
     ],
@@ -72,7 +72,7 @@ const ABI = [
   {
     type: "event", name: "ProviderRegistered",
     inputs: [
-      { name: "provider", type: "address", indexed: true }, { name: "id", type: "uint16", indexed: false },
+      { name: "provider", type: "address", indexed: true }, { name: "id", type: "uint16", indexed: true },
       { name: "bond", type: "uint64", indexed: false },
     ],
   },
@@ -177,6 +177,10 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
       };
     },
     async waitForFinality(receipt): Promise<Finality> {
+      // The local chain has no finality gadget and anvil produces one block per transaction, so
+      // inclusion is the only local observation. The record says `heuristic` with one confirmation;
+      // it never claims the `finalized` tag.
+      if (settings.network === "local") return { kind: "heuristic", confirmations: 1 };
       for (let attempt = 0; attempt < 600; attempt++) {
         const finalized = await publicClient.getBlock({ blockTag: "finalized" });
         if (finalized.number >= receipt.blockNumber) return { kind: "tag", tag: "finalized" };
@@ -223,9 +227,12 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
       };
     },
     async pollDeal(dealId) {
+      // A deal is resolved when it is settled or when a challenge it carried is closed. A deal that
+      // never had a challenge waits for settlement.
       for (let attempt = 0; attempt < 600; attempt++) {
         const deal = await dealOf(dealId);
         if (deal.flags & 1) return true;
+        if (deal.challengeStart !== 0 && (deal.flags & 2) === 0) return true;
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
       return false;

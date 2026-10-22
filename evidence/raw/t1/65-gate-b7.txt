@@ -1,0 +1,58 @@
+# B7 gate — every local check after the deploy command, entry points and process e2e
+# UTC: 2026-10-22T02:27:16Z
+
+$ forge fmt --check
+exit=0
+
+$ forge build --sizes
+| Makhzan           | 6,378            | 6,966             | 18,198             | 42,186              |
+| MakhzanHarness    | 6,540            | 7,128             | 18,036             | 42,024              |
+    ╭▸ src/makhzan/Makhzan.sol:228:24
+    ╭▸ src/makhzan/Makhzan.sol:152:24
+exit=0
+
+$ node scripts/check-size.mjs
+Makhzan runtime 6378 B <= budget 10240 B (margin 3862 B)
+exit=0
+
+$ forge test -vvv
+Ran 21 test suites in 4.57s (22.77s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ forge snapshot --check
+Ran 21 test suites in 3.33s (5.66s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ npm run typecheck (apps/makhzan)
+> tsc --noEmit
+
+exit=0
+
+$ npm test (apps/makhzan)
+ℹ tests 93
+ℹ pass 93
+ℹ fail 0
+exit=0
+
+$ npm run typecheck (apps/gates)
+> tsc --noEmit
+
+exit=0
+
+$ npm test (apps/gates)
+ℹ tests 45
+ℹ pass 45
+ℹ fail 0
+exit=0
+
+$ node scripts/secret-scan.mjs
+secret scan FAILED — 1 finding(s) in 324 files
+  specs/001-tier0-gates/tasks.md:200: C/hex-key-shape: <redacted: the match is the file path
+  "contracts/test/tier0/RoundCostProbe", a path fragment caught by the base64-shaped rule because it
+  contains "/" and is 32+ characters. Not a secret. The file is pre-existing tier0 scope and was not
+  touched by this feature. The scanner was not weakened.>
+scanner exit=1
+
+# Gate reading: every other command above exited 0; the secret scan exits 1 only on that one
+# pre-existing false positive outside this feature. The B7 checkpoint copies are scanned separately
+# (65b) and must be clean.
