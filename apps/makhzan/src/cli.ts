@@ -6,7 +6,7 @@ import { markExecuted, markFinalized, markIncluded, markSubmitted, newRecord, ty
 import { writeRound, type RoundRecord } from "./evidenceWriter.ts";
 import { MAX_UNITS, tPotToUnits, unitsToWei } from "./units.ts";
 
-export type CommandName = "upload" | "create" | "challenge" | "watch" | "claim" | "settle" | "report";
+export type CommandName = "upload" | "create" | "challenge" | "watch" | "claim" | "settle" | "resolve" | "report";
 
 export interface UploadCommand { name: "upload"; file: string; providerId: number }
 export interface CreateCommand {
@@ -20,7 +20,7 @@ export interface CreateCommand {
   units: bigint;
   value: bigint;
 }
-export interface IdCommand { name: "challenge" | "watch" | "claim" | "settle"; dealId: number }
+export interface IdCommand { name: "challenge" | "watch" | "claim" | "settle" | "resolve"; dealId: number }
 export interface ReportCommand { name: "report" }
 export type ParsedCommand = UploadCommand | CreateCommand | IdCommand | ReportCommand;
 
@@ -54,7 +54,7 @@ export interface CommandDeps {
   reporter?: () => Promise<string>;
 }
 
-const COMMANDS = new Set(["upload", "create", "challenge", "watch", "claim", "settle", "report"]);
+const COMMANDS = new Set(["upload", "create", "challenge", "watch", "claim", "settle", "resolve", "report"]);
 const KEY_FLAGS = new Set(["--private-key", "--privatekey", "--key", "--secret", "--mnemonic", "--seed"]);
 const CREATE_OPTIONS = ["--root", "--size", "--leaf-count", "--provider", "--duration", "--price"];
 
@@ -70,6 +70,7 @@ const ABI = [
   { type: "function", name: "challenge", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint32" }], outputs: [] },
   { type: "function", name: "claim", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint32" }], outputs: [] },
   { type: "function", name: "settle", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint32" }], outputs: [] },
+  { type: "function", name: "resolve", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint32" }], outputs: [] },
 ] as const;
 
 function keyError(): Error {
@@ -116,7 +117,7 @@ function required(options: Map<string, string>, name: string): string {
 /** Parses and validates argv before any transaction is built. */
 export function parseCommand(argv: string[], options: { blockSize?: number } = {}): ParsedCommand {
   const [name, ...rest] = argv;
-  if (!name) throw new Error("usage: cli <upload|create|challenge|watch|claim|settle|report>");
+  if (!name) throw new Error("usage: cli <upload|create|challenge|watch|claim|settle|resolve|report>");
   for (const arg of [name, ...rest]) {
     if (KEY_FLAGS.has(arg.toLowerCase())) throw keyError();
   }

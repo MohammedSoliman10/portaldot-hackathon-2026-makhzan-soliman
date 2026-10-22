@@ -7,8 +7,8 @@
     "node": ">=24"
   },
   "scripts": {
-    "daemon": "node src/daemon.ts",
-    "cli": "node src/cli.ts",
+    "daemon": "node src/daemonMain.ts",
+    "cli": "node src/cliMain.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test test/*.test.ts",
     "e2e:local": "node scripts/e2e-local.mjs"

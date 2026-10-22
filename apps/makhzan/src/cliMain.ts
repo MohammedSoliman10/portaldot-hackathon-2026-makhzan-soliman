@@ -1,10 +1,48 @@
-/** CLI entry point. */
-import type { CommandDeps } from "./cli.ts";
+/**
+ * CLI entry point: settings from the environment, viem wiring, then the documented commands.
+ *
+ * The key is read from MAKHZAN_PRIVATE_KEY at start-up and only lives in the viem account. It is not
+ * printed, not put on argv and not part of any record.
+ */
+import { pathToFileURL } from "node:url";
+import { makeChain } from "./chain.ts";
+import { execute, parseCommand, type CommandDeps } from "./cli.ts";
+import { mapContractError } from "./errors.ts";
+import { loadSettings } from "./settings.ts";
 
-export async function runCommand(_argv: string[], _deps: CommandDeps, _log: (line: string) => void): Promise<number> {
-  throw new Error("not implemented");
+/** JSON with bigint values rendered as decimal strings, so a record is stable evidence. */
+export function serialise(record: unknown): string {
+  return JSON.stringify(record, (_key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
 }
 
-export async function main(_argv: string[], _env: NodeJS.ProcessEnv, _log: (line: string) => void): Promise<number> {
-  throw new Error("not implemented");
+/** Parses, executes and prints one command. Returns the process exit code. */
+export async function runCommand(argv: string[], deps: CommandDeps, log: (line: string) => void): Promise<number> {
+  try {
+    const command = parseCommand(argv);
+    const record = await execute(command, deps);
+    log(serialise(record));
+    return 0;
+  } catch (err) {
+    log(`cli failed: ${mapContractError((err as Error).message)}`);
+    return 1;
+  }
+}
+
+export async function main(argv: string[], env: NodeJS.ProcessEnv, log: (line: string) => void): Promise<number> {
+  try {
+    const settings = loadSettings(env);
+    const wiring = makeChain(settings, env);
+    return await runCommand(
+      argv,
+      { contract: settings.contract, chain: wiring.chain, uploader: wiring.uploader, reporter: wiring.reporter },
+      log,
+    );
+  } catch (err) {
+    log(`cli failed: ${(err as Error).message}`);
+    return 1;
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main(process.argv.slice(2), process.env, (line) => console.log(line)).then((code) => process.exit(code));
 }

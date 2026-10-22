@@ -1,0 +1,39 @@
+# P2 green — CLI and daemon entry points
+# UTC: 2026-10-22T02:13:41Z
+# No network touched: fake chain clients and a fake loop. Covers explicit network (no default), live
+# preconditions, contract/key shaping, local defaults, configurable state dir/port/poll interval,
+# `resolve <dealId>` encoding + five-state record, argv key refusal, unknown-command refusal, watch
+# read-back, five-state cycle logging, graceful abort after the in-flight cycle, and a failed cycle
+# that does not stop the loop. The `npm run cli` run below refuses before touching an RPC because
+# MAKHZAN_NETWORK is unset; no key is set or printed.
+
+$ node --test test/settings.test.ts test/cliMain.test.ts test/daemonMain.test.ts
+✔ resolve sends resolve(dealId) and returns a five-state record (3.8261ms)
+✔ a key on argv is refused before anything is built (0.6061ms)
+✔ an unknown command is refused with the documented list (0.4232ms)
+✔ watch polls the deal and reports the read-back (0.2778ms)
+✔ the loop logs the five-state outcome of every cycle (1.0999ms)
+✔ an abort stops the loop after the in-flight cycle (0.3302ms)
+✔ a cycle error is reported and the loop keeps going (0.246ms)
+✔ the network is explicit and has no default (1.1618ms)
+✔ live needs an RPC URL and a chain id (0.175ms)
+✔ the contract and key are required and shaped (0.3388ms)
+✔ local defaults are explicit values, not a hidden network (0.2186ms)
+✔ live rejects a chain id that is not an integer (0.2569ms)
+✔ state dir, port and poll interval are configurable (0.1567ms)
+ℹ tests 13
+ℹ pass 13
+ℹ fail 0
+
+$ npm test
+ℹ tests 93
+ℹ pass 93
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
+
+$ env -u MAKHZAN_NETWORK npm run cli -- watch 1
+cli failed: MAKHZAN_NETWORK must be set to "local" or "live" (got null)
+exit=1
