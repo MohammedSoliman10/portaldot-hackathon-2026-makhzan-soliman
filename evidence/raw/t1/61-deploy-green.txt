@@ -25,6 +25,9 @@ $ npm run typecheck
 > tsc --noEmit
 
 
-$ node scripts/deploy.mjs --help-free check (module loads, no network touched)
-node: bad option: --dry-run
-exit=0
+$ env -u MAKHZAN_NETWORK -u MAKHZAN_PRIVATE_KEY node scripts/deploy.mjs --dry-run --min-bond 100000000000000000000
+deploy failed: MAKHZAN_NETWORK must be set to "local" or "live" (got null)
+exit=1
+
+# The wrapper (scripts/deploy.mjs) parses argv and calls main(); the suite above drives the same main()
+# for every case. With no network set it refuses before touching the RPC.
