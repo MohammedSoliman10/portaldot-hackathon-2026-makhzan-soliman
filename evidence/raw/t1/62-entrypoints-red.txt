@@ -1,0 +1,26 @@
+# P2 red — entry-point settings, CLI and daemon loop fail on behaviour
+# UTC: 2026-10-22T02:10:21Z
+# No network touched: fake chain clients and a fake loop. Each module keeps its documented exports and
+# throws "not implemented", so every failure below is an assertion, not a compile or resolution error.
+
+$ node --test test/settings.test.ts test/cliMain.test.ts test/daemonMain.test.ts
+✖ resolve sends resolve(dealId) and returns a five-state record (0.8189ms)
+✖ a key on argv is refused before anything is built (0.3467ms)
+✖ an unknown command is refused with the documented list (0.1654ms)
+✖ watch polls the deal and reports the read-back (0.2424ms)
+✖ the loop logs the five-state outcome of every cycle (0.8581ms)
+✖ an abort stops the loop after the in-flight cycle (0.2191ms)
+✖ a cycle error is reported and the loop keeps going (0.218ms)
+✖ the network is explicit and has no default (1.4376ms)
+✖ live needs an RPC URL and a chain id (0.3624ms)
+✖ the contract and key are required and shaped (0.2038ms)
+✖ local defaults are explicit values, not a hidden network (0.124ms)
+✖ live rejects a chain id that is not an integer (0.1892ms)
+✖ state dir, port and poll interval are configurable (0.1439ms)
+ℹ tests 13
+ℹ pass 0
+ℹ fail 13
+✖ failing tests:
+✖ resolve sends resolve(dealId) and returns a five-state record (0.8189ms)
+✖ a key on argv is refused before anything is built (0.3467ms)
+✖ an unknown command is refused with the documented list (0.1654ms)
