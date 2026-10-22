@@ -1,19 +1,20 @@
-at=2026-10-22T01:58:34Z
-g10_daemon_pid=13259
+at=2026-10-22T02:07:04Z
+g10_daemon_pid=7617
 g10_daemon_alive=yes
-g10_daemon_elapsed=1-20:31:49
+g10_daemon_started_after_restart=2026-10-22T02:05:59Z
 g10_daemon_cmd=node src/probe/daemon.ts
 keepawake_method=powershell.exe SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED) for 43200s
-keepawake_windows_pid=24840
-keepawake_wsl_launcher_pid=268612
+keepawake_windows_pid=27552
+keepawake_wsl_launcher_pid=7771
 keepawake_set_result=2147483648 (previous state, call succeeded)
-keepawake_started_at=2026-10-22T01:58:12Z
-keepawake_expires_at=2026-10-22T13:58:12Z
-owner_poller_pid=268636
-owner_poller_started_at=2026-10-22T01:58:34Z
+keepawake_started_at=2026-10-22T02:06:16Z
+keepawake_expires_at=2026-10-22T14:06:16Z
+owner_poller_pid=8494
+owner_poller_started_at=2026-10-22T02:06:50Z
 owner_poller_duration_ms=86400000
-owner_poller_expires_at=2026-10-23T01:58:34Z
+owner_poller_expires_at=2026-10-23T02:06:50Z
 owner_poller_flag=evidence/raw/g07/owner-funded.flag
 owner_poller_hub2=5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp
-first_poll=2026-10-22T01:58:34Z native_free=0 native_reserved=0 evm_wei=0 hub2_free=50000000000000000 hub2_reserved=0
+first_poll=2026-10-22T02:06:50Z native_free=0 native_reserved=0 evm_wei=0 hub2_free=50000000000000000 hub2_reserved=0
 owner_funded_flag_exists=no
+note=G10 daemon, keep-awake and poller were restarted after the server restart; the previous PIDs were stale.
