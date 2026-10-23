@@ -28,6 +28,30 @@ const LITERAL = /(0x[0-9a-fA-F]{32,}|[A-Za-z0-9+/=]{32,})/;
 const QUOTED_MNEMONIC = /["'`]((?:[a-z]{3,8}[ \t]+){11,23}[a-z]{3,8})["'`]/;
 const WORD_COUNTS = new Set([12, 15, 18, 21, 24]);
 
+/**
+ * Narrow, documented allowlist. Each entry names one rule, one exact repository-relative file and one
+ * exact matched literal, so it cannot hide a different value in the same file or the same value
+ * anywhere else. Kept intentionally short: a path fragment is not a secret.
+ */
+const ALLOWLIST = [
+  {
+    rule: "C",
+    path: "specs/001-tier0-gates/tasks.md",
+    literal: "contracts/test/tier0/RoundCostProbe",
+    reason:
+      "A Solidity test path is 32+ characters and contains '/', so the base64-shaped rule C matches " +
+      "it on a line that also says 'seed'. It is not a key; the tier0 spec is unchanged by this feature.",
+  },
+];
+
+function allowlisted(rel, line, rule) {
+  return ALLOWLIST.some((entry) => {
+    if (entry.rule !== rule || entry.path !== rel) return false;
+    const match = LITERAL.exec(line);
+    return match !== null && match[0] === entry.literal;
+  });
+}
+
 function wordsOf(phrase) {
   return phrase.trim().split(/\s+/).length;
 }
@@ -76,7 +100,7 @@ for (const file of files) {
       const flag = /--(?:private-key|privatekey|mnemonic|seed)\s+("?)(0x[0-9a-fA-F]{32,}|[A-Za-z0-9+/=]{32,})\1/.exec(line);
       const env = /\b(PRIVATE_KEY|MNEMONIC|SEED|SECRET|API_KEY|OWNER_KEY|PROVIDER_KEY)\s*=\s*("?)(0x[0-9a-fA-F]{32,}|[A-Za-z0-9+/=]{32,})\2/.exec(line);
       if (flag || env) findings.push(`${where}: B/key-literal: ${line.trim().slice(0, 120)}`);
-      if (/\b(key|secret|private|mnemonic|seed)\b/i.test(line) && LITERAL.test(line)) {
+      if (/\b(key|secret|private|mnemonic|seed)\b/i.test(line) && LITERAL.test(line) && !allowlisted(rel, line, "C")) {
         findings.push(`${where}: C/hex-key-shape: ${line.trim().slice(0, 120)}`);
       }
     }

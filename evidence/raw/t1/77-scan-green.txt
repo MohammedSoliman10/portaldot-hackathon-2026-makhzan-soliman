@@ -1,0 +1,16 @@
+# S4 green — narrow documented allowlist, gate exits 0, canary still catches secrets
+# UTC: 2026-10-23T02:57:58Z
+# Entry: rule C, exact path specs/001-tier0-gates/tasks.md, exact literal
+# "contracts/test/tier0/RoundCostProbe". Any other file or value still fails.
+
+$ node --test scripts/secret-scan.test.mjs
+✔ the documented tier0 path-fragment entry is allowlisted and the gate passes (32.0087ms)
+✔ the canary still catches a PEM block, a literal key and a mnemonic (30.4951ms)
+✔ the allowlist is narrow: a key-shaped line elsewhere is still a finding (24.2178ms)
+ℹ tests 3
+ℹ pass 3
+ℹ fail 0
+
+$ node scripts/secret-scan.mjs
+secret scan PASS — 0 findings in 336 files (347 paths)
+exit=0
