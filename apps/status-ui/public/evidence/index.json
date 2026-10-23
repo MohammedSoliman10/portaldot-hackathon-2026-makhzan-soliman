@@ -1,0 +1,13 @@
+{
+  "schema": "makhzan.evidence-index/v0",
+  "current": "local-anvil-2026-10-23",
+  "files": [
+    {
+      "id": "local-anvil-2026-10-23",
+      "url": "/evidence/local-anvil-2026-10-23.json",
+      "sha256": "0xfec974a18e7471bc51249b37494ec2a9b19deaf92c4a711289bb03e90fbff323",
+      "environment": "anvil-local",
+      "generatedAt": "2026-10-23T08:21:15Z"
+    }
+  ]
+}
