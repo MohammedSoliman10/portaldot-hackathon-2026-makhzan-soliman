@@ -1,0 +1,8 @@
+# R6 red — no doctor command
+# UTC: 2026-10-23T09:20:54Z
+
+$ node --test test/doctor.test.ts
+
+test at test/doctor.test.ts:1:1
+✖ test/doctor.test.ts (76.7028ms)
+  'test failed'
