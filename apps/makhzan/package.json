@@ -11,7 +11,8 @@
     "cli": "node src/cliMain.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test test/*.test.ts",
-    "e2e:local": "node scripts/e2e-local.mjs"
+    "e2e:local": "node scripts/e2e-local.mjs",
+    "verify:deployment": "node scripts/verify-deployment.mjs"
   },
   "dependencies": {
     "viem": "2.57.7"

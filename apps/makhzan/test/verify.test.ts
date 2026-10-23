@@ -61,8 +61,9 @@ test("verification writes code, artifact, deployer mapping and the block it read
   assert.equal(result.record.network, "LOCAL");
   assert.equal(result.record.block, 12);
   assert.equal(result.record.codeVerified.method, "runtime-code-hash");
-  assert.equal(result.record.deployerMapping.checked, true);
-  assert.match(String(result.record.deployerMapping.note), /0xf39Fd6/);
+  const mapping = result.record.deployerMapping as Record<string, unknown>;
+  assert.equal(mapping.checked, true);
+  assert.match(String(mapping.note), /0xf39Fd6/);
   assert.deepEqual(seen, [{ address: "0x5FbDB2315678afecb367f032d93F642f64180aa3", block: 12 }]);
 });
 
@@ -81,6 +82,7 @@ test("without a reachable helper the deployer mapping is explicitly not checked"
   );
   assert.equal(result.ok, true);
   assert.equal(result.record.network, "LIVE");
-  assert.equal(result.record.deployerMapping.checked, false);
-  assert.match(String(result.record.deployerMapping.note), /not checked/);
+  const mapping = result.record.deployerMapping as Record<string, unknown>;
+  assert.equal(mapping.checked, false);
+  assert.match(String(mapping.note), /not checked/);
 });
