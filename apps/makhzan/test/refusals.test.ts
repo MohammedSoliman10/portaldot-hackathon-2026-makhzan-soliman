@@ -7,12 +7,12 @@ const ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 test("a refused eth_call is decoded to its custom error, never to a revert string", async () => {
   const cases = [
-    { id: "wrong-proof", attempted: "answer(1, bad path)", data: "0x1234", error: "ProofRejected" },
-    { id: "wrong-length", attempted: "answer(1, short data)", data: "0x", error: "BadParams" },
-    { id: "late-answer", attempted: "answer(1) after the deadline", data: "0x12", error: "WindowOpen" },
-    { id: "non-owner", attempted: "challenge(1) by a stranger", data: "0x12", error: "NotOwner" },
-    { id: "settled", attempted: "challenge(2) on a settled deal", data: "0x12", error: "AlreadySettled" },
-    { id: "non-multiple", attempted: "registerProvider() with 1 wei", data: "0x12", error: "BondTooSmall" },
+    { id: "wrong-proof", attempted: "answer(1, bad path)", data: "0x11", error: "ProofRejected" },
+    { id: "wrong-length", attempted: "answer(1, short data)", data: "0x22", error: "BadParams" },
+    { id: "late-answer", attempted: "answer(1) after the deadline", data: "0x33", error: "WindowOpen" },
+    { id: "non-owner", attempted: "challenge(1) by a stranger", data: "0x44", error: "NotOwner" },
+    { id: "settled", attempted: "challenge(2) on a settled deal", data: "0x55", error: "AlreadySettled" },
+    { id: "non-multiple", attempted: "registerProvider() with 1 wei", data: "0x66", error: "BondTooSmall" },
   ];
   const result = await runRefusals(
     cases.map((item) => ({ id: item.id, attempted: item.attempted, call: { to: ADDRESS, data: item.data } })),
