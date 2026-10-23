@@ -1,0 +1,384 @@
+# P3 (B8 rerun) — process-level end-to-end on local anvil after the deploy-safety fixes
+# UTC: 2026-10-23T02:59:39Z
+# Same script as B7: separate anvil, deploy, daemon and per-command CLI processes; pass round
+# then a skip-drill deal resolved after the deadline (exactly 20% slash, exact owner credit).
+
+$ node apps/makhzan/scripts/e2e-process.mjs
+[0.0s] start anvil
+[0.2s] deploy via scripts/deploy.mjs (separate process)
+[deploy] estimated deploy cost 0.002927 tPOT; owner balance 10000.000000 tPOT; reserve 100 tPOT
+[deploy] tx sent 0x8d03db9de05b23a374441ef4d995754cd1e8b10631c2b2c63fae19cccb3ea538 (nonce 0); pending record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/pending-local-420420777.json
+[deploy] deployed 0x5FbDB2315678afecb367f032d93F642f64180aa3 [local run] tx 0x8d03db9de05b23a374441ef4d995754cd1e8b10631c2b2c63fae19cccb3ea538 block 1
+code 6378 B, codeHash 0xbc72fa0578e649040e80bbbf535143434618605824743b57732fda2b125e5f94, config read back
+[deploy] record /tmp/makhzan-e2e-7Z6wrM/deployment.json
+[4.5s] deploy exited code=0 signal=
+[4.5s] contract 0x5FbDB2315678afecb367f032d93F642f64180aa3 tx 0x8d03db9de05b23a374441ef4d995754cd1e8b10631c2b2c63fae19cccb3ea538 runtime 6378 B
+[4.5s] register provider (setup, viem)
+[4.6s] provider 1 registered, bond 10000000000000000 units
+[4.6s] daemon (answer mode) as a separate process
+[daemon] daemon listening on http://127.0.0.1:8588/upload (network local, provider 1, poll 400 ms, max attempts 3)
+[daemon] cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+[4.9s] cli upload
+[daemon] upload accepted: root 0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7 size 8192 leafCount 8
+[cli upload] {
+  "label": "upload",
+  "readBack": {
+    "root": "0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7",
+    "size": 8192,
+    "leafCount": 8
+  }
+}
+[5.2s] cli upload exited code=0 signal=
+[5.2s] root 0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7 size 8192 leafCount 8
+[5.2s] cli create
+[daemon] cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+[cli create] {
+  "label": "create",
+  "submitted": {
+    "hash": "0xa764d92bde580b39102f127816656a372d3c92ceac494876bd16c069b412861d",
+    "nonce": 1
+  },
+  "included": {
+    "blockNumber": "3",
+    "blockHash": "0xe8735656f2f3deced5ba579c4dd886848023517e86d60848407d8f703284861b"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 1,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "providerId": 1,
+    "root": "0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7",
+    "size": 8192,
+    "endBlock": 23,
+    "price": "10000000000000000"
+  }
+}
+[5.5s] cli create exited code=0 signal=
+[5.5s] deal 1 created, end block 23
+[5.5s] cli challenge
+[daemon] cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+[cli challenge] {
+  "label": "challenge",
+  "submitted": {
+    "hash": "0xe5544e91def7ceed7aabe17f8f380c53b4b9dae016fddbdd305c0493e15f86e3",
+    "nonce": 2
+  },
+  "included": {
+    "blockNumber": "4",
+    "blockHash": "0xb159dfc87b288ea1ed5b1244df4fc3c6e763e54e0036caed03d67b1460ee9a21"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 1,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "startBlock": 3,
+    "endBlock": 23,
+    "flags": 2,
+    "providerId": 1,
+    "leafCount": 8,
+    "size": 8192,
+    "price": "10000000000000000",
+    "claimed": "0",
+    "accrued": "500000000000000",
+    "claimable": "500000000000000",
+    "challenge": {
+      "open": true,
+      "index": 2,
+      "start": 4,
+      "deadline": 14,
+      "expectedPathLength": 3
+    }
+  }
+}
+[5.8s] cli challenge exited code=0 signal=
+[5.8s] cli watch (waits for the daemon answer)
+[daemon] cycle: submitted=[1] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+[cli watch] {
+  "label": "watch",
+  "readBack": {
+    "dealId": 1,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "startBlock": 3,
+    "endBlock": 23,
+    "flags": 0,
+    "providerId": 1,
+    "leafCount": 8,
+    "size": 8192,
+    "price": "10000000000000000",
+    "claimed": "0",
+    "accrued": "1000000000000000",
+    "claimable": "1000000000000000",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
+[6.2s] cli watch exited code=0 signal=
+[6.2s] cli claim (provider)
+[cli claim] {
+  "label": "claim",
+  "submitted": {
+    "hash": "0xf29c7ab65023a5b2f5ab6e8e8f143d6b29130783fd48f8bd3df61dd5b9c24308",
+    "nonce": 2
+  },
+  "included": {
+    "blockNumber": "9",
+    "blockHash": "0x9309d663406dcbdfaace19a8cb12f6011baef433c9e2de1ce081dd5cde6f7a2e"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 1,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "startBlock": 3,
+    "endBlock": 23,
+    "flags": 0,
+    "providerId": 1,
+    "leafCount": 8,
+    "size": 8192,
+    "price": "10000000000000000",
+    "claimed": "3000000000000000",
+    "accrued": "3000000000000000",
+    "claimable": "0",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
+[daemon] cycle: submitted=[] passed=[1] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+[6.5s] cli claim exited code=0 signal=
+[6.5s] advance to the deal end and cli settle
+[cli settle] {
+  "label": "settle",
+  "submitted": {
+    "hash": "0xc07d055c3715ff7f3fa82def2008af2e020f68e6878dd1a6af8b58463ef7b702",
+    "nonce": 3
+  },
+  "included": {
+    "blockNumber": "32",
+    "blockHash": "0xaa8cd25549b6bdb8cc60f317df8725e0be945502a239fab82a73ef7fee930097"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 1,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "startBlock": 3,
+    "endBlock": 23,
+    "flags": 1,
+    "providerId": 1,
+    "leafCount": 8,
+    "size": 8192,
+    "price": "10000000000000000",
+    "claimed": "10000000000000000",
+    "accrued": "10000000000000000",
+    "claimable": "0",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
+[6.9s] cli settle exited code=0 signal=
+[daemon] daemon stopping on SIGTERM: finishing the cycle in flight
+[daemon] daemon stopped
+[6.9s] daemon stopped gracefully after the happy path
+[6.9s] daemon (skip drill) as a separate process
+[daemon] daemon listening on http://127.0.0.1:8588/upload (network local, provider 1, poll 400 ms, max attempts 3)
+[daemon] cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+[7.2s] cli create + challenge for the drill
+[cli create] {
+  "label": "create",
+  "submitted": {
+    "hash": "0x5474f9dbad66df07ca67c27358b6c2e2570775ab7ef534b5577f43373cd60e48",
+    "nonce": 4
+  },
+  "included": {
+    "blockNumber": "33",
+    "blockHash": "0x339ba0289eb17759c2b061f37f3e15bf05e9c93691e42dd4982cf30c09e1002d"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "providerId": 1,
+    "root": "0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7",
+    "size": 8192,
+    "endBlock": 53,
+    "price": "5000000000000000"
+  }
+}
+[7.6s] cli create exited code=0 signal=
+[daemon] cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+[cli challenge] {
+  "label": "challenge",
+  "submitted": {
+    "hash": "0xcdbe1b1e14ea891521b7771c8f844c25aed6f9d51d3025666ec57cf95177751a",
+    "nonce": 5
+  },
+  "included": {
+    "blockNumber": "34",
+    "blockHash": "0x631bece6837299e340152c8927e5026729af4376db345a6c05fcb191933a3994"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "startBlock": 33,
+    "endBlock": 53,
+    "flags": 2,
+    "providerId": 1,
+    "leafCount": 8,
+    "size": 8192,
+    "price": "5000000000000000",
+    "claimed": "0",
+    "accrued": "250000000000000",
+    "claimable": "250000000000000",
+    "challenge": {
+      "open": true,
+      "index": 0,
+      "start": 34,
+      "deadline": 44,
+      "expectedPathLength": 3
+    }
+  }
+}
+[7.9s] cli challenge exited code=0 signal=
+[7.9s] wait for the daemon to log the skip drill
+[daemon] cycle: submitted=[] passed=[] failed=[] skipped=[2] unanswered=[] unknownDeal=[]
+[8.1s] advance past the 10-block window
+[8.1s] cli resolve (provider pays the gas, owner is credited exactly)
+[cli resolve] {
+  "label": "resolve",
+  "submitted": {
+    "hash": "0x55926a0fcd6d5209a157bc2e5a5b134487f48ad5bbc5cd84be09664105a2835a",
+    "nonce": 3
+  },
+  "included": {
+    "blockNumber": "46",
+    "blockHash": "0x2a9ebd3afceaf5feed914daf7998852fb1290da5139c46c9876ac8e17cf7fe2a"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "startBlock": 33,
+    "endBlock": 53,
+    "flags": 0,
+    "providerId": 1,
+    "leafCount": 8,
+    "size": 8192,
+    "price": "5000000000000000",
+    "claimed": "0",
+    "accrued": "3250000000000000",
+    "claimable": "3250000000000000",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
+[8.4s] cli resolve exited code=0 signal=
+[8.4s] bond 10000000000000000 -> 8000000000000000 units, slashed 2000000000000000, owner credited 20000000000000000000 wei
+[8.4s] advance past the drill deal end and settle
+[daemon] cycle: submitted=[] passed=[] failed=[2] skipped=[] unanswered=[] unknownDeal=[]
+[cli settle] {
+  "label": "settle",
+  "submitted": {
+    "hash": "0xda41aef1731c96646a6f8b903aae62fa343fffcabcc200429d7054203b7e3e95",
+    "nonce": 6
+  },
+  "included": {
+    "blockNumber": "99",
+    "blockHash": "0x4ee09a4d9d137bb40ae56a819cacaf19cf716cb30608e58a4937c6886ec3b262"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "heuristic",
+    "confirmations": 1
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "startBlock": 33,
+    "endBlock": 53,
+    "flags": 1,
+    "providerId": 1,
+    "leafCount": 8,
+    "size": 8192,
+    "price": "5000000000000000",
+    "claimed": "5000000000000000",
+    "accrued": "5000000000000000",
+    "claimable": "0",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
+[8.8s] cli settle exited code=0 signal=
+[daemon] daemon stopping on SIGTERM: finishing the cycle in flight
+[daemon] daemon stopped
+[8.9s] daemon stopped gracefully after the drill
+{"ok":true,"contract":"0x5FbDB2315678afecb367f032d93F642f64180aa3","deploymentRecord":"/home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/local-e2e-process-2026-10-23T02-59-43-858Z.json","deal1":1,"deal2":2,"slashed":"2000000000000000","creditWei":"20000000000000000000","bondBefore":"10000000000000000","bondAfter":"8000000000000000"}
+[8.9s] PASS
+[8.9s] anvil exited code=null signal=SIGKILL
