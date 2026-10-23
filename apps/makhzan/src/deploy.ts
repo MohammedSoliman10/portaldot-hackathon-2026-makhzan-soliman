@@ -598,7 +598,7 @@ export async function main(argv: string[], env: NodeJS.ProcessEnv, log: (line: s
   try {
     const args = parseDeployArgs(argv, env);
     const settings = deploySettings(env);
-    await runDeploy(args, settings, log, { evidenceDir: env.MAKHZAN_EVIDENCE_DIR ?? "evidence" });
+    await runDeploy(args, settings, log, { evidenceDir: repoPath(env.MAKHZAN_EVIDENCE_DIR ?? "evidence") });
     if (args.dryRun) log("dry run: no transaction sent");
     return 0;
   } catch (err) {

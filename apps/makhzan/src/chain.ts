@@ -6,6 +6,8 @@
  * the viem account; it is not logged, not put in a transaction and not written to the state file.
  */
 import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createPublicClient, createWalletClient, defineChain, http, type Abi, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { CommandDeps, Receipt, TxRequest } from "./cli.ts";
@@ -93,7 +95,7 @@ export interface Wiring {
 }
 
 export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.env): Wiring {
-  const evidenceDir = env.MAKHZAN_EVIDENCE_DIR ?? "evidence";
+  const evidenceDir = env.MAKHZAN_EVIDENCE_DIR ?? resolve(dirname(fileURLToPath(import.meta.url)), "../../../evidence");
   const chain = defineChain({
     id: settings.chainId,
     name: settings.network === "local" ? "makhzan-local" : `makhzan-${settings.chainId}`,
