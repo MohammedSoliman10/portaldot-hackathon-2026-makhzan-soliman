@@ -29,15 +29,34 @@ the live plan is [docs/live-runbook.md](docs/live-runbook.md).
 | CLI and daemon entry points with viem wiring, explicit network, graceful stop, five-state logs | implemented, local | `evidence/raw/t1/62-entrypoints-red.txt`, `63-entrypoints-green.txt` |
 | Network-explicit deploy command (`scripts/deploy.mjs`): dry-run estimate in tPOT, DR-012 reserve guard, code-length and config read-back, deployment record | implemented, local | `evidence/raw/t1/60-deploy-red.txt`, `61-deploy-green.txt`, `64-e2e-process.txt` |
 | Sanitised round evidence writer and the report hook | implemented, local | `evidence/raw/t1/53-evidence-red.txt`, `54-evidence-green.txt` |
-| Deployed size budget, enforced in CI (10,240 B; actual 6,378 B with `via_ir`) | implemented, local | `evidence/raw/t1/49-size-check.txt`, `50-size-check-red.txt` |
+| Deployed size budget, enforced in CI (10,240 B; actual 6,566 B with `via_ir`) | implemented, local | `evidence/raw/t1/49-size-check.txt`, `50-size-check-red.txt` |
 | Gas snapshot and drift check | implemented, local | `evidence/raw/t1/51-gas-snapshot.txt` |
 | Full CI command list, both jobs, one compiler profile | implemented, local | `evidence/raw/t1/52-ci-local.txt` |
 | 1 MiB / 1,024-block pass and slash round, then settle, on anvil | implemented, local | `evidence/raw/t1/48-e2e-local.txt` |
 | Process-level round (separate deploy, daemon and CLI processes), skip drill + `resolve`, exactly 20% slash and owner credit | implemented, local | `evidence/raw/t1/64-e2e-process.txt`, `evidence/deployments/` |
+| `healthOf(uint32)` availability gate for other contracts (0 unknown/settled, 1 healthy, 2 pending, 3 in default) | implemented, local | `evidence/raw/t1/84-health-red.txt`, `85-health-green.txt` |
+| Feature 003 evidence bundle schema (`makhzan.evidence/v0` + index), raw receipts and derived views | implemented, local | `evidence/raw/t1/88-evidence-red.txt`, `89-evidence-green.txt` |
+| Byte-for-byte deployment verification (`verify:deployment`) | implemented, local | `evidence/raw/t1/90-verify-red.txt`, `91-verify-anvil.txt`, `evidence/verify-deployment.local-anvil.json` |
+| Decoded refusal evidence (`evidence:refusals`, eth_call only) | implemented, local | `evidence/raw/t1/94-refusals-anvil.txt`, `evidence/refusals.json` |
+| Read-only `doctor` with an exact fix per failed check | implemented, local | `evidence/raw/t1/97-doctor-anvil.txt` |
 | Live deployment, live rounds, live fee/`WEI_PER_UNIT` measurement | `[pending live run]` | none — blocked on G01–G05/G07 |
 | Front-end, agent client, indexed history, pull-payment escrow contract | roadmap | not started (Tier 2+) |
 | Randomness beyond the D5 fallback | roadmap, blocked on G03 | not started |
 | PolkaVM (`resolc`) deployment path | simulated only (compiler probe, Tier 0) | `evidence/raw/t1/` tier-0 gates |
+
+### Roadmap
+
+Shipped items stay visible, struck through, so the roadmap is a record and not a promise:
+
+- ~~Merkle block commitment shared by Solidity and TypeScript~~
+- ~~Provider registry, bonds, deals, challenge/answer/resolve/settle with exact unit math~~
+- ~~Client CLI and provider daemon, process-level e2e with a 20% slash~~
+- ~~Network-explicit deploy with a reserve guard, pending record, resume and calibration gate~~
+- ~~`healthOf` availability view, versioned evidence bundle and byte-for-byte verification~~
+- ~~Refusal evidence, the read-only `doctor`, threat model and demo checklist~~
+- Next: live Portaldot testnet deploy, calibration probe, one passed and one slashed live round
+- Later (Tier 2+): front-end, agent client, indexed history, pull-payment escrow
+- Blocked: randomness beyond the D5 fallback (G03), real `resolc`/PolkaVM deployment path
 
 ## Architecture
 
