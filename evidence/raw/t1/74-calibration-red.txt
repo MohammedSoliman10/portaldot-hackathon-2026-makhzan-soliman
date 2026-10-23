@@ -1,0 +1,12 @@
+# S3 red — calibration line tests
+# UTC: 2026-10-23T02:55:50Z
+
+$ node --test test/deploy-calibration.test.ts
+✖ without a calibration file the dry-run says it is not verified (0.6411ms)
+✖ a measured ratio is printed with its source (0.3532ms)
+✖ a calibration file without a positive ratio is not trusted (0.1954ms)
+✖ a ratio of exactly 1 is accepted (0.1915ms)
+ℹ tests 4
+ℹ pass 0
+ℹ fail 4
+✖ failing tests:

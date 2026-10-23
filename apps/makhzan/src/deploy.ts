@@ -257,6 +257,11 @@ export function formatTpot(wei: bigint): string {
   return `${whole}.${fraction.toString().padStart(6, "0")}`;
 }
 
+/** Calibration line for a dry run; the measured ratio comes from the Tier 0 probe evidence. */
+export function calibrationLine(_path: string): string {
+  throw new Error("not implemented");
+}
+
 /** Slot 0 is the packed config; decode it without trusting a getter. */
 export function decodeConfig(slot0: Hex): {
   challengeWindow: number;
