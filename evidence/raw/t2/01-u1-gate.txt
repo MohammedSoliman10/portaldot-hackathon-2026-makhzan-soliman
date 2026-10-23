@@ -1,0 +1,38 @@
+# Batch U1 gate — 003-status-ui
+UTC: 2026-10-23T09:28:26Z
+
+$ npm run typecheck
+
+> status-ui@0.1.0 typecheck
+> tsc --noEmit
+
+
+$ npm test
+ RUN  v4.1.12 /home/mohammed_soliman/hackathons/portaldot-ui/apps/status-ui
+
+
+ Test Files  10 passed (10)
+      Tests  113 passed (113)
+   Start at  12:28:34
+   Duration  3.85s (transform 2.09s, setup 3.46s, import 3.33s, tests 1.88s, environment 14.07s)
+
+
+$ npm run build
+dist/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2          14.89 kB
+dist/assets/space-grotesk-latin-ext-wght-normal-D9tNdqV9.woff2     18.94 kB
+dist/assets/space-grotesk-latin-wght-normal-BhU9QXUp.woff2         22.29 kB
+dist/assets/index-BReZWHSz.css                                     17.37 kB │ gzip:  4.49 kB
+dist/assets/index-DwNJUtP6.js                                     257.69 kB │ gzip: 83.27 kB
+✓ built in 2.42s
+
+$ npm run check:evidence
+
+evidence OK: local-anvil-2026-10-23 (sha256 0xfec974a18e7471bc51249b37494ec2a9b19deaf92c4a711289bb03e90fbff323)
+
+$ npm run check:sample
+
+sample OK: 8192 bytes, 8 blocks, root 0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7
+
+$ npm run smoke
+
+smoke OK: 6 routes served the shell directly
