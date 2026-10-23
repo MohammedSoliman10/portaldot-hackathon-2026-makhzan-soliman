@@ -1,0 +1,41 @@
+at=2026-10-23T08:13:31Z gas_price_wei=33705 spent_tpot=70.63305145206221 remaining_tpot=29.36694854793778
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+G01 CounterProbe gas=1101464671429504 estimate_wei=37124866750531432320 estimate_tpot=37.12486675053143 cumulative_if_sent=107.75791820259364
+G02 BehaviorProbe gas=2261675742706013 estimate_wei=76229780907906168165 estimate_tpot=76.22978090790616 cumulative_if_sent=146.86283235996838
+G02 HashProbe gas=1317974648219440 estimate_wei=44422335518236225200 estimate_tpot=44.42233551823622 cumulative_if_sent=115.05538697029844
+G02 SizeProbe(512) gas=1599050108286519 estimate_wei=53895983899797122895 estimate_tpot=53.89598389979712 cumulative_if_sent=124.52903535185934
+G02 SizeProbe(2048) gas=5209196970769830 estimate_wei=175575983899797120150 estimate_tpot=175.57598389979712 cumulative_if_sent=246.20903535185933
+G02 SizeProbe(4096) gas=10022726120747578 estimate_wei=337815983899797116490 estimate_tpot=337.81598389979711 cumulative_if_sent=408.44903535185933
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+G02 via_ir CounterProbe gas=1049834232052851 estimate_wei=35384662791341342955 estimate_tpot=35.38466279134134 cumulative_if_sent=106.01771424340356
+projected_total_tpot=831.08264911946874 cap_tpot=100.00000000000000 over_tpot=731.08264911946874

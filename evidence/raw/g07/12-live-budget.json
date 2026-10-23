@@ -1,0 +1,70 @@
+{
+  "spentWei": "70633051452062217415",
+  "spentTpot": "70.63305145206221",
+  "entries": [
+    {
+      "label": "T024 owner -> owner self value transfer (0.001 tPOT)",
+      "gas": "383455528839",
+      "gasPriceWei": "33930",
+      "estimateWei": "14010646093507270",
+      "estimateTpot": "0.01401064609350",
+      "balanceBeforeWei": "900000000000000000",
+      "valueWei": "1000000000000000",
+      "hash": "0x4c38603d9b34b2aa229b87743b99bc81c3eee01c7e7197f21312e66862763396",
+      "balanceAfterWei": "887589375720858990",
+      "spentWei": "12410624279141010",
+      "spentTpot": "0.01241062427914",
+      "cumulativeWei": "12410624279141010",
+      "cumulativeTpot": "0.01241062427914",
+      "at": "2026-10-23T03:40:32Z"
+    },
+    {
+      "label": "provider-1 spend proof (0.001 tPOT self-transfer)",
+      "gas": "386013406805",
+      "gasPriceWei": "33705",
+      "estimateWei": "14010581876362525",
+      "estimateTpot": "0.01401058187636",
+      "balanceBeforeWei": "59900000000000000000",
+      "valueWei": "1000000000000000",
+      "hash": "0x8737720abc3a38c4e69a14f79c31f9120e7b669a0222ad6702107c14b003a26b",
+      "balanceAfterWei": "59887589439791516360",
+      "spentWei": "12410560208483640",
+      "spentTpot": "0.01241056020848",
+      "cumulativeWei": "24821184487624650",
+      "cumulativeTpot": "0.02482118448762",
+      "at": "2026-10-23T08:11:13Z"
+    },
+    {
+      "label": "deploy ValueEcho (evm)",
+      "gas": "1663919937239616",
+      "gasPriceWei": "33705",
+      "estimateWei": "56082421484661257280",
+      "estimateTpot": "56.08242148466125",
+      "balanceBeforeWei": "799887589375720858990",
+      "valueWei": "0",
+      "hash": "0xa32843281032f2f1305b8c313362d0257c0334098a336c449426c9e09ec253f9",
+      "balanceAfterWei": "744668374396963357780",
+      "spentWei": "55219214978757501210",
+      "spentTpot": "55.21921497875750",
+      "cumulativeWei": "55244036163245125860",
+      "cumulativeTpot": "55.24403616324512",
+      "at": "2026-10-23T08:11:55Z"
+    },
+    {
+      "label": "T026 ValueEcho.record() with 0.01 tPOT",
+      "gas": "463424378416556",
+      "gasPriceWei": "33705",
+      "estimateWei": "15629718674530019980",
+      "estimateTpot": "15.62971867453001",
+      "balanceBeforeWei": "744668374396963357780",
+      "valueWei": "10000000000000000",
+      "hash": "0xf6202d9a00bf1b59d522f4b44ce97b52872f7a18ba93b41864946c9dac942d81",
+      "balanceAfterWei": "729279359108146266225",
+      "spentWei": "15389015288817091555",
+      "spentTpot": "15.38901528881709",
+      "cumulativeWei": "70633051452062217415",
+      "cumulativeTpot": "70.63305145206221",
+      "at": "2026-10-23T08:12:13Z"
+    }
+  ]
+}

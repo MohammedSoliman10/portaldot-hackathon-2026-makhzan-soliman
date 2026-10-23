@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-23T08:13:31Z",
+  "policy": "DR-012: total live cap 100 tPOT, single deposit cap 60 tPOT",
+  "ratio_definition": "measured balance drop / estimated cost (both in wei)",
+  "entries": [
+    {
+      "label": "T024 owner -> owner self value transfer (0.001 tPOT)",
+      "tx_hash": "0x4c38603d9b34b2aa229b87743b99bc81c3eee01c7e7197f21312e66862763396",
+      "estimated_wei": "14010646093507270",
+      "estimated_tpot": "0.01401064609350",
+      "measured_wei": "12410624279141010",
+      "measured_tpot": "0.01241062427914",
+      "ratio": "0.885799569578"
+    },
+    {
+      "label": "provider-1 spend proof (0.001 tPOT self-transfer)",
+      "tx_hash": "0x8737720abc3a38c4e69a14f79c31f9120e7b669a0222ad6702107c14b003a26b",
+      "estimated_wei": "14010581876362525",
+      "estimated_tpot": "0.01401058187636",
+      "measured_wei": "12410560208483640",
+      "measured_tpot": "0.01241056020848",
+      "ratio": "0.885799056599"
+    },
+    {
+      "label": "deploy ValueEcho (evm)",
+      "tx_hash": "0xa32843281032f2f1305b8c313362d0257c0334098a336c449426c9e09ec253f9",
+      "estimated_wei": "56082421484661257280",
+      "estimated_tpot": "56.08242148466125",
+      "measured_wei": "55219214978757501210",
+      "measured_tpot": "55.21921497875750",
+      "ratio": "0.984608251872"
+    },
+    {
+      "label": "T026 ValueEcho.record() with 0.01 tPOT",
+      "tx_hash": "0xf6202d9a00bf1b59d522f4b44ce97b52872f7a18ba93b41864946c9dac942d81",
+      "estimated_wei": "15629718674530019980",
+      "estimated_tpot": "15.62971867453001",
+      "measured_wei": "15389015288817091555",
+      "measured_tpot": "15.38901528881709",
+      "ratio": "0.984599634150"
+    }
+  ],
+  "total_measured_wei": "70633051452062217415",
+  "total_measured_tpot": "70.63305145206221"
+}

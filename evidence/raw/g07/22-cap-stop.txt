@@ -1,0 +1,63 @@
+at=2026-10-23T08:15:02Z
+policy=DR-012: Tier 0 live total cap 100 tPOT; single deposit cap 60 tPOT
+budget_spent_tpot=70.63305145206221
+budget_remaining_tpot=29.36694854793778
+gas_price_wei=33705
+method=eth_estimateGas dry runs only; no G01/G02 transaction was sent
+
+G01 CounterProbe
+estimate_tpot=37.12486675053143
+projected_total_tpot=107.75791820259364
+over_total_cap_tpot=7.75791820259364
+decision=STOP before send: total cap would be exceeded
+
+G02 BehaviorProbe
+estimate_tpot=76.22978090790616
+single_deposit_cap_tpot=60.00000000000000
+decision=STOP before send: single-deposit cap would be exceeded
+
+G02 HashProbe
+estimate_tpot=44.42233551823622
+projected_total_if_sent_tpot=115.05538697029844
+
+G02 SizeProbe(512)
+estimate_tpot=53.89598389979712
+projected_total_if_sent_tpot=124.52903535185934
+
+G02 SizeProbe(2048)
+estimate_tpot=175.57598389979712
+projected_total_if_sent_tpot=246.20903535185933
+
+G02 SizeProbe(4096)
+estimate_tpot=337.81598389979711
+projected_total_if_sent_tpot=408.44903535185933
+
+G02 via_ir CounterProbe
+compiler=solc 0.8.28 via_ir=true evm_version=paris optimizer_runs=1
+estimate_tpot=35.38466279134134
+projected_total_if_sent_tpot=106.01771424340356
+
+all_G01_G02_projected_total_tpot=831.08264911946874
+over_total_cap_tpot=731.08264911946874
+tx_sent_for_g01_g02=false
+makhzan_deployed=false
+
+live_transactions_to_date
+T024 owner self-transfer tx=0x4c38603d9b34b2aa229b87743b99bc81c3eee01c7e7197f21312e66862763396
+provider-1 spend proof tx=0x8737720abc3a38c4e69a14f79c31f9120e7b669a0222ad6702107c14b003a26b
+T026 ValueEcho deploy tx=0xa32843281032f2f1305b8c313362d0257c0334098a336c449426c9e09ec253f9
+T026 ValueEcho.record tx=0xf6202d9a00bf1b59d522f4b44ce97b52872f7a18ba93b41864946c9dac942d81
+
+observed_balances_at
+HUB1 free_tpot=139.92557240070701
+HUB2 free_tpot=500.00000000000000
+owner free_tpot=729.37935910814622
+owner_evm_wei=729279359108146266225
+provider-1 free_tpot=59.98758943979151
+provider-1_evm_wei=59887589439791516360
+finalized_block=157767
+
+transfer_source_observation
+reported=1 tPOT HUB1->owner; 799 tPOT HUB1->owner; 60 tPOT HUB2->provider-1
+observed=HUB2 remains 500.00000000000000, so both HUB1 and the 60 tPOT provider-1 transfer were paid from HUB1; HUB1 now 139.92557240070701 after fees
+action=recorded as a deviation; no refund or extra transfer was made
