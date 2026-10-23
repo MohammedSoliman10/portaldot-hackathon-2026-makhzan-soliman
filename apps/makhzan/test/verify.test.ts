@@ -60,7 +60,8 @@ test("verification writes code, artifact, deployer mapping and the block it read
   assert.equal(result.record.schema, "makhzan.verify-deployment/v0");
   assert.equal(result.record.network, "LOCAL");
   assert.equal(result.record.block, 12);
-  assert.equal(result.record.codeVerified.method, "runtime-code-hash");
+  const verified = result.record.codeVerified as Record<string, unknown>;
+  assert.equal(verified.method, "runtime-code-hash");
   const mapping = result.record.deployerMapping as Record<string, unknown>;
   assert.equal(mapping.checked, true);
   assert.match(String(mapping.note), /0xf39Fd6/);
