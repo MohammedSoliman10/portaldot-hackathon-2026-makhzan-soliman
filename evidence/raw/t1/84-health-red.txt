@@ -1,0 +1,7 @@
+# R1 red — healthOf is not on the contract surface
+# UTC: 2026-10-23T08:18:10Z
+
+$ forge test --match-contract HealthOfTest
+Error: Compiler run failed:
+Error (9582): Member "healthOf" not found or not visible after argument-dependent lookup in contract MakhzanHarness.
+ --> test/makhzan/HealthOf.t.sol:9:18
