@@ -10,7 +10,10 @@
       "estimated_tpot": "0.01401064609350",
       "measured_wei": "12410624279141010",
       "measured_tpot": "0.01241062427914",
-      "ratio": 0.885799569578
+      "ratio": 0.885799569578,
+      "kind": "value_transfer",
+      "runtime_bytes": null,
+      "creation_bytes": null
     },
     {
       "label": "provider-1 spend proof (0.001 tPOT self-transfer)",
@@ -19,7 +22,10 @@
       "estimated_tpot": "0.01401058187636",
       "measured_wei": "12410560208483640",
       "measured_tpot": "0.01241056020848",
-      "ratio": 0.885799056599
+      "ratio": 0.885799056599,
+      "kind": "value_transfer",
+      "runtime_bytes": null,
+      "creation_bytes": null
     },
     {
       "label": "deploy ValueEcho (evm)",
@@ -28,7 +34,12 @@
       "estimated_tpot": "56.08242148466125",
       "measured_wei": "55219214978757501210",
       "measured_tpot": "55.21921497875750",
-      "ratio": 0.984608251872
+      "ratio": 0.984608251872,
+      "kind": "deploy",
+      "runtime_bytes": 539,
+      "creation_bytes": 570,
+      "onchain_runtime_bytes": 539,
+      "deploy_tx_input_bytes": 570
     },
     {
       "label": "T026 ValueEcho.record() with 0.01 tPOT",
@@ -37,9 +48,39 @@
       "estimated_tpot": "15.62971867453001",
       "measured_wei": "15389015288817091555",
       "measured_tpot": "15.38901528881709",
-      "ratio": 0.98459963415
+      "ratio": 0.98459963415,
+      "kind": "call",
+      "runtime_bytes": null,
+      "creation_bytes": null
     }
   ],
   "total_measured_wei": "70633051452062217415",
-  "total_measured_tpot": "70.63305145206221"
+  "total_measured_tpot": "70.63305145206221",
+  "updated_at": "2026-10-23T09:10:00Z",
+  "live_deploy_count": 1,
+  "makhzan_projection": {
+    "at": "2026-10-23T09:10:00Z",
+    "formula": "((0.078 * runtime_bytes + 13.3) * measured_ratio) + 4",
+    "runtime_bytes": 6566,
+    "creation_bytes": 7154,
+    "measured_ratio": 0.984608251872,
+    "config_slot_tpot": 4,
+    "runtime_only_base_tpot": "525.448000000000",
+    "creation_only_base_tpot": "571.312000000000",
+    "low_tpot": "521.360436729639",
+    "expected_tpot": "543.939473161567",
+    "high_tpot": "566.518509593496",
+    "expected_method": "midpoint of the runtime-only and creation-only bases; the T026 actual 55.21921497875750 lies between 54.490189875100 and 56.870972628127",
+    "t026_runtime_only_tpot": "54.490189875100",
+    "t026_creation_only_tpot": "56.870972628127",
+    "t026_measured_tpot": "55.21921497875750",
+    "owner_evm_balance_wei": "729279359108146266225",
+    "owner_native_free_planck": "72937935910814626",
+    "owner_native_free_tpot": "729.37935910814626",
+    "high_plus_60_tpot": "626.518509593496",
+    "owner_evm_surplus_over_high_plus_60_tpot": "102.760849514650266225",
+    "owner_native_surplus_over_high_plus_60_tpot": "102.860849514650",
+    "top_up_needed_tpot": "0.000000000000",
+    "top_up_from": "none; owner already covers the high case plus 60, HUB1 and HUB2 stay untouched"
+  }
 }

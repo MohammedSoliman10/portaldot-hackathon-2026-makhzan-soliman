@@ -1,0 +1,53 @@
+# Tier 0 calibration and Makhzan cost projection
+at=2026-10-23T09:10:00Z
+source=evidence/calibration.json
+
+## Live deploys
+live_deploy_count=1
+
+label=deploy ValueEcho (evm)
+tx=0xa32843281032f2f1305b8c313362d0257c0334098a336c449426c9e09ec253f9
+runtime_bytes=539
+creation_bytes=570
+onchain_runtime_bytes=539
+deploy_tx_input_bytes=570
+dry_run_estimate_tpot=56.08242148466125
+measured_balance_drop_tpot=55.21921497875750
+ratio=0.984608251872
+
+## Live call (not a deploy)
+label=T026 ValueEcho.record() with 0.01 tPOT
+tx=0xf6202d9a00bf1b59d522f4b44ce97b52872f7a18ba93b41864946c9dac942d81
+runtime_bytes=n/a creation_bytes=n/a
+dry_run_estimate_tpot=15.62971867453001
+measured_balance_drop_tpot=15.38901528881709
+ratio=0.984599634150
+
+## Makhzan projection
+formula=((0.078 * runtime_bytes + 13.3) * measured_ratio) + 4
+runtime_bytes=6566
+creation_bytes=7154
+measured_ratio=0.984608251872
+runtime_only_base_tpot=525.448000000000
+creation_only_base_tpot=571.312000000000
+low_tpot=521.360436729639
+expected_tpot=543.939473161567
+high_tpot=566.518509593496
+expected_method=midpoint of runtime-only and creation-only bases; T026 actual sits between them
+t026_runtime_only_tpot=54.490189875100
+t026_creation_only_tpot=56.870972628127
+t026_measured_tpot=55.21921497875750
+config_slot_tpot=4.000000000000
+
+## Owner balance and top-up
+owner_evm_balance_wei=729279359108146266225
+owner_evm_balance_tpot=729.279359108146266225
+owner_native_free_planck=72937935910814626
+owner_native_free_tpot=729.37935910814626
+high_plus_60_tpot=626.518509593496
+owner_evm_surplus_tpot=102.760849514650266225
+owner_native_surplus_tpot=102.860849514650
+top_up_needed_tpot=0.000000000000
+top_up_from=none; HUB1 and HUB2 stay untouched
+
+note=projection is a planning bracket, not a guarantee; the live deploy still needs an eth_estimateGas dry run and a stop if the owner cannot cover it

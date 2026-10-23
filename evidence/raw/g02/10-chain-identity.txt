@@ -1,0 +1,17 @@
+# G02 free read-only: chain identity
+at=2026-10-23T09:08:57Z
+source=eth_chainId; chain_getBlockHash(0); state_getRuntimeVersion
+chain_id=420420777
+genesis_hash=0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+genesis_pin=0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+genesis_match_reported=true
+spec_name=portaldot-v3
+spec_version=3002
+latest_block=158308
+latest_hash=0xf13b9aa4c7fbeb3d4f1db56e43e571e5bbd1bb7df70b7722f9159929468ccf9c
+latest_timestamp=1792746534
+finalized_block=158306
+finalized_hash=0x6468aa6ff448034b90c86906f5be511dc46a4afb93267c9913b40861d568c564
+finalized_timestamp=1792746522
+finality_lag_blocks=2
+transactions_sent=0
