@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm --prefix apps/makhzan ci && npm --prefix apps/status-ui ci",
+  "buildCommand": "npm --prefix apps/status-ui run build",
+  "outputDirectory": "apps/status-ui/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
