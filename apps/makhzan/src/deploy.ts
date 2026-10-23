@@ -340,15 +340,25 @@ export async function runDeploy(
 
   if (!args.resume && existsSync(pendingFile)) {
     if (!args.forceNew) {
-      let pendingHash = "unknown";
+      let state = "unknown";
+      let pendingHash: string | undefined;
       try {
-        pendingHash = (JSON.parse(readFileSync(pendingFile, "utf8")) as { txHash?: string }).txHash ?? "unknown";
+        const parsed = JSON.parse(readFileSync(pendingFile, "utf8")) as { state?: string; txHash?: string };
+        state = parsed.state ?? "unknown";
+        pendingHash = parsed.txHash;
       } catch {
         // A corrupt pending record is still a reason not to send a second deploy.
       }
+      if (state === "sending" || !pendingHash) {
+        throw new DeployError(
+          `refusing: pending deploy record ${pendingFile} is state ${state} with no transaction hash; ` +
+            "check the owner's nonce and the explorer for a transaction from the owner, then use " +
+            "--resume <hash> or --force-new",
+        );
+      }
       throw new DeployError(
-        `refusing: pending deploy record ${pendingFile} (tx ${pendingHash}); use --resume ${pendingHash} ` +
-          "once the receipt is available, or --force-new to deploy again",
+        `refusing: pending deploy record ${pendingFile} (state ${state}, tx ${pendingHash}); use ` +
+          `--resume ${pendingHash} once the receipt is available, or --force-new to deploy again`,
       );
     }
     log(`--force-new: ignoring the pending record ${pendingFile}`);
@@ -365,18 +375,28 @@ export async function runDeploy(
     const cost = gas * (await deps.gasPrice());
     estimateTpot = await guardReserve(account.address, cost, args.reserveTpot, deps, log);
     const nonce = await deps.nonce(account.address);
-    hash = await deps.send(deployData);
     const utc = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
     const pending = {
       network: settings.network,
       chainId: settings.chainId,
       deployer: getAddress(account.address),
-      txHash: hash,
       nonce,
       utc,
     };
-    mkdirSync(dirname(pendingFile), { recursive: true });
-    writeFileSync(pendingFile, `${JSON.stringify(pending, null, 2)}\n`, "utf8");
+    // The record exists before the send: if the response is lost after the node accepted the tx,
+    // the owner still has the nonce to check and the run cannot deploy twice unnoticed.
+    writePending(pendingFile, { state: "sending", ...pending });
+    log(`sending deploy tx (nonce ${nonce}); pending record ${pendingFile}`);
+    try {
+      hash = await deps.send(deployData);
+    } catch (err) {
+      throw new DeployError(
+        `send failed (${(err as Error).message}); the pending record ${pendingFile} is state "sending" ` +
+          "with no hash: check the owner's nonce and the explorer for a transaction from the owner, " +
+          "then use --resume <hash> or --force-new",
+      );
+    }
+    writePending(pendingFile, { state: "sent", ...pending, txHash: hash });
     log(`tx sent ${hash} (nonce ${nonce}); pending record ${pendingFile}`);
   }
 
@@ -448,6 +468,11 @@ export async function runDeploy(
   log(`code ${runtimeBytes} B, codeHash ${record.codeHash}, config read back`);
   log(`record ${out}`);
   return { record, estimateTpot };
+}
+
+function writePending(path: string, record: Record<string, unknown>): void {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, `${JSON.stringify(record, null, 2)}\n`, "utf8");
 }
 
 /** Bounded receipt retry with exponential backoff; a timeout never loses the pending record. */

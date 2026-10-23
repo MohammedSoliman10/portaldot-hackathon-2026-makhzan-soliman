@@ -72,6 +72,12 @@ receipt, repeats the code-length, code-hash and config read-back checks, writes 
 only then removes the pending file. A new deploy is refused while a pending record exists; use
 `--force-new` only when the pending tx is known dropped, and record why.
 
+**If the send call itself fails** (the node may have accepted the transaction but the response was
+lost), the pending record exists with `"state": "sending"` and no hash, written before the send. A
+re-run refuses; check the owner's nonce and the explorer for a transaction from the owner, then use
+`--resume <hash>` or `--force-new`. A successful send rewrites the record as `"state": "sent"` with
+the hash before the receipt wait. Never delete the pending file by hand without recording why.
+
 ### Calibration before the real deploy (mandatory)
 
 The dry-run cost is `gas × gasPrice`; the chain may charge the storage deposit differently. Before
