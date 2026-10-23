@@ -10,7 +10,7 @@
       "estimated_tpot": "0.01401064609350",
       "measured_wei": "12410624279141010",
       "measured_tpot": "0.01241062427914",
-      "ratio": "0.885799569578"
+      "ratio": 0.885799569578
     },
     {
       "label": "provider-1 spend proof (0.001 tPOT self-transfer)",
@@ -19,7 +19,7 @@
       "estimated_tpot": "0.01401058187636",
       "measured_wei": "12410560208483640",
       "measured_tpot": "0.01241056020848",
-      "ratio": "0.885799056599"
+      "ratio": 0.885799056599
     },
     {
       "label": "deploy ValueEcho (evm)",
@@ -28,7 +28,7 @@
       "estimated_tpot": "56.08242148466125",
       "measured_wei": "55219214978757501210",
       "measured_tpot": "55.21921497875750",
-      "ratio": "0.984608251872"
+      "ratio": 0.984608251872
     },
     {
       "label": "T026 ValueEcho.record() with 0.01 tPOT",
@@ -37,7 +37,7 @@
       "estimated_tpot": "15.62971867453001",
       "measured_wei": "15389015288817091555",
       "measured_tpot": "15.38901528881709",
-      "ratio": "0.984599634150"
+      "ratio": 0.98459963415
     }
   ],
   "total_measured_wei": "70633051452062217415",
