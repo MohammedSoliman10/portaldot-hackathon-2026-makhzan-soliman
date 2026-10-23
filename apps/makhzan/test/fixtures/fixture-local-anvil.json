@@ -1,0 +1,402 @@
+{
+  "schema": "makhzan.evidence/v0",
+  "id": "local-anvil-2026-10-23",
+  "environment": "anvil-local",
+  "label": "REPORTED",
+  "generatedAt": "2026-10-23T08:21:15Z",
+  "source": "evidence/raw/t1/87-e2e-process.txt",
+  "chain": {
+    "chainId": 420420777,
+    "name": "anvil (local)",
+    "rpcHost": "127.0.0.1:8564",
+    "explorer": null,
+    "explorerNote": "the local anvil chain has no explorer"
+  },
+  "timing": {
+    "blockTimeSeconds": 1,
+    "basis": "node-default",
+    "source": "evidence/raw/t1/87-e2e-process.txt"
+  },
+  "deployment": {
+    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "txHash": "0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2",
+    "block": 1,
+    "codeHash": "0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98",
+    "runtimeBytes": 6566,
+    "creationBytes": 7154,
+    "compiler": "solc 0.8.28, evm paris, via_ir, optimizer runs 1",
+    "codeVerified": {
+      "method": "runtime-code-hash",
+      "sourceVerified": false,
+      "artifact": "contracts/out/Makhzan.sol/Makhzan.json",
+      "note": "runtime length and code hash matched the artifact at deploy time; no explorer source verification exists on a local chain"
+    }
+  },
+  "config": {
+    "challengeWindowBlocks": 10,
+    "challengeBlockSize": 1024,
+    "slashBps": 2000,
+    "minBondUnits": "10000000000000000",
+    "nextDealId": 3,
+    "providerCount": 1,
+    "minDurationBlocks": 10,
+    "maxDurationBlocks": 1000,
+    "slot0": "0x0000000003e80000000a000100000003002386f26fc1000007d004000000000a"
+  },
+  "providers": [
+    {
+      "id": 1,
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "bondUnits": "8000000000000000",
+      "activeDeals": 0,
+      "registered": true
+    }
+  ],
+  "deals": [
+    {
+      "id": 1,
+      "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "providerId": 1,
+      "root": "0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7",
+      "leafCount": 8,
+      "size": 8192,
+      "blockSize": 1024,
+      "startBlock": 3,
+      "endBlock": 23,
+      "priceUnits": "10000000000000000",
+      "claimedUnits": "10000000000000000",
+      "flags": 1,
+      "state": "settled",
+      "health": null,
+      "roundIds": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "providerId": 1,
+      "root": "0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7",
+      "leafCount": 8,
+      "size": 8192,
+      "blockSize": 1024,
+      "startBlock": 34,
+      "endBlock": 54,
+      "priceUnits": "5000000000000000",
+      "claimedUnits": "5000000000000000",
+      "flags": 1,
+      "state": "settled",
+      "health": null,
+      "roundIds": [
+        2
+      ]
+    }
+  ],
+  "rounds": [
+    {
+      "id": 1,
+      "dealId": 1,
+      "outcome": "passed",
+      "status": "passed",
+      "index": 3,
+      "startBlock": 4,
+      "deadline": 14,
+      "expectedPathLength": 3,
+      "challengeTx": "0x2874b329d249e6d8e10a8934195dac388dc1f60ef2d7ffec0ab79cabea8a89d1",
+      "answerTx": null,
+      "resolveTx": null,
+      "bondBeforeUnits": "10000000000000000",
+      "bondAfterUnits": "10000000000000000",
+      "slashUnits": "0",
+      "ownerCreditWei": "0",
+      "readBack": {
+        "challengeOpenAfter": false,
+        "bondAfterUnits": "10000000000000000"
+      },
+      "note": "the daemon answered; the watch read-back shows the challenge closed and the bond unchanged, but the run did not print the answer transaction hash"
+    },
+    {
+      "id": 2,
+      "dealId": 2,
+      "outcome": "slashed",
+      "status": "failed",
+      "index": 1,
+      "startBlock": 35,
+      "deadline": 45,
+      "expectedPathLength": 3,
+      "challengeTx": "0x3d957e93adb353a444daeedd3839053cfec30c450067960737d3eb28bc8a6f09",
+      "answerTx": null,
+      "resolveTx": "0x9ec3e2ffbc6c9d0861be8334c0d67756ab2b87a6670002bbabad586b2d706d18",
+      "bondBeforeUnits": "10000000000000000",
+      "bondAfterUnits": "8000000000000000",
+      "slashUnits": "2000000000000000",
+      "ownerCreditWei": "20000000000000000000",
+      "readBack": {
+        "challengeOpenAfter": false,
+        "bondAfterUnits": "8000000000000000"
+      },
+      "note": "daemon ran the skip drill; resolve was sent by the provider, the deal owner was credited, and the daemon marked the round failed only after the bond read-back"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "deploy",
+      "label": "deploy",
+      "hash": "0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2",
+      "block": 1,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/deployments/local-e2e-process-2026-10-23T08-21-15-210Z.json",
+      "note": "runtime 6,566 B and packed config read back"
+    },
+    {
+      "id": "register-provider-1",
+      "label": "registerProvider",
+      "hash": null,
+      "block": null,
+      "status": "unknown",
+      "receipt": "not-recorded",
+      "finality": null,
+      "stages": [],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "the process run registered the provider directly with viem and printed no hash"
+    },
+    {
+      "id": "create-1",
+      "label": "createDeal",
+      "hash": "0xc2b283c85091fd2b5fc6b6ccf8583a924553080e7590a4a0eb0ca5a2b34b99a2",
+      "block": 3,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "deal 1, price 100 tPOT in native units, ended at block 23"
+    },
+    {
+      "id": "challenge-1",
+      "label": "challenge",
+      "hash": "0x2874b329d249e6d8e10a8934195dac388dc1f60ef2d7ffec0ab79cabea8a89d1",
+      "block": 4,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "index 3, deadline 14, expected path 3"
+    },
+    {
+      "id": "claim-1",
+      "label": "claim",
+      "hash": "0x72a582301c7c3c913ad0acb7518118f4d2409c15817692af520693aa57fff43a",
+      "block": 9,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "claimed 30 tPOT of the accrued amount"
+    },
+    {
+      "id": "settle-1",
+      "label": "settle",
+      "hash": "0x330a40121fbb5d1681c4973688b5f1607f547911e194f67b784b03d566714f25",
+      "block": 33,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "flags 1, claimed equals price"
+    },
+    {
+      "id": "create-2",
+      "label": "createDeal",
+      "hash": "0x80bcf401a1d43c9a27a94221bd88eab073a4ddf02c6d690852d7d52d72241138",
+      "block": 34,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "deal 2, price 50 tPOT, ended at block 54"
+    },
+    {
+      "id": "challenge-2",
+      "label": "challenge",
+      "hash": "0x3d957e93adb353a444daeedd3839053cfec30c450067960737d3eb28bc8a6f09",
+      "block": 35,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "index 1, deadline 45, skip drill"
+    },
+    {
+      "id": "resolve-2",
+      "label": "resolve",
+      "hash": "0x9ec3e2ffbc6c9d0861be8334c0d67756ab2b87a6670002bbabad586b2d706d18",
+      "block": 47,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "20 % slash: 20 tPOT in native units, owner credited 20,000,000,000,000,000,000 wei"
+    },
+    {
+      "id": "settle-2",
+      "label": "settle",
+      "hash": "0x548f083e9ddbb444e6b54fc0f21d20ab32b46e2de45306cf94f4f63042139457",
+      "block": 56,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 1
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized",
+        "readBack"
+      ],
+      "evidence": "evidence/raw/t1/87-e2e-process.txt",
+      "note": "flags 1, claimed equals price"
+    }
+  ],
+  "refusals": [
+    {
+      "id": "resolve-before-deadline",
+      "attempted": "resolve(1)",
+      "error": "WindowOpen",
+      "reason": "the response window has not closed yet, or the answer arrived after its deadline",
+      "source": "contracts/test/makhzan/Challenge.t.sol::test_resolveBeforeDeadlineRevertsWindowOpen",
+      "note": "no state change and no transfer"
+    },
+    {
+      "id": "second-resolve",
+      "attempted": "resolve(2)",
+      "error": "NoChallenge",
+      "reason": "the round already resolved",
+      "source": "contracts/test/makhzan/Challenge.t.sol::test_secondResolveRevertsNoChallenge",
+      "note": "a second slash is impossible"
+    },
+    {
+      "id": "answer-after-deadline",
+      "attempted": "answer(1, bytes, path)",
+      "error": "WindowOpen",
+      "reason": "the answer arrived after its deadline",
+      "source": "contracts/test/makhzan/Challenge.t.sol::test_answerAfterDeadlineRevertsWindowOpen",
+      "note": "late answers cannot pass"
+    },
+    {
+      "id": "bad-proof",
+      "attempted": "answer(1, wrongBytes, path)",
+      "error": "ProofRejected",
+      "reason": "bytes or path failed verification, or the length is wrong",
+      "source": "contracts/test/makhzan/Challenge.t.sol::test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry",
+      "note": "the challenge stays open and a correct retry is allowed before the deadline"
+    },
+    {
+      "id": "withdraw-with-open-deal",
+      "attempted": "withdrawBond()",
+      "error": "HasOpenDeal",
+      "reason": "the provider still has an unsettled deal",
+      "source": "contracts/test/makhzan/Guards.t.sol::test_withdrawBondBlockedWhileDealOpenAndAllowedAfterSettle",
+      "note": "the bond stays slashable"
+    },
+    {
+      "id": "claim-after-settle",
+      "attempted": "claim(1)",
+      "error": "AlreadySettled",
+      "reason": "the deal is already settled",
+      "source": "contracts/test/makhzan/Payments.t.sol::test_claimAfterSettleRevertsAlreadySettled",
+      "note": "a settled deal cannot pay twice"
+    }
+  ],
+  "limits": [
+    "A passed challenge proves possession of one block at one moment, not continuous storage.",
+    "Identical blocks are interchangeable by design; the leaf commits bytes, not position.",
+    "The challenge index comes from the D5 fallback and is not a proven randomness beacon.",
+    "The local chain has no explorer, so the source is not verified; only the runtime code hash was compared.",
+    "No live deployment, live fee, live block time or live round exists; those rows are pending live run.",
+    "No audit, no per-deal bond, no distinct-copy proof and no pull-payment escrow."
+  ]
+}
