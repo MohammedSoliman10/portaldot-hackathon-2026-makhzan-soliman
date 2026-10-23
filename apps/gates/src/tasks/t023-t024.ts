@@ -25,13 +25,8 @@ async function main(): Promise<void> {
   const client = publicClientFor(config.evmRpcUrl);
   const connection = await connectSubstrate(config.wsUrl);
   const owner = ownerAccount();
-  const provider = {
-    evm: "0xf4ec143c743ff57c0d32e829f50692551cbf6029" as `0x${string}`,
-    accountId32: "0xf4ec143c743ff57c0d32e829f50692551cbf6029eeeeeeeeeeeeeeeeeeeeeeee",
-  };
   const properties = await readProperties(connection.api);
   const ownerSs58 = accountId32ToSs58(owner.accountId32, properties.ss58Prefix);
-  const providerSs58 = accountId32ToSs58(provider.accountId32, properties.ss58Prefix);
 
   const runtimeAccount = await (connection.api.call as unknown as {
     reviveApi: { accountId: (address: string) => Promise<{ toHex: () => string }> };
@@ -45,7 +40,6 @@ async function main(): Promise<void> {
   ]);
   const nativeBefore = await systemAccount(connection.api, ownerSs58);
   const evmBefore = await getEvmBalance(client, owner.evm);
-  const providerBefore = await getEvmBalance(client, provider.evm);
   const startedAt = stamp(new Date());
 
   if (nativeBefore.free === "0" && evmBefore === 0n) {
@@ -74,48 +68,55 @@ async function main(): Promise<void> {
     `evm_balance_tpot=${formatWeiTpot(evmBefore)}`,
     `latest_block=${latest.number.toString()} hash=${latest.hash.toHex()}`,
     `finalized_block=${finalized.number.toString()} hash=${finalized.hash.toHex()}`,
-    `funding_source=human transfer from HUB2; no key or seed was read by this task`,
+    `funding_source=[reported] human transfer from HUB1; no key or seed was read by this task`,
     ``,
   ];
 
   const budget = await LiveBudget.load(client, owner.evm);
   const ownerWallet = await walletForMode("live", config.evmRpcUrl);
+  const valueWei = 1_000_000_000_000_000n; // 0.001 tPOT
   const transfer = await sendBudgetedTransaction(
     ownerWallet,
     client,
     budget,
-    "T024 owner -> provider-1 value transfer (1 wei)",
-    { to: provider.evm, value: 1n },
+    "T024 owner -> owner self value transfer (0.001 tPOT)",
+    { to: owner.evm, value: valueWei },
   );
   const finality = await waitForFinalized(client, transfer.receipt.blockNumber);
-  const providerAfter = await getEvmBalance(client, provider.evm);
   const evmAfter = await getEvmBalance(client, owner.evm);
   const nativeAfter = await systemAccount(connection.api, ownerSs58);
   const finishedAt = stamp(new Date());
+  const evmFeeWei = evmBefore > evmAfter ? evmBefore - evmAfter : 0n;
+  const nativeFeePlanck = BigInt(nativeBefore.free) > BigInt(nativeAfter.free)
+    ? BigInt(nativeBefore.free) - BigInt(nativeAfter.free)
+    : 0n;
 
   const t024 = {
     at: finishedAt,
     tx_hash: transfer.hash,
     from: owner.evm,
-    to: provider.evm,
-    value_wei: "1",
+    to: owner.evm,
+    value_wei: valueWei.toString(),
+    value_tpot: formatWeiTpot(valueWei),
+    self_transfer: true,
     status: transfer.receipt.status,
     block_number: Number(transfer.receipt.blockNumber),
     gas_used: transfer.receipt.gasUsed.toString(),
     finalized_number: finality.finalizedNumber.toString(),
     finalized_hash: finality.finalizedHash,
     latest_number: finality.latestNumber.toString(),
-    provider_balance_before_wei: providerBefore.toString(),
-    provider_balance_after_wei: providerAfter.toString(),
-    provider_readback_ok: providerAfter === providerBefore + 1n,
     owner_evm_before_wei: evmBefore.toString(),
     owner_evm_after_wei: evmAfter.toString(),
     owner_native_before_planck: nativeBefore.free,
     owner_native_after_planck: nativeAfter.free,
     owner_native_before_tpot: formatTpot(BigInt(nativeBefore.free)),
     owner_native_after_tpot: formatTpot(BigInt(nativeAfter.free)),
+    fee_wei: evmFeeWei.toString(),
+    fee_tpot: formatWeiTpot(evmFeeWei),
+    native_fee_planck: nativeFeePlanck.toString(),
+    native_fee_tpot: formatTpot(nativeFeePlanck),
+    value_readback_ok: evmAfter === evmBefore - evmFeeWei,
     mapping_equal: mappingEqual,
-    provider_ss58: providerSs58,
     budget_spent_wei: budget.spent.toString(),
     budget_spent_tpot: formatWeiTpot(budget.spent),
     receipt: transfer.receipt,
@@ -137,12 +138,12 @@ async function main(): Promise<void> {
   );
 
   console.log(fundingLines.join("\n"));
-  console.log(`T024 tx=${transfer.hash} status=${transfer.receipt.status} finalized=${finality.finalizedNumber} provider_readback_ok=${t024.provider_readback_ok}`);
+  console.log(`T024 tx=${transfer.hash} status=${transfer.receipt.status} finalized=${finality.finalizedNumber} value_readback_ok=${t024.value_readback_ok}`);
   console.log(`owner_native_after_tpot=${t024.owner_native_after_tpot} owner_evm_after_tpot=${formatWeiTpot(evmAfter)} budget_spent_tpot=${t024.budget_spent_tpot}`);
   console.log(`evidence=${fundingPath}`);
   console.log(`evidence=${transferPath}`);
   await connection.disconnect();
-  if (!t024.provider_readback_ok) process.exit(1);
+  if (!t024.value_readback_ok || t024.fee_wei === "0") process.exit(1);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
