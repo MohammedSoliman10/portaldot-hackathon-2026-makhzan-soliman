@@ -72,6 +72,26 @@ receipt, repeats the code-length, code-hash and config read-back checks, writes 
 only then removes the pending file. A new deploy is refused while a pending record exists; use
 `--force-new` only when the pending tx is known dropped, and record why.
 
+### Calibration before the real deploy (mandatory)
+
+The dry-run cost is `gas × gasPrice`; the chain may charge the storage deposit differently. Before
+the real deploy:
+
+1. Deploy a **small probe** with the same toolchain (or reuse the Tier 0 probe evidence) and record
+   the dry-run estimate for it.
+2. Measure the owner's actual balance drop (`balanceBefore - balanceAfter`, excluding unrelated
+   txs) for that probe.
+3. Write `evidence/calibration.json` with the measured ratio and both numbers:
+   `{"ratio": <measuredDrop / estimate>, "probe": {"estimateTpot": "...", "measuredDropTpot": "..."},
+   "measuredAt": "<UTC>", "source": "<evidence file>"}`.
+4. **If the ratio differs from 1 by more than 10%, STOP.** Do not deploy. Re-derive the real-deploy
+   budget from the measured per-byte deposit (creation bytes × measured deposit/byte, plus the deal
+   prices and fees), record the re-derivation in `docs/decisions.md`, and only then continue.
+
+`deploy --dry-run` prints `calibration: not yet verified against a live probe` until that file
+exists, and `calibration: measured ratio <r> (source: …)` afterwards. An unreadable or ratio-less
+file is treated as not verified, never as a pass.
+
 **Prerequisite closed in batch 7 (local only)**: `scripts/deploy.mjs` (library
 `apps/makhzan/src/deploy.ts`) is the environment-keyed viem deploy path. It requires
 `MAKHZAN_NETWORK` explicitly, refuses a non-whole-unit `--min-bond`, runs `eth_estimateGas` and

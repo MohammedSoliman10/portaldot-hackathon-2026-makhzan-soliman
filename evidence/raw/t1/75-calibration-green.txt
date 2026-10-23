@@ -1,0 +1,23 @@
+# S3 green — calibration line before the real deploy
+# UTC: 2026-10-23T02:56:31Z
+
+$ node --test test/deploy-calibration.test.ts
+✔ without a calibration file the dry-run says it is not verified (0.7046ms)
+✔ a measured ratio is printed with its source (0.4566ms)
+✔ a calibration file without a positive ratio is not trusted (0.5126ms)
+✔ a ratio of exactly 1 is accepted (0.1759ms)
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0
+
+$ npm test
+ℹ tests 107
+ℹ pass 107
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
+
+# The dry-run main() now prints the calibration line (asserted in test/deploy.test.ts):
+126:  assert.match(output, /calibration: not yet verified against a live probe/);

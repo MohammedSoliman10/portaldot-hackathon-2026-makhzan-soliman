@@ -257,9 +257,24 @@ export function formatTpot(wei: bigint): string {
   return `${whole}.${fraction.toString().padStart(6, "0")}`;
 }
 
-/** Calibration line for a dry run; the measured ratio comes from the Tier 0 probe evidence. */
-export function calibrationLine(_path: string): string {
-  throw new Error("not implemented");
+export const CALIBRATION_FILE = "evidence/calibration.json";
+
+/**
+ * Calibration line for a dry run. The ratio is the measured balance drop of a live probe divided by
+ * the dry-run estimate for that probe (Tier 0 evidence). No file means it has never been verified.
+ */
+export function calibrationLine(path: string = repoPath(CALIBRATION_FILE)): string {
+  const unverified = "calibration: not yet verified against a live probe";
+  if (!existsSync(path)) return unverified;
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8")) as { ratio?: unknown };
+    if (typeof parsed.ratio !== "number" || !Number.isFinite(parsed.ratio) || parsed.ratio <= 0) {
+      return unverified;
+    }
+    return `calibration: measured ratio ${parsed.ratio} (source: ${path})`;
+  } catch {
+    return unverified;
+  }
 }
 
 /** Slot 0 is the packed config; decode it without trusting a getter. */
@@ -317,6 +332,7 @@ export async function runDeploy(
   const deployData = encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode, args: argsTuple(args) });
 
   if (args.dryRun) {
+    log(calibrationLine());
     const gas = await deps.estimateGas(deployData);
     const cost = gas * (await deps.gasPrice());
     return { estimateTpot: await guardReserve(account.address, cost, args.reserveTpot, deps, log) };

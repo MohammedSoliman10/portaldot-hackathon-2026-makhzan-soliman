@@ -123,6 +123,7 @@ test("dry-run prints a tPOT estimate and sends nothing", async () => {
   const output = lines.join("\n");
   assert.match(output, /estimated deploy cost [0-9]+\.[0-9]{6} tPOT/);
   assert.match(output, /reserve 100 tPOT/);
+  assert.match(output, /calibration: not yet verified against a live probe/);
   assert.match(output, /dry run: no transaction sent/);
   const after = await publicClient.getTransactionCount({ address: (await import("viem/accounts")).privateKeyToAccount(TEST_KEY).address });
   assert.equal(after, before, "no transaction was sent");
