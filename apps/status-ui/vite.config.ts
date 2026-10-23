@@ -7,6 +7,9 @@ const appRoot = fileURLToPath(new URL(".", import.meta.url));
 const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
 
 export default defineConfig({
+  define: {
+    __BUILD_ID__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? "local"),
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

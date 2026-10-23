@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { within } from "@testing-library/react";
 import { App } from "../src/app/App";
 import { resolveMode } from "../src/config/modes";
 import { parseConfig } from "../src/config/env";
@@ -113,9 +114,10 @@ describe("shell", () => {
   });
 
   it("renders a not-found page inside the shell for an unknown route", () => {
-    const { getByRole, getByText } = render(recorded(), evidenceState(), "/nope");
+    const { getByRole } = render(recorded(), evidenceState(), "/nope");
     expect(getByRole("heading", { level: 1 })).toHaveTextContent(/not found/i);
-    expect(getByText(/overview/i)).toBeInTheDocument();
-    expect(getByText(/verify/i)).toBeInTheDocument();
+    const main = within(getByRole("main"));
+    expect(main.getByRole("link", { name: /overview/i })).toHaveAttribute("href", "/");
+    expect(main.getByRole("link", { name: /verify a file/i })).toHaveAttribute("href", "/verify");
   });
 });
