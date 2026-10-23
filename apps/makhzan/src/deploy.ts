@@ -367,6 +367,11 @@ function argsTuple(args: DeployArgs): readonly [number, number, number, bigint, 
   ];
 }
 
+/** Pure reserve check: the owner must keep `reserveTpot` after paying `cost`. */
+export function checkReserve(_balance: bigint, _cost: bigint, _reserveTpot: bigint): void {
+  throw new Error("not implemented");
+}
+
 async function guardReserve(
   owner: `0x${string}`,
   cost: bigint,
