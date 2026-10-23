@@ -1,0 +1,177 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@layer base {
+  html {
+    background: var(--ink);
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--ochre);
+    color: var(--ink);
+  }
+
+  a {
+    color: inherit;
+    text-decoration-color: var(--ochre-dim);
+    text-underline-offset: 0.22em;
+  }
+
+  a:hover {
+    text-decoration-color: var(--ochre);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    margin: 0;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  caption {
+    text-align: left;
+    color: var(--ash);
+    font-size: var(--step--1);
+    padding-bottom: 0.5rem;
+  }
+
+  th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--ash);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  th,
+  td {
+    border-bottom: var(--hairline) solid var(--rule);
+    padding: 0.6rem 0.75rem 0.6rem 0;
+    vertical-align: top;
+  }
+
+  code,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ash);
+  }
+
+  .rule {
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .rule-strong {
+    border-top: var(--hairline) solid var(--rule-strong);
+  }
+
+  .hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgb(237 231 218 / 16%) 0 1px,
+      transparent 1px 6px
+    );
+  }
+
+  .label-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.12rem 0.36rem;
+    border: var(--hairline) solid var(--rule-strong);
+    color: var(--ash);
+    white-space: nowrap;
+  }
+
+  .label-chip[data-label="MEASURED"] {
+    color: var(--ochre);
+    border-color: var(--ochre-dim);
+  }
+
+  .label-chip[data-label="SIMULATED"] {
+    border-style: dashed;
+  }
+
+  .label-chip[data-label="PENDING LIVE RUN"] {
+    border-color: var(--ash-2);
+    color: var(--ash-2);
+  }
+
+  .numeral {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+  }
+
+  .link-quiet {
+    color: var(--paper-dim);
+    text-decoration: none;
+  }
+
+  .link-quiet:hover {
+    color: var(--paper);
+    text-decoration: underline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
