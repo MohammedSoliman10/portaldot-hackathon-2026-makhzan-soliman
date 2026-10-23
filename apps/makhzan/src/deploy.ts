@@ -26,7 +26,7 @@ export const UINT64_MAX = 2n ** 64n - 1n;
 export const LOCAL_CHAIN_ID = 420_420_777;
 export const LOCAL_RPC = "http://127.0.0.1:8549";
 export const DEFAULT_MIN_BOND_WEI = 100_000_000_000_000_000_000n; // 1e20 wei = 1e16 units
-export const DEFAULT_RESERVE_TPOT = 500n;
+export const DEFAULT_RESERVE_TPOT = 100n;
 
 const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const DEFAULT_ARTIFACT = "contracts/out/Makhzan.sol/Makhzan.json";
@@ -367,9 +367,18 @@ function argsTuple(args: DeployArgs): readonly [number, number, number, bigint, 
   ];
 }
 
-/** Pure reserve check: the owner must keep `reserveTpot` after paying `cost`. */
-export function checkReserve(_balance: bigint, _cost: bigint, _reserveTpot: bigint): void {
-  throw new Error("not implemented");
+/**
+ * Pure reserve check: the owner must keep `reserveTpot` after paying `cost`. The default is 100 tPOT:
+ * what has to remain for deal prices, fees and slack after the deploy (DR-012, owner review).
+ */
+export function checkReserve(balance: bigint, cost: bigint, reserveTpot: bigint): void {
+  if (balance < cost + reserveTpot * 10n ** 18n) {
+    const remaining = balance > cost ? balance - cost : 0n;
+    throw new DeployError(
+      `refusing: balance ${formatTpot(balance)} tPOT - estimate ${formatTpot(cost)} tPOT leaves ` +
+        `${formatTpot(remaining)} tPOT, below the DR-012 reserve of ${reserveTpot} tPOT`,
+    );
+  }
 }
 
 async function guardReserve(
@@ -380,14 +389,9 @@ async function guardReserve(
   log: (line: string) => void,
 ): Promise<string> {
   const balance = await client.getBalance({ address: owner });
-  const reserve = reserveTpot * 10n ** 18n;
   const estimateTpot = formatTpot(cost);
   log(`estimated deploy cost ${estimateTpot} tPOT; owner balance ${formatTpot(balance)} tPOT; reserve ${reserveTpot} tPOT`);
-  if (balance < cost + reserve) {
-    throw new DeployError(
-      `refusing: the estimate would leave the owner at ${formatTpot(balance - cost)} tPOT, below the DR-012 reserve of ${reserveTpot} tPOT`,
-    );
-  }
+  checkReserve(balance, cost, reserveTpot);
   return estimateTpot;
 }
 

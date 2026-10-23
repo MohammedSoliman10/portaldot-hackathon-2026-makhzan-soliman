@@ -1,0 +1,20 @@
+# S1 green — 100 tPOT default reserve
+# UTC: 2026-10-23T02:52:29Z
+
+$ node --test test/deploy-reserve.test.ts
+✔ the default reserve is 100 tPOT, not 500 (0.6252ms)
+✔ owner 800 tPOT with a 517 tPOT estimate passes a 100 tPOT reserve (0.2012ms)
+✔ owner 600 tPOT with a 517 tPOT estimate refuses a 100 tPOT reserve (0.4804ms)
+✔ a balance exactly at cost plus reserve passes (0.1378ms)
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0
+
+$ npm test
+ℹ tests 97
+ℹ pass 96
+ℹ fail 1
+
+$ npm run typecheck
+> tsc --noEmit
+

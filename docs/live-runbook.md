@@ -49,12 +49,21 @@ node scripts/check-size.mjs             # must exit 0
 export MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=... MAKHZAN_CHAIN_ID=...
 export MAKHZAN_PRIVATE_KEY=...          # env only, never on argv, never printed
 node scripts/deploy.mjs --dry-run \
-  --min-bond <wei> --window <blocks> --block-size <1024..4096> --slash-bps 2000 \
-  --min-duration <blocks> --max-duration <blocks>
+  --min-bond 100000000000000000000 \
+  --window 10 --block-size 1024 --slash-bps 2000 \
+  --min-duration 10 --max-duration 1000
 node scripts/deploy.mjs \
-  --min-bond <wei> --window <blocks> --block-size <1024..4096> --slash-bps 2000 \
-  --min-duration <blocks> --max-duration <blocks>
+  --min-bond 100000000000000000000 \
+  --window 10 --block-size 1024 --slash-bps 2000 \
+  --min-duration 10 --max-duration 1000
 ```
+
+Flags: `--min-bond` is native wei and must be a whole number of protocol units (a multiple of
+10,000); the values above are the reviewed defaults (1e16 units = 1e20 wei). The reserve defaults to
+**100 tPOT**, which is what must remain after the deploy for deal prices, fees and slack; override
+with `--reserve-tpot` or `MAKHZAN_RESERVE_TPOT` only with a written reason. The refusal prints the
+balance, the estimate and the reserve. `--out` selects the record path and `--artifact` selects a
+different compiler output.
 
 **Prerequisite closed in batch 7 (local only)**: `scripts/deploy.mjs` (library
 `apps/makhzan/src/deploy.ts`) is the environment-keyed viem deploy path. It requires
