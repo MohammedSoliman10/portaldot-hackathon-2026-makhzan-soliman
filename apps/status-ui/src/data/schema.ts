@@ -168,3 +168,11 @@ export interface EvidenceState {
   error: string | null;
   loading: boolean;
 }
+
+export function parseEvidence(_value: unknown): EvidenceBundle {
+  throw new Error("not implemented");
+}
+
+export function parseManifest(_value: unknown): EvidenceManifest {
+  throw new Error("not implemented");
+}
