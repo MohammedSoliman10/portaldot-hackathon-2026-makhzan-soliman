@@ -1,0 +1,153 @@
+# B9 gate — deploy-safety fixes and scanner allowlist, all local checks
+# UTC: 2026-10-23T08:13:01Z
+
+$ forge fmt --check
+
+exit=0
+
+$ forge build --sizes
+257 │         vm.roll(endBlock + 10);
+    │         ────────────────────── `vm.roll` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockNumber()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/ChallengeIndex.t.sol:19:21
+   │
+19 │             vm.roll(block.number + 1);
+   │             ────────━━━━━━━━━━━━───── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+exit=0
+
+$ node scripts/check-size.mjs
+Makhzan runtime 6378 B <= budget 10240 B (margin 3862 B)
+exit=0
+
+$ forge test -vvv
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | resolveDeal      | 691   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | settleDeal       | 708   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | withdrawBond     | 715   | 0       | 0        |
+╰-------------------+------------------+-------+---------+----------╯
+
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1562727)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2868036)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 682683)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 4.07s (4.09s CPU time)
+
+Ran 21 test suites in 4.07s (11.42s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ forge snapshot --check
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | resolveDeal      | 686   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | settleDeal       | 740   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | withdrawBond     | 662   | 0       | 0        |
+╰-------------------+------------------+-------+---------+----------╯
+
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1562727)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2868036)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 682683)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 3.25s (3.26s CPU time)
+
+Ran 21 test suites in 3.26s (9.18s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ npm ci
+
+added 16 packages, and audited 17 packages in 5s
+
+10 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+exit=0
+
+$ npm run typecheck
+
+> makhzan@0.1.0 typecheck
+> tsc --noEmit
+exit=0
+
+$ npm test
+✔ a wrong data length is rejected (0.7846ms)
+✔ a block out of order is rejected (0.508ms)
+✔ a declared root that does not match the recomputed root is rejected (1.9575ms)
+✔ size and leaf count must agree with ceil(size/blockSize) (0.7327ms)
+✔ a malformed value type is rejected with a verbatim reason (0.7955ms)
+✔ the loopback endpoint acknowledges through the receiver (39.2412ms)
+ℹ tests 108
+ℹ suites 0
+ℹ pass 108
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4965.309965
+exit=0
+
+$ npm ci
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @substrate/connect@0.8.11: versions below 1.x are no longer maintained
+
+added 75 packages, and audited 76 packages in 9s
+
+15 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+exit=0
+
+$ npm run typecheck
+
+> makhzan-gates@0.1.0 typecheck
+> tsc --noEmit
+exit=0
+
+$ npm test
+✔ differential requires two labelled samples (0.2218ms)
+✔ differential records both labels (0.6346ms)
+✔ isPvmBlob accepts the PVM magic 0x50564d00 (0.9515ms)
+✔ isPvmBlob rejects EVM bytecode (0.1981ms)
+✔ isPvmBlob rejects odd-length and non-hex input (0.099ms)
+✔ pvmBlobHex encodes bytes with a 0x prefix (0.2373ms)
+ℹ tests 45
+ℹ suites 0
+ℹ pass 45
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1408.905519
+exit=0
+
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed
+exit=0
+
+$ node --test scripts/secret-scan.test.mjs
+✔ the documented tier0 path-fragment entry is allowlisted and the gate passes (27.7801ms)
+✔ the canary still catches a PEM block, a literal key and a mnemonic (25.644601ms)
+✔ the allowlist is narrow: a key-shaped line elsewhere is still a finding (25.504ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 127.906201
+exit=0
+
+$ node scripts/secret-scan.mjs
+secret scan PASS — 0 findings in 343 files (354 paths)
+exit=0
