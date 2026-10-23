@@ -5,7 +5,7 @@
  * from MAKHZAN_PRIVATE_KEY only, never from argv, never logged, never written to a record. The
  * artifact is a path so a different compiler output (for example resolc after G01/G02) can be used.
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -27,6 +27,8 @@ export const LOCAL_CHAIN_ID = 420_420_777;
 export const LOCAL_RPC = "http://127.0.0.1:8549";
 export const DEFAULT_MIN_BOND_WEI = 100_000_000_000_000_000_000n; // 1e20 wei = 1e16 units
 export const DEFAULT_RESERVE_TPOT = 100n;
+/** Bounded receipt attempts; the RPC is ~95.5% reliable, so one timeout must not lose the deploy. */
+export const RECEIPT_ATTEMPTS = 5;
 
 const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const DEFAULT_ARTIFACT = "contracts/out/Makhzan.sol/Makhzan.json";
@@ -47,6 +49,8 @@ export interface DeploySettings {
 
 export interface DeployArgs {
   dryRun: boolean;
+  resume?: Hex;
+  forceNew: boolean;
   artifact: string;
   out?: string;
   minBondWei: bigint;
@@ -56,6 +60,26 @@ export interface DeployArgs {
   minDurationBlocks: number;
   maxDurationBlocks: number;
   reserveTpot: bigint;
+}
+
+/** Every chain interaction the deploy needs, so tests can drive the resume path without an RPC. */
+export interface DeployDeps {
+  chainId(): Promise<number>;
+  estimateGas(data: Hex): Promise<bigint>;
+  gasPrice(): Promise<bigint>;
+  balance(address: Hex): Promise<bigint>;
+  nonce(address: Hex): Promise<number>;
+  send(data: Hex): Promise<Hex>;
+  receipt(hash: Hex): Promise<{ status: "success" | "reverted"; contractAddress?: Hex | null; blockNumber: bigint }>;
+  code(address: Hex): Promise<Hex | undefined>;
+  peek(address: Hex): Promise<Hex[]>;
+  sleep(ms: number): Promise<void>;
+}
+
+export interface DeployRuntime {
+  deps?: DeployDeps;
+  /** Overrides `evidence/deployments/pending-<network>-<chainId>.json`; tests use a temp file. */
+  pendingFile?: string;
 }
 
 export interface DeploymentRecord {
@@ -124,10 +148,15 @@ function integer(text: string, name: string): number {
 export function parseDeployArgs(argv: string[], env: NodeJS.ProcessEnv = process.env): DeployArgs {
   const options = new Map<string, string>();
   let dryRun = false;
+  let forceNew = false;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--dry-run") {
       dryRun = true;
+      continue;
+    }
+    if (arg === "--force-new") {
+      forceNew = true;
       continue;
     }
     if (!arg.startsWith("--")) throw new DeployError(`unexpected argument ${JSON.stringify(arg)}`);
@@ -145,6 +174,7 @@ export function parseDeployArgs(argv: string[], env: NodeJS.ProcessEnv = process
     "--min-duration",
     "--max-duration",
     "--reserve-tpot",
+    "--resume",
   ]);
   for (const key of options.keys()) {
     if (!known.has(key)) throw new DeployError(`unknown option ${key}`);
@@ -169,8 +199,14 @@ export function parseDeployArgs(argv: string[], env: NodeJS.ProcessEnv = process
   if (minDurationBlocks <= 0) throw new DeployError("--min-duration must be positive");
   if (maxDurationBlocks < minDurationBlocks) throw new DeployError("--max-duration must be >= --min-duration");
   const reserveTpot = bigint(options.get("--reserve-tpot") ?? env.MAKHZAN_RESERVE_TPOT ?? DEFAULT_RESERVE_TPOT.toString(), "--reserve-tpot");
+  const resume = options.get("--resume");
+  if (resume !== undefined && !/^0x[0-9a-fA-F]{64}$/.test(resume)) {
+    throw new DeployError("--resume must be a 32-byte transaction hash");
+  }
   return {
     dryRun,
+    resume: resume as Hex | undefined,
+    forceNew,
     artifact: options.get("--artifact") ?? DEFAULT_ARTIFACT,
     out: options.get("--out"),
     minBondWei,
@@ -258,44 +294,85 @@ export async function runDeploy(
   args: DeployArgs,
   settings: DeploySettings,
   log: (line: string) => void,
+  runtime: DeployRuntime = {},
 ): Promise<RunResult> {
+  if (args.dryRun && args.resume) {
+    throw new DeployError("--resume cannot be combined with --dry-run");
+  }
   const artifact = loadArtifact(args.artifact);
   const account = privateKeyToAccount(settings.privateKey);
-  const chain = defineChain({
-    id: settings.chainId,
-    name: settings.network === "local" ? "makhzan-local" : "makhzan-live",
-    nativeCurrency: { name: "tPOT", symbol: "tPOT", decimals: 18 },
-    rpcUrls: { default: { http: [settings.rpcUrl] } },
-  });
-  const transport = http(settings.rpcUrl);
-  const publicClient = createPublicClient({ chain, transport });
-  const walletClient = createWalletClient({ account, chain, transport });
+  const deps = runtime.deps ?? makeDeps(settings, account, artifact.abi);
+  const pendingFile =
+    runtime.pendingFile ?? repoPath(`evidence/deployments/pending-${settings.network}-${settings.chainId}.json`);
 
-  const observedChain = await publicClient.getChainId();
+  const observedChain = await deps.chainId();
   if (observedChain !== settings.chainId) {
     throw new DeployError(`refusing: the RPC is chain ${observedChain}, settings say ${settings.chainId}`);
   }
-  if (args.dryRun) {
-    const gas = await publicClient.estimateGas({ account: account.address, data: encodeDeployData({
-      abi: artifact.abi,
-      bytecode: artifact.bytecode,
-      args: argsTuple(args),
-    }) });
-    const cost = gas * (await publicClient.getGasPrice());
-    return { estimateTpot: await guardReserve(account.address, cost, args.reserveTpot, publicClient, log) };
-  }
   const deployData = encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode, args: argsTuple(args) });
-  const gas = await publicClient.estimateGas({ account: account.address, data: deployData });
-  const cost = gas * (await publicClient.getGasPrice());
-  const estimateTpot = await guardReserve(account.address, cost, args.reserveTpot, publicClient, log);
 
-  const hash = await walletClient.sendTransaction({ account, chain, data: deployData });
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  if (args.dryRun) {
+    const gas = await deps.estimateGas(deployData);
+    const cost = gas * (await deps.gasPrice());
+    return { estimateTpot: await guardReserve(account.address, cost, args.reserveTpot, deps, log) };
+  }
+
+  if (!args.resume && existsSync(pendingFile)) {
+    if (!args.forceNew) {
+      let pendingHash = "unknown";
+      try {
+        pendingHash = (JSON.parse(readFileSync(pendingFile, "utf8")) as { txHash?: string }).txHash ?? "unknown";
+      } catch {
+        // A corrupt pending record is still a reason not to send a second deploy.
+      }
+      throw new DeployError(
+        `refusing: pending deploy record ${pendingFile} (tx ${pendingHash}); use --resume ${pendingHash} ` +
+          "once the receipt is available, or --force-new to deploy again",
+      );
+    }
+    log(`--force-new: ignoring the pending record ${pendingFile}`);
+  }
+
+  let hash: Hex;
+  let estimateTpot: string;
+  if (args.resume) {
+    hash = args.resume;
+    estimateTpot = "resume: not measured";
+    log(`resuming deploy tx ${hash} (no new transaction)`);
+  } else {
+    const gas = await deps.estimateGas(deployData);
+    const cost = gas * (await deps.gasPrice());
+    estimateTpot = await guardReserve(account.address, cost, args.reserveTpot, deps, log);
+    const nonce = await deps.nonce(account.address);
+    hash = await deps.send(deployData);
+    const utc = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    const pending = {
+      network: settings.network,
+      chainId: settings.chainId,
+      deployer: getAddress(account.address),
+      txHash: hash,
+      nonce,
+      utc,
+    };
+    mkdirSync(dirname(pendingFile), { recursive: true });
+    writeFileSync(pendingFile, `${JSON.stringify(pending, null, 2)}\n`, "utf8");
+    log(`tx sent ${hash} (nonce ${nonce}); pending record ${pendingFile}`);
+  }
+
+  let receipt: { status: "success" | "reverted"; contractAddress?: Hex | null; blockNumber: bigint };
+  try {
+    receipt = await waitForReceipt(deps, hash);
+  } catch (err) {
+    throw new DeployError(
+      `receipt wait for tx ${hash} failed after ${RECEIPT_ATTEMPTS} attempts (${(err as Error).message}); ` +
+        `the pending record is kept at ${pendingFile}; rerun with --resume ${hash}`,
+    );
+  }
   if (receipt.status !== "success") throw new DeployError(`refusing: deploy tx ${hash} reverted`);
   const address = receipt.contractAddress;
   if (!address) throw new DeployError(`refusing: tx ${hash} has no contract address`);
 
-  const code = await publicClient.getCode({ address });
+  const code = await deps.code(address);
   if (!code || code === "0x") throw new DeployError(`refusing: no code at ${address}`);
   const runtimeBytes = (code.length - 2) / 2;
   if (runtimeBytes !== artifact.runtimeBytes) {
@@ -303,12 +380,7 @@ export async function runDeploy(
       `refusing: deployed code is ${runtimeBytes} B, artifact says ${artifact.runtimeBytes} B`,
     );
   }
-  const peeked = (await publicClient.readContract({
-    address,
-    abi: artifact.abi,
-    functionName: "peek",
-    args: [[SLOT0]],
-  })) as unknown as Hex[];
+  const peeked = await deps.peek(address);
   const config = decodeConfig(peeked[0]);
   const mismatches: string[] = [];
   if (config.challengeWindow !== args.challengeWindow) mismatches.push("challengeWindow");
@@ -350,10 +422,63 @@ export async function runDeploy(
   const out = repoPath(args.out ?? `evidence/deployments/${settings.network}-${settings.chainId}-${stamp}.json`);
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`, "utf8");
+  rmSync(pendingFile, { force: true });
   log(`deployed ${record.address} ${record.evidenceLabel} tx ${hash} block ${record.blockNumber}`);
   log(`code ${runtimeBytes} B, codeHash ${record.codeHash}, config read back`);
   log(`record ${out}`);
   return { record, estimateTpot };
+}
+
+/** Bounded receipt retry with exponential backoff; a timeout never loses the pending record. */
+async function waitForReceipt(
+  deps: DeployDeps,
+  hash: Hex,
+): Promise<{ status: "success" | "reverted"; contractAddress?: Hex | null; blockNumber: bigint }> {
+  let lastError: Error | undefined;
+  for (let attempt = 1; attempt <= RECEIPT_ATTEMPTS; attempt++) {
+    try {
+      return await deps.receipt(hash);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt < RECEIPT_ATTEMPTS) await deps.sleep(250 * 2 ** (attempt - 1));
+    }
+  }
+  throw lastError ?? new Error("receipt wait failed");
+}
+
+/** viem-backed dependencies; the only place the deploy touches the network. */
+function makeDeps(
+  settings: DeploySettings,
+  account: ReturnType<typeof privateKeyToAccount>,
+  abi: Abi,
+): DeployDeps {
+  const chain = defineChain({
+    id: settings.chainId,
+    name: settings.network === "local" ? "makhzan-local" : "makhzan-live",
+    nativeCurrency: { name: "tPOT", symbol: "tPOT", decimals: 18 },
+    rpcUrls: { default: { http: [settings.rpcUrl] } },
+  });
+  const transport = http(settings.rpcUrl);
+  const publicClient = createPublicClient({ chain, transport });
+  const walletClient = createWalletClient({ account, chain, transport });
+  return {
+    chainId: () => publicClient.getChainId(),
+    estimateGas: (data) => publicClient.estimateGas({ account: account.address, data }),
+    gasPrice: () => publicClient.getGasPrice(),
+    balance: (address) => publicClient.getBalance({ address }),
+    nonce: (address) => publicClient.getTransactionCount({ address, blockTag: "pending" }),
+    send: (data) => walletClient.sendTransaction({ account, chain, data }),
+    receipt: (hash) => publicClient.waitForTransactionReceipt({ hash, timeout: 15_000 }),
+    code: (address) => publicClient.getCode({ address }),
+    peek: async (address) =>
+      (await publicClient.readContract({
+        address,
+        abi,
+        functionName: "peek",
+        args: [[SLOT0]],
+      })) as unknown as Hex[],
+    sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  };
 }
 
 function argsTuple(args: DeployArgs): readonly [number, number, number, bigint, number, number] {
@@ -385,10 +510,10 @@ async function guardReserve(
   owner: `0x${string}`,
   cost: bigint,
   reserveTpot: bigint,
-  client: ReturnType<typeof createPublicClient>,
+  deps: DeployDeps,
   log: (line: string) => void,
 ): Promise<string> {
-  const balance = await client.getBalance({ address: owner });
+  const balance = await deps.balance(owner);
   const estimateTpot = formatTpot(cost);
   log(`estimated deploy cost ${estimateTpot} tPOT; owner balance ${formatTpot(balance)} tPOT; reserve ${reserveTpot} tPOT`);
   checkReserve(balance, cost, reserveTpot);

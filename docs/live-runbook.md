@@ -65,6 +65,13 @@ with `--reserve-tpot` or `MAKHZAN_RESERVE_TPOT` only with a written reason. The 
 balance, the estimate and the reserve. `--out` selects the record path and `--artifact` selects a
 different compiler output.
 
+**If the receipt wait fails**, the script has already printed the tx hash and written
+`evidence/deployments/pending-<network>-<chainId>.json` (hash, nonce, deployer, UTC). Do **not**
+deploy again: rerun the same command with `--resume <txHash>` once the RPC recovers; it waits for the
+receipt, repeats the code-length, code-hash and config read-back checks, writes the final record and
+only then removes the pending file. A new deploy is refused while a pending record exists; use
+`--force-new` only when the pending tx is known dropped, and record why.
+
 **Prerequisite closed in batch 7 (local only)**: `scripts/deploy.mjs` (library
 `apps/makhzan/src/deploy.ts`) is the environment-keyed viem deploy path. It requires
 `MAKHZAN_NETWORK` explicitly, refuses a non-whole-unit `--min-bond`, runs `eth_estimateGas` and
