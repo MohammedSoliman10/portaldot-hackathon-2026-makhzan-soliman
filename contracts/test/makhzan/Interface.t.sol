@@ -50,7 +50,7 @@ contract InterfaceTest is Test {
 
     function test_abiIsExactlyTheDocumentedSurface() public view {
         bytes4[] memory actual = _functionSelectors();
-        bytes4[14] memory expected = [
+        bytes4[15] memory expected = [
             _selector("registerProvider()"),
             _selector("addBond()"),
             _selector("withdrawBond()"),
@@ -64,6 +64,7 @@ contract InterfaceTest is Test {
             _selector("claim(uint32)"),
             _selector("settle(uint32)"),
             _selector("accruedOf(uint32)"),
+            _selector("healthOf(uint32)"),
             _selector("peek(bytes32[])")
         ];
 

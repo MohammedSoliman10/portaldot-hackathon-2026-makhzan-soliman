@@ -328,6 +328,16 @@ contract Makhzan is IMakhzan {
 
     // ------------------------------------------------------------------ reads
 
+    function healthOf(uint32 dealId) external view override returns (uint8) {
+        Deal storage d = deals[dealId];
+        if (d.owner == address(0) || d.flags & DEAL_SETTLED != 0) return 0;
+        if (d.flags & DEAL_CHALLENGE_OPEN != 0) {
+            // The exact deadline block is still pending; the next block is in default.
+            return block.number > uint256(d.challengeStart) + challengeWindow ? 3 : 2;
+        }
+        return 1;
+    }
+
     function peek(bytes32[] calldata slots) external view override returns (bytes32[] memory values) {
         values = new bytes32[](slots.length);
         for (uint256 i; i < slots.length; i++) {

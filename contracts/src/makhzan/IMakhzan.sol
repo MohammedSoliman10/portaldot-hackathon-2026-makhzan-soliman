@@ -100,6 +100,10 @@ interface IMakhzan {
     function settle(uint32 dealId) external;
     function accruedOf(uint32 dealId) external view returns (uint64 accrued, uint64 claimable);
 
+    /// @notice Availability for other contracts: 0 no such deal or settled; 1 healthy;
+    ///         2 challenge pending (open, inside the window); 3 in default (open, past the deadline).
+    function healthOf(uint32 dealId) external view returns (uint8);
+
     // ------------------------------------------------------------------ reads
 
     function peek(bytes32[] calldata slots) external view returns (bytes32[] memory values);

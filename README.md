@@ -55,13 +55,23 @@ flowchart LR
 The daemon never trusts its own transaction hash: a round is `submitted` after the send and only
 becomes `passed`/`failed` from a fresh `challengeStateOf` read-back plus the provider bond.
 
+### Gating on availability (consumer example)
+
+Other contracts should gate on `healthOf` instead of decoding deal storage:
+
+```solidity
+IMakhzan m = IMakhzan(addr);
+uint8 h = m.healthOf(dealId); // 0 unknown/settled, 1 healthy, 2 challenge pending, 3 in default
+require(h == 1, "deal not available");
+```
+
 ## Demo (3 minutes)
 
 The full script is [docs/demo.md](docs/demo.md). Short version:
 
 ```bash
 cd contracts && forge build --sizes && cd ..
-node scripts/check-size.mjs                     # 6,378 B <= 10,240 B
+node scripts/check-size.mjs                     # 6,566 B <= 10,240 B
 cd apps/makhzan && npm test                     # 108 TypeScript tests
 node scripts/e2e-local.mjs                      # anvil: one pass, one slash, then settle
 ```

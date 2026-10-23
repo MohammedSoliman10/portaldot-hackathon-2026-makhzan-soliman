@@ -61,6 +61,16 @@ function accruedOf(uint32 dealId) external view returns (uint64 accrued, uint64 
 ### Reads
 
 ```solidity
+function healthOf(uint32 dealId) external view returns (uint8);
+```
+
+`healthOf` is the availability gate for other contracts. It is read-only, adds no storage and emits
+no events. Values: `0` = no such deal **or settled**; `1` = healthy (deal exists, not settled, no open
+challenge); `2` = challenge pending (open and `block.number <= challengeStart + challengeWindow`,
+including the exact deadline block); `3` = in default (open and past the deadline, unresolved). After
+a successful answer or a `resolve` the deal returns to `1`; after `settle` it is `0`.
+
+```solidity
 function peek(bytes32[] calldata slots) external view returns (bytes32[] memory values);
 ```
 
