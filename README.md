@@ -91,7 +91,7 @@ The full script is [docs/demo.md](docs/demo.md). Short version:
 ```bash
 cd contracts && forge build --sizes && cd ..
 node scripts/check-size.mjs                     # 6,566 B <= 10,240 B
-cd apps/makhzan && npm test                     # 108 TypeScript tests
+cd apps/makhzan && npm test                     # 117 TypeScript tests
 node scripts/e2e-local.mjs                      # anvil: one pass, one slash, then settle
 ```
 
