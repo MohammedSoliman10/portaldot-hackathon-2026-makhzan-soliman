@@ -5,7 +5,7 @@
  * `parseEvidence` (added with its tests); these declarations are the shared vocabulary.
  */
 
-import { decodeSlot0 } from "./peek";
+import { decodeSlot0 } from "./peek.ts";
 
 export type Hex = `0x${string}`;
 export type EvidenceEnvironment = "anvil-local" | "portaldot-testnet";
