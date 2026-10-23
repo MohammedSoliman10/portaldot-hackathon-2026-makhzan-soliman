@@ -154,3 +154,37 @@ balance rather than spending into the reserve.
 
 **Evidence.** `evidence/raw/g07/11-funding-recon-2.txt`,
 `evidence/raw/g07/10-fanout-plan.txt`.
+
+## DR-013 — Close Tier 0 probes and carry the open questions into the live Makhzan run (2026-10-23)
+
+**Context.** T026 passed and confirmed `WEI_PER_UNIT = 10_000`; the owner and provider-1 spend
+proofs passed. Tier 0 has spent `70.63305145206221 tPOT` of the DR-012 `100 tPOT` cap. The G01
+`CounterProbe` dry run is `37.12486675053143 tPOT`, which would take the total to
+`107.75791820259364`; G02's `BehaviorProbe` alone is `76.22978090790616 tPOT`, above the
+`60 tPOT` single-deposit cap, and every G01 + G02 deploy together projects to
+`831.08264911946874 tPOT`. No further Tier 0 probe fits the current decision.
+
+**Decision.**
+- Tier 0 probe spending is **closed** at the current total. The `100 tPOT` cap is **not raised**,
+  and no further probe is deployed.
+- **G01 is closed on the T026 evidence for the `solc` EVM path.** The open `via_ir` question is no
+  longer a Tier 0 gate: it becomes a **free `eth_estimateGas` dry run of the real Makhzan creation
+  transaction** in the Tier 1 live runbook, recorded there.
+- **G02 shrinks to the free read-only checks** in the DR-013 evidence: chain identity, block time,
+  `eth_getLogs` range, pruning, the 2 KiB calldata estimate, and the reverting-call error shape. No
+  probe deploy and no transaction.
+- **G03, G04 and G05 are measured on the real Makhzan after its deploy**, with an
+  `eth_estimateGas` dry run before every transaction. The dry-run estimate and the measured balance
+  drop are recorded for each transaction.
+- **G07 is closed:** factor `10000` is confirmed. Only owner and provider-1 are funded; the four
+  unfunded providers are not needed for the Makhzan deploy path and remain a documented gap.
+
+**Consequences.** `29.36694854793778 tPOT` stays unspent. There are no more Tier 0 probe
+transactions. The live phase owns the Makhzan deploy budget and must stop and report if a dry run
+exceeds the owner's spendable balance. G01 is a `solc` EVM-path closure, not a `via_ir` PASS.
+
+**Evidence.** `evidence/raw/g07/14-t026.json`, `15-t026-summary.txt`,
+`evidence/raw/g07/21-cap-check.txt`, `22-cap-stop.txt`, `evidence/calibration.json`.
+
+**Status.** Active; supersedes DR-012 only for the scope of Tier 0 probes, not for the already
+completed funding and spend records.
