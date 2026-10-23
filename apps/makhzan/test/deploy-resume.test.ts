@@ -117,6 +117,7 @@ test("an exhausted wait keeps the pending record and a second run refuses to sen
   );
   assert.equal(existsSync(pendingFile), true, "pending record is kept");
   const pending = JSON.parse(readFileSync(pendingFile, "utf8"));
+  assert.equal(pending.state, "sent");
   assert.equal(pending.txHash, HASH);
   assert.equal(pending.nonce, 7);
   assert.match(pending.deployer, /^0x[0-9a-fA-F]{40}$/);
@@ -128,6 +129,39 @@ test("an exhausted wait keeps the pending record and a second run refuses to sen
   await assert.rejects(
     runDeploy(args(join(dir, "final.json")), SETTINGS, log, { deps: second.deps, pendingFile }),
     (err: Error) => err instanceof DeployError && /pending deploy/.test(err.message),
+  );
+  assert.equal(second.sent.length, 0, "no second deploy was sent");
+  rmSync(dir, { recursive: true, force: true });
+});
+
+test("a send that throws after the node accepted it leaves a sending record and blocks a re-run", async () => {
+  const dir = tempDir();
+  const pendingFile = join(dir, "pending.json");
+  const lost = makeDeps({
+    send: async () => {
+      throw new Error("socket closed after the node accepted the transaction");
+    },
+  });
+  await assert.rejects(
+    runDeploy(args(join(dir, "final.json")), SETTINGS, log, { deps: lost.deps, pendingFile }),
+    /socket closed/,
+  );
+  assert.equal(existsSync(pendingFile), true, "a sending record exists before the send");
+  const pending = JSON.parse(readFileSync(pendingFile, "utf8"));
+  assert.equal(pending.state, "sending");
+  assert.equal("txHash" in pending, false, "no hash is known");
+  assert.equal(pending.nonce, 7);
+  assert.match(pending.deployer, /^0x[0-9a-fA-F]{40}$/);
+  assert.match(pending.utc, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+
+  const second = makeDeps();
+  await assert.rejects(
+    runDeploy(args(join(dir, "final.json")), SETTINGS, log, { deps: second.deps, pendingFile }),
+    (err: Error) =>
+      err instanceof DeployError &&
+      /pending deploy record/.test(err.message) &&
+      /check the owner's nonce and the explorer for a transaction from the owner/.test(err.message) &&
+      /--resume <hash> or --force-new/.test(err.message),
   );
   assert.equal(second.sent.length, 0, "no second deploy was sent");
   rmSync(dir, { recursive: true, force: true });
