@@ -8,9 +8,9 @@ describe("formatting", () => {
     expect(formatNative("10000000000000000")).toBe("100");
     expect(formatNative("8000000000000000")).toBe("80");
     expect(formatNative("2000000000000000")).toBe("20");
-    expect(formatNative("100000000000000")).toBe("10");
+    expect(formatNative("1000000000000000")).toBe("10");
     expect(formatNative("5000000000000")).toBe("0.05");
-    expect(formatNative("100000000000")).toBe("0.01");
+    expect(formatNative("1000000000000")).toBe("0.01");
   });
 
   it("never prints a rounded zero for a positive amount", () => {
