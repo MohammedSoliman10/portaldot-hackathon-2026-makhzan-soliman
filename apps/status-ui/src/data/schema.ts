@@ -5,6 +5,8 @@
  * `parseEvidence` (added with its tests); these declarations are the shared vocabulary.
  */
 
+import { decodeSlot0 } from "./peek";
+
 export type Hex = `0x${string}`;
 export type EvidenceEnvironment = "anvil-local" | "portaldot-testnet";
 export type DealState = "active" | "expired" | "settled";
@@ -274,27 +276,6 @@ const ROUND_STATUSES = ["pending", "submitted", "passed", "failed", "unanswered"
 const STAGES = ["submitted", "included", "executed", "finalized", "readBack"] as const;
 const RECEIPT_STATES = ["recorded", "not-recorded", "unavailable-pruned", "unavailable-error"] as const;
 
-/**
- * Decodes the packed config word. Solidity packs from the least-significant end, so the first
- * declared field sits in the last bytes of the 32-byte word; two leading bytes are padding.
- */
-export function decodePackedConfig(value: Hex): Omit<ConfigInfo, "slot0"> {
-  const bytes = Uint8Array.from(value.slice(2).match(/../g) ?? [], (pair) => Number.parseInt(pair, 16));
-  if (bytes.length !== 32) throw new Error("slot0: must be 32 bytes");
-  const at = (start: number, length: number): bigint =>
-    bytes.subarray(start, start + length).reduce((acc, byte) => (acc << 8n) | BigInt(byte), 0n);
-  return {
-    challengeWindowBlocks: Number(at(28, 4)),
-    challengeBlockSize: Number(at(26, 2)),
-    slashBps: Number(at(24, 2)),
-    minBondUnits: at(16, 8).toString(),
-    nextDealId: Number(at(12, 4)),
-    providerCount: Number(at(10, 2)),
-    minDurationBlocks: Number(at(6, 4)),
-    maxDurationBlocks: Number(at(2, 4)),
-  };
-}
-
 function parseChain(value: unknown): ChainInfo {
   const raw = object(value, "chain", CHAIN_KEYS);
   const explorer = raw.explorer === null ? null : string(raw.explorer, "chain.explorer");
@@ -353,7 +334,7 @@ function parseConfig(value: unknown): ConfigInfo {
     maxDurationBlocks: integer(raw.maxDurationBlocks, "config.maxDurationBlocks", 1),
     slot0,
   };
-  const decoded = decodePackedConfig(slot0);
+  const decoded = decodeSlot0(slot0);
   for (const [key, decodedValue] of Object.entries(decoded)) {
     if (String(decodedValue) !== String(config[key as keyof Omit<ConfigInfo, "slot0">])) {
       fail("config.slot0", `disagrees with config.${key}`);

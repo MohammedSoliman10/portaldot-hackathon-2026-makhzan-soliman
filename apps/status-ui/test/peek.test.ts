@@ -18,7 +18,7 @@ describe("decodeSlot0", () => {
   });
 
   it("reads the first declared field from the least-significant end", () => {
-    const word = `0x${"00".repeat(28)}0000000a`;
+    const word = `0x${"00".repeat(28)}0000000a` as `0x${string}`;
     expect(decodeSlot0(word).challengeWindowBlocks).toBe(10);
   });
 
