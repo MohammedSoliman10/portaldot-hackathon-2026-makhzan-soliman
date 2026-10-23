@@ -45,7 +45,7 @@ export interface CommandDeps {
     gasPrice(): Promise<bigint>;
     nonce?(): Promise<number>;
     send(tx: TxRequest): Promise<Hex>;
-    receipt(hash: Hex): Promise<Receipt>;
+    receipt(hash: Hex, action?: string): Promise<Receipt>;
     waitForFinality(receipt: Receipt): Promise<Finality>;
     read(target: number | "created"): Promise<Record<string, unknown>>;
     pollDeal?(dealId: number): Promise<boolean>;
@@ -240,7 +240,7 @@ export async function execute(command: ParsedCommand, deps: CommandDeps): Promis
   const nonce = deps.chain.nonce ? await deps.chain.nonce() : 0;
   const hash = await deps.chain.send(tx);
   markSubmitted(record, hash, nonce);
-  const receipt = await deps.chain.receipt(hash);
+  const receipt = await deps.chain.receipt(hash, command.name);
   markIncluded(record, receipt.blockNumber, receipt.blockHash);
   if (receipt.status === "reverted") {
     markExecuted(record, "reverted", receipt.reason ?? "transaction reverted without a reason");

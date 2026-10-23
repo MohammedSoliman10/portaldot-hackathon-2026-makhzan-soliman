@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { deriveViews, writeReceipt } from "./evidence.ts";
 import {
   createPublicClient,
   createWalletClient,
@@ -73,10 +74,14 @@ export interface DeployDeps {
   receipt(hash: Hex): Promise<{ status: "success" | "reverted"; contractAddress?: Hex | null; blockNumber: bigint }>;
   code(address: Hex): Promise<Hex | undefined>;
   peek(address: Hex): Promise<Hex[]>;
+  /** Optional raw transaction fetch so the evidence receipt keeps the full request. */
+  transaction?(hash: Hex): Promise<unknown>;
   sleep(ms: number): Promise<void>;
 }
 
 export interface DeployRuntime {
+  /** When set, the deploy writes the raw receipt under this evidence root (the script passes it). */
+  evidenceDir?: string;
   deps?: DeployDeps;
   /** Overrides `evidence/deployments/pending-<network>-<chainId>.json`; tests use a temp file. */
   pendingFile?: string;
@@ -463,6 +468,27 @@ export async function runDeploy(
   const out = repoPath(args.out ?? `evidence/deployments/${settings.network}-${settings.chainId}-${stamp}.json`);
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`, "utf8");
+  if (runtime.evidenceDir) {
+    try {
+      const raw = deps.transaction ? await deps.transaction(hash) : { hash };
+      writeReceipt(runtime.evidenceDir, {
+        network: settings.network,
+        action: "deploy",
+        txHash: hash,
+        utc,
+        transaction: raw,
+        receipt: { ...receipt, contractAddress: address },
+      });
+      deriveViews(runtime.evidenceDir, {
+        network: settings.network,
+        chainId: settings.chainId,
+        generatedAt: utc,
+        deployments: [{ address: record.address, txHash: hash, action: "deploy" }],
+      });
+    } catch (err) {
+      log(`warning: receipt evidence not written (${(err as Error).message})`);
+    }
+  }
   rmSync(pendingFile, { force: true });
   log(`deployed ${record.address} ${record.evidenceLabel} tx ${hash} block ${record.blockNumber}`);
   log(`code ${runtimeBytes} B, codeHash ${record.codeHash}, config read back`);
@@ -515,6 +541,7 @@ function makeDeps(
     nonce: (address) => publicClient.getTransactionCount({ address, blockTag: "pending" }),
     send: (data) => walletClient.sendTransaction({ account, chain, data }),
     receipt: (hash) => publicClient.waitForTransactionReceipt({ hash, timeout: 15_000 }),
+    transaction: (hash) => publicClient.getTransaction({ hash }),
     code: (address) => publicClient.getCode({ address }),
     peek: async (address) =>
       (await publicClient.readContract({
@@ -571,7 +598,7 @@ export async function main(argv: string[], env: NodeJS.ProcessEnv, log: (line: s
   try {
     const args = parseDeployArgs(argv, env);
     const settings = deploySettings(env);
-    await runDeploy(args, settings, log);
+    await runDeploy(args, settings, log, { evidenceDir: env.MAKHZAN_EVIDENCE_DIR ?? "evidence" });
     if (args.dryRun) log("dry run: no transaction sent");
     return 0;
   } catch (err) {

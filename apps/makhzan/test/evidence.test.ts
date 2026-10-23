@@ -96,16 +96,18 @@ test("addresses.json and txs.json are derived views over the raw receipts", () =
     generatedAt: "2026-10-23T08:21:17Z",
     deployments: [{ address: "0x5FbDB2315678afecb367f032d93F642f64180aa3", txHash: hash, action: "deploy" }],
   });
-  assert.deepEqual(views.addresses.entries.map((entry) => entry.address), [
+  const addresses = views.addresses as Record<string, any>;
+  assert.deepEqual(addresses.entries.map((entry: { address: string }) => entry.address), [
     "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   ]);
   assert.equal(views.addresses.schema, "makhzan.evidence-index/v0");
   assert.equal(views.addresses.network, "LOCAL");
   assert.equal(views.addresses.derivedFrom, "evidence/receipts");
-  assert.equal(views.txs.entries.length, 1);
-  assert.equal(views.txs.entries[0].hash, hash);
-  assert.equal(views.txs.entries[0].action, "challenge");
-  assert.equal(views.txs.entries[0].network, "LOCAL");
+  const txs = views.txs as Record<string, any>;
+  assert.equal(txs.entries.length, 1);
+  assert.equal(txs.entries[0].hash, hash);
+  assert.equal(txs.entries[0].action, "challenge");
+  assert.equal(txs.entries[0].network, "LOCAL");
   assert.equal(existsSync(join(dir, "addresses.json")), true);
   assert.equal(existsSync(join(dir, "txs.json")), true);
   rmSync(dir, { recursive: true, force: true });
@@ -115,16 +117,18 @@ test("publishing a bundle is additive and the index carries the sha256 of the ex
   const dir = tmp();
   const bundle = buildBundle({ ...fixture, id: "local-anvil-a" });
   const first = publishBundle(dir, bundle);
+  const index = first.index as Record<string, any>;
   const bytes = readFileSync(first.file);
   const digest = `0x${createHash("sha256").update(bytes).digest("hex")}`;
-  assert.equal(first.index.files[0].sha256, digest);
-  assert.equal(first.index.schema, "makhzan.evidence-index/v0");
-  assert.equal(first.index.current, "local-anvil-a");
-  assert.equal(first.index.files[0].environment, "anvil-local");
+  assert.equal(index.files[0].sha256, digest);
+  assert.equal(index.schema, "makhzan.evidence-index/v0");
+  assert.equal(index.current, "local-anvil-a");
+  assert.equal(index.files[0].environment, "anvil-local");
 
   const second = publishBundle(dir, buildBundle({ ...fixture, id: "local-anvil-b" }));
-  assert.equal(second.index.current, "local-anvil-b");
-  assert.deepEqual(second.index.files.map((file: { id: string }) => file.id), [
+  const secondIndex = second.index as Record<string, any>;
+  assert.equal(secondIndex.current, "local-anvil-b");
+  assert.deepEqual((secondIndex.files as Array<{ id: string }>).map((file) => file.id), [
     "local-anvil-a",
     "local-anvil-b",
   ]);

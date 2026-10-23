@@ -14,6 +14,7 @@ import { chunkFile } from "./chunk.ts";
 import type { ChainClient } from "./daemon.ts";
 import { buildTree } from "./merkle.ts";
 import type { Settings } from "./settings.ts";
+import { deriveViews, writeReceipt } from "./evidence.ts";
 
 export const DEFAULT_BLOCK_SIZE = 1024;
 
@@ -92,6 +93,7 @@ export interface Wiring {
 }
 
 export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.env): Wiring {
+  const evidenceDir = env.MAKHZAN_EVIDENCE_DIR ?? "evidence";
   const chain = defineChain({
     id: settings.chainId,
     name: settings.network === "local" ? "makhzan-local" : `makhzan-${settings.chainId}`,
@@ -102,6 +104,38 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
   const account = privateKeyToAccount(settings.key);
   const publicClient = createPublicClient({ chain, transport });
   const walletClient = createWalletClient({ chain, transport, account });
+
+  /** Raw receipt first: it is written before finality or any derived view exists. */
+  const capture = async (
+    hash: Hex,
+    action: string,
+    receipt: { status: string; blockNumber: bigint; gasUsed?: bigint },
+  ): Promise<void> => {
+    try {
+      const tx = await publicClient.getTransaction({ hash }).catch(() => ({ hash }));
+      const utc = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+      writeReceipt(evidenceDir, {
+        network: settings.network,
+        action,
+        txHash: hash,
+        utc,
+        transaction: tx,
+        receipt: {
+          status: receipt.status,
+          blockNumber: Number(receipt.blockNumber),
+          gasUsed: receipt.gasUsed === undefined ? null : receipt.gasUsed.toString(),
+        },
+      });
+      deriveViews(evidenceDir, {
+        network: settings.network,
+        chainId: settings.chainId,
+        generatedAt: utc,
+      });
+    } catch (err) {
+      console.error(`warning: receipt evidence not written (${(err as Error).message})`);
+    }
+  };
+
   const address = settings.contract;
   const blockSize = env.MAKHZAN_BLOCK_SIZE ? Number(env.MAKHZAN_BLOCK_SIZE) : DEFAULT_BLOCK_SIZE;
   const daemonUrl = settings.daemonUrl;
@@ -149,6 +183,8 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
       const hash = await walletClient.writeContract({
         address, abi: ABI, functionName: "answer", args: [dealId, data, path],
       });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 15_000 });
+      await capture(hash, "answer", receipt);
       return { hash };
     },
     async estimateGas(tx) {
@@ -168,8 +204,9 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
         maxFeePerGas: tx.maxFeePerGas, maxPriorityFeePerGas: tx.maxPriorityFeePerGas, chain,
       });
     },
-    async receipt(hash): Promise<Receipt> {
+    async receipt(hash, action = "transaction"): Promise<Receipt> {
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      await capture(hash, action, receipt);
       return {
         status: receipt.status,
         blockNumber: receipt.blockNumber,

@@ -1,0 +1,24 @@
+# R2 green — feature 003 bundle schema, raw receipts and derived views
+# UTC: 2026-10-23T09:12:05Z
+
+$ node --test test/evidence.test.ts
+✔ the feature 003 fixture is accepted as makhzan.evidence/v0 (2.698ms)
+✔ the schema rejects every documented failure case (4.3407ms)
+✔ a raw receipt is written as soon as it arrives, under receipts/<network>/<hash>.json (0.9358ms)
+✔ addresses.json and txs.json are derived views over the raw receipts (0.8209ms)
+✔ publishing a bundle is additive and the index carries the sha256 of the exact bytes (1.4354ms)
+ℹ tests 5
+ℹ pass 5
+ℹ fail 0
+
+$ npm test
+ℹ tests 107
+ℹ pass 107
+ℹ fail 0
+
+$ npm run typecheck
+
+
+# Receipts: chain.ts (CLI round + daemon answer) and deploy.ts (deploy, when the script sets
+# evidenceDir) write evidence/receipts/<network>/<hash>.json as soon as the receipt arrives, then
+# rebuild addresses.json and txs.json. Validator accepts the feature 003 fixture and rejects 18 cases.
