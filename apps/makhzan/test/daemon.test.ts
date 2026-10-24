@@ -358,6 +358,22 @@ test("a timed-out answer that was slashed becomes failed from the read-back", as
   assert.deepEqual(result.failed, [DEAL]);
 });
 
+test("an unanswered no-send round still becomes failed after the slash read-back", async () => {
+  const fx = fixture();
+  const client = fakeClient({ open: true, index: 0, start: START });
+  client.block = START + 1;
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, drill: "skip" });
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, drill: "skip" });
+  assert.equal(fx.state.deals[String(DEAL)].lastChallenge?.status, "unanswered");
+
+  client.challenge.open = false;
+  client.bond = 8n * 10n ** 15n;
+  const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, drill: "skip" });
+  assert.equal(fx.state.deals[String(DEAL)].lastChallenge?.status, "failed");
+  assert.deepEqual(result.failed, [DEAL]);
+  assert.equal(client.calls.length, 0);
+});
+
 test("a missing block is reported, never guessed", async () => {
   const fx = fixture();
   rmSync(blockPathFor(fx.stateFile, fx.tree.root, 2));

@@ -150,14 +150,20 @@ async function pollDeal(ctx: PollContext, dealId: number, result: PollResult): P
       writeState(ctx.stateFile, ctx.state);
       return;
     }
-    if (prev.status === "pending") {
+    if (prev.status === "pending" || prev.status === "unanswered") {
       // Without a successful send the daemon must never claim a pass; an observed slash is the only
-      // evidence it can still record.
+      // evidence it can still record. A skip/no-send round that was already labelled unanswered while
+      // the window was open must still turn into failed once resolve slashes the bond.
       const bond = await ctx.client.bondOf(dealId);
       const slashed = prev.bondBefore !== undefined && bond < BigInt(prev.bondBefore);
-      prev.status = slashed ? "failed" : "unanswered";
-      if (slashed) result.failed.push(dealId);
-      writeState(ctx.stateFile, ctx.state);
+      if (slashed) {
+        prev.status = "failed";
+        result.failed.push(dealId);
+        writeState(ctx.stateFile, ctx.state);
+      } else if (prev.status === "pending") {
+        prev.status = "unanswered";
+        writeState(ctx.stateFile, ctx.state);
+      }
     }
     return;
   }
