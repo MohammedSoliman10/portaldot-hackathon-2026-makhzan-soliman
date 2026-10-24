@@ -160,3 +160,29 @@ test("watch polls the deal until it resolves, then reads it back", async () => {
   assert.equal(order.join(","), "poll,read");
   assert.ok(record.readBack);
 });
+
+test("register parses a tPOT bond into exact units and wei", () => {
+  const register = parseCommand(["register", "--bond", "30"]);
+  assert.equal(register.name, "register");
+  if (register.name !== "register") return;
+  assert.equal(register.units, 3n * 10n ** 15n, "30 tPOT is 3e15 units");
+  assert.equal(register.value, 3n * 10n ** 19n, "msg.value = units * 10_000");
+});
+
+test("register refuses a missing, malformed or unit-inexact bond", () => {
+  assert.throws(() => parseCommand(["register"]), /missing --bond/);
+  assert.throws(() => parseCommand(["register", "--bond", "nope"]), /invalid tPOT amount/);
+  assert.throws(() => parseCommand(["register", "--bond", "0"]), /bond must be positive/);
+  assert.throws(() => parseCommand(["register", "--bond", "1.000000000000001"]), /more than 14 decimal places/);
+});
+
+test("register sends the bond, waits for finality and claims no deal read-back", async () => {
+  const { deps, order, sent } = harness();
+  const record = await execute(parseCommand(["register", "--bond", "30"]), deps);
+  assert.equal(order.join(","), "estimate,gasPrice,send,receipt,finality");
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].to, CONTRACT);
+  assert.equal(sent[0].value, 3n * 10n ** 19n);
+  assert.equal(record.readBack, undefined, "registration is not a deal");
+  assert.equal(record.executed?.status, "success");
+});

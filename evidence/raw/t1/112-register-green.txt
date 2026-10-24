@@ -1,0 +1,16 @@
+# LIVE-1 green — register command, key stays in the environment
+# UTC: 2026-10-24T02:39:10Z
+
+$ node --test test/cli.test.ts   (apps/makhzan)
+✔ register parses a tPOT bond into exact units and wei (0.2708ms)
+✔ register refuses a missing, malformed or unit-inexact bond (0.3398ms)
+✔ register sends the bond, waits for finality and claims no deal read-back (0.2835ms)
+ℹ tests 12
+ℹ pass 12
+ℹ fail 0
+
+$ npm test && npm run typecheck   (apps/makhzan)
+ℹ tests 128
+ℹ pass 128
+ℹ fail 0
+typecheck exit=0

@@ -6,7 +6,16 @@ import { markExecuted, markFinalized, markIncluded, markSubmitted, newRecord, ty
 import { writeRound, type RoundRecord } from "./evidenceWriter.ts";
 import { MAX_UNITS, tPotToUnits, unitsToWei } from "./units.ts";
 
-export type CommandName = "upload" | "create" | "challenge" | "watch" | "claim" | "settle" | "resolve" | "report";
+export type CommandName =
+  | "upload"
+  | "create"
+  | "register"
+  | "challenge"
+  | "watch"
+  | "claim"
+  | "settle"
+  | "resolve"
+  | "report";
 
 export interface UploadCommand { name: "upload"; file: string; providerId: number }
 export interface CreateCommand {
@@ -20,9 +29,10 @@ export interface CreateCommand {
   units: bigint;
   value: bigint;
 }
+export interface RegisterCommand { name: "register"; bond: string; units: bigint; value: bigint }
 export interface IdCommand { name: "challenge" | "watch" | "claim" | "settle" | "resolve"; dealId: number }
 export interface ReportCommand { name: "report" }
-export type ParsedCommand = UploadCommand | CreateCommand | IdCommand | ReportCommand;
+export type ParsedCommand = UploadCommand | CreateCommand | RegisterCommand | IdCommand | ReportCommand;
 
 export interface TxRequest {
   to: Hex;
@@ -54,11 +64,12 @@ export interface CommandDeps {
   reporter?: () => Promise<string>;
 }
 
-const COMMANDS = new Set(["upload", "create", "challenge", "watch", "claim", "settle", "resolve", "report"]);
+const COMMANDS = new Set(["upload", "create", "register", "challenge", "watch", "claim", "settle", "resolve", "report"]);
 const KEY_FLAGS = new Set(["--private-key", "--privatekey", "--key", "--secret", "--mnemonic", "--seed"]);
 const CREATE_OPTIONS = ["--root", "--size", "--leaf-count", "--provider", "--duration", "--price"];
 
 const ABI = [
+  { type: "function", name: "registerProvider", stateMutability: "payable", inputs: [], outputs: [] },
   {
     type: "function", name: "createDeal", stateMutability: "payable",
     inputs: [
@@ -117,7 +128,7 @@ function required(options: Map<string, string>, name: string): string {
 /** Parses and validates argv before any transaction is built. */
 export function parseCommand(argv: string[], options: { blockSize?: number } = {}): ParsedCommand {
   const [name, ...rest] = argv;
-  if (!name) throw new Error("usage: cli <upload|create|challenge|watch|claim|settle|resolve|report>");
+  if (!name) throw new Error("usage: cli <upload|create|register|challenge|watch|claim|settle|resolve|report>");
   for (const arg of [name, ...rest]) {
     if (KEY_FLAGS.has(arg.toLowerCase())) throw keyError();
   }
@@ -167,6 +178,25 @@ export function parseCommand(argv: string[], options: { blockSize?: number } = {
     };
   }
 
+  if (name === "register") {
+    const { positional, options: opts } = split(rest, ["--bond"]);
+    if (positional.length > 0) throw new Error(`unexpected argument '${positional[0]}'`);
+    const bond = required(opts, "--bond");
+    let units: bigint;
+    try {
+      units = tPotToUnits(bond);
+    } catch (err) {
+      const message = (err as Error).message;
+      if (/decimal/.test(message)) {
+        throw new Error(`bond ${bond} is not an exact multiple of WEI_PER_UNIT: ${message}`);
+      }
+      throw err;
+    }
+    if (units <= 0n) throw new Error("bond must be positive");
+    if (units > MAX_UNITS) throw new Error("bond exceeds the uint64 unit cap");
+    return { name: "register", bond, units, value: unitsToWei(units) };
+  }
+
   if (name === "report") {
     const { positional, options: opts } = split(rest, []);
     if (positional.length > 0) throw new Error(`unexpected argument '${positional[0]}'`);
@@ -183,7 +213,13 @@ export function parseCommand(argv: string[], options: { blockSize?: number } = {
   return { name: name as IdCommand["name"], dealId };
 }
 
-function txFor(command: CreateCommand | IdCommand): { data: Hex; value: bigint } {
+function txFor(command: CreateCommand | RegisterCommand | IdCommand): { data: Hex; value: bigint } {
+  if (command.name === "register") {
+    return {
+      data: encodeFunctionData({ abi: ABI, functionName: "registerProvider", args: [] }),
+      value: command.value,
+    };
+  }
   if (command.name === "create") {
     return {
       data: encodeFunctionData({
@@ -248,7 +284,9 @@ export async function execute(command: ParsedCommand, deps: CommandDeps): Promis
   }
   markExecuted(record, "success");
   markFinalized(record, await deps.chain.waitForFinality(receipt));
-  record.readBack = await deps.chain.read(command.name === "create" ? "created" : command.dealId);
+  if (command.name !== "register") {
+    record.readBack = await deps.chain.read(command.name === "create" ? "created" : command.dealId);
+  }
   return record;
 }
 
