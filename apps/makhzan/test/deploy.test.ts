@@ -26,12 +26,15 @@ const ARTIFACT = "contracts/out/Makhzan.sol/Makhzan.json";
 const publicClient = createPublicClient({ transport: http(RPC) });
 let anvil: ReturnType<typeof spawn>;
 const dirs: string[] = [];
+let evidenceRoot: string | undefined;
 
 function env(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
   return {
     MAKHZAN_NETWORK: "local",
     MAKHZAN_RPC_URL: RPC,
     MAKHZAN_PRIVATE_KEY: TEST_KEY,
+    // Tests must never write into the tracked evidence tree.
+    MAKHZAN_EVIDENCE_DIR: (evidenceRoot ??= tempDir()),
     ...extra,
   };
 }
