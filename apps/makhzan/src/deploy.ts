@@ -85,6 +85,8 @@ export interface DeployRuntime {
   deps?: DeployDeps;
   /** Overrides `evidence/deployments/pending-<network>-<chainId>.json`; tests use a temp file. */
   pendingFile?: string;
+  /** Overrides the calibration file the dry run reads; tests point this at a fixture. */
+  calibrationFile?: string;
 }
 
 export interface DeploymentRecord {
@@ -268,15 +270,36 @@ export const CALIBRATION_FILE = "evidence/calibration.json";
  * Calibration line for a dry run. The ratio is the measured balance drop of a live probe divided by
  * the dry-run estimate for that probe (Tier 0 evidence). No file means it has never been verified.
  */
+function measuredRatio(parsed: unknown): number | null {
+  if (parsed === null || typeof parsed !== "object") return null;
+  const record = parsed as Record<string, unknown>;
+  const positive = (value: unknown): value is number =>
+    typeof value === "number" && Number.isFinite(value) && value > 0;
+  if (positive(record.ratio)) return record.ratio;
+  // Tier 0 writes the measured deploy ratio under the projection (DR-013); read it, never invent it.
+  const projection = record.makhzan_projection;
+  if (projection !== null && typeof projection === "object") {
+    const measured = (projection as Record<string, unknown>).measured_ratio;
+    if (positive(measured)) return measured;
+  }
+  if (Array.isArray(record.entries)) {
+    for (let i = record.entries.length - 1; i >= 0; i--) {
+      const entry = record.entries[i];
+      if (entry === null || typeof entry !== "object") continue;
+      const row = entry as Record<string, unknown>;
+      if (row.kind === "deploy" && positive(row.ratio)) return row.ratio;
+    }
+  }
+  return null;
+}
+
 export function calibrationLine(path: string = repoPath(CALIBRATION_FILE)): string {
   const unverified = "calibration: not yet verified against a live probe";
   if (!existsSync(path)) return unverified;
   try {
-    const parsed = JSON.parse(readFileSync(path, "utf8")) as { ratio?: unknown };
-    if (typeof parsed.ratio !== "number" || !Number.isFinite(parsed.ratio) || parsed.ratio <= 0) {
-      return unverified;
-    }
-    return `calibration: measured ratio ${parsed.ratio} (source: ${path})`;
+    const ratio = measuredRatio(JSON.parse(readFileSync(path, "utf8")));
+    if (ratio === null) return unverified;
+    return `calibration: measured ratio ${ratio} (source: ${path})`;
   } catch {
     return unverified;
   }
@@ -337,7 +360,7 @@ export async function runDeploy(
   const deployData = encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode, args: argsTuple(args) });
 
   if (args.dryRun) {
-    log(calibrationLine());
+    log(calibrationLine(runtime.calibrationFile));
     const gas = await deps.estimateGas(deployData);
     const cost = gas * (await deps.gasPrice());
     return { estimateTpot: await guardReserve(account.address, cost, args.reserveTpot, deps, log) };
@@ -598,7 +621,10 @@ export async function main(argv: string[], env: NodeJS.ProcessEnv, log: (line: s
   try {
     const args = parseDeployArgs(argv, env);
     const settings = deploySettings(env);
-    await runDeploy(args, settings, log, { evidenceDir: repoPath(env.MAKHZAN_EVIDENCE_DIR ?? "evidence") });
+    await runDeploy(args, settings, log, {
+      evidenceDir: repoPath(env.MAKHZAN_EVIDENCE_DIR ?? "evidence"),
+      calibrationFile: env.MAKHZAN_CALIBRATION_FILE ? repoPath(env.MAKHZAN_CALIBRATION_FILE) : undefined,
+    });
     if (args.dryRun) log("dry run: no transaction sent");
     return 0;
   } catch (err) {

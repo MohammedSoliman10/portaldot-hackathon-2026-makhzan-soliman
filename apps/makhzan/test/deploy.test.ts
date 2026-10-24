@@ -118,7 +118,11 @@ test("a missing artifact is refused before any transaction", async () => {
 test("dry-run prints a tPOT estimate and sends nothing", async () => {
   const before = await publicClient.getTransactionCount({ address: (await import("viem/accounts")).privateKeyToAccount(TEST_KEY).address });
   const lines: string[] = [];
-  const code = await main(["--dry-run", "--min-bond", MIN_BOND], env(), (line) => lines.push(line));
+  const code = await main(
+    ["--dry-run", "--min-bond", MIN_BOND],
+    env({ MAKHZAN_CALIBRATION_FILE: join(tempDir(), "absent-calibration.json") }),
+    (line) => lines.push(line),
+  );
   assert.equal(code, 0, lines.join("\n"));
   const output = lines.join("\n");
   assert.match(output, /estimated deploy cost [0-9]+\.[0-9]{6} tPOT/);
