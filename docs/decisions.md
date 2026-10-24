@@ -304,3 +304,45 @@ fix. No contract change is implied.
 `evidence/state/live/state.json`, `evidence/state/live-daemon.log`,
 `evidence/receipts/live/0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91.json`,
 `evidence/receipts/live/0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1.json`.
+
+## T1-002 — FIXED and re-run live (2026-10-24, Tier 1)
+
+**Context.** The T1-002 receipt-timeout defect was reproduced in tests first (delayed receipt, lost
+response, closed challenge after a timeout, deadline while submitted). The daemon now sends and
+returns the hash immediately, persists it in the state file and in `evidence/submitted/<network>/`
+before any wait, then waits at least 120 s (600 s in the live run) for the receipt. A timeout with a
+known hash stays `submitted`; later polls fetch the receipt, write the raw schema receipt and label
+`passed`/`failed` only from the read-back. The CLI does the same persistence before its receipt wait.
+The skip drill also needed a second small fix: a no-send round already recorded `unanswered` while
+the window was open must still become `failed` when `resolve` slashes the bond.
+
+**Decision.** No contract change. Both fixes are client-side and covered by tests (136 client/daemon
+tests). Re-run the live path with new state directories; do not edit the LIVE-2b bug evidence
+`evidence/state/live/state.json`.
+
+**Live result.** Deal B passed with the daemon label `passed` after read-back (answer tx
+`0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210`, block `172585`; the raw
+receipt is in `txs.json`). A skipped second challenge was resolved: the bond moved from
+`3000000000000000` to `2400000000000000` units (exactly 20%) and the owner was credited exactly
+`6000000000000000000` wei; the daemon labelled the round `failed`. Claim and settle then ran for both
+deal A and deal B.
+
+**Evidence.** `evidence/raw/t1/61-t1002-red.txt`, `61-t1002-green.txt`, `63-live-refusals.txt`,
+`64-live-claim-a.txt` .. `72-live-summary.txt`, `evidence/receipts/live/`.
+
+## SEC-001 — unredacted canary key material remains in public git history (2026-10-24, Tier 1)
+
+**Context.** The whole-history secret scan (`evidence/raw/t1/73-secret-history.txt`) found three
+key-shaped canary values in an older version of `evidence/raw/t1/55-secret-scan.txt` (commit
+`2af8a44`): a PEM header, a 64-hex literal on a `PRIVATE_KEY=` line and a 12-word phrase. The current
+file is redacted (commit `1ce5ab2`), and the current working tree passes `scripts/secret-scan.mjs`,
+but the old blob remains in the public history of `main` and the branch. The values are not printed
+anywhere in the scan output.
+
+**Decision.** Treat the canary key material as compromised and rotate it if it ever controlled a
+funded account. Do **not** rewrite public history without explicit owner approval; the repository rule
+forbids a history rewrite by default. Keep the finding and the redacted evidence visible.
+
+**Consequences.** LIVE-2c merged nothing to `main` after this finding; the docs/evidence commit stays
+on `002-core-storage-proofs` until the owner decides whether to rotate only, rewrite history with
+approval, or both.

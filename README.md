@@ -5,10 +5,12 @@ missing block and be paid from the bond.**
 
 - Repository: https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
 - Live contract (Portaldot V3 testnet, chain `420420777`): `0x60481DFcFCA34A8F095939D9675eC715127B2e44`
-- Status: **contract deployed [live run]**; live registration, deal A and one challenge/answer also
-  ran [live run]. The answer passed on-chain (`healthOf(1) = 1`, bond unchanged), but the daemon
-  labelled it `unanswered` after a receipt timeout (defect T1-002). The slashed round and
-  claim/settle are still `[pending live run]`. Everything not marked `[live run]` is local evidence.
+- Status: **full live run complete [live run]**: contract deployed, provider-1 registered, deal A
+  passed and was claimed/settled, deal B passed with the fixed daemon, then a skipped second challenge
+  was resolved with exactly 20% slashed to the owner, and deal B was claimed/settled. The first live
+  pass exposed daemon defect T1-002 (a 15 s receipt wait mislabelled a landed answer); it is fixed and
+  the re-run is clean. Live retrieval is still `[pending live run]`; everything not marked `[live run]`
+  is local evidence.
 
 ## The problem
 
@@ -90,20 +92,52 @@ text above; no URL pattern is invented.
 - `evidence/raw/t1/58-live-gate.txt`, `59-doctor-after-deploy.txt`, `59-pending-{sending,sent}.json`
 - Tier 0 calibration: `evidence/calibration.json` (ratio `0.984608251872`)
 
-**Live run so far [live run].** Provider-1 registered with a 30 tPOT bond (tx
+**Live run [live run].** Provider-1 registered with a 30 tPOT bond (tx
 `0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91`), deal A was created at block
 `172266` (tx `0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1`), challenge 1
 opened at index `451` (tx `0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda`), and
 the daemon's answer landed at block `172295` (tx
 `0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3`) before the `172331`
-deadline. On-chain the round passed: `healthOf(1) = 1`, the bond is unchanged at 30 tPOT, and the
-provider paid `0.162915694292617500 tPOT` of gas.
+deadline. On-chain the round passed: `healthOf(1) = 1`, the bond stayed at 30 tPOT.
 
-The daemon nevertheless recorded `unanswered`: its 15 s receipt wait timed out before the answer was
-mined, it did not persist the hash, and the next poll labelled the closed round unanswered. This is a
-daemon defect (T1-002), not a contract failure. **No live slash, claim or settle has run.** Evidence:
-`evidence/raw/t1/62-live-register.txt`, `60-live-pass.txt`, `60-live-answer-receipt.json`,
-`evidence/state/live/state.json`, `evidence/state/live-daemon.log`.
+That first pass exposed T1-002: the daemon's 15 s receipt wait timed out before the answer was mined,
+it had not persisted the hash, and it labelled the closed round `unanswered`. The fix persists the
+hash before any wait, uses a receipt timeout of at least 120 s (600 s in the live rerun), and keeps a
+timed-out round `submitted` until a later receipt and read-back resolve it.
+
+After the fix the full live path ran:
+
+- **Deal A close.** Claim tx `0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b`
+  (block `172557`) paid the provider the full 5 tPOT; settle tx
+  `0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3` (block `172564`) set health
+  to `0`; the bond did not move.
+- **Deal B pass.** Deal 2 was created at block `172578` (tx
+  `0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3`, end `172878`). Challenge
+  index `29` (tx `0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb`, block
+  `172584`) was answered at block `172585` (tx
+  `0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210`). The daemon state became
+  `passed` only after the receipt and read-back; `healthOf(2) = 1` and the bond did not move. The
+  raw answer receipt is in `txs.json`.
+- **Deal B slash.** A second challenge, index `623` (tx
+  `0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db`, block `172602`,
+  deadline `172652`), was left unanswered by the skip-mode daemon: health was `2` during the window
+  and `3` after it. Resolve tx
+  `0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3` (block `172658`) slashed
+  exactly 6 tPOT (30 -> 24 tPOT, 20%) and credited the owner exactly 6 tPOT. The daemon labelled the
+  round `failed`.
+- **Deal B close.** Claim tx
+  `0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee` (block `172881`) paid the
+  provider 5 tPOT; settle tx
+  `0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec` (block `172887`) set health
+  to `0`; the remaining bond stayed at 24 tPOT.
+- **Refusals.** Free `eth_call` checks returned the custom selectors `0x30cd7471` (NotOwner),
+  `0x3480e2b2` (NotProvider) and `0x019af637` (BadParams), so R2 is yes.
+
+Final measured balances: owner `172229122908433355700` wei, provider-1
+`27993410962002459140` wei, provider bond `2400000000000000` units. Evidence:
+`evidence/raw/t1/60-live-pass.txt`, `62-live-register.txt`, `63-live-refusals.txt`,
+`64-live-claim-a.txt` through `72-live-summary.txt`, plus the raw receipts under
+`evidence/receipts/live/`.
 
 ## Architecture
 
@@ -154,8 +188,9 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Decoded refusal evidence (`evidence:refusals`, `eth_call` only) | implemented, local | `evidence/raw/t1/94-refusals-anvil.txt` |
 | Read-only `doctor` with an exact fix per failed check | implemented, local | `evidence/raw/t1/97-doctor-anvil.txt` |
 | Live deploy on Portaldot V3 | **implemented [live run]** | `evidence/raw/t1/59-live-deploy.txt` |
-| Live registration + deal A + one challenge/answer | **implemented [live run]**; on-chain pass (`healthOf(1) = 1`, bond unchanged), daemon labelled it `unanswered` (receipt-timeout defect T1-002) | `62-live-register.txt`, `60-live-pass.txt` |
-| Live slashed round, claim, settle | `[pending live run]` | none yet |
+| Live registration + deal A + one challenge/answer | **implemented [live run]**; on-chain pass (`healthOf(1) = 1`, bond unchanged). The first pass exposed T1-002; the fixed daemon then labelled deal B `passed` from read-back | `62-live-register.txt`, `60-live-pass.txt`, `67-live-answer-b.txt` |
+| Live slashed round, claim, settle | **implemented [live run]**; claim/settle A and B, second deal B challenge slashed exactly 20% and credited the owner 6 tPOT | `64-live-claim-a.txt` .. `71-live-settle-b.txt`, `72-live-summary.txt` |
+| Daemon receipt-timeout fix (T1-002) | **implemented, red then green**; hash persisted before wait, 120 s minimum, later poll labels from receipt/read-back | `61-t1002-red.txt`, `61-t1002-green.txt` |
 | Status web app (feature 003) | in progress, not merged | branch `003-status-ui` |
 | Front-end, agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
 | Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
@@ -190,7 +225,7 @@ cd ../..
 node scripts/check-size.mjs
 ```
 
-Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **128 tests passed**;
+Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **136 tests passed**;
 `apps/gates` has **45 tests** and the secret scanner **3**; the e2e ends with
 `PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
 check prints **6,566 B ≤ 10,240 B**.
@@ -235,10 +270,11 @@ are in [docs/CHECKIN.md](docs/CHECKIN.md).
 - A value-rejecting owner or provider can block its own payout; Tier 1 assumes externally owned
   accounts. Pull-payment escrow is a Tier 2 item.
 - No audit, no explorer source verification, no per-deal bond, no proof of replication.
-- One live answer passed on-chain; the live slashed round, claim, settle and live retrieval are
-  `[pending live run]`. Live block time was slow enough to outlast the daemon's 15 s receipt wait.
-- The daemon mislabelled that passed round `unanswered` (T1-002); its label is not yet trustworthy
-  under slow blocks, so verify the receipt before acting on a non-`passed` label.
+- The live pass, slash, claim and settle all ran; live retrieval is still `[pending live run]`.
+  Live block time was measured across deal B (`172578`..`172878`) and was slow enough to outlast the
+  old 15 s receipt wait.
+- T1-002 is fixed: the daemon persisted the hash before waiting and labelled a passed and a slashed
+  live round correctly. The receipt, not the label alone, remains the primary evidence.
 
 ## AI-assisted code disclosure
 

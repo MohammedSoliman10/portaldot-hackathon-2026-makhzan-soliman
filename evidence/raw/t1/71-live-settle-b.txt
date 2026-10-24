@@ -1,0 +1,61 @@
+# [live run] chain id 420420777 — contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# LIVE-2c settle B — 2026-10-24T09:35:31Z
+block=172886
+settle estimate=498094919484 cap_1.2=597713903380 gasPrice=32450 maxFeeWei=19395816164681000
+owner balance before wei:
+172244437403421351750
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts settle 2
+
+{
+  "label": "settle",
+  "submitted": {
+    "hash": "0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec",
+    "nonce": 11
+  },
+  "included": {
+    "blockNumber": "172887",
+    "blockHash": "0x7f3f4a616e512c84f530699d6e0751eebff06fd176ea92abbe67882b9b043f7b"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 172578,
+    "endBlock": 172878,
+    "flags": 1,
+    "providerId": 1,
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "500000000000000",
+    "accrued": "500000000000000",
+    "claimable": "0",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
+settle_exit=0
+
+## settle B read-back — 2026-10-24T09:35:51Z
+block=172889
+healthOf(2):
+0x0000000000000000000000000000000000000000000000000000000000000000
+providerOf after:
+0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000886c98b76000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
+owner balance after wei:
+172229122908433355700
+provider balance wei:
+27993410962002459140

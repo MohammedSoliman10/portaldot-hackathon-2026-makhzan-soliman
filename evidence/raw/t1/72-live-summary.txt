@@ -1,0 +1,62 @@
+# [live run] LIVE-2c summary — chain id 420420777
+contract: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+rpc: https://test-evm-rpc-v3.portaldot.dev
+owner: 0x0948EBD7637D1C32858a6FC5D947E85A6600205C
+provider-1: 0xf4ec143c743FF57c0D32e829f50692551CBf6029
+utc window: 2026-10-24T08:52:51Z .. 2026-10-24T09:35:51Z
+
+## T1-002 fix
+- red: evidence/raw/t1/61-t1002-red.txt (6 failing tests for delayed/lost receipt and deadline)
+- green + gate: evidence/raw/t1/61-t1002-green.txt (136 client tests, Forge 152, typecheck, size, secret scan)
+- commits: 0657733 (persist submitted hash before receipt wait), 91ffca4 (skip round becomes failed after slash)
+- receipt wait minimum 120 s; live run used 600 s. Hash is written to state and evidence/submitted before waiting.
+- old daemon PID 185029 stopped at 2026-10-24T08:52:51Z; evidence/state/live/state.json was not edited.
+
+## Refusals (eth_call only, no tx)
+- challenge by non-owner at historical block 172280 -> 0x30cd7471 (NotOwner)
+- answer by non-provider at historical block 172290 -> 0x3480e2b2 (NotProvider)
+- createDeal with duration 99 -> 0x019af637 (BadParams)
+- R2: yes, all three carry the custom selector. evidence/raw/t1/63-live-refusals.txt
+
+## Deal A (id 1)
+- claim: 0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b
+  block 172557, nonce 3, success; claimed 500000000000000 units (5 tPOT); bond unchanged 3000000000000000 units.
+  provider balance 18186958388194299980 -> 23171642511212947340 wei (fee 15315876981352640 wei).
+- settle: 0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3
+  block 172564, nonce 6, success; flags 1; healthOf(1)=0; bond unchanged.
+- evidence: evidence/raw/t1/64-live-claim-a.txt, 65-live-settle-a.txt
+
+## Deal B (id 2, first challenge, fixed daemon)
+- create: 0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3
+  block 172578, nonce 7, success; start 172578, end 172878, price 5 tPOT, duration 300 blocks, root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7.
+- challenge: 0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb
+  block 172584, nonce 8, success; index 29, start 172584, deadline 172634.
+- answer: 0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210
+  block 172585, success; daemon status passed only after read-back; healthOf(2)=1; bond unchanged.
+  txs.json includes the answer with action "answer"; evidence/submitted/live/<hash>.json was written before the wait.
+- evidence: evidence/raw/t1/66-live-deal-b.txt, 67-live-answer-b.txt
+
+## Deal B (second challenge, skip mode)
+- challenge: 0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db
+  block 172602, nonce 9, success; index 623, start 172602, deadline 172652.
+- healthOf(2)=2 while open; healthOf(2)=3 after block 172652.
+- resolve: 0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3
+  block 172658, nonce 10, success.
+  bond 3000000000000000 -> 2400000000000000 units (exactly 600000000000000 = 20%).
+  owner balance 166259754363499386110 -> 172244437403421351750 wei, plus fee 15316960078034360 wei
+  = credit 6000000000000000000 wei (exactly 6 tPOT).
+- daemon skip state: failed; cycle log failed=[2].
+- evidence: evidence/raw/t1/68-live-skip-b.txt, 69-live-resolve-b.txt
+
+## Deal B close
+- claim: 0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee
+  block 172881, nonce 5, success; claimed 500000000000000 units (5 tPOT); bond unchanged 2400000000000000 units.
+  provider balance 23008726827006383240 -> 27993410962002459140 wei.
+- settle: 0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec
+  block 172887, nonce 11, success; flags 1; healthOf(2)=0; bond 2400000000000000 units.
+- evidence: evidence/raw/t1/70-live-claim-b.txt, 71-live-settle-b.txt
+
+## Final measured balances
+owner: 172229122908433355700 wei (172.229122908433355700 tPOT)
+provider-1: 27993410962002459140 wei (27.993410962002459140 tPOT)
+provider bond: 2400000000000000 units (24 tPOT)

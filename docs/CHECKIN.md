@@ -49,7 +49,7 @@ byte for byte (6,566 B runtime; code hash
 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98) and the constructor config reads
 back as window 50, block size 1024, slash 2000 bps, min bond 1e15 units, duration 100...100800.
 
-Locally the full product is green: 152 Forge tests, 128 client/daemon tests, 45 gate tests and 3
+Locally the full product is green: 152 Forge tests, 136 client/daemon tests, 45 gate tests and 3
 secret-scanner tests; a local end-to-end run covers a 1 MiB file (1,024 blocks), one passed challenge,
 one skipped challenge with exactly 20% slashed to the owner, claim and settle.
 
@@ -59,18 +59,34 @@ Live run [live run]: provider-1 registered with a 30 tPOT bond (tx
 (tx 0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda), and the answer landed at
 block 172295 before the 172331 deadline (tx
 0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3). On-chain the round passed:
-healthOf(1)=1, bond unchanged at 30 tPOT, provider gas 0.162915694292617500 tPOT. The daemon labelled
-it unanswered because its 15 s receipt wait timed out before the answer was mined and it did not
-persist the hash (defect T1-002). No slash, claim or settle has run.
+healthOf(1)=1, bond unchanged at 30 tPOT. That first pass exposed T1-002: the daemon's 15 s receipt
+wait timed out before the answer was mined and it did not persist the hash, so it said unanswered.
+
+The fix (persist the hash before waiting, 120 s minimum timeout, later receipt poll and read-back) was
+red-then-green and re-run live. Claim A paid the provider the full 5 tPOT (tx
+0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b, block 172557); settle A set
+health 0 (tx 0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3, block 172564).
+Deal B (id 2, end 172878) was created (tx
+0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3, block 172578). Challenge index
+29 (tx 0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb, block 172584) was
+answered at block 172585 (tx 0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210);
+the daemon label became passed only after read-back, healthOf(2)=1 and the bond did not move. A second
+challenge, index 623 (tx 0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db, block
+172602, deadline 172652), was left unanswered in skip mode: health 2 during the window, 3 after it.
+Resolve (tx 0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3, block 172658)
+slashed exactly 6 tPOT (30 -> 24 tPOT, 20%) and credited the owner exactly 6 tPOT; the daemon said
+failed. Claim B paid 5 tPOT (tx
+0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee, block 172881) and settle B set
+health 0 (tx 0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec, block 172887).
+Final balances: owner 172229122908433355700 wei, provider-1 27993410962002459140 wei, bond
+2400000000000000 units. Free eth_call refusals returned selectors 0x30cd7471 (NotOwner), 0x3480e2b2
+(NotProvider) and 0x019af637 (BadParams). Live retrieval is still pending.
 ```
 
 ## 6. Outstanding items (paste)
 
 ```text
-- Fix the daemon receipt-timeout path (T1-002): persist the submitted hash before waiting, poll it in
-  later cycles, and never label a landed answer unanswered.
-- Re-run one passed round with the daemon label `passed`, then run one slashed challenge, claim and
-  settle, recording each receipt. [pending live run]
+- Live retrieval (a fresh client reading a block from the provider) is still `[pending live run]`.
 - Status web app: feature 003 (health/deal status UI) is in progress on its own branch and not merged.
 - Replication/repair and a per-deal bond are roadmap; the current bond is shared across a provider's
   deals.
@@ -133,13 +149,13 @@ new chain with uneven RPC behaviour.
 - Claim (provider-only) and settle, exactly-once accounting.
 - `healthOf` availability view with every boundary tested.
 - CLI, daemon, deploy with pending record/resume, evidence bundle, verify:deployment, refusals, doctor.
-- 152 Forge + 128 + 45 + 3 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
+- 152 Forge + 136 + 45 + 3 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
 
 ## 12. What is not claimed
 
-- Live slashed round, claim, settle, live block time across many blocks and live retrieval:
-  `[pending live run]`. One live answer passed on-chain, but the daemon labelled it unanswered
-  (T1-002), so the daemon's round label is not yet claimed as working.
+- Live retrieval is `[pending live run]`. The live pass, slash, claim and settle did run; the slashed
+  round moved exactly 20% of the bond and credited the owner exactly 6 tPOT. T1-002 is fixed and the
+  daemon labelled both the passed and the slashed live round correctly after read-back.
 - No explorer source verification (records say `sourceVerified: false`); only byte-for-byte code match.
 - No audit, no per-deal bond, no replication proof, no pull-payment escrow.
 - A pass proves one block at one moment, not continuous storage.
@@ -158,5 +174,5 @@ new chain with uneven RPC behaviour.
 
 ## 14. Next proof milestone
 
-Fix T1-002, re-run one passed round with the daemon label `passed`, then one slashed round, claim and
-settle — replacing every remaining `[pending live run]` row with a measured receipt hash.
+Run a live retrieval from a fresh client process, then finish the status web app (feature 003) on its
+own branch; keep the measured receipt hashes and 6 tPOT slash in the check-in.

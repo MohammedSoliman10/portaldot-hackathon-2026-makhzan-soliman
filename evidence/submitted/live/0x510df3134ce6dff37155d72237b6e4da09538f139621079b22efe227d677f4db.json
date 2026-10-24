@@ -1,0 +1,8 @@
+{
+  "schema": "makhzan.submitted/v0",
+  "network": "LIVE",
+  "action": "challenge",
+  "txHash": "0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db",
+  "nonce": 9,
+  "utc": "2026-10-24T09:06:53Z"
+}

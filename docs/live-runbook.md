@@ -3,8 +3,9 @@
 **Feature**: `002-core-storage-proofs`. LIVE-1 (read-only preparation and one free `--dry-run`) is
 **done**. LIVE-2a (the deploy) is **done**: one transaction, contract
 `0x60481DFcFCA34A8F095939D9675eC715127B2e44`, record `evidence/raw/t1/59-live-deploy.txt`.
-LIVE-2b (registration and the two rounds) is **not started**. Every row below that has no evidence
-file yet is `[pending live run]`.
+LIVE-2b/2c (registration, the passed round, the slashed round, claim and settle) are **done**; see
+`evidence/raw/t1/60-live-pass.txt` and `64-live-claim-a.txt` .. `72-live-summary.txt`. Live retrieval
+and the evidence bundle remain `[pending live run]`.
 
 ## LIVE-1 results (executed 2026-10-24, no transaction)
 
@@ -171,10 +172,10 @@ Record the round record (five statuses), challenge/answer hashes and blocks, the
 before/after, the provider's claim credit and the settle result. **Abort** if the daemon reports
 `unanswered`, the bond moved, or a read-back disagrees with the receipt.
 
-**Observed 2026-10-24 (T1-002).** On a slow block the answer can outlast the daemon's 15 s receipt
-wait: the tx landed in block `172295`, before the `172331` deadline, but the daemon stored
-`unanswered`. If that happens, read the answer receipt before treating the round as failed and never
-resend; the daemon fix is the next change.
+**Observed 2026-10-24 (T1-002, fixed).** On a slow block the old 15 s receipt wait let a landed
+answer in block `172295` be stored as `unanswered`. The fix persists the hash before waiting, uses a
+timeout of at least 120 s and keeps a timed-out hash `submitted` until a later receipt and read-back.
+The fixed daemon labelled deal B `passed` in the rerun; never resend a known hash.
 
 ### Step 6 — deal B, daemon in skip mode, slashed round
 
@@ -215,8 +216,10 @@ the provider's claim credit and the settle result.
 npm --prefix apps/makhzan run evidence:refusals
 ```
 
-This is the R5 **local anvil** snapshot (read-only `eth_call` against a local chain); it is not a live
-claim and its rows stay labelled local. No live refusal runner exists.
+This is the R5 **local anvil** snapshot (read-only `eth_call` against a local chain); its rows stay
+labelled local. A live selector snapshot was taken with free `eth_call` at historical blocks
+(`evidence/raw/t1/63-live-refusals.txt`): all three reverts carry the custom selector. No live refusal
+runner exists.
 
 The feature 003 bundle is built from the records above and published with the tested
 `publishBundle` path (`apps/makhzan/src/evidence.ts`); its validator rejects the 18 documented

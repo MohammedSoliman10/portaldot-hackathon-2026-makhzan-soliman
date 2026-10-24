@@ -4,7 +4,7 @@
   "derivedFrom": "evidence/receipts",
   "network": "LIVE",
   "chainId": 420420777,
-  "generatedAt": "2026-10-24T08:34:37Z",
+  "generatedAt": "2026-10-24T09:35:38Z",
   "entries": [
     {
       "hash": "0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda",
@@ -16,6 +16,24 @@
       "receiptPath": "evidence/receipts/live/0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda.json"
     },
     {
+      "hash": "0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee",
+      "action": "claim",
+      "block": 172881,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:35:01Z",
+      "receiptPath": "evidence/receipts/live/0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee.json"
+    },
+    {
+      "hash": "0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3",
+      "action": "settle",
+      "block": 172564,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:03:08Z",
+      "receiptPath": "evidence/receipts/live/0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3.json"
+    },
+    {
       "hash": "0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1",
       "action": "create",
       "block": 172266,
@@ -23,6 +41,69 @@
       "network": "LIVE",
       "utc": "2026-10-24T08:33:08Z",
       "receiptPath": "evidence/receipts/live/0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1.json"
+    },
+    {
+      "hash": "0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b",
+      "action": "claim",
+      "block": 172557,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:02:25Z",
+      "receiptPath": "evidence/receipts/live/0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b.json"
+    },
+    {
+      "hash": "0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db",
+      "action": "challenge",
+      "block": 172602,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:06:55Z",
+      "receiptPath": "evidence/receipts/live/0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db.json"
+    },
+    {
+      "hash": "0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec",
+      "action": "settle",
+      "block": 172887,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:35:38Z",
+      "receiptPath": "evidence/receipts/live/0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec.json"
+    },
+    {
+      "hash": "0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3",
+      "action": "resolve",
+      "block": 172658,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:12:32Z",
+      "receiptPath": "evidence/receipts/live/0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3.json"
+    },
+    {
+      "hash": "0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210",
+      "action": "answer",
+      "block": 172585,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:05:14Z",
+      "receiptPath": "evidence/receipts/live/0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210.json"
+    },
+    {
+      "hash": "0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3",
+      "action": "create",
+      "block": 172578,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:04:32Z",
+      "receiptPath": "evidence/receipts/live/0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3.json"
+    },
+    {
+      "hash": "0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb",
+      "action": "challenge",
+      "block": 172584,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T09:05:07Z",
+      "receiptPath": "evidence/receipts/live/0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb.json"
     },
     {
       "hash": "0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91",

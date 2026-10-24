@@ -4,14 +4,18 @@
   "derivedFrom": "evidence/receipts",
   "network": "LIVE",
   "chainId": 420420777,
-  "generatedAt": "2026-10-24T08:34:37Z",
+  "generatedAt": "2026-10-24T09:35:38Z",
   "entries": [
     {
       "address": "0x60481dfcfca34a8f095939d9675ec715127b2e44",
       "actions": [
+        "answer",
         "challenge",
+        "claim",
         "create",
-        "register"
+        "register",
+        "resolve",
+        "settle"
       ]
     }
   ]

@@ -1,0 +1,35 @@
+{
+  "schema": "makhzan.receipt/v0",
+  "network": "LIVE",
+  "action": "settle",
+  "txHash": "0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3",
+  "utc": "2026-10-24T09:03:08Z",
+  "writtenAt": "2026-10-24T09:03:08Z",
+  "transaction": {
+    "blockHash": "0xb79571d231fb8b6b2afe14363a533652d01e958990cfe1aa3f3f55d8e3b5a9bd",
+    "blockNumber": "172564",
+    "from": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+    "hash": "0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3",
+    "transactionIndex": 1,
+    "accessList": [],
+    "chainId": 420420777,
+    "gas": "597162234884",
+    "gasPrice": "0",
+    "input": "0x61a6287f0000000000000000000000000000000000000000000000000000000000000001",
+    "maxFeePerGas": "32480",
+    "maxPriorityFeePerGas": "0",
+    "nonce": 6,
+    "to": "0x60481dfcfca34a8f095939d9675ec715127b2e44",
+    "type": "eip1559",
+    "value": "0",
+    "r": "0x4b428243dfadc8427fcc8a0a911cee4fa63364a196fa7c29b87df85b28426f0",
+    "s": "0x76931084cf77f1f516e374965fb12fea91c9d444c5867e4e4173b4d652c325b7",
+    "yParity": 0,
+    "typeHex": "0x2"
+  },
+  "receipt": {
+    "status": "success",
+    "blockNumber": 172564,
+    "gasUsed": "471505721117"
+  }
+}

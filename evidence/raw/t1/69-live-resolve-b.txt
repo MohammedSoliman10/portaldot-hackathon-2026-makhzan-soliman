@@ -1,0 +1,79 @@
+# [live run] chain id 420420777 — contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# LIVE-2c resolve B (skip round) — 2026-10-24T09:12:22Z
+block=172656
+resolve estimate=497865223185 cap_1.2=597438267822 gasPrice=32470 maxFeeWei=19398820556180340
+owner balance before wei:
+166259754363499386110
+providerOf before:
+0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000aa87bee53800000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001
+
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts resolve 2
+
+{
+  "label": "resolve",
+  "submitted": {
+    "hash": "0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3",
+    "nonce": 10
+  },
+  "included": {
+    "blockNumber": "172658",
+    "blockHash": "0x62522d51b4cc133f510b84e096476a587c58cea0d50ed118a6ad3156571ae933"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 172578,
+    "endBlock": 172878,
+    "flags": 0,
+    "providerId": 1,
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "0",
+    "accrued": "136666666666666",
+    "claimable": "136666666666666",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
+resolve_exit=0
+
+## resolve B read-back — 2026-10-24T09:12:45Z
+block=172660
+healthOf(2):
+0x0000000000000000000000000000000000000000000000000000000000000001
+providerOf after:
+0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000886c98b76000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001
+owner balance after wei:
+172244437403421351750
+provider balance wei:
+23008726827006383240
+
+## resolve B credit check — 2026-10-24T09:13:36Z
+owner_before_wei 166259754363499386110
+owner_after_wei 172244437403421351750
+net_delta_wei 5984683039921965640
+gasUsed 471726519188 maxFeePerGas 32470 fee_wei 15316960078034360
+credit_wei 6000000000000000000
+credit_tPOT 6.0
+bond_before_units 3000000000000000
+bond_after_units 2400000000000000
+slash_units 600000000000000
+slash_wei 6000000000000000000
+skip daemon state status: failed
+skip log last failed line:
+cycle: submitted=[] passed=[] failed=[2] skipped=[] unanswered=[] unknownDeal=[]
