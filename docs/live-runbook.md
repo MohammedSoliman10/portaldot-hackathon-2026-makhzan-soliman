@@ -1,8 +1,10 @@
 # Live runbook — Tier 1
 
 **Feature**: `002-core-storage-proofs`. LIVE-1 (read-only preparation and one free `--dry-run`) is
-**done**; LIVE-2 (the transactions) is **not started**. No live transaction has been sent from this
-repository. Every live row below is `[pending live run]` until its own evidence file exists.
+**done**. LIVE-2a (the deploy) is **done**: one transaction, contract
+`0x60481DFcFCA34A8F095939D9675eC715127B2e44`, record `evidence/raw/t1/59-live-deploy.txt`.
+LIVE-2b (registration and the two rounds) is **not started**. Every row below that has no evidence
+file yet is `[pending live run]`.
 
 ## LIVE-1 results (executed 2026-10-24, no transaction)
 
@@ -47,61 +49,61 @@ All commands run from the repository root. The wrapper sets
 `MAKHZAN_CHAIN_ID=420420777`, and loads **one** key (`OWNER_KEY` or `PROVIDER_1_KEY`) as
 `MAKHZAN_PRIVATE_KEY`. It never prints a value and never puts a key on argv.
 
+`MAKHZAN_CONTRACT` is passed **inline on every command**; never rely on an `export` surviving
+between separate command runs. Use the deployed address
+`ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44` (LIVE-2a).
+
 ### Step 0 — gate re-check (read-only, free)
 
 ```bash
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
+
 MAKHZAN_ED_TPOT=566.518509593496 MAKHZAN_GAS_TPOT=100 \
   scripts/with-live-env.sh owner -- node apps/makhzan/src/doctorMain.ts
 MAKHZAN_ED_TPOT=0 MAKHZAN_DEPOSITS_TPOT=30 MAKHZAN_GAS_TPOT=1 \
   scripts/with-live-env.sh provider-1 -- node apps/makhzan/src/doctorMain.ts
-
-scripts/with-live-env.sh owner -- node scripts/deploy.mjs --dry-run \
-  --min-bond 10000000000000000000 \
-  --window 50 --block-size 1024 --slash-bps 2000 \
-  --min-duration 100 --max-duration 100800
 ```
 
-Expected (LIVE-1): `calibration: measured ratio 0.984608251872`, estimate about
-`538.123540 tPOT`. **Abort** if the chain id differs, either balance is below its need, the estimate
-fails, or the estimate is above the deploy cap.
+**Expected FAIL, not an abort:** the owner's line `account mapping: this account is not a registered
+provider` is permanent for the owner, who never registers. It is **not** an abort condition.
+Provider-1's line is FAIL until registration and turns `ok` afterwards. The owner checks that matter
+are **chain id, balance and (after deploy) contract code**.
 
-### Step 1 — deploy (one transaction)
+No deploy dry run is needed again: LIVE-2a already deployed the contract and a second deploy is out of
+scope. If the owner balance is below the remaining needs, STOP.
 
-Dry run again (same command, immediately before):
+### Step 1 — deploy (DONE in LIVE-2a; do not repeat)
 
-```bash
-scripts/with-live-env.sh owner -- node scripts/deploy.mjs --dry-run \
-  --min-bond 10000000000000000000 \
-  --window 50 --block-size 1024 --slash-bps 2000 \
-  --min-duration 100 --max-duration 100800
+The one deploy transaction is executed and recorded. Do **not** send another:
 
-scripts/with-live-env.sh owner -- node scripts/deploy.mjs \
-  --min-bond 10000000000000000000 \
-  --window 50 --block-size 1024 --slash-bps 2000 \
-  --min-duration 100 --max-duration 100800
-export MAKHZAN_CONTRACT=<address from the deployment record>
+```text
+contract  0x60481DFcFCA34A8F095939D9675eC715127B2e44
+tx        0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7
+block     171308
+chain     420420777
+record    evidence/deployments/live-420420777-20261024-065714Z.json
+evidence  evidence/raw/t1/59-live-deploy.txt
 ```
 
-Then verify the code and the address:
+Verify (read-only, no key) and check the deployed code:
 
 ```bash
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
 MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
   MAKHZAN_CHAIN_ID=420420777 \
-  node apps/makhzan/scripts/verify-deployment.mjs --address "$MAKHZAN_CONTRACT"
-MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
-  MAKHZAN_CHAIN_ID=420420777 scripts/with-live-env.sh owner -- \
-  node apps/makhzan/src/doctorMain.ts
+  node apps/makhzan/scripts/verify-deployment.mjs --address "$ADDR"
+MAKHZAN_CONTRACT="$ADDR" MAKHZAN_ED_TPOT=0 MAKHZAN_GAS_TPOT=100 \
+  scripts/with-live-env.sh owner -- node apps/makhzan/src/doctorMain.ts
 ```
 
-Record `evidence/raw/t1/59-live-deploy.txt`: chain id, deployer, address, tx hash, block, status,
-finality, gas used, estimate, measured balance drop, ratio, runtime/creation bytes, the
-`verify-deployment.json` digest, and the read-back of slot 0. **Abort** on a revert, an address
-mismatch, a byte mismatch, or a measured cost above the cap.
+The measured deploy facts are in `59-live-deploy.txt`; a second deploy needs a new decision record and
+is out of scope.
 
 ### Step 2 — register provider-1 (one transaction, 30 tPOT bond)
 
 ```bash
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run cli -- register --bond 30
 MAKHZAN_ED_TPOT=0 MAKHZAN_DEPOSITS_TPOT=30 MAKHZAN_GAS_TPOT=1 \
   scripts/with-live-env.sh provider-1 -- node apps/makhzan/src/doctorMain.ts
@@ -113,7 +115,8 @@ wei, balance before/after, and the doctor's mapping line (now `ok`).
 ### Step 3 — start the daemon (no transaction)
 
 ```bash
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" MAKHZAN_PROVIDER_ID=1 \
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
+MAKHZAN_CONTRACT="$ADDR" MAKHZAN_PROVIDER_ID=1 \
   MAKHZAN_STATE_DIR="$PWD/evidence/state/live" \
   scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run daemon &
 echo $! > evidence/state/live-daemon.pid
@@ -124,33 +127,48 @@ The daemon logs the five labels every poll; the state file is evidence and is ne
 ### Step 4 — upload the 1 MiB file and create deal A
 
 ```bash
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
 dd if=/dev/urandom of=demo-1mib.bin bs=1024 count=1024
 sha256sum demo-1mib.bin
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- upload "$PWD/demo-1mib.bin" --provider 1
 ```
 
 Take `root`, `size` and `leafCount` from the upload record (1,048,576 B / 1,024 B = 1,024 leaves).
 
 ```bash
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- create \
   --root <root> --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
 ```
 
 Deal A is id `1`. Record `evidence/raw/t1/60-live-pass.txt` and the upload root/hash.
 
-### Step 5 — challenge A, daemon answers, passed round
+### Step 5 — challenge A, daemon answers, then claim and settle A
 
 ```bash
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- challenge 1
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- watch 1
 ```
 
-Expect `passed` with an unchanged bond. Record the round record (five statuses), challenge/answer
-hashes and blocks, the read-back and the bond before/after. **Abort** if the daemon reports
+Expect `passed` with an unchanged bond. **After deal A's end block** (duration 150), claim the
+provider's accrued price with the provider-1 key, then settle:
+
+```bash
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# claim is provider-only: it pays the provider's accrued price, it does not move the bond
+MAKHZAN_CONTRACT="$ADDR" \
+  scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run cli -- claim 1
+MAKHZAN_CONTRACT="$ADDR" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- settle 1
+```
+
+Record the round record (five statuses), challenge/answer hashes and blocks, the read-back, the bond
+before/after, the provider's claim credit and the settle result. **Abort** if the daemon reports
 `unanswered`, the bond moved, or a read-back disagrees with the receipt.
 
 ### Step 6 — deal B, daemon in skip mode, slashed round
@@ -158,30 +176,33 @@ hashes and blocks, the read-back and the bond before/after. **Abort** if the dae
 Restart the daemon in skip mode (stop the old process first, record both PIDs):
 
 ```bash
+ADDR=0x60481DFcFCA34A8F095939D9675eC715127B2e44
 kill "$(cat evidence/state/live-daemon.pid)"
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" MAKHZAN_PROVIDER_ID=1 \
+MAKHZAN_CONTRACT="$ADDR" MAKHZAN_PROVIDER_ID=1 \
   MAKHZAN_DRILL=skip MAKHZAN_STATE_DIR="$PWD/evidence/state/live-skip" \
   scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run daemon &
 echo $! > evidence/state/live-skip-daemon.pid
 
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- create \
   --root <root> --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- challenge 2
 # wait for the 50-block window, then, permissionless:
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- resolve 2
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
-  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- claim 2
-MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+# claim is provider-only: it pays the provider's accrued price, it does not move the bond
+MAKHZAN_CONTRACT="$ADDR" \
+  scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run cli -- claim 2
+MAKHZAN_CONTRACT="$ADDR" \
   scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- settle 2
 ```
 
-Deal B is id `2`. `claim` moves the provider bond (not the deal price) and `settle` releases the deal;
-run them in that order as above. Record `evidence/raw/t1/61-live-slash.txt`: challenge/resolve hashes
+Deal B is id `2`. `claim` is provider-only: run it with the provider-1 key; it pays the provider's
+accrued price and does **not** move the bond. `settle` then releases the deal. Run them in that order
+as above. Record `evidence/raw/t1/61-live-slash.txt`: challenge/resolve hashes
 and blocks, bond before/after (exactly 20% down), owner credit in wei, the daemon's `failed` status,
-and the claim/settle results.
+the provider's claim credit and the settle result.
 
 ### Step 7 — refusal snapshot and evidence bundle
 
@@ -211,12 +232,16 @@ git status --short
 | --- | --- | --- |
 | Deploy | estimate ≤ `566.518509593496 tPOT`; measured cost ≤ the same | DR-013 high projection |
 | Deploy reserve | `100 tPOT` stays after the deploy | the script's reserve check |
-| Register provider-1 | `30 tPOT` bond + `1 tPOT` fees = `31 tPOT` | provider-1 holds about `60 tPOT` |
-| Deal A | `5 tPOT` price + `1 tPOT` fees = `6 tPOT` | owner |
-| Deal B | `5 tPOT` price + `1 tPOT` fees = `6 tPOT` | owner |
-| Challenge / resolve / claim / settle | `2 tPOT` total | owner |
-| Owner session total | ≤ `729.279359108146266225 − 100 = 629.279359108146266225 tPOT` | LIVE-1 balance minus reserve |
-| Provider-1 session total | ≤ `31 tPOT` | bond plus fees |
+| Register provider-1 | that command's own `eth_estimateGas` cost **+25%** | per-transaction dry-run estimate |
+| Deal A | that command's own `eth_estimateGas` cost **+25%** | per-transaction dry-run estimate |
+| Deal B | that command's own `eth_estimateGas` cost **+25%** | per-transaction dry-run estimate |
+| Challenge / resolve / claim / settle | that command's own `eth_estimateGas` cost **+25%** | per-transaction dry-run estimate |
+| Owner session total | ≤ `629 tPOT` (hard) | LIVE-1 balance minus the 100 tPOT reserve, rounded down |
+| Provider-1 session total | ≤ `50 tPOT` (hard) | provider-1 balance, rounded down |
+
+Each non-deploy transaction is capped by **its own estimate plus 25%**, measured immediately before
+that command; a fixed per-step tPOT figure is not reused. The two session totals are hard: no
+transaction may take the owner above `629 tPOT` spent or provider-1 above `50 tPOT` spent.
 
 `--reserve-tpot` or `MAKHZAN_RESERVE_TPOT` may be changed only with a written reason in
 `docs/decisions.md`. Never top up from an unaudited wallet.
@@ -242,6 +267,8 @@ git status --short
 
 - RPC down, chain id mismatch, stalled blocks, or any estimate failure: record the exact error and
   the UTC time, stop, retry later. Do not work around the RPC.
+- The owner's permanent `account mapping: this account is not a registered provider` line is **not**
+  an abort condition (step 0). Provider-1's mapping must be `ok` after registration.
 - Estimate above the step cap, balance below the planned need, deploy revert, address mismatch,
   byte mismatch, or a pending record you cannot explain: STOP; do not retry with different flags.
 - Daemon `unanswered`, bond moved without a slash, slash not exactly 20%, owner credit not equal to
