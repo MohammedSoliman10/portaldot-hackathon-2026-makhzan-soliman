@@ -245,3 +245,37 @@ live default; it is not changed by assumption.
 rules a different size, the default and the docs change in one commit, and the e2e re-runs; the
 contract bound does not need to change. Gas figures scale with the block size and are re-measured
 then.
+
+## T1-001 — Live phase opens on DR-013: read-only preparation and a free via_ir dry run (2026-10-24)
+
+**Context.** Tier 0 is closed by DR-013 (main repository commit `320cb6d`): probe spending stopped at
+`70.63305145206221 tPOT` of the `100 tPOT` cap; no further probe deploy. The owner's go for LIVE-1 is
+read-only preparation plus a free `eth_estimateGas` dry run of the real Makhzan creation transaction.
+**No transaction is sent in this step**; deploying needs a separate explicit go.
+
+**Verdicts carried from Tier 0 (read-only; no renumbering of the existing gates).**
+
+- **G01 — closed on T026 evidence** for the `solc` EVM path. The `via_ir` question is no longer a
+  Tier 0 probe; it is answered only by the free Makhzan dry run recorded in `evidence/raw/t1/`.
+- **G02 — partial by design.** Only the free read-only checks exist (chain identity, block time,
+  `eth_getLogs` range, pruning, the 2 KiB calldata estimate, the reverting-call error shape). No
+  behaviour probe was deployed and no live size/behaviour claim is made.
+- **G03, G04, G05 — measured on the real Makhzan after its deploy**, with `eth_estimateGas` before
+  every transaction and the measured balance drop recorded against that estimate.
+- **G07 — closed.** The implied factor is exactly `10000` (`WEI_PER_UNIT = 10_000`).
+
+**Chain and calibration facts.** Chain id `420420777`; genesis
+`0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd`; measured deploy ratio
+`0.984608251872` (ValueEcho, 570 creation bytes); Makhzan projection (6,566 runtime / 7,154 creation
+bytes) low `521.360436729639`, expected `543.939473161567`, high `566.518509593496 tPOT`. Owner EVM
+balance `729.279359108146266225 tPOT`; provider-1 about `60 tPOT`. The Tier 0 calibration file is
+copied verbatim to `evidence/calibration.json`; its ratio lives under `makhzan_projection` and in the
+deploy entry, so the deploy reader accepts that documented shape instead of inventing a second file.
+
+**Consequences.** LIVE-1 may call only read-only RPC methods and `eth_estimateGas`. The deploy
+transaction, the provider registration and every round are LIVE-2 and need a new go. Every LIVE-2
+transaction keeps the dry-run-before-every-tx rule, the pending-record rule and its per-step cap.
+
+**Evidence.** `evidence/calibration.json`, `evidence/raw/t1/104-live-env-red.txt`,
+`105-live-env-green.txt`, `106-calibration-shape-red.txt`, `107-calibration-shape-green.txt`,
+`108-doctor-owner-live.txt`, `109-doctor-provider1-live.txt`, `110-live-dry-run.txt`.
