@@ -1,0 +1,26 @@
+{
+  "schema": "makhzan.verify-deployment/v0",
+  "network": "LIVE",
+  "chainId": 420420777,
+  "address": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+  "block": 171310,
+  "utc": "2026-10-24T06:57:28Z",
+  "artifact": "contracts/out/Makhzan.sol/Makhzan.json",
+  "match": true,
+  "runtimeBytes": 6566,
+  "artifactBytes": 6566,
+  "firstDiff": null,
+  "reason": null,
+  "codeHash": "0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98",
+  "codeVerified": {
+    "method": "runtime-code-hash",
+    "sourceVerified": false,
+    "artifact": "contracts/out/Makhzan.sol/Makhzan.json",
+    "note": "runtime code compared byte for byte with the artifact; no explorer source verification exists"
+  },
+  "deployerMapping": {
+    "checked": false,
+    "note": "not checked: no Tier 0 deployer helper is configured or reachable on this network"
+  },
+  "helper": null
+}
