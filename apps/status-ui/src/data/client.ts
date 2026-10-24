@@ -27,6 +27,7 @@ export interface ReadClient {
   getChainId(): Promise<number>;
   getCode(args: { address: Hex }): Promise<Hex | undefined>;
   getBlockNumber(): Promise<bigint>;
+  getBalance(args: { address: Hex }): Promise<bigint>;
   getBlock(args?: { blockNumber?: bigint }): Promise<{ timestamp: bigint } | null>;
 }
 

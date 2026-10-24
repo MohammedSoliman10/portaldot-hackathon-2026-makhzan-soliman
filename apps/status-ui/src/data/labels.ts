@@ -89,6 +89,17 @@ export function formatNative(units: string): string {
   return `${group(whole.toString())}.${decimals}`;
 }
 
+/** 18-decimal wei to native tPOT (1 tPOT = 1e18 wei), integer math only. */
+export function formatWeiAsNative(wei: string): string {
+  const value = toDecimal(wei);
+  const base = 10n ** 18n;
+  const whole = value / base;
+  const fraction = value % base;
+  if (fraction === 0n) return group(whole.toString());
+  const decimals = fraction.toString().padStart(18, "0").slice(0, 4).replace(/0+$/, "");
+  return decimals === "" ? group(whole.toString()) : `${group(whole.toString())}.${decimals}`;
+}
+
 export function formatWei(wei: string): string {
   return group(toDecimal(wei).toString());
 }

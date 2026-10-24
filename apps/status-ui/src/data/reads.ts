@@ -155,6 +155,10 @@ export function healthOf(client: ReadClient, address: Hex, dealId: number): Prom
   });
 }
 
+export function balanceOf(client: ReadClient, address: Hex): Promise<ReadResult<string>> {
+  return runRead(async () => (await client.getBalance({ address })).toString());
+}
+
 export function codeOf(client: ReadClient, address: Hex): Promise<ReadResult<Hex>> {
   return runRead(async () => (await client.getCode({ address })) ?? "0x");
 }

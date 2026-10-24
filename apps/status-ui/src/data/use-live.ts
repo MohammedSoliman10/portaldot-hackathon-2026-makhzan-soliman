@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { keccak256 } from "viem";
 import type { ModeState } from "../config/modes";
 import { checkChain, createReadClient, runRead, type ReadClient } from "./client";
-import { codeOf, peekConfig } from "./reads";
+import { balanceOf, codeOf, dealOf, healthOf, peekConfig, providerOf, type DealRead, type ProviderView } from "./reads";
 import type { PeekConfig } from "./peek";
 import type { Hex } from "./schema";
 
@@ -11,6 +11,10 @@ export interface LiveOptions {
   now?: () => number;
   staleAfterMs?: number;
   intervalMs?: number;
+  /** Provider whose bond is shown; normally the one recorded in the evidence. */
+  providerAddress?: Hex | null;
+  /** Deals to read back; normally the ids recorded in the evidence. */
+  dealIds?: readonly number[];
 }
 
 export interface LiveDeployment {
@@ -20,6 +24,10 @@ export interface LiveDeployment {
   at: string | null;
   codeHash: Hex | null;
   codeBytes: number | null;
+  provider: ProviderView | null;
+  deals: Record<number, DealRead | null>;
+  health: Record<number, number | null>;
+  balanceWei: string | null;
   stale: boolean;
   error: string | null;
   blockingDetail: string | null;
@@ -33,20 +41,27 @@ const INITIAL: Omit<LiveDeployment, "refresh"> = {
   at: null,
   codeHash: null,
   codeBytes: null,
+  provider: null,
+  deals: {},
+  health: {},
+  balanceWei: null,
   stale: false,
   error: null,
   blockingDetail: null,
 };
 
 /**
- * The live overlay for one deployment: chain guard first, then config and runtime code, refreshed
- * every 30 s. A failed read keeps the last good value and marks it STALE; it never empties the page.
+ * The live overlay for one deployment: chain guard first, then config, runtime code, the provider
+ * bond, the recorded deals and the contract balance, refreshed every 30 s. A failed read keeps the
+ * last good value and marks it STALE; it never empties the page.
  */
 export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): LiveDeployment {
   const nowRef = useRef(options.now ?? (() => Date.now()));
   const now = nowRef.current;
   const staleAfterMs = options.staleAfterMs ?? 30_000;
   const intervalMs = options.intervalMs ?? 30_000;
+  const providerAddress = options.providerAddress ?? null;
+  const dealIdsKey = (options.dealIds ?? []).join(",");
   const client = useMemo(() => options.client ?? createReadClient(mode), [options.client, mode]);
   const [state, setState] = useState<Omit<LiveDeployment, "refresh">>(
     client ? INITIAL : { ...INITIAL, status: "off" },
@@ -61,6 +76,7 @@ export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): L
     const active = client;
     let cancelled = false;
     const controller = new AbortController();
+    const ids = [...new Set(dealIdsKey === "" ? [] : dealIdsKey.split(",").map(Number))].sort((a, b) => a - b);
 
     async function run(): Promise<void> {
       setState((previous) => ({
@@ -79,10 +95,17 @@ export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): L
         return;
       }
 
-      const [config, code, blockNumber] = await Promise.all([
-        peekConfig(active, mode.address!),
-        codeOf(active, mode.address!),
+      const address = mode.address!;
+      const [config, code, blockNumber, balance, provider] = await Promise.all([
+        peekConfig(active, address),
+        codeOf(active, address),
         runRead(() => active.getBlockNumber(), { signal: controller.signal }),
+        balanceOf(active, address),
+        providerAddress ? providerOf(active, address, providerAddress) : Promise.resolve(null),
+      ]);
+      const [dealReads, healthReads] = await Promise.all([
+        Promise.all(ids.map((id) => dealOf(active, address, id))),
+        Promise.all(ids.map((id) => healthOf(active, address, id))),
       ]);
       if (cancelled) return;
 
@@ -97,18 +120,35 @@ export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): L
         return;
       }
 
+      const deals = ids.map((id, position) => ({ id, deal: dealReads[position] }));
+      const health = ids.map((id, position) => ({ id, health: healthReads[position] }));
       const runtime = code.value ?? null;
       lastGood.current = now();
-      setState({
-        status: "live",
-        config: config.value,
-        block: blockNumber.value === null ? null : Number(blockNumber.value),
-        at: config.at,
-        codeHash: runtime ? keccak256(runtime) : null,
-        codeBytes: runtime ? (runtime.length - 2) / 2 : null,
-        stale: false,
-        error: null,
-        blockingDetail: null,
+
+      setState((previous) => {
+        const nextDeals = { ...previous.deals };
+        for (const entry of deals) {
+          if (entry.deal) nextDeals[entry.id] = entry.deal.value;
+        }
+        const nextHealth = { ...previous.health };
+        for (const entry of health) {
+          if (entry.health) nextHealth[entry.id] = entry.health.value;
+        }
+        return {
+          status: "live",
+          config: config.value,
+          block: blockNumber.value === null ? null : Number(blockNumber.value),
+          at: config.at,
+          codeHash: runtime ? keccak256(runtime) : previous.codeHash,
+          codeBytes: runtime ? (runtime.length - 2) / 2 : previous.codeBytes,
+          provider: provider?.value ?? previous.provider,
+          deals: nextDeals,
+          health: nextHealth,
+          balanceWei: balance.value ?? previous.balanceWei,
+          stale: false,
+          error: null,
+          blockingDetail: null,
+        };
       });
     }
 
@@ -117,7 +157,7 @@ export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): L
       cancelled = true;
       controller.abort();
     };
-  }, [client, tick, mode.address, mode.expectedChainId, staleAfterMs]);
+  }, [client, tick, mode.address, mode.expectedChainId, staleAfterMs, providerAddress, dealIdsKey, now]);
 
   useEffect(() => {
     if (!client) return;
