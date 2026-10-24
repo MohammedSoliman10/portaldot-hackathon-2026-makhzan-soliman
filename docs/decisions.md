@@ -38,6 +38,164 @@ solc `0.8.28` for both paths.
 
 **Evidence.** `evidence/raw/g01/05-resolc.txt`, `evidence/raw/g01/CounterProbe.pvm`.
 
+## DR-003 — Storage deposits are balance, not just gas (2026-10-20)
+
+**Context.** Other teams report `[reported]`: about 0.079 tPOT per code byte plus about 13 tPOT per
+contract for deployment, about 3.9 tPOT per new slot (refunded when cleared), and that
+`eth_estimateGas` includes the deposit. If true, a 24 KiB size ladder would cost roughly 1,475 tPOT
+and a gas limit is not a safe proxy for affordability.
+
+**Decision.** Treat every deposit as real balance. G02 deploys at most three small probes (~0.5, 2
+and 4 KiB runtime code) and derives deposit per byte plus the fixed part; the code-size limit comes
+from runtime metadata/constants, and any further size is an `eth_estimateGas` dry run only when the
+owner balance covers it. No single probe may spend more than 5% of the owner balance. G05 measures the
+deposit matrix and the refund recipient; G06 states its budget as tPOT = gas + deposits floated −
+refunds and includes Tier 1 deployment at 8, 12 and 16 KiB runtime code.
+
+**Consequences.** G02's live size answer may be `PARTIAL` if the three probes do not bracket the
+limit; the metadata limit is then the recorded answer with that caveat. Anvil's 24,576-byte result is
+never reported as the chain's limit.
+
+**Status.** `[reported]` until our own G02/G05 measurements confirm or correct it.
+
+## DR-004 — Chain identity in every gate record (2026-10-20)
+
+**Context.** A team reports genesis `0xd4f9acbc…283bd`. Our records currently do not pin the chain
+identity at measurement time, so a later reader cannot tell whether a gate ran against the same chain.
+
+**Decision.** Every gate record includes our own `chain_getBlockHash(0)` and runtime spec version,
+read at measurement time. The reported genesis is a cross-check only; our own read decides
+`equal`, `different` or `unconfirmed`. G07 also calls the read-only `ReviveApi_account_id` for the
+owner EVM address and compares it with candidate A.
+
+**Consequences.** A genesis or spec mismatch is recorded as a contradiction and flagged, not worked
+around silently. The check is read-only and costs no funds.
+
+## DR-005 — RPC event and finality shape (2026-10-20)
+
+**Context.** `[reported]`: `eth_getLogs` is limited, blocks take about 6 s, and the finalized head lags
+the best head by 1–2 blocks.
+
+**Decision.** Gates read events from their own transaction receipts or very recent blocks, never from
+a long historical `eth_getLogs` query. Where finality matters, the gate waits for the finalized head
+and records both heads. The reported numbers are re-measured, not assumed.
+
+**Consequences.** G03's latest-state sampling (DR-001) remains correct; a receipt is authoritative
+for event values. A limited `eth_getLogs` is recorded as an RPC limitation, not as a gate failure.
+
+## DR-010 — Tier 0 live spending caps (2026-10-21)
+
+**Context.** The reported funding stash is about 1,500 tPOT, delivered to native SS58 addresses.
+The Tier 1 deploy is estimated at about 718 tPOT, and the Tier 0 probes must not consume it. Recon on
+2026-10-21T07:10:22Z observed HUB2
+`5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp` at 500 tPOT free, not the reported 1,500.
+
+**Decision.**
+- The owner keeps an **untouched 800 tPOT reserve** for the Tier 1 deploy.
+- Total Tier 0 live spend, gas **and** storage deposits included, is capped at **250 tPOT**.
+- No single probe deposit may exceed **60 tPOT**. The 2 KiB and 4 KiB size rungs are therefore
+  `eth_estimateGas` dry runs only; they are not deployed.
+- Before every live deploy, print the estimate and abort if it would break either cap.
+- Record every transaction hash and the balance before and after the transaction.
+
+**Consequences.** A probe whose estimate exceeds 60 tPOT is not sent. If the owner's spendable
+balance cannot cover both the 800 tPOT reserve and the live probes, the live phase stops and reports
+the shortfall rather than spending the reserve. The observed 500 tPOT HUB2 balance cannot fund both
+the 800 tPOT reserve and the 75% fan-out; the fan-out plan records the conflict and does not move
+funds without the owner's decision.
+
+**Evidence.** `evidence/raw/g07/09-funding-recon.txt`, `evidence/raw/g07/10-fanout-plan.txt`.
+
+## DR-011 — Reduced live cap until the missing tokens arrive (2026-10-21)
+
+**Context.** Recon at 2026-10-21T07:10:22Z found HUB2
+`5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp` holding 500 tPOT, not the reported ~1,500.
+DR-010's untouched 800 tPOT reserve cannot be funded from the balance that exists, so the live phase
+uses a reduced envelope until the remaining tokens arrive.
+
+**Decision.** DR-011 supersedes DR-010 while HUB2 holds less than the reported stash:
+- Total Tier 0 live spend, deposits and gas included, is capped at **100 tPOT**.
+- No single deposit may exceed **60 tPOT**.
+- The 2 KiB and 4 KiB probes are `eth_estimateGas` dry runs only.
+- Before every live deploy, print the estimate and abort if a cap would break.
+- Record every transaction hash and the balance before and after.
+- The owner is funded **1 tPOT now** and, after T024 passes, **one more tranche so the owner holds
+  150 tPOT in total**. HUB2 keeps the rest.
+
+**Consequences.** The Tier 1 reserve is 150 tPOT until more tokens arrive, not 800 tPOT. The fan-out
+plan is recomputed for a 500 tPOT HUB2 balance and excludes provider-1. If a live task would exceed
+100 tPOT total or a 60 tPOT single deposit, it stops and reports the cost instead of spending.
+
+**Evidence.** `evidence/raw/g07/10-fanout-plan.txt`, `evidence/raw/g07/09-funding-recon.txt`.
+
+## DR-012 — HUB1 funding and 800 tPOT owner target (2026-10-21)
+
+**Context.** Recon at 2026-10-21T16:30:48Z found HUB1
+`5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF` holding exactly 1,000 tPOT free.
+HUB2 still holds 500 tPOT. The reported additional funding has not arrived. DR-012 supersedes
+DR-011's owner target; the live spending caps do not change.
+
+**Decision.**
+- Total Tier 0 live spend, deposits and gas included, stays capped at **100 tPOT**.
+- No single deposit may exceed **60 tPOT**; the 2 KiB and 4 KiB probes remain
+  `eth_estimateGas` dry runs only.
+- Before every live deploy, print the estimate and abort if a cap would break.
+- Record every transaction hash and the balance before and after.
+- The owner target is **800 tPOT in total**. The owner keeps an **untouched 650 tPOT reserve**
+  for the Tier 1 deploy, leaving at most 150 tPOT for Tier 0 live spend inside the 100 tPOT cap.
+- Provider-1 target is **60 tPOT**. HUB1 and HUB2 keep the rest.
+- Fan-out: first 1 tPOT from HUB1 to the owner; after the flag and T024 pass, the remainder needed
+  to bring the owner to 800 tPOT from HUB1, and 60 tPOT from HUB2 to provider-1.
+
+**Consequences.** HUB1 is exactly at the 1,000 tPOT threshold, so no extra margin is assumed. If T024
+spends gas, the second tranche is slightly above the nominal 799 tPOT so that the owner lands on
+800 tPOT. If HUB1 falls below 1,000 tPOT before the fan-out, the plan stops and reports the real
+balance rather than spending into the reserve.
+
+**Evidence.** `evidence/raw/g07/11-funding-recon-2.txt`,
+`evidence/raw/g07/10-fanout-plan.txt`.
+
+## DR-013 — Close Tier 0 probes and carry the open questions into the live Makhzan run (2026-10-23)
+
+**Context.** T026 passed and confirmed `WEI_PER_UNIT = 10_000`; the owner and provider-1 spend
+proofs passed. Tier 0 has spent `70.63305145206221 tPOT` of the DR-012 `100 tPOT` cap. The G01
+`CounterProbe` dry run is `37.12486675053143 tPOT`, which would take the total to
+`107.75791820259364`; G02's `BehaviorProbe` alone is `76.22978090790616 tPOT`, above the
+`60 tPOT` single-deposit cap, and every G01 + G02 deploy together projects to
+`831.08264911946874 tPOT`. No further Tier 0 probe fits the current decision.
+
+**Decision.**
+- Tier 0 probe spending is **closed** at the current total. The `100 tPOT` cap is **not raised**,
+  and no further probe is deployed.
+- **G01 is closed on the T026 evidence for the `solc` EVM path.** The open `via_ir` question is no
+  longer a Tier 0 gate: it becomes a **free `eth_estimateGas` dry run of the real Makhzan creation
+  transaction** in the Tier 1 live runbook, recorded there.
+- **G02 shrinks to the free read-only checks** in the DR-013 evidence: chain identity, block time,
+  `eth_getLogs` range, pruning, the 2 KiB calldata estimate, and the reverting-call error shape. No
+  probe deploy and no transaction.
+- **G03, G04 and G05 are measured on the real Makhzan after its deploy**, with an
+  `eth_estimateGas` dry run before every transaction. The dry-run estimate and the measured balance
+  drop are recorded for each transaction.
+- **G07 is closed:** factor `10000` is confirmed. Only owner and provider-1 are funded; the four
+  unfunded providers are not needed for the Makhzan deploy path and remain a documented gap.
+
+**Consequences.** `29.36694854793778 tPOT` stays unspent. There are no more Tier 0 probe
+transactions. The live phase owns the Makhzan deploy budget and must stop and report if a dry run
+exceeds the owner's spendable balance. G01 is a `solc` EVM-path closure, not a `via_ir` PASS.
+
+**Evidence.** `evidence/raw/g07/14-t026.json`, `15-t026-summary.txt`,
+`evidence/raw/g07/21-cap-check.txt`, `22-cap-stop.txt`, `evidence/calibration.json`.
+
+**Status.** Active; supersedes DR-012 only for the scope of Tier 0 probes, not for the already
+completed funding and spend records.
+---
+
+# Tier 1 product decisions
+
+The branch `002-core-storage-proofs` kept its product decisions in this same file. They are reproduced
+below verbatim, with their original identifiers and dates. Tier 0 and Tier 1 allocated numbers on
+parallel branches, so `DR-010` to `DR-013` exist once per tier; cite them as "Tier 0 DR-010" or
+"Tier 1 DR-010". No record was renumbered by this merge.
 
 ## DR-006 — Amounts are stored in native units, not wei (2026-10-21, Tier 1)
 

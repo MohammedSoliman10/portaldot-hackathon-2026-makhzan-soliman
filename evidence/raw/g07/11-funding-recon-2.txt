@@ -1,0 +1,10 @@
+at=2026-10-21T16:30:48Z
+spec=portaldot-v3 version=3002
+genesis=0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+decimals=14
+latest_block=134035 hash=0xade87f834dfb0a59dd433c32e4e2525204db161b0e561dacb0cd982fd26cc03b
+finalized_block=134032 hash=0x446ca17ae5ecb69efc6dc4fbf454d9251d447b67416465b0b82616f78e6a699b
+HUB1 ss58=5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF free_planck=100000000000000000 free_tpot=1000.00000000000000 reserved_planck=0 reserved_tpot=0.00000000000000 frozen_planck=0 frozen_tpot=0.00000000000000 nonce=0
+HUB2 ss58=5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp free_planck=50000000000000000 free_tpot=500.00000000000000 reserved_planck=0 reserved_tpot=0.00000000000000 frozen_planck=0 frozen_tpot=0.00000000000000 nonce=0
+candidate-A ss58=5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE free_planck=0 free_tpot=0.00000000000000 reserved_planck=0 reserved_tpot=0.00000000000000 frozen_planck=0 frozen_tpot=0.00000000000000 nonce=0
+provider-1 ss58=5Hbqft1roeX13KBJHkYY1jSPCR3Ef6yFtxkMgJF9YxM5M3UQ free_planck=0 free_tpot=0.00000000000000 reserved_planck=0 reserved_tpot=0.00000000000000 frozen_planck=0 frozen_tpot=0.00000000000000 nonce=0

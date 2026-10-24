@@ -1,0 +1,13 @@
+# G02 free read-only: 2 KiB calldata eth_estimateGas
+at=2026-10-23T09:08:57Z
+target=0x3155765dd7305e6f529d94aa1e3147e396aa0d92 (ValueEcho)
+method=eth_estimateGas from owner with 2048 bytes of calldata
+selector=0x266cf109 (record())
+calldata_bytes=2048
+value_wei=0
+estimate_works=true
+gas=6561062665238
+gas_price_wei=33705
+implied_cost_tpot=0.22114061713185
+transactions_sent=0
+note=this is an estimate only; no record() call was sent

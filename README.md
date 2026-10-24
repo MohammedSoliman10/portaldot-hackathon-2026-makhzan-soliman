@@ -251,12 +251,17 @@ evidence/                  raw command output, deployment records, receipts, ver
 
 ## Demo
 
+**Live read-only status page:** <https://status-ui-one.vercel.app/>. It is a read-only view over the
+deployed Makhzan contract on Portaldot V3: the page bundle contains the contract address, chain
+`420420777` and the live RPC, and calls only read methods (`healthOf`, `dealOf`, `challengeStateOf`,
+`providerOf`). It sends no transactions. The live challenge rounds are still `[pending live run]`.
+
 The 3-minute local script is [docs/demo.md](docs/demo.md). It deploys to anvil, registers a provider,
 uploads a 1 MiB file as 1,024 blocks, passes one challenge, then skips a second and shows exactly 20%
 slashed to the owner, followed by claim and settle.
 
-A recorded video or hosted live link is **not yet published** (`[pending]`). The check-in placeholders
-are in [docs/CHECKIN.md](docs/CHECKIN.md).
+A recorded video is **not yet published** (`[pending]`). The check-in text is in
+[docs/CHECKIN.md](docs/CHECKIN.md).
 
 ## Security model and honest limits
 

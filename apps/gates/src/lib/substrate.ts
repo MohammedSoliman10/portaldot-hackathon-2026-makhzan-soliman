@@ -68,7 +68,44 @@ export interface AccountBalances {
   nonce: string;
 }
 
-export async function systemAccount(api: ApiPromise, address: string): Promise<AccountBalances> {
+export interface ChainIdentity {
+  genesisHash: string;
+  specName: string;
+  specVersion: string;
+  observedAt: string;
+}
+
+/** Read the revive constants relevant to deposits and code size. */
+export async function readReviveConstants(wsUrl: string): Promise<Record<string, unknown>> {
+  const connection = await connectSubstrate(wsUrl);
+  try {
+    const section = (connection.api.consts as unknown as Record<string, Record<string, { toJSON?: () => unknown }> | undefined>).revive;
+    if (!section) return {};
+    return Object.fromEntries(
+      Object.keys(section)
+        .sort()
+        .map((name) => {
+          const value = section[name];
+          return [name, typeof value?.toJSON === "function" ? value.toJSON() : (value ?? null)];
+        }),
+    );
+  } finally {
+    await connection.disconnect();
+  }
+}
+export async function readChainIdentity(wsUrl: string): Promise<ChainIdentity> {
+  const connection = await connectSubstrate(wsUrl);
+  try {
+    return {
+      genesisHash: connection.api.genesisHash.toHex(),
+      specName: connection.api.runtimeVersion.specName.toString(),
+      specVersion: connection.api.runtimeVersion.specVersion.toString(),
+      observedAt: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    };
+  } finally {
+    await connection.disconnect();
+  }
+}export async function systemAccount(api: ApiPromise, address: string): Promise<AccountBalances> {
   const account = await api.query.system.account(address);
   const json = account.toJSON() as { nonce?: number; data?: { free?: string; reserved?: string; frozen?: string } };
   return {

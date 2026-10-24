@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-23T09:08:57Z",
+  "method": "eth_call",
+  "http_status": 200,
+  "body": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "error": {
+      "code": 3,
+      "message": "execution reverted: ",
+      "data": "0x"
+    }
+  },
+  "note": "JSON-RPC error returned with HTTP 200; code 3, empty revert data",
+  "transactions_sent": 0
+}

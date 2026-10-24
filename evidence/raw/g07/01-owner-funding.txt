@@ -1,0 +1,65 @@
+# T023 owner funding record
+at=2026-10-23T03:40:23Z
+spec=portaldot-v3 version=3002
+genesis=0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+ss58_prefix=42
+owner_ss58=5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE
+owner_evm=0x0948ebd7637d1c32858a6fc5d947e85a6600205c
+owner_account_id32=0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee
+runtime_account_id=0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee
+mapping_equal=true
+native_free_planck=100000000000000
+native_free_tpot=1.00000000000000
+native_reserved_planck=0
+native_frozen_planck=0
+evm_balance_wei=900000000000000000
+evm_balance_tpot=0.90000000000000
+latest_block=155034 hash=0xd90933f5c52d4e2b7e83f238fc2e62a7d57c0f02fb280a81885a8f50fe3cfcea
+finalized_block=155032 hash=0x1ba0029ef6e0a2e12134ad74a1169fb9e5cef514b59c96ce2ea2c626feae145e
+funding_source=[reported] human transfer from HUB1; no key or seed was read by this task
+# T024 candidate-A spend test
+{
+  "at": "2026-10-23T03:40:45Z",
+  "tx_hash": "0x4c38603d9b34b2aa229b87743b99bc81c3eee01c7e7197f21312e66862763396",
+  "from": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+  "to": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+  "value_wei": "1000000000000000",
+  "value_tpot": "0.00100000000000",
+  "self_transfer": true,
+  "status": "success",
+  "block_number": 155036,
+  "gas_used": "365771419957",
+  "finalized_number": "155036",
+  "finalized_hash": "0xea5aeea272b0864dfac287bf8ec7ce7b7fbfe94d163cc0e35a4114da7d842ca0",
+  "latest_number": "155037",
+  "owner_evm_before_wei": "900000000000000000",
+  "owner_evm_after_wei": "887589375720858990",
+  "owner_native_before_planck": "100000000000000",
+  "owner_native_after_planck": "98758937572085",
+  "owner_native_before_tpot": "1.00000000000000",
+  "owner_native_after_tpot": "0.98758937572085",
+  "fee_wei": "12410624279141010",
+  "fee_tpot": "0.01241062427914",
+  "native_fee_planck": "1241062427915",
+  "native_fee_tpot": "0.01241062427915",
+  "value_readback_ok": true,
+  "mapping_equal": true,
+  "budget_spent_wei": "12410624279141010",
+  "budget_spent_tpot": "0.01241062427914",
+  "receipt": {
+    "blockHash": "0xea5aeea272b0864dfac287bf8ec7ce7b7fbfe94d163cc0e35a4114da7d842ca0",
+    "blockNumber": "155036",
+    "contractAddress": null,
+    "cumulativeGasUsed": "0",
+    "effectiveGasPrice": "33930",
+    "from": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+    "gasUsed": "365771419957",
+    "logs": [],
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "status": "success",
+    "to": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+    "transactionHash": "0x4c38603d9b34b2aa229b87743b99bc81c3eee01c7e7197f21312e66862763396",
+    "transactionIndex": 1,
+    "type": "eip1559"
+  }
+}

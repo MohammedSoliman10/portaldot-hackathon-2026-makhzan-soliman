@@ -1,6 +1,7 @@
-import type { Abi, Address, Hash, Hex, PublicClient, TransactionReceipt, WalletClient } from "viem";
+import { encodeDeployData, type Abi, type Address, type Hash, type Hex, type PublicClient, type TransactionReceipt, type WalletClient } from "viem";
 import type { Artifact } from "./artifacts.ts";
 import { compilePvm, type PvmArtifact } from "./pvm.ts";
+import type { LiveBudget, SpendEntry } from "./budget.ts";
 
 export type DeployPath = "evm" | "pvm";
 
@@ -17,6 +18,7 @@ export interface DeployProbeInput {
   artifact: Artifact;
   args?: readonly unknown[];
   value?: bigint;
+  budget?: LiveBudget;
 }
 
 export interface DeployProbeResult {
@@ -28,6 +30,7 @@ export interface DeployProbeResult {
   compiler: string;
   evmVersion: string | null;
   pvm: PvmArtifact | null;
+  budgetEntry: SpendEntry | null;
 }
 
 /**
@@ -42,15 +45,21 @@ export async function deployProbe(input: DeployProbeInput): Promise<DeployProbeR
 
   const pvm = path === "pvm" ? await compilePvm(contract) : null;
   const bytecode = path === "pvm" ? (pvm!.hex as Hex) : artifact.bytecode.object;
+  const args = (input.args ?? []) as readonly unknown[];
+  const data = encodeDeployData({ abi: artifact.abi, bytecode, args: args as never });
+  const ticket = input.budget
+    ? await input.budget.preflight(`deploy ${contract} (${path})`, { data, value: input.value ?? 0n })
+    : null;
   const hash = await wallet.deployContract({
     abi: artifact.abi as Abi,
     bytecode,
-    args: (input.args ?? []) as never,
+    args: args as never,
     value: input.value ?? 0n,
     account,
     chain: wallet.chain,
   });
   const receipt = await client.waitForTransactionReceipt({ hash });
+  const budgetEntry = ticket && input.budget ? await input.budget.record(ticket, hash) : null;
   if (receipt.status !== "success") throw new Error(`${path} deployment ${hash} reverted`);
   if (!receipt.contractAddress) throw new Error(`${path} deployment ${hash} produced no contract address`);
 
@@ -63,5 +72,6 @@ export async function deployProbe(input: DeployProbeInput): Promise<DeployProbeR
     compiler: path === "pvm" ? pvm!.resolcVersion : artifact.metadata.compiler.version,
     evmVersion: path === "pvm" ? null : artifact.metadata.settings.evmVersion,
     pvm,
+    budgetEntry,
   };
 }

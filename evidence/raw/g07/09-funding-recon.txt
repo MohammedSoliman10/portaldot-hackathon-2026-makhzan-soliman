@@ -1,0 +1,18 @@
+at=2026-10-21T07:10:22Z
+spec=portaldot-v3 version=3002
+genesis=0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+decimals=14
+latest_block=128446 hash=0xfd9f745b18188323d9e1d5ad7b89ec055a76a94fde2d8a13da3e35f1a549a5f1
+finalized_block=128444 hash=0xc5fdc6e1b3feae644e3624151fd363e66e2935b95f562d570d338004ec7c36f7
+finalized_lag=2
+HUB2 ss58=5HnABVM6AYZS1WR2x8mF4Z4gmUnSUp5E7rwASY5svrns7LZp free_planck=50000000000000000 free_tpot=500.00000000000000 reserved_planck=0 reserved_tpot=0.00000000000000 frozen_planck=0 frozen_tpot=0.00000000000000 nonce=0
+hub-old ss58=5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF free_planck=0 free_tpot=0.00000000000000 reserved_planck=0 reserved_tpot=0.00000000000000 frozen_planck=0 frozen_tpot=0.00000000000000 nonce=0
+candidate-A ss58=5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE free_planck=0 free_tpot=0.00000000000000 reserved_planck=0 reserved_tpot=0.00000000000000 frozen_planck=0 frozen_tpot=0.00000000000000 nonce=0
+revive_call_sections=["reviveApi"]
+reviveApi_methods=["ethBlock","ethBlockHash","ethReceiptData","blockGasLimit","maxExtrinsicWeightInGas","balance","gasPrice","nonce","call","instantiate","ethTransact","ethTransactWithConfig","ethEstimateGas","ethPreDispatchWeight","uploadCode","getStorage","getStorageVarKey","traceBlock","traceTx","traceCall","traceCallWithConfig","blockAuthor","address","accountId","runtimePalletsAddress","code","newBalanceWithDust","versionDeclarations","ethBlockVersioned","ethBlockHashVersioned","ethReceiptDataVersioned","blockGasLimitVersioned","maxExtrinsicWeightInGasVersioned","balanceVersioned","gasPriceVersioned","nonceVersioned","callVersioned","instantiateVersioned","ethTransactVersioned","ethEstimateGasVersioned","ethPreDispatchWeightVersioned","uploadCodeVersioned","getStorageVersioned","runtimePalletsAddressVersioned","codeVersioned","accountIdVersioned","newBalanceWithDustVersioned","blockAuthorVersioned","addressVersioned","traceBlockVersioned","traceTxVersioned","traceCallVersioned"]
+runtime_api=api.call.reviveApi.accountId
+owner_evm=0x0948ebd7637d1c32858a6fc5d947e85a6600205c
+account_id_raw=0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee
+candidate_a_account_id32=0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee
+equal=true
+account_id_ss58_prefix42=5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE

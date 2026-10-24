@@ -1,0 +1,12 @@
+# G02 free read-only: block time over the last 100 blocks
+at=2026-10-23T09:08:57Z
+method=eth_getBlockByNumber for blocks 158208..158308, timestamps differenced
+interval_count=100
+min_seconds=6
+median_seconds=6
+mean_seconds=6
+max_seconds=6
+first_timestamp=1792745934
+last_timestamp=1792746534
+result=all 100 intervals are exactly 6 seconds
+transactions_sent=0
