@@ -28,3 +28,7 @@ evidence/rpc-log/*.tmp
 # OS / editor
 .DS_Store
 *.swp
+.vercel
+.env
+.env.local
+.env.*.local
