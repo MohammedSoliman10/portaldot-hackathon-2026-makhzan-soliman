@@ -50,7 +50,7 @@ function Row({
       <td>
         <Chip label={label} />
       </td>
-      <td className="mono text-xs text-ash-2">{source}</td>
+      <td className="mono break-words text-xs text-ash-2">{source}</td>
     </tr>
   );
 }
@@ -134,7 +134,7 @@ export function Overview(options: LiveOptions) {
           </div>
         </dl>
         <div className="mt-4 overflow-x-auto">
-        <table className="min-w-[34rem]">
+        <table className="w-full">
           <caption>Deployment facts, transcribed from the recorded verification run.</caption>
           <thead>
             <tr>
@@ -218,7 +218,7 @@ export function Overview(options: LiveOptions) {
           Decoded from packed storage slot 0. {live.config ? "These values were read by this browser." : "These values are the recorded ones; a live read replaces them when an RPC answers."}
         </p>
         <div className="mt-4 overflow-x-auto">
-        <table className="min-w-[34rem]">
+        <table className="w-full">
           <caption>Packed slot 0, field by field.</caption>
           <thead>
             <tr>
