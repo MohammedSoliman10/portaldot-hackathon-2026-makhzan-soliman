@@ -328,7 +328,7 @@ function parseConfig(value: unknown): ConfigInfo {
     challengeBlockSize: integer(raw.challengeBlockSize, "config.challengeBlockSize", 1),
     slashBps: integer(raw.slashBps, "config.slashBps", 0, 10000),
     minBondUnits: decimal(raw.minBondUnits, "config.minBondUnits").toString(),
-    nextDealId: integer(raw.nextDealId, "config.nextDealId", 1),
+    nextDealId: integer(raw.nextDealId, "config.nextDealId", 0),
     providerCount: integer(raw.providerCount, "config.providerCount", 0),
     minDurationBlocks: integer(raw.minDurationBlocks, "config.minDurationBlocks", 1),
     maxDurationBlocks: integer(raw.maxDurationBlocks, "config.maxDurationBlocks", 1),

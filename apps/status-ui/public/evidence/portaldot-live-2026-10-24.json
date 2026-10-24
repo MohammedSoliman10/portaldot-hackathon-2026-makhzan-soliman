@@ -1,0 +1,73 @@
+{
+  "schema": "makhzan.evidence/v0",
+  "id": "portaldot-live-2026-10-24",
+  "environment": "portaldot-testnet",
+  "label": "REPORTED",
+  "generatedAt": "2026-10-24T06:57:28Z",
+  "source": "portaldot-tier1/evidence/verify-deployment.json and evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json",
+  "chain": {
+    "chainId": 420420777,
+    "name": "Portaldot testnet",
+    "rpcHost": "test-evm-rpc-v3.portaldot.dev",
+    "explorer": null,
+    "explorerNote": "no explorer is configured for this network"
+  },
+  "timing": {
+    "blockTimeSeconds": 1,
+    "basis": "assumption",
+    "source": "not measured; the page does not extrapolate from it"
+  },
+  "deployment": {
+    "address": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+    "txHash": "0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7",
+    "block": 171308,
+    "codeHash": "0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98",
+    "runtimeBytes": 6566,
+    "creationBytes": null,
+    "compiler": "solc 0.8.28, evm paris, via_ir, optimizer runs 1",
+    "codeVerified": {
+      "method": "runtime-code-hash",
+      "sourceVerified": false,
+      "artifact": "contracts/out/Makhzan.sol/Makhzan.json",
+      "note": "runtime code compared byte for byte with the artifact at block 171310; no explorer source verification exists"
+    }
+  },
+  "config": {
+    "challengeWindowBlocks": 50,
+    "challengeBlockSize": 1024,
+    "slashBps": 2000,
+    "minBondUnits": "1000000000000000",
+    "nextDealId": 0,
+    "providerCount": 0,
+    "minDurationBlocks": 100,
+    "maxDurationBlocks": 100800,
+    "slot0": "0x0000000189c00000006400000000000000038d7ea4c6800007d0040000000032"
+  },
+  "providers": [],
+  "deals": [],
+  "rounds": [],
+  "transactions": [
+    {
+      "id": "deploy",
+      "label": "Makhzan deployment",
+      "hash": "0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7",
+      "block": 171308,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "heuristic",
+        "confirmations": 98
+      },
+      "stages": ["submitted", "included", "executed"],
+      "evidence": "portaldot-tier1/evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json",
+      "note": "receipt status success at block 171308; 98 confirmations when this file was written (head 171406)"
+    }
+  ],
+  "refusals": [],
+  "limits": [
+    "A pass proves one block was retrievable at one moment, not continuous storage.",
+    "The deployment has no deals, no provider and no challenge round yet: rounds are pending, not passed.",
+    "No explorer source verification exists for this network; verification is a runtime code hash against the build artifact.",
+    "Live values on the Overview are read by the browser and labelled MEASURED; everything here is REPORTED."
+  ]
+}

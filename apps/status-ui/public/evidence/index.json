@@ -1,7 +1,14 @@
 {
   "schema": "makhzan.evidence-index/v0",
-  "current": "local-anvil-2026-10-23",
+  "current": "portaldot-live-2026-10-24",
   "files": [
+    {
+      "id": "portaldot-live-2026-10-24",
+      "url": "/evidence/portaldot-live-2026-10-24.json",
+      "sha256": "0xaa5b8c74729f0e03de6b13cd5d7596017d7acb8a86fcfba2fbf688ccc8cfd52c",
+      "environment": "portaldot-testnet",
+      "generatedAt": "2026-10-24T06:57:28Z"
+    },
     {
       "id": "local-anvil-2026-10-23",
       "url": "/evidence/local-anvil-2026-10-23.json",

@@ -8,7 +8,7 @@ import type { Hex } from "./schema";
  * there is no write function in this ABI, so the app cannot construct one by accident.
  */
 export const ABI = parseAbi([
-  "function peek(uint256 slot) view returns (bytes32)",
+  "function peek(bytes32[] slots) view returns (bytes32[] values)",
   "function providerOf(address who) view returns (uint16 id, uint64 bond, uint24 activeDeals, bool registered)",
   "function dealOf(uint32 dealId) view returns (address owner, uint32 startBlock, uint32 endBlock, uint16 providerId, uint8 flags, bytes32 root, uint24 leafCount, uint32 size, uint32 challengeIndex, uint32 challengeStart, uint64 price, uint64 claimed)",
   "function challengeStateOf(uint32 dealId) view returns (bool open, uint32 index, uint32 start, uint32 deadline, uint32 expectedPathLength)",
@@ -67,8 +67,18 @@ const tuple = (value: unknown): readonly unknown[] => {
 
 export function peekConfig(client: ReadClient, address: Hex): Promise<ReadResult<PeekConfig>> {
   return runRead(async () => {
-    const raw = (await client.readContract({ address, abi: ABI, functionName: "peek", args: [0n] })) as Hex;
-    return decodeSlot0(raw);
+    // The contract takes a slot array and answers in kind; slot 0 is the packed config word.
+    const raw = tuple(
+      await client.readContract({
+        address,
+        abi: ABI,
+        functionName: "peek",
+        args: [[`0x${"0".repeat(64)}` as Hex]],
+      }),
+    );
+    const word = raw[0];
+    if (typeof word !== "string") throw new Error("malformed read: peek returned no word");
+    return decodeSlot0(word as Hex);
   });
 }
 

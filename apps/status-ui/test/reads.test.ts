@@ -166,7 +166,7 @@ describe("chain guard", () => {
 
 describe("the seven view calls", () => {
   const reads: Record<string, unknown> = {
-    peek: SLOT0,
+    peek: [SLOT0],
     providerOf: [1n, 8_000_000_000_000_000n, 0n, true],
     dealOf: [
       "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
