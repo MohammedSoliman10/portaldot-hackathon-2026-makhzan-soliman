@@ -1,203 +1,272 @@
-# Live runbook — Tier 1 (document only, nothing here has been executed)
+# Live runbook — Tier 1
 
-**Feature**: `002-core-storage-proofs`. This file is the plan for T063–T067. It has **not** been run:
-there is no live address, no live transaction and no live number anywhere in this repository. Every
-step below is `[pending live run]` until it is executed and its own evidence file exists.
+**Feature**: `002-core-storage-proofs`. LIVE-1 (read-only preparation and one free `--dry-run`) is
+**done**; LIVE-2 (the transactions) is **not started**. No live transaction has been sent from this
+repository. Every live row below is `[pending live run]` until its own evidence file exists.
 
-The gate (T063) decides whether any of this may start. If the gate fails, do not deploy and do not
-touch the network beyond the read-only checks in step 0.
+## LIVE-1 results (executed 2026-10-24, no transaction)
 
-## Preconditions (T063 — all must be true and recorded)
+| Item | Result | Evidence |
+| --- | --- | --- |
+| Key wrapper | `scripts/with-live-env.sh <owner\|provider-1> -- <cmd>`; 6 tests pass; the key is exported only to the child, never printed, written or on argv | `104-live-env-red.txt`, `105-live-env-green.txt` |
+| Owner, live read-only | chain `420420777`, account `0x0948EBD7637D1C32858a6FC5D947E85A6600205C`, balance `729.279359108146266225 tPOT`; mapping and contract code fail as expected before a deploy | `108-doctor-owner-live.txt` |
+| Provider-1, live read-only | same chain, balance covers the `30 tPOT` bond plus fees; not yet registered | `109-doctor-provider1-live.txt` |
+| Free dry run | `--dry-run` of the real creation tx: estimate `538.123540 tPOT`; ratio `0.984608251872`; projected `529.840878011 tPOT`; owner after `199.438481098 tPOT`; reserve check passed | `110-live-dry-run.txt` |
+| Calibration shape | the Tier 0 file is copied verbatim; the reader accepts `makhzan_projection.measured_ratio` | `106-calibration-shape-red.txt`, `107-calibration-shape-green.txt` |
+| Registration path | the CLI had no `register` command while the doctor printed one; added test-first | `111-register-red.txt`, `112-register-green.txt` |
 
-| # | Check | Where the verdict lives | If missing or failing |
-| --- | --- | --- | --- |
-| G01 | Chain id, RPC and block production observed | `evidence/raw/t0/` G01 record | STOP — record `BLOCKED — G01 missing` |
-| G02 | The live chain accepts the IR bytecode produced by `via_ir = true` (DR-012) | `evidence/raw/t0/` G02 record | STOP — do not deploy; DR-012's bytecode is unproven on that chain |
-| G04 | Block size and block time measured | `evidence/raw/t0/` G04 record | STOP — the 1,024 B default (DR-017) is unconfirmed |
-| G05 | Fee schedule measured (deploy deposit and per-extrinsic fees) | `evidence/raw/t0/` G05 record | STOP — every tPOT figure stays an estimate (DR-015) |
-| G07 | Measured implied factor equals `WEI_PER_UNIT = 10_000` | `evidence/raw/t0/` G07 record | STOP — do not re-scale the unit by guesswork; a mismatch is a spec change, not a config change |
-| Funding | Owner accounts hold enough tPOT and can move value | owner's funding evidence | STOP — record the shortfall; never deploy with a partial budget |
-| Spending cap | DR-012 planning estimate ≈ 517 tPOT for the deploy, owner budget ≈ 1,500 tPOT across two wallets | `docs/decisions.md` DR-012 | STOP if the measured deposit exceeds the cap; do not top up from an unaudited wallet |
-| Secrets | `PROVIDER_KEY` / `OWNER_KEY` exist only in the environment, never in a file, log, argv or commit | `55-secret-scan.txt` (local) plus a fresh scan on the live artifacts | STOP and rotate if any key appears anywhere |
+The dry run is **not** a deploy and **not** a G02 PASS: `eth_estimateGas` executed the `via_ir`
+creation bytecode in simulation and accepted it, which is the free pre-check only.
 
-The gate result goes to `evidence/raw/t1/58-live-gate.txt` with the UTC time and each verdict quoted.
-`contracts/size-budget.json` is re-set from the G05 numbers in the same commit, and the budget table in
-`evidence/tier1-results.md` is updated then — not before.
+## Gate (DR-013) — replaces the old T063 gate
 
-## Step 0 — read-only preflight (no key needed)
+DR-013 closed Tier 0 probe spending at `70.63305145206221 tPOT` of the `100 tPOT` cap. The gate is
+now split into what is **verified** (free, before any transaction) and what is **measured on the real
+contract** (after the deploy). There is no probe deploy.
 
-```bash
-# Every value is recorded with its UTC timestamp; a failed RPC is recorded verbatim and retried later.
-date -u +%Y-%m-%dT%H:%M:%SZ
-cast chain-id --rpc-url "$MAKHZAN_RPC_URL"
-cast block-number --rpc-url "$MAKHZAN_RPC_URL"
-cast block latest --rpc-url "$MAKHZAN_RPC_URL" --json | head -40
-cast balance "$OWNER_ADDRESS" --rpc-url "$MAKHZAN_RPC_URL"
-cast balance "$PROVIDER_ADDRESS" --rpc-url "$MAKHZAN_RPC_URL"
-```
+| # | What | Status | Proof | If missing or failing |
+| --- | --- | --- | --- | --- |
+| G01 | Chain id, RPC and block production | **verified** | Tier 0 T026; re-observed in `108`/`109`/`110` | STOP if the chain id is not `420420777` |
+| G02 | The live EVM accepts the `via_ir` creation bytecode | **partial by design** | `eth_estimateGas` succeeded in `110`; the deploy tx is the remaining proof | STOP if the deploy estimate fails — do not fall back to non-IR without a decision record |
+| G03 | Deployed runtime equals the artifact | **measured after deploy** | `verify:deployment` byte-for-byte `eth_getCode` | STOP if any byte differs; record the first differing offset |
+| G04 | Block size and block time | **measured after deploy** | the 1 MiB deal (1,024 leaves at 1,024 B) and the challenge blocks | STOP if the deal cannot use 1,024 B blocks |
+| G05 | Fee schedule and storage deposit | **measured after deploy** | balance drop vs the estimate, in `evidence/calibration.json` style | STOP if the measured ratio leaves the 10% band |
+| G07 | Implied factor | **verified** | Tier 0 T026: factor `10000`, `WEI_PER_UNIT = 10_000` | STOP if a live read disagrees |
+| Funding | Owner and provider-1 hold the planned tPOT | **verified for the dry run only** | `108`, `109` | STOP if either balance is below the planned need |
+| Calibration | Measured deploy ratio is present and positive | **verified** | `evidence/calibration.json`, ratio `0.984608251872` | STOP if the file is absent or ratio-less |
+| Secrets | No key in an artifact, log, argv or commit | **verified** | wrapper tests, `secret-scan` on every evidence file, `sanitization` scan | STOP and rotate |
 
-Abort if the chain id differs from the G01 record, if block production is stalled, or if either
-balance is below the DR-012 cap. Record the raw output even when it fails.
+Gate verdict for the transaction run goes to `evidence/raw/t1/58-live-gate.txt` with the UTC time and
+each verdict quoted. Re-run the two doctors and the free dry run **immediately before** the deploy;
+the LIVE-1 estimate is not reused if the chain moved.
 
-## Step 1 — deploy (T064)
+## LIVE-2 — exact commands
 
-```bash
-cd contracts
-forge build --sizes                     # record the runtime/creation bytes for the live build
-cd ..
-node scripts/check-size.mjs             # must exit 0
-export MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=... MAKHZAN_CHAIN_ID=...
-export MAKHZAN_PRIVATE_KEY=...          # env only, never on argv, never printed
-node scripts/deploy.mjs --dry-run \
-  --min-bond 100000000000000000000 \
-  --window 10 --block-size 1024 --slash-bps 2000 \
-  --min-duration 10 --max-duration 1000
-node scripts/deploy.mjs \
-  --min-bond 100000000000000000000 \
-  --window 10 --block-size 1024 --slash-bps 2000 \
-  --min-duration 10 --max-duration 1000
-```
+All commands run from the repository root. The wrapper sets
+`MAKHZAN_NETWORK=live`, `MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev` and
+`MAKHZAN_CHAIN_ID=420420777`, and loads **one** key (`OWNER_KEY` or `PROVIDER_1_KEY`) as
+`MAKHZAN_PRIVATE_KEY`. It never prints a value and never puts a key on argv.
 
-Flags: `--min-bond` is native wei and must be a whole number of protocol units (a multiple of
-10,000); the values above are the reviewed defaults (1e16 units = 1e20 wei). The reserve defaults to
-**100 tPOT**, which is what must remain after the deploy for deal prices, fees and slack; override
-with `--reserve-tpot` or `MAKHZAN_RESERVE_TPOT` only with a written reason. The refusal prints the
-balance, the estimate and the reserve. `--out` selects the record path and `--artifact` selects a
-different compiler output.
-
-**If the receipt wait fails**, the script has already printed the tx hash and written
-`evidence/deployments/pending-<network>-<chainId>.json` (hash, nonce, deployer, UTC). Do **not**
-deploy again: rerun the same command with `--resume <txHash>` once the RPC recovers; it waits for the
-receipt, repeats the code-length, code-hash and config read-back checks, writes the final record and
-only then removes the pending file. A new deploy is refused while a pending record exists; use
-`--force-new` only when the pending tx is known dropped, and record why.
-
-**If the send call itself fails** (the node may have accepted the transaction but the response was
-lost), the pending record exists with `"state": "sending"` and no hash, written before the send. A
-re-run refuses; check the owner's nonce and the explorer for a transaction from the owner, then use
-`--resume <hash>` or `--force-new`. A successful send rewrites the record as `"state": "sent"` with
-the hash before the receipt wait. Never delete the pending file by hand without recording why.
-
-### Calibration before the real deploy (mandatory)
-
-The dry-run cost is `gas × gasPrice`; the chain may charge the storage deposit differently. Before
-the real deploy:
-
-1. Deploy a **small probe** with the same toolchain (or reuse the Tier 0 probe evidence) and record
-   the dry-run estimate for it.
-2. Measure the owner's actual balance drop (`balanceBefore - balanceAfter`, excluding unrelated
-   txs) for that probe.
-3. Write `evidence/calibration.json` with the measured ratio and both numbers:
-   `{"ratio": <measuredDrop / estimate>, "probe": {"estimateTpot": "...", "measuredDropTpot": "..."},
-   "measuredAt": "<UTC>", "source": "<evidence file>"}`.
-4. **If the ratio differs from 1 by more than 10%, STOP.** Do not deploy. Re-derive the real-deploy
-   budget from the measured per-byte deposit (creation bytes × measured deposit/byte, plus the deal
-   prices and fees), record the re-derivation in `docs/decisions.md`, and only then continue.
-
-`deploy --dry-run` prints `calibration: not yet verified against a live probe` until that file
-exists, and `calibration: measured ratio <r> (source: …)` afterwards. An unreadable or ratio-less
-file is treated as not verified, never as a pass.
-
-**Prerequisite closed in batch 7 (local only)**: `scripts/deploy.mjs` (library
-`apps/makhzan/src/deploy.ts`) is the environment-keyed viem deploy path. It requires
-`MAKHZAN_NETWORK` explicitly, refuses a non-whole-unit `--min-bond`, runs `eth_estimateGas` and
-refuses below the DR-012 reserve, verifies the deployed code length against the artifact runtime,
-reads the constructor values back from packed slot 0, and writes the deployment record. Tests and a
-real anvil deploy: `evidence/raw/t1/60-deploy-red.txt`, `61-deploy-green.txt`,
-`64-e2e-process.txt`. `--artifact` accepts a different compiler output (for example `resolc`) after
-G01/G02. **The live run is still `[pending live run]`; no live RPC has been called.**
-
-- Wait for `executed: success`, then observe finality (tag or labelled heuristic with its depth),
-  then read the contract back (`providerOf`, `dealOf`, `challengeStateOf` on an unknown id).
-- Record to `evidence/raw/t1/59-live-deploy.txt`: chain id, deployer address, deployed address, tx
-  hash, inclusion block and hash, execution status, finality observation, gas used, measured
-  deposit, `forge build --sizes` bytes.
-- **Abort** on a reverted deploy, an address read-back that does not match the tx receipt, or a
-  deposit above the DR-012 cap. A failed deploy is recorded, not retried with different flags.
-
-## Step 2 — live passed round (T065)
-
-**Prerequisite closed in batch 7 (local only)**: `npm run cli` and `npm run daemon` now have real
-`main()` functions (`apps/makhzan/src/cliMain.ts`, `daemonMain.ts`) with viem wiring for every
-`CommandDeps` and `ChainClient` method. Settings come from `MAKHZAN_NETWORK`, `MAKHZAN_RPC_URL`,
-`MAKHZAN_CHAIN_ID`, `MAKHZAN_CONTRACT`, `MAKHZAN_PRIVATE_KEY`, `MAKHZAN_STATE_DIR`,
-`MAKHZAN_DAEMON_PORT`, `MAKHZAN_POLL_MS`, `MAKHZAN_BLOCK_SIZE`, `MAKHZAN_PROVIDER_ID` and
-`MAKHZAN_DRILL`. There is no default network; keys never appear on argv, in logs or in the state
-file. `resolve` exists and is permissionless. Evidence: `evidence/raw/t1/62-entrypoints-red.txt`,
-`63-entrypoints-green.txt`, `64-e2e-process.txt`. **Every live row below is still
-`[pending live run]`.**
+### Step 0 — gate re-check (read-only, free)
 
 ```bash
-cd apps/makhzan
-export MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=... MAKHZAN_CHAIN_ID=...
-export MAKHZAN_CONTRACT=...                      # address from step 1
-export MAKHZAN_PRIVATE_KEY=...                   # provider key; env only, never printed
-npm run daemon &                                 # poll loop, evidence-based labels
-export MAKHZAN_PRIVATE_KEY=...                   # owner key for the client commands
-npm run cli -- upload demo.bin --provider 1
-npm run cli -- create --root 0x… --size 1048576 --leaf-count 1024 \
-  --provider 1 --duration 7200 --price 5
-npm run cli -- challenge 1
-npm run cli -- watch 1                           # expect "passed", bond unchanged
+MAKHZAN_ED_TPOT=566.518509593496 MAKHZAN_GAS_TPOT=100 \
+  scripts/with-live-env.sh owner -- node apps/makhzan/src/doctorMain.ts
+MAKHZAN_ED_TPOT=0 MAKHZAN_DEPOSITS_TPOT=30 MAKHZAN_GAS_TPOT=1 \
+  scripts/with-live-env.sh provider-1 -- node apps/makhzan/src/doctorMain.ts
+
+scripts/with-live-env.sh owner -- node scripts/deploy.mjs --dry-run \
+  --min-bond 10000000000000000000 \
+  --window 50 --block-size 1024 --slash-bps 2000 \
+  --min-duration 100 --max-duration 100800
 ```
 
-- The daemon records `submitted` with the tx hash and block, then re-reads `challengeStateOf` and the
-  provider bond. Only a closed challenge with an unchanged bond is `passed`.
-- Record to `evidence/raw/t1/60-live-pass.txt`: the round record (five statuses), challenge and answer
-  hashes with blocks and statuses, the read-back, bond before/after, the daemon's status.
-- **Abort** if the daemon reports `unanswered`, if the bond moved, or if any read-back disagrees with
-  the receipt. Keep the state file; do not delete or edit it.
+Expected (LIVE-1): `calibration: measured ratio 0.984608251872`, estimate about
+`538.123540 tPOT`. **Abort** if the chain id differs, either balance is below its need, the estimate
+fails, or the estimate is above the deploy cap.
 
-## Step 3 — live slashed round (T066)
+### Step 1 — deploy (one transaction)
+
+Dry run again (same command, immediately before):
 
 ```bash
-# restart the daemon in drill mode: wrong answer or skipped answer, through the environment
-MAKHZAN_DRILL=skip npm run daemon &
-npm run cli -- challenge 1
-# after the window, anyone may resolve (permissionless); the daemon cannot answer in skip mode
-npm run cli -- resolve 1
-npm run cli -- claim 1
-npm run cli -- settle 1
+scripts/with-live-env.sh owner -- node scripts/deploy.mjs --dry-run \
+  --min-bond 10000000000000000000 \
+  --window 50 --block-size 1024 --slash-bps 2000 \
+  --min-duration 100 --max-duration 100800
+
+scripts/with-live-env.sh owner -- node scripts/deploy.mjs \
+  --min-bond 10000000000000000000 \
+  --window 50 --block-size 1024 --slash-bps 2000 \
+  --min-duration 100 --max-duration 100800
+export MAKHZAN_CONTRACT=<address from the deployment record>
 ```
 
-- Record to `evidence/raw/t1/61-live-slash.txt`: challenge hash/block, resolve hash/block, bond
-  before/after (exactly 20% down), owner credit in wei (slash × `WEI_PER_UNIT`), the daemon's
-  `failed` status after the read-back, then claim/settle results.
-- **Abort** if the slash is not exactly 20%, if the owner credit differs from the computed value, or
-  if the daemon claims `failed` before the read-back. Do not "fix" a mismatch by changing the test.
+Then verify the code and the address:
 
-## Key rule
+```bash
+MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
+  MAKHZAN_CHAIN_ID=420420777 \
+  node apps/makhzan/scripts/verify-deployment.mjs --address "$MAKHZAN_CONTRACT"
+MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
+  MAKHZAN_CHAIN_ID=420420777 scripts/with-live-env.sh owner -- \
+  node apps/makhzan/src/doctorMain.ts
+```
 
-Keys are read from the environment at run time and are never passed as a command-line argument, never
-echoed, never written to a file or a log, and never committed. That is why the resolve step uses the
-CLI path above rather than a raw signing command: no key flag appears anywhere in this runbook, and
-none may be added to it. If a key appears in any output, stop, rotate it, and record the incident.
+Record `evidence/raw/t1/59-live-deploy.txt`: chain id, deployer, address, tx hash, block, status,
+finality, gas used, estimate, measured balance drop, ratio, runtime/creation bytes, the
+`verify-deployment.json` digest, and the read-back of slot 0. **Abort** on a revert, an address
+mismatch, a byte mismatch, or a measured cost above the cap.
 
-## Evidence labels and files
+### Step 2 — register provider-1 (one transaction, 30 tPOT bond)
+
+```bash
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run cli -- register --bond 30
+MAKHZAN_ED_TPOT=0 MAKHZAN_DEPOSITS_TPOT=30 MAKHZAN_GAS_TPOT=1 \
+  scripts/with-live-env.sh provider-1 -- node apps/makhzan/src/doctorMain.ts
+```
+
+Record `evidence/raw/t1/62-live-register.txt`: tx hash/block/status, provider id, bond in units and
+wei, balance before/after, and the doctor's mapping line (now `ok`).
+
+### Step 3 — start the daemon (no transaction)
+
+```bash
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" MAKHZAN_PROVIDER_ID=1 \
+  MAKHZAN_STATE_DIR="$PWD/evidence/state/live" \
+  scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run daemon &
+echo $! > evidence/state/live-daemon.pid
+```
+
+The daemon logs the five labels every poll; the state file is evidence and is never edited by hand.
+
+### Step 4 — upload the 1 MiB file and create deal A
+
+```bash
+dd if=/dev/urandom of=demo-1mib.bin bs=1024 count=1024
+sha256sum demo-1mib.bin
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- upload "$PWD/demo-1mib.bin" --provider 1
+```
+
+Take `root`, `size` and `leafCount` from the upload record (1,048,576 B / 1,024 B = 1,024 leaves).
+
+```bash
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- create \
+  --root <root> --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
+```
+
+Deal A is id `1`. Record `evidence/raw/t1/60-live-pass.txt` and the upload root/hash.
+
+### Step 5 — challenge A, daemon answers, passed round
+
+```bash
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- challenge 1
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- watch 1
+```
+
+Expect `passed` with an unchanged bond. Record the round record (five statuses), challenge/answer
+hashes and blocks, the read-back and the bond before/after. **Abort** if the daemon reports
+`unanswered`, the bond moved, or a read-back disagrees with the receipt.
+
+### Step 6 — deal B, daemon in skip mode, slashed round
+
+Restart the daemon in skip mode (stop the old process first, record both PIDs):
+
+```bash
+kill "$(cat evidence/state/live-daemon.pid)"
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" MAKHZAN_PROVIDER_ID=1 \
+  MAKHZAN_DRILL=skip MAKHZAN_STATE_DIR="$PWD/evidence/state/live-skip" \
+  scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run daemon &
+echo $! > evidence/state/live-skip-daemon.pid
+
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- create \
+  --root <root> --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- challenge 2
+# wait for the 50-block window, then, permissionless:
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- resolve 2
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- claim 2
+MAKHZAN_CONTRACT="$MAKHZAN_CONTRACT" \
+  scripts/with-live-env.sh owner -- npm --prefix apps/makhzan run cli -- settle 2
+```
+
+Deal B is id `2`. `claim` moves the provider bond (not the deal price) and `settle` releases the deal;
+run them in that order as above. Record `evidence/raw/t1/61-live-slash.txt`: challenge/resolve hashes
+and blocks, bond before/after (exactly 20% down), owner credit in wei, the daemon's `failed` status,
+and the claim/settle results.
+
+### Step 7 — refusal snapshot and evidence bundle
+
+```bash
+npm --prefix apps/makhzan run evidence:refusals
+```
+
+This is the R5 **local anvil** snapshot (read-only `eth_call` against a local chain); it is not a live
+claim and its rows stay labelled local. No live refusal runner exists.
+
+The feature 003 bundle is built from the records above and published with the tested
+`publishBundle` path (`apps/makhzan/src/evidence.ts`); its validator rejects the 18 documented
+failure cases. **No bundle CLI exists yet**, so LIVE-2 must add
+`apps/makhzan/scripts/publish-evidence.mjs` (test-first) before this step can run. Until it does,
+the bundle row is `[pending live run]` and no bundle is claimed.
+
+Finally:
+
+```bash
+node scripts/secret-scan.mjs evidence/raw/t1/*.txt evidence/*.json
+git status --short
+```
+
+## Spend caps and per-step limits
+
+| Step | Cap | Basis |
+| --- | --- | --- |
+| Deploy | estimate ≤ `566.518509593496 tPOT`; measured cost ≤ the same | DR-013 high projection |
+| Deploy reserve | `100 tPOT` stays after the deploy | the script's reserve check |
+| Register provider-1 | `30 tPOT` bond + `1 tPOT` fees = `31 tPOT` | provider-1 holds about `60 tPOT` |
+| Deal A | `5 tPOT` price + `1 tPOT` fees = `6 tPOT` | owner |
+| Deal B | `5 tPOT` price + `1 tPOT` fees = `6 tPOT` | owner |
+| Challenge / resolve / claim / settle | `2 tPOT` total | owner |
+| Owner session total | ≤ `729.279359108146266225 − 100 = 629.279359108146266225 tPOT` | LIVE-1 balance minus reserve |
+| Provider-1 session total | ≤ `31 tPOT` | bond plus fees |
+
+`--reserve-tpot` or `MAKHZAN_RESERVE_TPOT` may be changed only with a written reason in
+`docs/decisions.md`. Never top up from an unaudited wallet.
+
+## Rules that apply to every transaction
+
+- **Dry run first.** The deploy path has an explicit `--dry-run`; every CLI transaction runs
+  `eth_estimateGas` before it sends. Record the estimate and, after inclusion, the measured balance
+  drop. If the drop is more than 10% above `estimate × 0.984608251872`, STOP and record it; do not
+  re-derive the budget by guesswork.
+- **Pending record.** The deploy writes
+  `evidence/deployments/pending-live-420420777.json` before sending: `"sending"` with no hash
+  first, then `"sent"` with the hash. While it exists, a new deploy is refused. If the send response
+  is lost, check the owner nonce and the explorer, then `--resume <hash>`; `--force-new` only when the
+  pending tx is known dropped, with the reason in the evidence. Never delete the pending file by
+  hand.
+- **One transaction at a time.** Read the receipt and the read-back before the next command. A
+  second live deploy needs a new decision record.
+- **No key on argv, ever.** Only `scripts/with-live-env.sh` loads a key; if a key appears in any
+  output, stop, rotate it and record the incident.
+
+## Abort rules
+
+- RPC down, chain id mismatch, stalled blocks, or any estimate failure: record the exact error and
+  the UTC time, stop, retry later. Do not work around the RPC.
+- Estimate above the step cap, balance below the planned need, deploy revert, address mismatch,
+  byte mismatch, or a pending record you cannot explain: STOP; do not retry with different flags.
+- Daemon `unanswered`, bond moved without a slash, slash not exactly 20%, owner credit not equal to
+  `slashUnits × 10_000`, or any read-back that disagrees with the receipt: STOP; keep the state file.
+- Never weaken a test or a threshold to make a live run pass. A mismatch is a spec change (decision
+  record) or a bug (failing test first).
+- If the gate fails after it starts, every remaining live task is written `BLOCKED — <reason>` in
+  `evidence/tier1-results.md` and the run stops without another transaction.
+
+## Evidence files for LIVE-2
 
 | File | Content | Label |
 | --- | --- | --- |
-| `58-live-gate.txt` | Each precondition verdict, UTC time, funding | `[live check]` |
-| `59-live-deploy.txt` | Deploy record, five statuses, address, size, deposit | `[live run]` |
-| `60-live-pass.txt` | Passed round record and read-back | `[live run]` |
-| `61-live-slash.txt` | Slashed round record, bond delta, owner credit | `[live run]` |
-| `evidence/tier1-results.md` | Live section appended; `BLOCKED` rows replaced only where evidence exists | `[live run]` |
-| `README.md` | Live rows updated only from the files above | `[live run]` |
+| `evidence/raw/t1/58-live-gate.txt` | DR-013 gate verdicts, UTC, funding, dry run | `[live check]` |
+| `evidence/raw/t1/59-live-deploy.txt` | Deploy record, verify digest, measured deposit | `[live run]` |
+| `evidence/raw/t1/62-live-register.txt` | Registration tx, bond, mapping | `[live run]` |
+| `evidence/raw/t1/60-live-pass.txt` | Passed round and read-back | `[live run]` |
+| `evidence/raw/t1/61-live-slash.txt` | Slashed round, bond delta, owner credit | `[live run]` |
+| `evidence/receipts/live/` | Raw receipts written by the CLI/daemon/deploy | `[live run]` |
+| `evidence/addresses.json`, `evidence/txs.json` | Derived views only, never hand-edited | `[live run]` |
 
-Every live record carries its own UTC timestamp and the chain id. Nothing local may be re-labelled
-live, and no live number may be inferred from a local one.
+Every record carries its own UTC timestamp and chain id. Nothing local may be re-labelled live, and
+no live number may be inferred from a local one.
 
-## Abort and failure rules
-
-- Record the exact error and the UTC time, then stop. An RPC outage is retried later, not worked
-  around.
-- Never weaken a test or a threshold to make a live run pass. A mismatch is either a spec change
-  (recorded in `docs/decisions.md`) or a bug (fixed with a failing test first).
-- A second live deployment needs a new decision record; patrol/re-deploy loops are out of scope.
-- If the gate fails at any point, every live task is written as `BLOCKED — <reason>` in
-  `evidence/tier1-results.md` and the run stops without deploying.
-
-## Out of scope for this runbook
+## Out of scope
 
 No mainnet, no token, no vault, no agent, no UI, no replication/repair, no permissionless challenges,
 no second deployment for the same feature.
