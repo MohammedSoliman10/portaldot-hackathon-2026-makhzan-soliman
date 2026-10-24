@@ -6,14 +6,59 @@ import { createServer, type Server } from "node:http";
 import { existsSync, readFileSync } from "node:fs";
 import { bytesToHex } from "viem";
 import { buildTree, getPath } from "./merkle.ts";
+import type { FilePayload } from "./retrieve.ts";
+import { DEFAULT_RECEIPT_TIMEOUT_MS } from "./settings.ts";
 import { blockPathFor, writeState, type ChallengeRecord, type StateFile } from "./state.ts";
 import { UploadReceiver, type Acknowledgement } from "./upload.ts";
 
-/** Loopback-only HTTP endpoint: POST /upload carries one validated envelope per request. */
-export function startUploadServer(receiver: UploadReceiver, port = 0): Promise<Server> {
+export type FileSource = (root: string) => FilePayload | Promise<FilePayload>;
+
+/**
+ * Loopback-only HTTP endpoint: POST /upload carries one validated envelope per request; GET
+ * /file/<root> serves the stored blocks and Merkle paths to a read-only client.
+ */
+export function startUploadServer(
+  receiver: UploadReceiver,
+  port = 0,
+  fileSource?: FileSource,
+): Promise<Server> {
   return new Promise((resolve, reject) => {
     const server = createServer((req, res) => {
-      if (req.method !== "POST" || req.url !== "/upload") {
+      const path = req.url?.split("?")[0] ?? "";
+      if (req.method === "GET" && path.startsWith("/file/")) {
+        if (!fileSource) {
+          res.writeHead(404, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "not found" }));
+          return;
+        }
+        let root: string;
+        try {
+          root = decodeURIComponent(path.slice("/file/".length));
+        } catch {
+          res.writeHead(400, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "root is not valid URL encoding" }));
+          return;
+        }
+        if (!/^0x[0-9a-fA-F]{64}$/.test(root)) {
+          res.writeHead(400, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "root must be 32 bytes of hex" }));
+          return;
+        }
+        void Promise.resolve()
+          .then(() => fileSource(root))
+          .then((payload) => {
+            const body = JSON.stringify(payload);
+            res.writeHead(200, { "content-type": "application/json", "content-length": Buffer.byteLength(body) });
+            res.end(body);
+          })
+          .catch((err: Error) => {
+            const missing = /not in the provider store/.test(err.message);
+            res.writeHead(missing ? 404 : 500, { "content-type": "application/json" });
+            res.end(JSON.stringify({ error: err.message }));
+          });
+        return;
+      }
+      if (req.method !== "POST" || path !== "/upload") {
         res.writeHead(404, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "not found" }));
         return;
@@ -42,6 +87,12 @@ export function startUploadServer(receiver: UploadReceiver, port = 0): Promise<S
 /** T046/T047: the polling half. */
 export const MAX_ANSWER_ATTEMPTS = 3;
 
+export interface AnswerReceipt {
+  status: "success" | "reverted";
+  blockNumber: number;
+  blockHash: string;
+}
+
 export interface ChainClient {
   /** Current block height, used for the deadline and for the record. */
   blockNumber(): Promise<number>;
@@ -54,7 +105,14 @@ export interface ChainClient {
     deadline: number;
     expectedPathLength: number;
   }>;
+  /** Sends the answer and returns the hash immediately; it never hides a successful send behind a wait. */
   answer(dealId: number, data: `0x${string}`, path: `0x${string}`[]): Promise<{ hash: `0x${string}` }>;
+  /** Persists the hash before any receipt wait. */
+  recordSubmitted?(hash: `0x${string}`, action: string, nonce?: number): Promise<void>;
+  /** Waits up to timeoutMs and writes the raw schema receipt. Throws on timeout, with the hash known. */
+  waitReceipt?(hash: `0x${string}`, action: string, timeoutMs: number): Promise<AnswerReceipt>;
+  /** One-shot lookup for a later poll; writes the raw schema receipt when it first appears. */
+  receiptOf?(hash: `0x${string}`, action: string): Promise<AnswerReceipt | null>;
 }
 
 export interface PollContext {
@@ -64,6 +122,8 @@ export interface PollContext {
   /** Deal ids to check even when the state has never heard of them. */
   dealIds?: number[];
   drill?: "wrong" | "skip";
+  /** At least 120 s; defaults to the same minimum. */
+  receiptTimeoutMs?: number;
 }
 
 export interface PollResult {
@@ -111,21 +171,43 @@ async function pollDeal(ctx: PollContext, dealId: number, result: PollResult): P
   if (!challenge.open) {
     if (!sameRound) return;
     if (prev.status === "submitted") {
+      // A known hash is never guessed away. The receipt is required before a pass is claimed; a
+      // decisive slash may label a failure even while the receipt RPC is still unavailable.
+      const receipt = prev.hash && ctx.client.receiptOf
+        ? await ctx.client.receiptOf(prev.hash as `0x${string}`, "answer")
+        : null;
       const bond = await ctx.client.bondOf(dealId);
       const slashed = prev.bondBefore !== undefined && bond < BigInt(prev.bondBefore);
-      prev.status = slashed ? "failed" : "passed";
-      (slashed ? result.failed : result.passed).push(dealId);
+      if (receipt) {
+        prev.status = receipt.status === "reverted"
+          ? (slashed ? "failed" : "unanswered")
+          : (slashed ? "failed" : "passed");
+      } else if (slashed) {
+        prev.status = "failed";
+      } else {
+        // No receipt and no slash: keep waiting for the receipt. Never claim a pass from silence.
+        return;
+      }
+      if (prev.status === "failed") result.failed.push(dealId);
+      else if (prev.status === "passed") result.passed.push(dealId);
+      else result.unanswerable.push(`unanswerable: answer for deal ${dealId} reverted without a slash`);
       writeState(ctx.stateFile, ctx.state);
       return;
     }
-    if (prev.status === "pending") {
+    if (prev.status === "pending" || prev.status === "unanswered") {
       // Without a successful send the daemon must never claim a pass; an observed slash is the only
-      // evidence it can still record.
+      // evidence it can still record. A skip/no-send round that was already labelled unanswered while
+      // the window was open must still turn into failed once resolve slashes the bond.
       const bond = await ctx.client.bondOf(dealId);
       const slashed = prev.bondBefore !== undefined && bond < BigInt(prev.bondBefore);
-      prev.status = slashed ? "failed" : "unanswered";
-      if (slashed) result.failed.push(dealId);
-      writeState(ctx.stateFile, ctx.state);
+      if (slashed) {
+        prev.status = "failed";
+        result.failed.push(dealId);
+        writeState(ctx.stateFile, ctx.state);
+      } else if (prev.status === "pending") {
+        prev.status = "unanswered";
+        writeState(ctx.stateFile, ctx.state);
+      }
     }
     return;
   }
@@ -136,10 +218,15 @@ async function pollDeal(ctx: PollContext, dealId: number, result: PollResult): P
   }
   const block = await ctx.client.blockNumber();
   if (sameRound && prev.status === "submitted") {
-    // The answer landed but the round has not resolved yet. Wait for the next poll; never re-send.
-    if (block >= challenge.deadline) {
-      prev.status = "unanswered";
-      writeState(ctx.stateFile, ctx.state);
+    // A known hash is never re-sent, and a slow receipt never becomes unanswered. If the receipt
+    // says the attempt reverted, allow a bounded retry while the window is still open.
+    if (prev.hash && ctx.client.receiptOf) {
+      const receipt = await ctx.client.receiptOf(prev.hash as `0x${string}`, "answer");
+      const attempts = prev.attempts ?? 1;
+      if (receipt?.status === "reverted" && block < challenge.deadline && attempts < MAX_ANSWER_ATTEMPTS) {
+        prev.status = "pending";
+        writeState(ctx.stateFile, ctx.state);
+      }
     }
     return;
   }
@@ -211,30 +298,11 @@ async function pollDeal(ctx: PollContext, dealId: number, result: PollResult): P
     data = Uint8Array.from(data);
     data[0] = data[0] ^ 0xff;
   }
-  try {
-    const { hash } = await ctx.client.answer(dealId, bytesToHex(data), path);
-    const submittedAt = await ctx.client.blockNumber();
-    const record: ChallengeRecord = {
-      index: challenge.index,
-      start: challenge.start,
-      status: "submitted",
-      attempts: attempts + 1,
-      hash,
-      blockNumber: submittedAt,
-      bondBefore: bondBefore.toString(),
-    };
-    deal.lastChallenge = record;
-    result.answered.push(dealId);
-    writeState(ctx.stateFile, ctx.state);
 
-    // Label only from a fresh read-back.
-    const after = await ctx.client.challengeStateOf(dealId);
-    if (!after.open) {
-      const bond = await ctx.client.bondOf(dealId);
-      record.status = bond < bondBefore ? "failed" : "passed";
-      (record.status === "failed" ? result.failed : result.passed).push(dealId);
-      writeState(ctx.stateFile, ctx.state);
-    }
+  // Send only. From here the hash is known, so every later failure must preserve it as submitted.
+  let hash: `0x${string}`;
+  try {
+    ({ hash } = await ctx.client.answer(dealId, bytesToHex(data), path));
   } catch (err) {
     const failedAttempts = attempts + 1;
     const late = (await ctx.client.blockNumber()) >= challenge.deadline;
@@ -246,6 +314,57 @@ async function pollDeal(ctx: PollContext, dealId: number, result: PollResult): P
       bondBefore: bondBefore.toString(),
     };
     result.unanswerable.push(`unanswerable: deal ${dealId}: ${(err as Error).message}`);
+    writeState(ctx.stateFile, ctx.state);
+    return;
+  }
+
+  const submittedAt = await ctx.client.blockNumber().catch(() => 0);
+  const record: ChallengeRecord = {
+    index: challenge.index,
+    start: challenge.start,
+    status: "submitted",
+    attempts: attempts + 1,
+    hash,
+    blockNumber: submittedAt,
+    bondBefore: bondBefore.toString(),
+  };
+  deal.lastChallenge = record;
+  result.answered.push(dealId);
+  // Persist the hash before any receipt wait, in the state file and in the evidence layer.
+  writeState(ctx.stateFile, ctx.state);
+  try {
+    await ctx.client.recordSubmitted?.(hash, "answer");
+  } catch (err) {
+    console.error(`warning: submitted record not written (${(err as Error).message})`);
+  }
+
+  const timeoutMs = ctx.receiptTimeoutMs ?? DEFAULT_RECEIPT_TIMEOUT_MS;
+  let receipt: AnswerReceipt | null | undefined;
+  try {
+    receipt = await ctx.client.waitReceipt?.(hash, "answer", timeoutMs);
+    if (!receipt && ctx.client.receiptOf) receipt = await ctx.client.receiptOf(hash, "answer");
+  } catch {
+    // The hash is known and already persisted. A timeout is not evidence of failure; the next poll
+    // reads the receipt and the on-chain state. It must never become `unanswered` here.
+    return;
+  }
+  if (!receipt) return;
+
+  if (receipt.status === "reverted") {
+    const late = (await ctx.client.blockNumber()) >= challenge.deadline;
+    if (!late && (record.attempts ?? 1) < MAX_ANSWER_ATTEMPTS) {
+      record.status = "pending";
+      writeState(ctx.stateFile, ctx.state);
+    }
+    return;
+  }
+
+  // Label only from a fresh read-back.
+  const after = await ctx.client.challengeStateOf(dealId);
+  if (!after.open) {
+    const bond = await ctx.client.bondOf(dealId);
+    record.status = bond < bondBefore ? "failed" : "passed";
+    (record.status === "failed" ? result.failed : result.passed).push(dealId);
     writeState(ctx.stateFile, ctx.state);
   }
 }

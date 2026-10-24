@@ -1,0 +1,26 @@
+# LIVE-1 free dry run — real Makhzan creation transaction against the live chain
+# UTC: 2026-10-24T02:35:35Z
+# NO transaction is sent: --dry-run stops after eth_estimateGas, gasPrice and the reserve check.
+# Constructor: window 50, blockSize 1024, slash 2000 bps, minBond 1e15 units (1e19 wei = 10 tPOT),
+#              minDuration 100, maxDuration 100800.
+
+$ scripts/with-live-env.sh owner -- node scripts/deploy.mjs --dry-run --min-bond 10000000000000000000 --window 50 --block-size 1024 --slash-bps 2000 --min-duration 100 --max-duration 100800
+calibration: measured ratio 0.984608251872 (source: /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/calibration.json)
+estimated deploy cost 538.123540 tPOT; owner balance 729.279359 tPOT; reserve 100 tPOT
+dry run: no transaction sent
+exit=0
+
+# Result (UTC above; values from the command output on that chain).
+# estimate (gas x gasPrice, tPOT):        538.123540
+# calibration ratio (DR-013, measured):   0.984608251872
+# projected cost = estimate x ratio:      529.840878011 tPOT
+# owner balance before:                   729.279359108146266225 tPOT
+# owner balance after (projected):        199.438481098 tPOT
+# owner balance after (if the estimate is the charge): 191.155819108 tPOT
+# calibration band (Tier 0 projection):   low 521.360436729639 / expected 543.939473161567 / high 566.518509593496
+# this estimate vs the band:              low -8.480441, expected +14.098595, high +36.677632 tPOT
+# reserve check:                          passed; 100 tPOT reserve remains after the projected cost
+# failure check:                          eth_estimateGas succeeded, so the via_ir creation
+#                                         bytecode (runtime 6,566 B / creation 7,154 B) was accepted
+#                                         by the live EVM for estimation. This is NOT a deploy and
+#                                         NOT a G02 PASS; no transaction was sent.

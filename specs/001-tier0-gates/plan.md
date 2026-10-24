@@ -56,10 +56,47 @@ overhead per tick.
 - RPC outages: record the verbatim error and UTC time, keep working locally, retry later.
 - Stop and report on the first hard failure of G1 (two toolchain attempts / 48h per FR-009).
 - No product features; no WASM/ink!; no frontend; no database.
+- Code deposits are real balance: `eth_estimateGas` includes the storage deposit, and gas limits are
+  funded. Use `estimate + 20%`, `maxFeePerGas` = observed chain gas price, tip 0. Never deploy large
+  probes to find a limit.
+- Live G02 size work is capped at three small probes (~0.5, 2 and 4 KiB runtime code) and at 5% of the
+  owner balance per probe; further sizes are `eth_estimateGas` dry runs only, and the limit comes from
+  runtime metadata/constants.
+- Every gate record carries the genesis hash and runtime spec version observed at measurement time.
+  Another team's genesis hash is `[reported]` until our own read confirms or contradicts it.
+- `eth_getLogs` is limited on this RPC; event evidence comes from our own receipts/recent blocks.
+  Blocks are ~6 s and the finalized head lags best head by 1–2 blocks.
 - Dependencies minimal, pinned exact, and disclosed in the README with versions and licences.
 
 **Scale/Scope**: 10 gates, 6 burner accounts, ~380 `forge`/`cast`/CLI invocations, 9 disposable
 probe contracts, 1 background daemon, 2 documents of record.
+
+## Measurement Amendments (2026-10-20)
+
+These inputs came from other teams' public work and are `[reported]`, not verified by this run. They
+change how the gates measure; they do not become evidence by being written here.
+
+1. **Code deposit economics.** Deployment is reported to cost about 0.079 tPOT per code byte plus
+   about 13 tPOT per contract, and a new storage slot about 3.9 tPOT (refunded when cleared).
+   `eth_estimateGas` is reported to include the deposit. G02 therefore deploys at most three small
+   probes (~0.5, 2 and 4 KiB runtime code), derives deposit-per-byte and the fixed part from them,
+   and reads the code-size limit from runtime metadata/constants. Any larger size is estimated, never
+   deployed. No probe may spend more than 5% of the owner balance. Anvil's 24,576-byte limit is not
+   the chain's limit.
+2. **G05 deposit matrix.** Measure (a) deposit per code byte and fixed per-contract part, (b) deposit
+   for a new slot, a non-zero to non-zero rewrite and clearing to zero, (c) who receives the refund
+   when a slot is cleared (caller, original payer or contract), and (d) the cost of a realistic deal
+   record packed into 1, 2 and 3 slots.
+3. **G02 call checks.** Add a deploy-less `eth_call` carrying creation bytecode that returns data,
+   and test whether state overrides work; record yes/no with the raw response or error.
+4. **G06 budget shape.** Express the 14-day budget in tPOT as gas + deposits floated − refunds, and
+   add the total tPOT needed to deploy Tier 1 contracts at 8, 12 and 16 KiB of runtime code.
+5. **G07 mapping check.** Call the read-only runtime API `ReviveApi_account_id` for the owner EVM
+   address and compare it with candidate A; record `equal` or the exact difference.
+6. **Chain identity.** Record our own genesis hash and spec version in every gate record. The
+   reported genesis hash `0xd4f9acbc…283bd` is only a cross-check until our read confirms it.
+7. **RPC shape.** `eth_getLogs` is limited; blocks are ~6 s and finalized lags best head by 1–2
+   blocks. Gates read events from their own receipts/recent blocks and state the limitation.
 
 ## Constitution Check
 
@@ -120,7 +157,7 @@ contracts/                      # Foundry project root
 ├── src/tier0/                  # disposable probes, deleted or quarantined before product tier
 │   ├── CounterProbe.sol        # G1: deploy + set/get + event + revert
 │   ├── BehaviorProbe.sol       # G2: storage, events, revert, value, time, block number
-│   ├── SizeProbe.sol           # G2: deployment size ladder
+│   ├── SizeProbe.sol           # G2: small (0.5/2/4 KiB) live probes; no large ladder
 │   ├── ValueEcho.sol           # G7: reports msg.value, sender, time, number
 │   ├── RandomnessProbe.sol     # G3: reads blockhash(n-1), prevrandao, emits sample event
 │   ├── HashCostProbe.sol       # G4b: keccak over 1/4/16/64 KiB

@@ -1,0 +1,8 @@
+# R5 red — no refusal evidence writer
+# UTC: 2026-10-23T09:16:25Z
+
+$ node --test test/refusals.test.ts
+
+test at test/refusals.test.ts:1:1
+✖ test/refusals.test.ts (208.509003ms)
+  'test failed'

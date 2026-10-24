@@ -44,6 +44,11 @@ interface Fake extends ChainClient {
   /** Keep the challenge open even when the answer call returns (wrong-answer drill). */
   keepOpen: boolean;
   failDeals: number[];
+  clock: number;
+  timeoutSeen?: number;
+  waitThrows?: Error;
+  receiptAvailable: boolean;
+  receiptStatus: "success" | "reverted";
 }
 
 function fakeClient(
@@ -59,6 +64,9 @@ function fakeClient(
     failures: 0,
     keepOpen: false,
     failDeals: [],
+    clock: 0,
+    receiptAvailable: true,
+    receiptStatus: "success",
     async challengeStateOf(dealId) {
       const open = only === undefined ? f.challenge.open : only === dealId && f.challenge.open;
       return {
@@ -74,6 +82,16 @@ function fakeClient(
       }
       if (!f.keepOpen && (only === undefined || only === dealId)) f.challenge.open = false;
       return { hash: HASH };
+    },
+    async waitReceipt(_hash, _action, timeoutMs) {
+      f.timeoutSeen = timeoutMs;
+      f.clock += 40_000; // simulated slow block: 40 s, well under the 120 s minimum
+      if (f.waitThrows) throw f.waitThrows;
+      return { status: f.receiptStatus, blockNumber: f.block, blockHash: HASH };
+    },
+    async receiptOf() {
+      if (!f.receiptAvailable) return null;
+      return { status: f.receiptStatus, blockNumber: f.block, blockHash: HASH };
     },
     async blockNumber() {
       return f.block;
@@ -246,6 +264,114 @@ test("a submitted round is re-read after a restart, never re-sent", async () => 
   assert.equal(client.calls.length, 0);
   assert.equal(fx.state.deals[String(DEAL)].lastChallenge?.status, "passed");
   assert.deepEqual(result.passed, [DEAL]);
+});
+
+test("a 40 s delayed receipt stays submitted and is labelled passed on a later poll", async () => {
+  const fx = fixture();
+  const client = fakeClient({ open: true, index: 2, start: START });
+  client.keepOpen = true;
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, receiptTimeoutMs: 120_000 });
+
+  let record = fx.state.deals[String(DEAL)].lastChallenge;
+  assert.equal(client.clock, 40_000, "the fake receipt arrived after a simulated 40 s");
+  assert.equal(client.timeoutSeen, 120_000, "the wait is at least the 120 s minimum");
+  assert.equal(record?.status, "submitted", "the known hash stays submitted while the round is open");
+  assert.equal(record?.hash, HASH);
+  assert.deepEqual(client.calls.map((c) => c.dealId), [DEAL], "no duplicate send");
+
+  client.challenge.open = false;
+  client.block = START + 41;
+  const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+  record = fx.state.deals[String(DEAL)].lastChallenge;
+  assert.equal(record?.status, "passed", "the later read-back labels the round");
+  assert.deepEqual(result.passed, [DEAL]);
+  assert.equal(client.calls.length, 1);
+});
+
+test("a lost receipt response keeps the hash submitted, then the next poll labels passed", async () => {
+  const fx = fixture();
+  const client = fakeClient({ open: true, index: 1, start: START });
+  client.waitThrows = new Error("Timed out while waiting for the receipt");
+  client.receiptAvailable = false;
+
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+  let record = fx.state.deals[String(DEAL)].lastChallenge;
+  assert.equal(record?.status, "submitted", "a timeout with a known hash never becomes unanswered");
+  assert.equal(record?.hash, HASH);
+  assert.equal(client.calls.length, 1);
+
+  client.challenge.open = false;
+  client.receiptAvailable = true;
+  const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+  record = fx.state.deals[String(DEAL)].lastChallenge;
+  assert.equal(record?.status, "passed");
+  assert.deepEqual(result.passed, [DEAL]);
+  assert.equal(client.calls.length, 1, "the hash was never re-sent");
+});
+
+test("a closed challenge after a receipt timeout is labelled from the read-back, never unanswered", async () => {
+  const fx = fixture();
+  const client = fakeClient({ open: true, index: 0, start: START });
+  client.waitThrows = new Error("receipt wait timed out");
+  client.receiptAvailable = false;
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+
+  client.challenge.open = false;
+  client.block = START + 11;
+  const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+  const record = fx.state.deals[String(DEAL)].lastChallenge;
+  assert.notEqual(record?.status, "unanswered");
+  assert.equal(record?.status, "submitted", "without a receipt the daemon does not guess");
+  assert.deepEqual(result.unanswerable, []);
+  assert.equal(client.calls.length, 1);
+});
+
+test("a submitted round past the deadline stays submitted, not unanswered", async () => {
+  const fx = fixture();
+  fx.state.deals[String(DEAL)].lastChallenge = {
+    index: 1, start: START, status: "submitted", hash: HASH, blockNumber: START,
+    bondBefore: (10n ** 16n).toString(),
+  };
+  const client = fakeClient({ open: true, index: 1, start: START, deadline: START + 10 });
+  client.block = START + 11;
+  client.receiptAvailable = false;
+
+  const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+  assert.equal(fx.state.deals[String(DEAL)].lastChallenge?.status, "submitted");
+  assert.equal(client.calls.length, 0, "never resend a known hash");
+  assert.deepEqual(result.unanswerable, []);
+});
+
+test("a timed-out answer that was slashed becomes failed from the read-back", async () => {
+  const fx = fixture();
+  const client = fakeClient({ open: true, index: 0, start: START });
+  client.waitThrows = new Error("receipt wait timed out");
+  client.receiptAvailable = false;
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+
+  client.challenge.open = false;
+  client.bond = 8n * 10n ** 15n;
+  client.receiptAvailable = true;
+  client.block = START + 11;
+  const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile });
+  assert.equal(fx.state.deals[String(DEAL)].lastChallenge?.status, "failed");
+  assert.deepEqual(result.failed, [DEAL]);
+});
+
+test("an unanswered no-send round still becomes failed after the slash read-back", async () => {
+  const fx = fixture();
+  const client = fakeClient({ open: true, index: 0, start: START });
+  client.block = START + 1;
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, drill: "skip" });
+  await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, drill: "skip" });
+  assert.equal(fx.state.deals[String(DEAL)].lastChallenge?.status, "unanswered");
+
+  client.challenge.open = false;
+  client.bond = 8n * 10n ** 15n;
+  const result = await pollOnce({ client, state: fx.state, stateFile: fx.stateFile, drill: "skip" });
+  assert.equal(fx.state.deals[String(DEAL)].lastChallenge?.status, "failed");
+  assert.deepEqual(result.failed, [DEAL]);
+  assert.equal(client.calls.length, 0);
 });
 
 test("a missing block is reported, never guessed", async () => {

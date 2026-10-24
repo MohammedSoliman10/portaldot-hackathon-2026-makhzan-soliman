@@ -1,0 +1,26 @@
+
+> makhzan@0.1.0 daemon
+> node src/daemonMain.ts
+
+daemon listening on http://127.0.0.1:8787/upload (network live, provider 1, poll 6000 ms, max attempts 3)
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+upload accepted: root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 leafCount 1024
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[2] passed=[2] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+daemon stopping on SIGTERM: finishing the cycle in flight
+daemon stopped

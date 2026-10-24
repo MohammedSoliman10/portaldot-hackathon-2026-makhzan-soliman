@@ -1,0 +1,230 @@
+# LIVE-2b deal A — passed round — [live run]
+utc: 2026-10-24T08:32:13Z
+chain id: 420420777
+contract: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+provider id: 1 (registered in 62-live-register.txt)
+
+## 1 MiB file and upload (no transaction)
+1048576 bytes (1.0 MB, 1.0 MiB) copied, 0.0194336 s, 55 MB/s
+-rw-r--r-- 1 mohammed_soliman mohammed_soliman 1048576 Oct 24 11:32 demo-1mib.bin
+7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e  demo-1mib.bin
+
+$ upload demo-1mib.bin --provider 1
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts upload /home/mohammed_soliman/hackathons/portaldot-tier1/demo-1mib.bin --provider 1
+
+{
+  "label": "upload",
+  "readBack": {
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "size": 1048576,
+    "leafCount": 1024
+  }
+}
+upload cli exit=0
+
+## daemon state after upload (no transaction)
+state dir: /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/state/live; pid 185029
+daemon state: chainId 420420777 providerId 1
+stored file: 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 leafCount 1024
+
+## free dry run: createDeal value 5 tPOT from owner
+owner balance wei before: 199435042290680279745
+Error: server returned an error response: error code 3: execution reverted, data: "0x019af637"
+estimate gas units: 
+gas price wei: 32500
+value wei: 5000000000000000000
+  File "<string>", line 1
+    g=; p=32500; v=5*10**18; fee=g*p; print(f'estimated fee wei: {fee}'); print(f'estimated total wei: {v+fee}'); print(f'hard cap wei (value + 1.25*fee): {v + fee*125//100}'); print(f'estimated fee tPOT: {fee/10**18:.18f}'); print(f'estimated total tPOT: {(v+fee)/10**18:.18f}'); print(f'hard cap tPOT: {(v+fee*125//100)/10**18:.18f}')
+      ^
+SyntaxError: invalid syntax
+owner session remaining of 629 tPOT after LIVE-2a deploy 529.844316817465986480: 99.155683182534013520 tPOT
+
+note: the first estimate above passed price=5 (units) while the value was 5 tPOT; createDeal requires value == price * WEI_PER_UNIT, so it reverted BadParams. The CLI takes --price 5 tPOT and converts it to 500000000000000 units. Corrected free estimate:
+estimate gas units: 361169269711845
+gas price wei: 32500
+value wei: 5000000000000000000
+price units: 500000000000000
+estimated fee wei: 11738001265634962500
+estimated total wei: 16738001265634962500
+hard cap wei (value + 1.25*fee): 19672501582043703125
+estimated fee tPOT: 11.738001265634961712
+estimated total tPOT: 16.738001265634963488
+hard cap tPOT: 19.672501582043704360
+
+## create deal A — 2026-10-24T08:32:59Z
+owner balance wei before: 199435042290680279745
+$ create --root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts create --root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
+
+{
+  "label": "create",
+  "submitted": {
+    "hash": "0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1",
+    "nonce": 4
+  },
+  "included": {
+    "blockNumber": "172266",
+    "blockHash": "0x25a9e093c7e5765affa20366e2ba4b146988a23feb02556630575210dd35dc0b"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 1,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "providerId": 1,
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "size": 1048576,
+    "endBlock": 172416,
+    "price": "500000000000000"
+  }
+}
+create cli exit=0
+
+## read-back 2026-10-24T08:33:20Z
+owner balance wei after: 182878025680702122245
+dealOf(1):
+0x0948EBD7637D1C32858a6FC5D947E85A6600205C
+172266 [1.722e5]
+172416 [1.724e5]
+1
+0
+0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+1024
+1048576 [1.048e6]
+0
+0
+500000000000000 [5e14]
+0
+healthOf(1): 1
+nextDealId slot read (slot0 last 2 bytes not decoded here); providerOf(provider-1): 1 3000000000000000 [3e15] 1 true 
+
+## raw receipt facts (evidence/receipts/live/0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1.json)
+tx hash: 0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1
+block: 172266; status: success; nonce: 4
+gasUsed: 355600511076251; effective gas price: 32500 wei
+value (price): 5000000000000000000 wei = 5 tPOT
+actual fee (gasUsed * price): 11557016609978157500 wei = 11.557016609978157717 tPOT
+actual balance delta: 16557016609978157500 wei = 16.557016609978155941 tPOT
+estimated fee: 11738001265634962500 wei = 11.738001265634961712 tPOT
+actual/estimate: 0.984581305491
+cap (value + 1.25*estimated fee): 19672501582043703125 wei = 19.672501582043704360 tPOT
+within cap: True
+deal id read-back: 1; start 172266; end 172416; provider 1; flags 0; price 500000000000000 units; healthOf 1
+per-deal storage deposit note: the RPC exposes no separate deposit field; the deposit is charged inside gasUsed, so the fee above is gas + storage deposit.
+
+## challenge deal A — 2026-10-24T08:34:27Z
+daemon paused (SIGSTOP) before the challenge so the free answer preflight is not raced; pid 185029
+owner balance wei before: 182878025680702122245
+## free dry run: challenge(1) from owner
+estimate gas units: 497294744153
+gas price wei: 32500
+estimated fee wei: 16162079184972500
+hard cap wei (1.25*fee): 20202598981215625
+estimated fee tPOT: 0.016162079184972498
+hard cap tPOT: 0.020202598981215625
+
+$ challenge 1
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts challenge 1
+
+{
+  "label": "challenge",
+  "submitted": {
+    "hash": "0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda",
+    "nonce": 5
+  },
+  "included": {
+    "blockNumber": "172281",
+    "blockHash": "0xa22900c90aad61b0f0dc2825873c20dfeae88f2f8147afa37cdaecbda4d1579f"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 1,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 172266,
+    "endBlock": 172416,
+    "flags": 2,
+    "providerId": 1,
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "0",
+    "accrued": "56666666666666",
+    "claimable": "56666666666666",
+    "challenge": {
+      "open": true,
+      "index": 451,
+      "start": 172281,
+      "deadline": 172331,
+      "expectedPathLength": 10
+    }
+  }
+}
+challenge cli exit=0
+
+## challenge read-back 2026-10-24T08:34:50Z
+block now: 172283
+owner balance wei after: 182862712269791142245
+challengeStateOf(1) [open,index,start,deadline,expectedPathLength]:
+true
+451
+172281 [1.722e5]
+172331 [1.723e5]
+10
+dealOf(1) flags/challenge: 2 451 172281 [1.722e5] 
+healthOf(1): 2
+
+## free dry run: answer(1, block 451, 10-hash path) from provider-1, daemon still paused
+root: 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 leafCount: 1024 index: 451
+block bytes: 1024 path length: 10 calldata bytes: 1508
+path: ["0x5a9509006c77f1b1dc87db5fc853837f6cb3704055cc81d298cdf871af771906", "0x1b6ce00518303f6fd320d6d14f2252d0b63238708ab54188d82aa4b042366587", "0xf2fdc6ab16377a2ec2fffc807cfa2f42ccd1465e496e82e9abae429db2a067ce", "0xb6e480c2c303501faa9595dd98251a59c5793ff55ec771ec0a1dfb9d5e535e86", "0x28f1a9876c95c6a210cde5e119171abf06520453fac2b089e1973312f5584f03", "0x4c9631a8272585df2affbe13d0cb8d76d495af681f3059b557e8c023aca2ab2e", "0x93f72f6f7936dd2cabbe91b2a93b127e5cfd294caeaf59f45ad7e4bfbc956f11", "0x8c0a51514e8ba222ec89fc6fc33c4ed0fed737654451d9ddbce5b80bf8442910", "0x81e03e8ec2cb697f96a0b2572766d17393f08eaa1d28732e873c9a811a36a52f", "0x162f46b2ba0321765d12aa7f46872d598628e49691ffcc07e9d301169e6c30ff"]
+estimate gas units: 5106741102235
+gas price wei: 32500
+estimated fee wei: 165969085822637500
+hard cap wei (1.25*fee): 207461357278296875
+estimated fee tPOT: 0.165969085822637502
+hard cap tPOT: 0.207461357278296871
+provider-1 session remaining after register (50 - 41.537715357304598740): 8.462284642695401260 tPOT
+
+## answer (daemon, provider-1) — ABORT CONDITION OBSERVED
+answer tx hash: 0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3
+answer block: 172295; status: success; nonce: 2; from provider-1; value 0
+challenge deadline block: 172331 (answer landed 36 blocks before the deadline)
+daemon state label: unanswered (deals.1.lastChallenge.status = unanswered, attempts 1, no hash stored)
+daemon log error: Timed out while waiting for transaction with hash 0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3 to be confirmed. viem@2.57.7
+cause: chain.answer waited 15 s for the receipt; the receipt arrived after that, the hash was not persisted, and the next poll labelled the closed pending round unanswered.
+
+on-chain read-back after the timeout:
+  challengeStateOf(1): open=false index=0 start=0 deadline=0 expectedPathLength=0
+  healthOf(1): 1
+  dealOf(1) flags: 0
+  providerOf(provider-1): id 1, bond 3000000000000000 units (30 tPOT), activeDeals 1, registered true
+  bond before answer: 3000000000000000 units; bond after: 3000000000000000 units (unchanged)
+  owner balance before answer: 182862712269791142245 wei; after: 182862712269791142245 wei (unchanged)
+  provider-1 balance before answer: 18349874082486917480 wei; after: 18186958388194299980 wei
+  provider-1 delta: -162915694292617500 wei = -0.162915694292617500 tPOT (answer gas; no other movement)
+  no separate storage-deposit refund observed to owner or provider
+answer fee = gasUsed 5012790593619 * effective price 32500 = 162915694292617500 wei = 0.162915694292617500 tPOT
+preflight estimate 5106741102235 gas; actual/estimate = 0.9816026489819737
+preflight cap 0.207461357278296875 tPOT; actual fee 0.162915694292617500 tPOT; within cap
+provider-1 session spend: register 41.537715357304598740 + answer 0.162915694292617500 = 41.700631051597216240 tPOT, under 50
+owner session spend: create 16.557016609978155941 + challenge 0.015313410910980000 = 16.572330020889135941 tPOT, under the 99.155683182534013520 remaining of 629
+
+ABORT: the daemon said unanswered even though the answer transaction succeeded on-chain and the round passed. Per the run rules, no resolve, claim, settle or deal B was sent; the read-only refusal step was not run. The daemon is left running (challenge closed; safe).
+NOTE: the daemon did not write a receipt file because the receipt wait threw first; the raw RPC receipt is saved post hoc at evidence/raw/t1/60-live-answer-receipt.json.

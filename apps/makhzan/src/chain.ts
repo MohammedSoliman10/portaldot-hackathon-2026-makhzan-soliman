@@ -5,7 +5,9 @@
  * so every method the two entry points declare has a real implementation. The key only ever lives in
  * the viem account; it is not logged, not put in a transaction and not written to the state file.
  */
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createPublicClient, createWalletClient, defineChain, http, type Abi, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { CommandDeps, Receipt, TxRequest } from "./cli.ts";
@@ -14,6 +16,7 @@ import { chunkFile } from "./chunk.ts";
 import type { ChainClient } from "./daemon.ts";
 import { buildTree } from "./merkle.ts";
 import type { Settings } from "./settings.ts";
+import { deriveViews, writeReceipt } from "./evidence.ts";
 
 export const DEFAULT_BLOCK_SIZE = 1024;
 
@@ -92,6 +95,7 @@ export interface Wiring {
 }
 
 export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.env): Wiring {
+  const evidenceDir = env.MAKHZAN_EVIDENCE_DIR ?? resolve(dirname(fileURLToPath(import.meta.url)), "../../../evidence");
   const chain = defineChain({
     id: settings.chainId,
     name: settings.network === "local" ? "makhzan-local" : `makhzan-${settings.chainId}`,
@@ -102,6 +106,67 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
   const account = privateKeyToAccount(settings.key);
   const publicClient = createPublicClient({ chain, transport });
   const walletClient = createWalletClient({ chain, transport, account });
+
+  /** Raw receipt first: it is written before finality or any derived view exists. */
+  const capture = async (
+    hash: Hex,
+    action: string,
+    receipt: { status: string; blockNumber: bigint; gasUsed?: bigint },
+  ): Promise<void> => {
+    try {
+      const tx = await publicClient.getTransaction({ hash }).catch(() => ({ hash }));
+      const utc = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+      writeReceipt(evidenceDir, {
+        network: settings.network,
+        action,
+        txHash: hash,
+        utc,
+        transaction: tx,
+        receipt: {
+          status: receipt.status,
+          blockNumber: Number(receipt.blockNumber),
+          gasUsed: receipt.gasUsed === undefined ? null : receipt.gasUsed.toString(),
+        },
+      });
+      deriveViews(evidenceDir, {
+        network: settings.network,
+        chainId: settings.chainId,
+        generatedAt: utc,
+      });
+    } catch (err) {
+      console.error(`warning: receipt evidence not written (${(err as Error).message})`);
+    }
+  };
+
+  /**
+   * T1-002: the hash is durable before any receipt wait. This is deliberately outside the receipt
+   * schema (which only accepts a real receipt) and outside the derived views.
+   */
+  const recordSubmitted = async (hash: Hex, action: string, nonce?: number): Promise<void> => {
+    const dir = join(evidenceDir, "submitted", settings.network);
+    mkdirSync(dir, { recursive: true });
+    const file = join(dir, `${hash}.json`);
+    const record = {
+      schema: "makhzan.submitted/v0",
+      network: settings.network === "local" ? "LOCAL" : "LIVE",
+      action,
+      txHash: hash,
+      nonce: nonce ?? null,
+      utc: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    };
+    writeFileSync(file, `${JSON.stringify(record, null, 2)}\n`, "utf8");
+  };
+
+  const receiptResult = (receipt: {
+    status: "success" | "reverted";
+    blockNumber: bigint;
+    blockHash: string;
+  }) => ({
+    status: receipt.status,
+    blockNumber: Number(receipt.blockNumber),
+    blockHash: receipt.blockHash,
+  });
+
   const address = settings.contract;
   const blockSize = env.MAKHZAN_BLOCK_SIZE ? Number(env.MAKHZAN_BLOCK_SIZE) : DEFAULT_BLOCK_SIZE;
   const daemonUrl = settings.daemonUrl;
@@ -146,10 +211,30 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
       };
     },
     async answer(dealId, data, path) {
+      // Return the hash immediately. The caller persists it before any receipt wait (T1-002).
       const hash = await walletClient.writeContract({
         address, abi: ABI, functionName: "answer", args: [dealId, data, path],
       });
       return { hash };
+    },
+    recordSubmitted,
+    async waitReceipt(hash, action, timeoutMs) {
+      const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: timeoutMs });
+      await capture(hash, action, receipt);
+      return receiptResult(receipt);
+    },
+    async receiptOf(hash, action) {
+      let receipt;
+      try {
+        receipt = await publicClient.getTransactionReceipt({ hash });
+      } catch (err) {
+        // A not-yet-mined hash is not an error; a real RPC failure must stay visible to the caller.
+        if (/not (be )?found|could not find|unknown transaction/i.test((err as Error).message)) return null;
+        throw err;
+      }
+      if (!receipt) return null;
+      await capture(hash, action, receipt);
+      return receiptResult(receipt);
     },
     async estimateGas(tx) {
       return publicClient.estimateGas({
@@ -168,8 +253,9 @@ export function makeChain(settings: Settings, env: NodeJS.ProcessEnv = process.e
         maxFeePerGas: tx.maxFeePerGas, maxPriorityFeePerGas: tx.maxPriorityFeePerGas, chain,
       });
     },
-    async receipt(hash): Promise<Receipt> {
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    async receipt(hash, action = "transaction"): Promise<Receipt> {
+      const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: settings.receiptTimeoutMs });
+      await capture(hash, action, receipt);
       return {
         status: receipt.status,
         blockNumber: receipt.blockNumber,

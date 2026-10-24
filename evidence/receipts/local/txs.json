@@ -1,0 +1,109 @@
+{
+  "schema": "makhzan.evidence-index/v0",
+  "kind": "transactions",
+  "derivedFrom": "evidence/receipts",
+  "network": "LOCAL",
+  "chainId": 420420777,
+  "generatedAt": "2026-10-23T09:27:25Z",
+  "entries": [
+    {
+      "hash": "0x0a0e5a2c665dc86f48892d1592d22a6aa181ef9ab98dd08555d116e00acdf4be",
+      "action": "create",
+      "block": 33,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:21Z",
+      "receiptPath": "evidence/receipts/local/0x0a0e5a2c665dc86f48892d1592d22a6aa181ef9ab98dd08555d116e00acdf4be.json"
+    },
+    {
+      "hash": "0x0fdd09f95813335518ef4c71c386610a7922771bba0e31ab032d4c04cfccdf0b",
+      "action": "deploy",
+      "block": null,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:26:14Z",
+      "receiptPath": "evidence/receipts/local/0x0fdd09f95813335518ef4c71c386610a7922771bba0e31ab032d4c04cfccdf0b.json"
+    },
+    {
+      "hash": "0x1b212566270b85d4d3c2e6c040995c23949284307d92fb24b9ae0a2303cc7250",
+      "action": "resolve",
+      "block": 46,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:23Z",
+      "receiptPath": "evidence/receipts/local/0x1b212566270b85d4d3c2e6c040995c23949284307d92fb24b9ae0a2303cc7250.json"
+    },
+    {
+      "hash": "0x2874b329d249e6d8e10a8934195dac388dc1f60ef2d7ffec0ab79cabea8a89d1",
+      "action": "challenge",
+      "block": 4,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:17Z",
+      "receiptPath": "evidence/receipts/local/0x2874b329d249e6d8e10a8934195dac388dc1f60ef2d7ffec0ab79cabea8a89d1.json"
+    },
+    {
+      "hash": "0x320d13ba06ec7efa9d44eb1d46b578ad4a93ff4814f863ea44bef315f202c388",
+      "action": "settle",
+      "block": 32,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:19Z",
+      "receiptPath": "evidence/receipts/local/0x320d13ba06ec7efa9d44eb1d46b578ad4a93ff4814f863ea44bef315f202c388.json"
+    },
+    {
+      "hash": "0x586e889817e163f1f54afc8ee8005b8910cf3f16a2febedf435db8c779a5dea3",
+      "action": "challenge",
+      "block": 34,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:21Z",
+      "receiptPath": "evidence/receipts/local/0x586e889817e163f1f54afc8ee8005b8910cf3f16a2febedf435db8c779a5dea3.json"
+    },
+    {
+      "hash": "0x72a582301c7c3c913ad0acb7518118f4d2409c15817692af520693aa57fff43a",
+      "action": "claim",
+      "block": 9,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:19Z",
+      "receiptPath": "evidence/receipts/local/0x72a582301c7c3c913ad0acb7518118f4d2409c15817692af520693aa57fff43a.json"
+    },
+    {
+      "hash": "0xb3b54fdb9d68a4171b9107eaba6e57a69173649a8114a87cbac049138b060e12",
+      "action": "answer",
+      "block": 5,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:18Z",
+      "receiptPath": "evidence/receipts/local/0xb3b54fdb9d68a4171b9107eaba6e57a69173649a8114a87cbac049138b060e12.json"
+    },
+    {
+      "hash": "0xc2b283c85091fd2b5fc6b6ccf8583a924553080e7590a4a0eb0ca5a2b34b99a2",
+      "action": "create",
+      "block": 3,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:17Z",
+      "receiptPath": "evidence/receipts/local/0xc2b283c85091fd2b5fc6b6ccf8583a924553080e7590a4a0eb0ca5a2b34b99a2.json"
+    },
+    {
+      "hash": "0xc4e1cd7779cf8d40b7e9b0539f522ef615057b433766494276d6a8e8c4387846",
+      "action": "settle",
+      "block": 55,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:25Z",
+      "receiptPath": "evidence/receipts/local/0xc4e1cd7779cf8d40b7e9b0539f522ef615057b433766494276d6a8e8c4387846.json"
+    },
+    {
+      "hash": "0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2",
+      "action": "deploy",
+      "block": null,
+      "status": "success",
+      "network": "LOCAL",
+      "utc": "2026-10-23T09:27:11Z",
+      "receiptPath": "evidence/receipts/local/0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2.json"
+    }
+  ]
+}

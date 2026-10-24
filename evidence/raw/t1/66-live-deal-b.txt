@@ -1,0 +1,65 @@
+# [live run] chain id 420420777 — contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# LIVE-2c fixed daemon upload — 2026-10-24T09:04:10Z
+daemon wrapper pid=193740 node=193758 
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts upload /home/mohammed_soliman/hackathons/portaldot-tier1/demo-1mib.bin --provider 1
+
+{
+  "label": "upload",
+  "readBack": {
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "size": 1048576,
+    "leafCount": 1024
+  }
+}
+upload_exit=0
+state files:
+{
+ "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7": {
+  "size": 1048576,
+  "leafCount": 1024,
+  "path": "files/0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+ }
+}
+
+## create deal B — 2026-10-24T09:04:25Z
+block=172577
+create estimate=361447305719607 cap_1.2=433736766863528 gasPrice=32475 maxFeeWei=-4361142569816479816 valueWei=5000000000000000000
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts create --root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 --size 1048576 --leaf-count 1024 --provider 1 --duration 300 --price 5
+
+{
+  "label": "create",
+  "submitted": {
+    "hash": "0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3",
+    "nonce": 7
+  },
+  "included": {
+    "blockNumber": "172578",
+    "blockHash": "0x89764ea20680ec74e285630f6041fd811473596c1b256447136da0ae3337407e"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "providerId": 1,
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "size": 1048576,
+    "endBlock": 172878,
+    "price": "500000000000000"
+  }
+}
+create_exit=0
+
+## deal B read-back — 2026-10-24T09:04:44Z
+owner balance wei:
+166290381166097315210
+create maxFeeWei exact = 14085601503893071800

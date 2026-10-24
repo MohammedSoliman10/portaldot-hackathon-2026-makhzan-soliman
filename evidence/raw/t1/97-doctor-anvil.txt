@@ -1,0 +1,31 @@
+# R6 anvil run — doctor before deploy, after deploy, after registration
+# UTC: 2026-10-23T09:21:56Z
+
+$ node apps/makhzan/scripts/doctor-anvil.mjs
+== before deploy ==
+ok  network: LOCAL, chain 420420777, account 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, contract not set
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=local MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 10000 tPOT covers 1.01 tPOT (existential deposit + deposits + gas)
+FAIL  contract code: no code at (no contract configured)
+      fix: deploy it with MAKHZAN_NETWORK=local node scripts/deploy.mjs, then set MAKHZAN_CONTRACT
+doctor: not ready; fix the FAIL lines above
+exit=1 (expected 1)
+== after deploy, before register ==
+ok  network: LOCAL, chain 420420777, account 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, contract 0x5FbDB2315678afecb367f032d93F642f64180aa3
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=local MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 9999.996991598 tPOT covers 1.01 tPOT (existential deposit + deposits + gas)
+ok  contract code: 6566 B of runtime code at 0x5FbDB2315678afecb367f032d93F642f64180aa3
+doctor: not ready; fix the FAIL lines above
+exit=1 (expected 1: account mapping)
+== after register ==
+ok  network: LOCAL, chain 420420777, account 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, contract 0x5FbDB2315678afecb367f032d93F642f64180aa3
+ok  chain id: RPC reports 420420777, expected 420420777
+ok  account mapping: registered provider 1, bond is not read by the doctor
+ok  balance: balance 9899.996809184729195231 tPOT covers 1.01 tPOT (existential deposit + deposits + gas)
+ok  contract code: 6566 B of runtime code at 0x5FbDB2315678afecb367f032d93F642f64180aa3
+doctor: ready
+exit=0 (expected 0)

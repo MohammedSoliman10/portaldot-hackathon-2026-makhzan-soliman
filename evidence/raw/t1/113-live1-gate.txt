@@ -1,0 +1,17 @@
+# LIVE-1 gate — repository state after the wrapper, doctor, dry run, register and runbook work
+# UTC: 2026-10-24T02:41:17Z
+
+$ npm test && npm run typecheck   (apps/makhzan)
+ℹ tests 128
+ℹ pass 128
+ℹ fail 0
+typecheck exit=0
+
+$ forge test   (contracts, untouched in LIVE-1)
+
+Ran 23 test suites in 2.96s (6.74s CPU time): 152 tests passed, 0 failed, 0 skipped (152 total tests)
+
+$ node scripts/check-size.mjs
+Makhzan runtime 6566 B <= budget 10240 B (margin 3674 B)
+
+# Deploy tests now write receipts to a temp evidence root, never the tracked evidence tree.

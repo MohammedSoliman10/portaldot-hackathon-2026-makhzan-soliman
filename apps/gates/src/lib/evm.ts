@@ -85,3 +85,19 @@ export function assertReserve(balance: bigint, estimatedCost: bigint, reserve: b
 export async function getEvmBalance(client: PublicClient, address: Address): Promise<bigint> {
   return client.getBalance({ address });
 }
+
+/** Wait until the finalized head includes the block, with the best head recorded too. */
+export async function waitForFinalized(
+  client: PublicClient,
+  blockNumber: bigint,
+): Promise<{ finalizedNumber: bigint; finalizedHash: string; latestNumber: bigint }> {
+  for (let attempt = 0; attempt < 180; attempt++) {
+    const finalized = await client.getBlock({ blockTag: "finalized" });
+    const latestNumber = await client.getBlockNumber();
+    if (finalized.number >= blockNumber) {
+      return { finalizedNumber: finalized.number, finalizedHash: finalized.hash, latestNumber };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+  throw new Error(`block ${blockNumber} was not finalized within 6 minutes`);
+}

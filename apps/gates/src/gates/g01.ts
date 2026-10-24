@@ -3,8 +3,10 @@ import { loadConfig } from "../config.ts";
 import { loadArtifact } from "../lib/artifacts.ts";
 import { walletForMode } from "../lib/accounts.ts";
 import { receiptGas } from "../lib/measure.ts";
+import { readChainIdentity } from "../lib/substrate.ts";
 import { getEvmBalance, publicClientFor } from "../lib/evm.ts";
 import { deployPathOrder, deployProbe, type DeployPath } from "../lib/deploy.ts";
+import { formatWeiTpot, LiveBudget, sendBudgetedContract } from "../lib/budget.ts";
 import { RawLog, writeGateRecord, exitCodeFor } from "../lib/gateIO.ts";
 import type { CostMeasurement, GateRecord, TransactionRef } from "../lib/evidence.ts";
 
@@ -33,10 +35,14 @@ export async function run(options: { mode?: "live" | "local"; firstPath?: Deploy
   const artifact = await loadArtifact("CounterProbe");
   const client = publicClientFor(config.evmRpcUrl);
   const chainId = String(await client.getChainId());
+  const chainIdentity = mode === "live"
+    ? await readChainIdentity(config.wsUrl).catch((error) => ({ error: `${(error as Error).name}: ${(error as Error).message}` }))
+    : { skipped: "local mode; chain identity is recorded by live gates only" };
   const wallet = await walletForMode(mode, config.evmRpcUrl);
   const account = wallet.account!.address;
   const balanceBefore = await getEvmBalance(client, account);
   if (balanceBefore === 0n) throw new Error(`account ${account} has zero EVM balance; fund it before sending`);
+  const budget = mode === "live" ? await LiveBudget.load(client, account) : null;
 
   const raw = mode === "live" ? await RawLog.create("G01") : null;
   const transactions: TransactionRef[] = [];
@@ -60,7 +66,7 @@ export async function run(options: { mode?: "live" | "local"; firstPath?: Deploy
     for (const path of order) {
       const attemptStarted = Date.now();
       try {
-        const deployed = await deployProbe({ path, wallet, client, contract: "CounterProbe", artifact, args: [] });
+        const deployed = await deployProbe({ path, wallet, client, contract: "CounterProbe", artifact, args: [], budget: budget ?? undefined });
         const address: Address = deployed.address;
         deployReceiptJson = jsonSafe(deployed.receipt);
         transactions.push({
@@ -83,15 +89,26 @@ export async function run(options: { mode?: "live" | "local"; firstPath?: Deploy
           }),
         );
 
-        const setHash = await wallet.writeContract({
-          address,
-          abi: artifact.abi,
-          functionName: "set",
-          args: [7n],
-          account: wallet.account!,
-          chain: wallet.chain,
-        });
-        const setReceipt = await client.waitForTransactionReceipt({ hash: setHash });
+        const setResult = mode === "live" && budget
+          ? await sendBudgetedContract(wallet, client, budget, "CounterProbe.set(7)", {
+              address,
+              abi: artifact.abi,
+              functionName: "set",
+              args: [7n],
+            })
+          : {
+              hash: await wallet.writeContract({
+                address,
+                abi: artifact.abi,
+                functionName: "set",
+                args: [7n],
+                account: wallet.account!,
+                chain: wallet.chain,
+              }),
+              receipt: null,
+            };
+        const setHash = setResult.hash;
+        const setReceipt = setResult.receipt ?? (await client.waitForTransactionReceipt({ hash: setHash }));
         if (setReceipt.status !== "success") throw new Error(`set(7) reverted in ${setHash}`);
         setReceiptJson = jsonSafe(setReceipt);
         transactions.push({
@@ -132,6 +149,7 @@ export async function run(options: { mode?: "live" | "local"; firstPath?: Deploy
           setGas: setReceipt.gasUsed.toString(),
           get: value.toString(),
           balanceBefore: balanceBefore.toString(),
+          budgetSpentTpot: budget ? formatWeiTpot(budget.spent) : null,
           attempts,
         };
         attempts.push({ path, status: "success", ms: Date.now() - attemptStarted });
@@ -178,7 +196,7 @@ export async function run(options: { mode?: "live" | "local"; firstPath?: Deploy
       classification: null,
       adaptation: null,
       evidenceFiles,
-      details: { summary, attempts },
+      details: { chainIdentity, summary, attempts },
     };
     const recordPath = await writeGateRecord(record);
     console.log(`record=${recordPath}`);
@@ -208,7 +226,7 @@ export async function run(options: { mode?: "live" | "local"; firstPath?: Deploy
         classification: null,
         adaptation: null,
         evidenceFiles: [raw.relative(errorPath)],
-        details: { attempts },
+        details: { chainIdentity, attempts },
       };
       const recordPath = await writeGateRecord(record);
       console.error(`record=${recordPath}`);

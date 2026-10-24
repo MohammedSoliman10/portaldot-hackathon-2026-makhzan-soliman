@@ -26,12 +26,15 @@ const ARTIFACT = "contracts/out/Makhzan.sol/Makhzan.json";
 const publicClient = createPublicClient({ transport: http(RPC) });
 let anvil: ReturnType<typeof spawn>;
 const dirs: string[] = [];
+let evidenceRoot: string | undefined;
 
 function env(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
   return {
     MAKHZAN_NETWORK: "local",
     MAKHZAN_RPC_URL: RPC,
     MAKHZAN_PRIVATE_KEY: TEST_KEY,
+    // Tests must never write into the tracked evidence tree.
+    MAKHZAN_EVIDENCE_DIR: (evidenceRoot ??= tempDir()),
     ...extra,
   };
 }
@@ -118,7 +121,11 @@ test("a missing artifact is refused before any transaction", async () => {
 test("dry-run prints a tPOT estimate and sends nothing", async () => {
   const before = await publicClient.getTransactionCount({ address: (await import("viem/accounts")).privateKeyToAccount(TEST_KEY).address });
   const lines: string[] = [];
-  const code = await main(["--dry-run", "--min-bond", MIN_BOND], env(), (line) => lines.push(line));
+  const code = await main(
+    ["--dry-run", "--min-bond", MIN_BOND],
+    env({ MAKHZAN_CALIBRATION_FILE: join(tempDir(), "absent-calibration.json") }),
+    (line) => lines.push(line),
+  );
   assert.equal(code, 0, lines.join("\n"));
   const output = lines.join("\n");
   assert.match(output, /estimated deploy cost [0-9]+\.[0-9]{6} tPOT/);

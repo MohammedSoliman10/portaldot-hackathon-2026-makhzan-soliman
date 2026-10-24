@@ -1,0 +1,20 @@
+# R6 green — doctor suite and typecheck
+# UTC: 2026-10-23T09:22:08Z
+
+$ node --test test/doctor.test.ts
+✔ a healthy account passes every check (2.1553ms)
+✔ a wrong chain id prints the exact fix (0.3628ms)
+✔ a balance shortfall is exact, in wei and tPOT (0.316ms)
+✔ an unregistered account prints the register command with the network (0.2851ms)
+✔ a missing contract prints the deploy command, not a generic failure (0.2223ms)
+ℹ tests 5
+ℹ pass 5
+ℹ fail 0
+
+$ npm test
+ℹ tests 122
+ℹ pass 122
+ℹ fail 0
+
+$ npm run typecheck
+

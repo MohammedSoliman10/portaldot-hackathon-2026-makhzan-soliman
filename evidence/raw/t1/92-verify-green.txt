@@ -1,0 +1,22 @@
+# R3 green — byte-for-byte deployment verification
+# UTC: 2026-10-23T09:15:10Z
+
+$ node --test test/verify.test.ts
+✔ matching runtime code is accepted byte for byte (1.1538ms)
+✔ case and a missing 0x prefix are normalised, not treated as a mismatch (0.3669ms)
+✔ one tampered byte is refused and its offset is reported (0.3014ms)
+✔ a shorter runtime is refused as a byte-length mismatch (0.2308ms)
+✔ an artifact without deployedBytecode is refused, never guessed (0.1402ms)
+✔ verification writes code, artifact, deployer mapping and the block it read (1.5172ms)
+✔ without a reachable helper the deployer mapping is explicitly not checked (0.4141ms)
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+
+$ npm test
+ℹ tests 114
+ℹ pass 114
+ℹ fail 0
+
+$ npm run typecheck
+1

@@ -30,7 +30,8 @@
     "evidence/raw/g07/05-owner-poll.txt",
     "evidence/raw/g07/06-faucet-instructions.md",
     "evidence/raw/g07/07-address-recompute.txt",
-    "evidence/raw/g07/08-owner-poll-summary.txt"
+    "evidence/raw/g07/08-owner-poll-summary.txt",
+    "evidence/raw/g07/13-runtime-account-id.txt"
   ],
   "details": {
     "derivation": "secp256k1 -> viem privateKeyToAccount address; candidate A = EVM bytes + twelve 0xEE",
@@ -220,6 +221,24 @@
       "errors": 0,
       "evidence": "evidence/raw/g07/05-owner-poll.txt",
       "summary": "evidence/raw/g07/08-owner-poll-summary.txt"
+    },
+    "chainIdentity": {
+      "genesisHash": "0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd",
+      "specName": "portaldot-v3",
+      "specVersion": "3002",
+      "observedAt": "2026-10-20T21:21:32Z",
+      "reportedGenesis": "0xd4f9acbc\u2026283bd",
+      "comparison": "equal",
+      "source": "evidence/raw/g07/13-runtime-account-id.txt"
+    },
+    "runtimeAccountId": {
+      "ownerEvm": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+      "candidateA": "0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee",
+      "observed": "0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee",
+      "equal": true,
+      "ss58": "5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE",
+      "api": "ReviveApi_account_id",
+      "source": "evidence/raw/g07/13-runtime-account-id.txt"
     }
   }
 }

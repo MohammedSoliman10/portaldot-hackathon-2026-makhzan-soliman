@@ -1,0 +1,16 @@
+# LIVE-1 red — the Tier 0 calibration shape is not read
+# UTC: 2026-10-24T02:34:40Z
+
+$ node --test test/deploy-calibration.test.ts
+✔ without a calibration file the dry-run says it is not verified (0.8332ms)
+✔ a measured ratio is printed with its source (0.6329ms)
+✔ a calibration file without a positive ratio is not trusted (0.6096ms)
+✔ a ratio of exactly 1 is accepted (1.3113ms)
+✖ the Tier 0 calibration shape is read from makhzan_projection.measured_ratio (0.9754ms)
+✖ without the projection, the last measured deploy entry is used (0.4134ms)
+✔ a Tier 0 file with a non-positive or missing measured ratio is still not verified (0.3886ms)
+ℹ tests 7
+ℹ pass 5
+ℹ fail 2
+✖ failing tests:
+✖ the Tier 0 calibration shape is read from makhzan_projection.measured_ratio (0.9754ms)

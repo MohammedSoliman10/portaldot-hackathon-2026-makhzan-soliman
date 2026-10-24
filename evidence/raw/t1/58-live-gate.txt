@@ -1,0 +1,55 @@
+# LIVE-2a gate — read-only checks immediately before the deploy
+# UTC: 2026-10-24T06:56:27Z
+# Constructor: window 50, blockSize 1024, slash 2000 bps, minBond 1e15 units (1e19 wei = 10 tPOT),
+#              minDuration 100, maxDuration 100800.
+
+$ MAKHZAN_ED_TPOT=566.518509593496 MAKHZAN_GAS_TPOT=100 scripts/with-live-env.sh owner -- node apps/makhzan/src/doctorMain.ts
+ok  network: LIVE, chain 420420777, account 0x0948EBD7637D1C32858a6FC5D947E85A6600205C, contract not set
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=live MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 729.279359108146266225 tPOT covers 666.518509593496 tPOT (existential deposit + deposits + gas)
+FAIL  contract code: no code at (no contract configured)
+      fix: deploy it with MAKHZAN_NETWORK=live node scripts/deploy.mjs, then set MAKHZAN_CONTRACT
+doctor: not ready; fix the FAIL lines above
+exit=1
+
+$ MAKHZAN_ED_TPOT=0 MAKHZAN_DEPOSITS_TPOT=30 MAKHZAN_GAS_TPOT=1 scripts/with-live-env.sh provider-1 -- node apps/makhzan/src/doctorMain.ts
+ok  network: LIVE, chain 420420777, account 0xf4ec143c743FF57c0D32e829f50692551CBf6029, contract not set
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=live MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 59.88758943979151636 tPOT covers 31 tPOT (existential deposit + deposits + gas)
+FAIL  contract code: no code at (no contract configured)
+      fix: deploy it with MAKHZAN_NETWORK=live node scripts/deploy.mjs, then set MAKHZAN_CONTRACT
+doctor: not ready; fix the FAIL lines above
+exit=1
+
+$ scripts/with-live-env.sh owner -- node scripts/deploy.mjs --dry-run --min-bond 10000000000000000000 --window 50 --block-size 1024 --slash-bps 2000 --min-duration 100 --max-duration 100800
+calibration: measured ratio 0.984608251872 (source: /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/calibration.json)
+estimated deploy cost 538.123540 tPOT; owner balance 729.279359 tPOT; reserve 100 tPOT
+dry run: no transaction sent
+exit=0
+
+# Owner balance at the gate (exact wei; read-only eth_getBalance):
+node:internal/modules/package_json_reader:301
+  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+        ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'viem' imported from /home/mohammed_soliman/hackathons/portaldot-tier1/[eval]
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+    at packageResolve (node:internal/modules/esm/resolve:784:25)
+    at moduleResolve (node:internal/modules/esm/resolve:873:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at node:internal/modules/esm/loader:636:32 {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v24.20.0
+balanceWei=729279359108146266225
+balanceTpot=729.279359108146266225

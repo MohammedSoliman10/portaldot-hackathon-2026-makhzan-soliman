@@ -240,12 +240,19 @@ copied; nothing is inferred. The fixture SHA-256 is
 manifest must carry the hash of the exact published bytes). The provider registration block and hash were not printed by that run,
 so they are recorded as missing (`hash: null`, `block: null`) rather than guessed.
 
-## Published fixture
+---
 
-The first published bundle is `apps/status-ui/public/evidence/local-anvil-2026-10-23.json`,
-transcribed from `evidence/raw/t1/87-e2e-process.txt` (UTC 2026-10-23T08:21Z).
+## Implementation addendum (002 writer, batch 10)
 
-- SHA-256 of the published bytes: `fec974a18e7471bc51249b37494ec2a9b19deaf92c4a711289bb03e90fbff323`
-- Manifest: `apps/status-ui/public/evidence/index.json`
-- Recompute with `sha256sum apps/status-ui/public/evidence/local-anvil-2026-10-23.json` and compare with
-  the manifest; `npm --prefix apps/status-ui run check:evidence` fails if they disagree.
+The schema above is copied verbatim from feature `003-status-ui`. The 002 writer publishes exactly
+this shape, and adds two layers that are **not** inputs to the bundle:
+
+- `evidence/receipts/<network>/<hash>.json` (`makhzan.receipt/v0`): the raw transaction and receipt,
+  written as soon as the receipt arrives, before finality and before any view is derived.
+- `evidence/addresses.json` and `evidence/txs.json` (`makhzan.evidence-index/v0`, `kind:
+  "addresses" | "transactions"`, `derivedFrom: "evidence/receipts"`): rebuilt views only. Readers must
+  treat a pruned raw receipt as `unavailable-pruned`, never as a failed run.
+
+`apps/makhzan/src/evidence.ts` implements `validateBundle`, `writeReceipt`, `deriveViews` and
+`publishBundle`. `publishBundle` writes `<id>.json` once (immutable) and moves `current` in
+`index.json`; it computes the SHA-256 over the exact published bytes.

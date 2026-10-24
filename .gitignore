@@ -14,7 +14,9 @@ node_modules/
 
 # Foundry / build output
 out/
+out-viair/
 cache/
+cache-viair/
 broadcast/
 
 # Python
@@ -29,6 +31,9 @@ evidence/rpc-log/*.tmp
 .DS_Store
 *.swp
 .vercel
-.env
-.env.local
-.env.*.local
+
+# local demo file for the live runbook; never committed
+demo-1mib.bin
+
+# daemon block store: evidence, not repo content
+evidence/state/*/files/

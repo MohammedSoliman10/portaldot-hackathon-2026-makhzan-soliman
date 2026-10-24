@@ -1,0 +1,52 @@
+# LIVE-2b gate — 2026-10-24T08:29:49Z — chain 420420777 — contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# owner's 'not a registered provider' line is an expected permanent FAIL (fix e), not an abort.
+
+## owner doctor, LIVE-2a deploy reserve (deploy is done; recorded for completeness)
+ok  network: LIVE, chain 420420777, account 0x0948EBD7637D1C32858a6FC5D947E85A6600205C, contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=live MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+FAIL  balance: short by 467083467302815720255 wei (467.083467302815720255 tPOT): balance 199.435042290680279745 tPOT, needs 666.518509593496 tPOT
+      fix: fund 0x0948EBD7637D1C32858a6FC5D947E85A6600205C with at least 467.083467302815720255 tPOT
+ok  contract code: 6566 B of runtime code at 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+doctor: not ready; fix the FAIL lines above
+exit=1
+
+## owner doctor, remaining-needs basis (no second deploy)
+ok  network: LIVE, chain 420420777, account 0x0948EBD7637D1C32858a6FC5D947E85A6600205C, contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=live MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 199.435042290680279745 tPOT covers 35 tPOT (existential deposit + deposits + gas)
+ok  contract code: 6566 B of runtime code at 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+doctor: not ready; fix the FAIL lines above
+exit=1
+
+## provider-1 doctor before registration
+ok  network: LIVE, chain 420420777, account 0xf4ec143c743FF57c0D32e829f50692551CBf6029, contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=live MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 59.88758943979151636 tPOT covers 31 tPOT (existential deposit + deposits + gas)
+ok  contract code: 6566 B of runtime code at 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+doctor: not ready; fix the FAIL lines above
+exit=1
+
+## chain reads 2026-10-24T08:29:55Z
+block: 172234
+gas price wei: 32505
+owner balance wei: 199435042290680279745
+provider-1 balance wei: 59887589439791516360
+provider-1 nonce: 1
+
+## free dry run: registerProvider() value 30 tPOT from provider-1
+estimate gas units: 360510642393240
+gas price wei: 32505
+value wei: 30000000000000000000
+estimated fee wei: 11718398430992266200
+estimated total wei: 41718398430992266200
+hard cap wei (value + 1.25*fee): 44647998038740332750
+estimated fee tPOT: 11.718398430992266412
+estimated total tPOT: 41.718398430992266412
+hard cap tPOT: 44.647998038740333016
+session provider-1 remaining: 50 tPOT

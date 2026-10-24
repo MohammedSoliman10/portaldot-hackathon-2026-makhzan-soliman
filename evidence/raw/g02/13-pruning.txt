@@ -1,0 +1,21 @@
+# G02 free read-only: receipt and state pruning
+at=2026-10-23T09:08:57Z
+old_tx=0x4c38603d9b34b2aa229b87743b99bc81c3eee01c7e7197f21312e66862763396
+old_tx_receipt_found=true
+old_tx_status=success
+old_tx_block=155036
+old_tx_input_bytes=0
+old_block_requested=155036
+old_block_found=true
+old_block_number=155036
+old_block_timestamp=1792726830
+old_state_balance_block=155000
+old_state_balance_wei=900000000000000000
+old_state_balance_tpot=0.90000000000000
+old_state_code_block=157738
+old_state_code_bytes=539
+receipts_pruned=false
+state_pruned=false
+result=the old receipt, old block, balance at block 155000 and code at block 157738 all answered
+sampling_caveat=only these heights were sampled; deeper pruning was not tested
+transactions_sent=0

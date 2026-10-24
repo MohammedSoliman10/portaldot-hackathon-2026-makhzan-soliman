@@ -1,0 +1,27 @@
+{
+  "chainId": 420420777,
+  "providerId": 1,
+  "lastBlock": 0,
+  "files": {
+    "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7": {
+      "size": 1048576,
+      "leafCount": 1024,
+      "path": "files/0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+    }
+  },
+  "deals": {
+    "1": {
+      "role": "provider",
+      "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "providerId": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "lastChallenge": {
+        "index": 451,
+        "start": 172281,
+        "status": "unanswered",
+        "attempts": 1,
+        "bondBefore": "3000000000000000"
+      }
+    }
+  }
+}

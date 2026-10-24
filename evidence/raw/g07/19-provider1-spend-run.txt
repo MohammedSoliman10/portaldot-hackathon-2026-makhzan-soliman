@@ -1,0 +1,5 @@
+[DR-011] provider-1 spend proof (0.001 tPOT self-transfer) estimate_gas=386013406805 gas_price_wei=33705 estimate_wei=14010581876362525 estimate_tpot=0.01401058187636 spent_tpot=0.01241062427914
+[DR-011] provider-1 spend proof (0.001 tPOT self-transfer) tx=0x8737720abc3a38c4e69a14f79c31f9120e7b669a0222ad6702107c14b003a26b spent_tpot=0.01241056020848 cumulative_tpot=0.02482118448762
+provider1 tx=0x8737720abc3a38c4e69a14f79c31f9120e7b669a0222ad6702107c14b003a26b status=success finalized=157731
+native_fee_tpot=0.01241056020849 evm_fee_tpot=0.01241056020848 spend_ok=true
+evidence=/home/mohammed_soliman/hackathons/portaldot-hackathon/evidence/raw/g07/19-provider1-spend.json

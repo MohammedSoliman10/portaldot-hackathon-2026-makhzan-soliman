@@ -1,0 +1,124 @@
+# [live run] chain id 420420777 — contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# LIVE-2c fixed daemon stop — 2026-10-24T09:06:14Z
+wrapper=193740 sh=193757 node=193758
+stopped
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+daemon stopping on SIGTERM: finishing the cycle in flight
+daemon stopped
+
+## skip daemon upload — 2026-10-24T09:06:27Z
+skip wrapper=194590
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts upload /home/mohammed_soliman/hackathons/portaldot-tier1/demo-1mib.bin --provider 1
+
+{
+  "label": "upload",
+  "readBack": {
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "size": 1048576,
+    "leafCount": 1024
+  }
+}
+upload_exit=0
+skip daemon state:
+{
+ "files": {
+  "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7": {
+   "size": 1048576,
+   "leafCount": 1024,
+   "path": "files/0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+  }
+ },
+ "deals": {
+  "1": {
+   "role": "provider",
+   "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+   "providerId": 1,
+   "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+  },
+  "2": {
+   "role": "provider",
+   "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+   "providerId": 1,
+   "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+  }
+ }
+}
+
+## challenge B second (skip daemon) — 2026-10-24T09:06:49Z
+block=172601
+challenge estimate=497677262296 cap_1.2=597212714755 gasPrice=32475 maxFeeWei=19394482911668625
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts challenge 2
+
+{
+  "label": "challenge",
+  "submitted": {
+    "hash": "0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db",
+    "nonce": 9
+  },
+  "included": {
+    "blockNumber": "172602",
+    "blockHash": "0xdc88e1c6f8126f1af2e60b20d445b87a0be529a866717e51f92fff83d50fdc42"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 2,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 172578,
+    "endBlock": 172878,
+    "flags": 2,
+    "providerId": 1,
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "0",
+    "accrued": "43333333333333",
+    "claimable": "43333333333333",
+    "challenge": {
+      "open": true,
+      "index": 623,
+      "start": 172602,
+      "deadline": 172652,
+      "expectedPathLength": 10
+    }
+  }
+}
+challenge_exit=0
+
+## health during window — 2026-10-24T09:07:08Z
+block=172604
+challengeStateOf(2):
+0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000026f000000000000000000000000000000000000000000000000000000000002a23a000000000000000000000000000000000000000000000000000000000002a26c000000000000000000000000000000000000000000000000000000000000000a
+healthOf(2):
+0x0000000000000000000000000000000000000000000000000000000000000002
+
+## restart skip daemon with the label fix — 2026-10-24T09:08:59Z
+old wrapper=194590 sh=194606 node=194607
+old stopped
+block=172623
+challengeStateOf(2):
+0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000026f000000000000000000000000000000000000000000000000000000000002a23a000000000000000000000000000000000000000000000000000000000002a26c000000000000000000000000000000000000000000000000000000000000000a
+
+## wait for deadline — 2026-10-24T09:09:14Z
+deadline=172652
+block_after_deadline=172653 utc=2026-10-24T09:12:03Z
+healthOf(2):
+0x0000000000000000000000000000000000000000000000000000000000000003
+challengeStateOf(2):
+0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000026f000000000000000000000000000000000000000000000000000000000002a23a000000000000000000000000000000000000000000000000000000000002a26c000000000000000000000000000000000000000000000000000000000000000a
+
+## stop skip daemon — 2026-10-24T09:13:36Z
+wrapper=195621 sh=195637 node=195638
+stopped
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+daemon stopping on SIGTERM: finishing the cycle in flight
+daemon stopped

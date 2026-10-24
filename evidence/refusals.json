@@ -1,0 +1,51 @@
+{
+  "schema": "makhzan.refusals/v0",
+  "network": "LOCAL",
+  "chainId": 420420777,
+  "generatedAt": "2026-10-23T09:20:01Z",
+  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "entries": [
+    {
+      "id": "non-owner-challenge",
+      "attempted": "challenge(1) from a stranger",
+      "error": "NotOwner",
+      "reason": "the caller does not own this deal",
+      "source": "eth_call"
+    },
+    {
+      "id": "wrong-length",
+      "attempted": "answer(1, 1 byte, [])",
+      "error": "ProofRejected",
+      "reason": "the supplied Merkle path does not prove the stored block",
+      "source": "eth_call"
+    },
+    {
+      "id": "wrong-proof",
+      "attempted": "answer(1, 1024 zero bytes, [])",
+      "error": "ProofRejected",
+      "reason": "the supplied Merkle path does not prove the stored block",
+      "source": "eth_call"
+    },
+    {
+      "id": "late-answer",
+      "attempted": "answer(1, 1024 zero bytes, []) after the deadline",
+      "error": "WindowOpen",
+      "reason": "the response window has not closed yet, or the answer arrived after its deadline",
+      "source": "eth_call"
+    },
+    {
+      "id": "challenge-settled",
+      "attempted": "challenge(1) on a settled deal",
+      "error": "AlreadySettled",
+      "reason": "the deal is already settled",
+      "source": "eth_call"
+    },
+    {
+      "id": "non-multiple-value",
+      "attempted": "createDeal(...) with a value that is not a multiple of 10000 wei",
+      "error": "BadParams",
+      "reason": "an argument is out of range or has the wrong length",
+      "source": "eth_call"
+    }
+  ]
+}

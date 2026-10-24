@@ -1,0 +1,95 @@
+# LIVE retrieval from a fresh client — [live run] chain reads, [local] tamper copy
+utc: 2026-10-24T10:12:29Z
+chain id: 420420777
+contract: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+rpc: https://test-evm-rpc-v3.portaldot.dev
+
+## provider daemon (normal answer mode, no drill)
+state dir: /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/state/live-fixed
+pid file: evidence/state/live-retrieval-daemon.pid
+pid: 214130
+```text
+    PID    PPID CMD
+ 214130  214128 node src/daemonMain.ts
+LISTEN 0      511        127.0.0.1:8787       0.0.0.0:*    users:(("MainThread",pid=214130,fd=22))
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+```
+
+## upload record (evidence/raw/t1/60-live-pass.txt)
+1048576 bytes (1.0 MB, 1.0 MiB) copied, 0.0194336 s, 55 MB/s
+7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e  demo-1mib.bin
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+$ create --root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
+> node src/cliMain.ts create --root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 --size 1048576 --leaf-count 1024 --provider 1 --duration 150 --price 5
+
+## fresh client process — [live run]
+new cwd: /tmp/opencode/live-client-cwd
+empty HOME: /tmp/opencode/live-client-home
+env -i; no MAKHZAN_* variables, no key, no daemon state
+```text
+$ cd /tmp/opencode/live-client-cwd
+$ env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp/opencode/live-client-home TMPDIR=/tmp/opencode \
+    /home/mohammed_soliman/.nvm/versions/node/v24.20.0/bin/node \
+    /home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/scripts/retrieve-live.mjs \
+    --deal 1 --also-deal 2 --out /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/raw/t1/75-live-retrieval.bin \
+    --contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
+    --rpc https://test-evm-rpc-v3.portaldot.dev --chain-id 420420777 \
+    --daemon http://127.0.0.1:8787 --block-size 1024 --tamper-test
+{
+  "schema": "makhzan.live-retrieval/v0",
+  "utc": "2026-10-24T10:12:07Z",
+  "chainId": 420420777,
+  "contract": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+  "provider": "http://127.0.0.1:8787",
+  "deals": [
+    {
+      "dealId": 1,
+      "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "providerId": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "leafCount": 1024,
+      "size": 1048576
+    },
+    {
+      "dealId": 2,
+      "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "providerId": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "leafCount": 1024,
+      "size": 1048576
+    }
+  ],
+  "blockSize": 1024,
+  "blockCount": 1024,
+  "payloadBlocks": 1024,
+  "sha256": "7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e",
+  "out": "/home/mohammed_soliman/hackathons/portaldot-tier1/evidence/raw/t1/75-live-retrieval.bin",
+  "tamper": {
+    "rejected": true,
+    "error": "ProofRejected: block 0 does not match the expected root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+  }
+}
+```
+
+## written file and full upload hash
+```text
+-rw-r--r-- 1 mohammed_soliman mohammed_soliman 1048576 Oct 24 11:32 demo-1mib.bin
+-rw-r--r-- 1 mohammed_soliman mohammed_soliman 1048576 Oct 24 13:12 evidence/raw/t1/75-live-retrieval.bin
+7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e  evidence/raw/t1/75-live-retrieval.bin
+7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e  demo-1mib.bin
+cmp: retrieved file is byte-for-byte identical to the uploaded 1 MiB file
+expected upload sha256: 7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
+```
+
+## tamper test — [local], copy only
+The client fetched the provider payload once; the verifier was run again on an in-memory JSON copy with one byte of block 0 flipped. The live state and the written file were not touched.
+result: rejected yes; error: ProofRejected: block 0 does not match the expected root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+
+## measured facts
+- deals 1 and 2 both read back providerId 1, root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, leafCount 1024, size 1048576.
+- payload blocks: 1024; verified blocks: 1024; block size: 1024 bytes.
+- sha256 match: yes.
+- tamper rejected: yes, with ProofRejected.

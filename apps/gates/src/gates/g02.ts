@@ -1,14 +1,16 @@
-import { parseEventLogs, type Address, type Hex } from "viem";
+import { parseEventLogs, type Abi, type Address, type Hex } from "viem";
 import { loadConfig } from "../config.ts";
-import { loadArtifact } from "../lib/artifacts.ts";
+import { forgeBuildViaIr, loadArtifact, loadArtifactFrom, VIA_IR_OUT } from "../lib/artifacts.ts";
 import { walletForMode } from "../lib/accounts.ts";
 import { getEvmBalance, publicClientFor } from "../lib/evm.ts";
 import { deployProbe, type DeployPath } from "../lib/deploy.ts";
+import { formatWeiTpot, LiveBudget, sendBudgetedContract } from "../lib/budget.ts";
 import { ratio, receiptGas } from "../lib/measure.ts";
+import { readChainIdentity, readReviveConstants } from "../lib/substrate.ts";
 import { RawLog, writeGateRecord, exitCodeFor } from "../lib/gateIO.ts";
 import type { CostMeasurement, GateRecord, TransactionRef } from "../lib/evidence.ts";
 
-const LADDER = [1, 1024, 8192, 16_384, 24_576, 24_577, 32_768, 49_152, 65_536];
+const LIVE_SIZES = [512, 2048, 4096];
 const REVERT_REASON = "BehaviorProbe: custom reason";
 
 function stamp(date: Date): string {
@@ -42,10 +44,39 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
   const sizeArtifact = await loadArtifact("SizeProbe");
   const client = publicClientFor(config.evmRpcUrl);
   const chainId = String(await client.getChainId());
+  const chainIdentity = mode === "live"
+    ? await readChainIdentity(config.wsUrl).catch((error) => ({ error: `${(error as Error).name}: ${(error as Error).message}` }))
+    : { skipped: "local mode; chain identity is recorded by live gates only" };
+  const reviveConstants = (mode === "live"
+    ? await readReviveConstants(config.wsUrl).catch((error) => ({ error: `${(error as Error).name}: ${(error as Error).message}` }))
+    : { skipped: "local mode" }) as Record<string, unknown>;
   const wallet = await walletForMode(mode, config.evmRpcUrl);
   const account = wallet.account!.address;
   const balance = await getEvmBalance(client, account);
   if (balance === 0n) throw new Error(`account ${account} has zero EVM balance; fund it before sending`);
+  const budget = mode === "live" ? await LiveBudget.load(client, account) : null;
+  const write = async (
+    label: string,
+    address: Address,
+    abi: Abi,
+    functionName: string,
+    args: readonly unknown[],
+    value = 0n,
+  ) => {
+    if (mode === "live" && budget) {
+      return sendBudgetedContract(wallet, client, budget, label, { address, abi, functionName, args, value });
+    }
+    const hash = await wallet.writeContract({
+      address,
+      abi,
+      functionName,
+      args: args as never,
+      value,
+      account: wallet.account!,
+      chain: wallet.chain,
+    });
+    return { hash, receipt: await client.waitForTransactionReceipt({ hash }) };
+  };
 
   const raw = mode === "live" ? await RawLog.create("G02") : null;
   const transactions: TransactionRef[] = [];
@@ -63,6 +94,7 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       contract: "BehaviorProbe",
       artifact: behaviorArtifact,
       args: [],
+      budget: budget ?? undefined,
     });
     const behaviorDeploy = behaviorDeployed.hash;
     const behaviorReceipt = behaviorDeployed.receipt;
@@ -78,16 +110,9 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
     });
     measurements.push(receiptGas("behavior-deploy-gas", behaviorReceipt.gasUsed, behaviorDeploy, { contract: "BehaviorProbe", path, compiler: behaviorDeployed.compiler }));
 
-    const firstStore = await wallet.writeContract({
-      address: behaviorAddress,
-      abi: behaviorArtifact.abi,
-      functionName: "store",
-      args: [42n],
-      value: 1n,
-      account: wallet.account!,
-      chain: wallet.chain,
-    });
-    const firstReceipt = await client.waitForTransactionReceipt({ hash: firstStore });
+    const firstStoreTx = await write("BehaviorProbe.store(42) with 1 wei", behaviorAddress, behaviorArtifact.abi, "store", [42n], 1n);
+    const firstStore = firstStoreTx.hash;
+    const firstReceipt = firstStoreTx.receipt;
     if (firstReceipt.status !== "success") throw new Error(`store(42) reverted in ${firstStore}`);
     transactions.push({
       hash: firstStore,
@@ -143,16 +168,9 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       await client.transport.request({ method: "evm_increaseTime", params: [2] } as never);
       await client.transport.request({ method: "evm_mine", params: [] } as never);
     }
-    const secondStore = await wallet.writeContract({
-      address: behaviorAddress,
-      abi: behaviorArtifact.abi,
-      functionName: "store",
-      args: [43n],
-      value: 0n,
-      account: wallet.account!,
-      chain: wallet.chain,
-    });
-    const secondReceipt = await client.waitForTransactionReceipt({ hash: secondStore });
+    const secondStoreTx = await write("BehaviorProbe.store(43) no value", behaviorAddress, behaviorArtifact.abi, "store", [43n], 0n);
+    const secondStore = secondStoreTx.hash;
+    const secondReceipt = secondStoreTx.receipt;
     transactions.push({
       hash: secondStore,
       kind: "store(43) no value",
@@ -180,6 +198,7 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       contract: "HashProbe",
       artifact: hashArtifact,
       args: [],
+      budget: budget ?? undefined,
     });
     const hashDeploy = hashDeployed.hash;
     const hashReceipt = hashDeployed.receipt;
@@ -195,16 +214,9 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
     });
 
     const callHash = async (kind: string, functionName: string, args: readonly unknown[], value = 0n) => {
-      const hash = await wallet.writeContract({
-        address: hashAddress,
-        abi: hashArtifact.abi,
-        functionName,
-        args,
-        value,
-        account: wallet.account!,
-        chain: wallet.chain,
-      });
-      const receipt = await client.waitForTransactionReceipt({ hash });
+      const result = await write(kind, hashAddress, hashArtifact.abi, functionName, args, value);
+      const hash = result.hash;
+      const receipt = result.receipt;
       if (receipt.status !== "success") throw new Error(`${kind} reverted in ${hash}`);
       transactions.push({ hash, kind, from: account, to: hashAddress, blockNumber: Number(receipt.blockNumber), status: receipt.status, explorerUrl: explorer(hash) });
       return { hash, gas: Number(receipt.gasUsed) };
@@ -231,11 +243,12 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
     });
     measurements.push(hashToSlot, hashToEvent);
 
-    // ---- size ladder ----------------------------------------------------
+    // ---- small size probes (DR-003 / DR-011) ---------------------------
     const sizeAttempts: Array<Record<string, unknown>> = [];
+    const sizeCosts: Array<{ size: number; spentWei: bigint; gasUsed: bigint }> = [];
     let lastSuccess = 0;
     let firstFailure: { size: number; error: string } | null = null;
-    for (const size of LADDER) {
+    for (const size of LIVE_SIZES) {
       try {
         const deployed = await deployProbe({
           path,
@@ -244,6 +257,7 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
           contract: "SizeProbe",
           artifact: sizeArtifact,
           args: [BigInt(size)],
+          budget: budget ?? undefined,
         });
         const hash = deployed.hash;
         const receipt = deployed.receipt;
@@ -256,7 +270,16 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
           break;
         }
         lastSuccess = size;
-        sizeAttempts.push({ size, status: "accepted", hash, gasUsed: receipt.gasUsed.toString(), blockNumber: Number(receipt.blockNumber) });
+        const spentWei = deployed.budgetEntry?.spentWei ?? 0n;
+        if (deployed.budgetEntry) sizeCosts.push({ size, spentWei, gasUsed: receipt.gasUsed });
+        sizeAttempts.push({
+          size,
+          status: "accepted",
+          hash,
+          gasUsed: receipt.gasUsed.toString(),
+          spentWei: spentWei.toString(),
+          blockNumber: Number(receipt.blockNumber),
+        });
         transactions.push({ hash, kind: `deploy SizeProbe(${size})`, from: account, to: null, blockNumber: Number(receipt.blockNumber), status: receipt.status, explorerUrl: explorer(hash) });
       } catch (error) {
         firstFailure = { size, error: errorText(error) };
@@ -265,54 +288,108 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       }
     }
 
-    if (firstFailure && firstFailure.size - lastSuccess > 1) {
-      let low = lastSuccess;
-      let high = firstFailure.size;
-      while (high - low > 1) {
-        const mid = Math.floor((low + high) / 2);
-        try {
-          const deployed = await deployProbe({
-            path,
-            wallet,
-            client,
-            contract: "SizeProbe",
-            artifact: sizeArtifact,
-            args: [BigInt(mid)],
-          });
-          const hash = deployed.hash;
-          const receipt = deployed.receipt;
-          const address = deployed.address;
-          const code = address ? await client.getCode({ address }) : "0x";
-          const codeBytes = code && code !== "0x" ? (code.length - 2) / 2 : 0;
-          if (receipt.status === "success" && codeBytes === mid) {
-            low = mid;
-            sizeAttempts.push({ size: mid, status: "accepted (binary search)", hash, gasUsed: receipt.gasUsed.toString() });
-            transactions.push({ hash, kind: `deploy SizeProbe(${mid})`, from: account, to: null, blockNumber: Number(receipt.blockNumber), status: receipt.status, explorerUrl: explorer(hash) });
-          } else {
-            high = mid;
-            sizeAttempts.push({ size: mid, status: "rejected (binary search)", error: `deployed code ${codeBytes}` });
-          }
-        } catch (error) {
-          high = mid;
-          sizeAttempts.push({ size: mid, status: "rejected (binary search)", error: errorText(error) });
-        }
-      }
-      lastSuccess = low;
-      firstFailure = { size: high, error: sizeAttempts.find((entry) => entry.size === high)?.error as string };
-    }
-
     measurements.push({
       name: "size-limit-bytes",
       value: lastSuccess,
       unit: "bytes",
       method: "estimate",
       conditions: {
-        method: "ascending deployments of SizeProbe with N zero-byte runtime code, binary search between last success and first rejection",
-        firstRejectedSize: firstFailure?.size ?? "none",
+        method: "three small live probes at 512, 2048 and 4096 bytes of runtime code; no large ladder and no binary search",
+        firstRejectedSize: firstFailure?.size ?? "none observed",
         rejection: firstFailure?.error ?? "none observed",
+        source: "runtime metadata/constants did not expose a code-size limit in the inspected revive constants",
       },
       txRef: null,
     });
+
+    if (sizeCosts.length >= 2) {
+      const low = sizeCosts[0];
+      const high = sizeCosts[sizeCosts.length - 1];
+      const perByteWei = (high.spentWei - low.spentWei) / BigInt(high.size - low.size);
+      const fixedWei = low.spentWei - perByteWei * BigInt(low.size);
+      measurements.push({
+        name: "deposit-per-byte",
+        value: perByteWei.toString(),
+        unit: "wei",
+        method: "differential",
+        conditions: {
+          method: "linear fit between the 512-byte and 4096-byte live deployments; spentWei includes gas and deposit",
+          lowSize: low.size,
+          highSize: high.size,
+          lowSpentWei: low.spentWei.toString(),
+          highSpentWei: high.spentWei.toString(),
+        },
+        txRef: null,
+      });
+      measurements.push({
+        name: "fixed-contract-cost",
+        value: fixedWei.toString(),
+        unit: "wei",
+        method: "differential",
+        conditions: { method: "intercept of the same two-point fit", lowSize: low.size, highSize: high.size },
+        txRef: null,
+      });
+    }
+
+    // ---- via_ir probe (Tier 1 compiler setting) -------------------------
+    let viaIrSummary: Record<string, unknown> | null = null;
+    let viaIrError: string | null = null;
+    let viaIrArtifact: Awaited<ReturnType<typeof loadArtifactFrom>> | null = null;
+    try {
+      forgeBuildViaIr();
+      viaIrArtifact = await loadArtifactFrom("CounterProbe", VIA_IR_OUT);
+    } catch (error) {
+      viaIrError = errorText(error);
+    }
+    if (viaIrArtifact) {
+      const viaDeployed = await deployProbe({
+        path: "evm",
+        wallet,
+        client,
+        contract: "CounterProbe",
+        artifact: viaIrArtifact,
+        args: [],
+        budget: budget ?? undefined,
+      });
+      const viaCode = await client.getCode({ address: viaDeployed.address });
+      const viaRuntimeBytes = viaCode && viaCode !== "0x" ? (viaCode.length - 2) / 2 : 0;
+      transactions.push({
+        hash: viaDeployed.hash,
+        kind: "deploy CounterProbe (via_ir, runs=1)",
+        from: account,
+        to: null,
+        blockNumber: Number(viaDeployed.receipt.blockNumber),
+        status: viaDeployed.receipt.status,
+        explorerUrl: explorer(viaDeployed.hash),
+      });
+      measurements.push({
+        name: "via-ir-runtime-size",
+        value: viaRuntimeBytes,
+        unit: "bytes",
+        method: "receipt",
+        conditions: {
+          contract: "CounterProbe",
+          compiler: viaDeployed.compiler,
+          evmVersion: viaDeployed.evmVersion ?? "unknown",
+          viaIR: "true",
+          optimizerRuns: 1,
+        },
+        txRef: viaDeployed.hash,
+      });
+      viaIrSummary = {
+        contract: "CounterProbe",
+        address: viaDeployed.address,
+        hash: viaDeployed.hash,
+        blockNumber: Number(viaDeployed.receipt.blockNumber),
+        bytecodeBytes: viaDeployed.bytecodeBytes,
+        runtimeBytes: viaRuntimeBytes,
+        compiler: viaDeployed.compiler,
+        evmVersion: viaDeployed.evmVersion,
+        viaIR: true,
+        optimizerRuns: 1,
+        outDir: VIA_IR_OUT,
+      };
+    }
 
     const observations = {
       storageWriteRead: { expected: "42", observed: firstRead[0].toString(), match: firstRead[0] === 42n },
@@ -331,6 +408,7 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       .filter(([, value]) => !value.match)
       .map(([name, value]) => ({ behavior: name, expected: value.expected, observed: value.observed }));
 
+    const codeSizeKey = Object.keys(reviveConstants).find((key) => /code.?size|max.*code/i.test(key)) ?? null;
     const summary = {
       mode,
       at: stamp(new Date()),
@@ -345,10 +423,13 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       pvm: behaviorDeployed.pvm ? { sha256: behaviorDeployed.pvm.sha256, bytes: behaviorDeployed.pvm.bytes } : null,
       observations,
       differences,
-      size: { lastSuccess, firstFailure, attempts: sizeAttempts },
+      size: { lastSuccess, firstFailure, attempts: sizeAttempts, codeSizeKey, codeSizeLimit: codeSizeKey ? reviveConstants[codeSizeKey] : null },
+      viaIr: viaIrSummary,
+      viaIrError,
       hashes: { hashTx, slotTx, eventTx, hashToSlot: hashToSlot.value, hashToEvent: hashToEvent.value },
       transactions,
       balanceBefore: balance.toString(),
+      budgetSpentTpot: budget ? formatWeiTpot(budget.spent) : null,
     };
     console.log(JSON.stringify(summary, null, 2));
 
@@ -361,7 +442,7 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
 
     if (mode === "local") return 0;
 
-    const verdict = differences.length === 0 && firstFailure ? "PASS" : "PARTIAL";
+    const verdict = differences.length === 0 && firstFailure && !viaIrError && viaIrSummary ? "PASS" : "PARTIAL";
     const record: GateRecord = {
       schemaVersion: 1,
       gateId: "G02",
@@ -381,15 +462,15 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
       errors,
       verdictReason:
         verdict === "PASS"
-          ? `all behaviors matched Ethereum; first rejected runtime size ${firstFailure?.size} bytes`
-          : `${differences.length} behavioral difference(s); ${firstFailure ? `first rejected runtime size ${firstFailure.size} bytes` : `no size rejection observed up to ${lastSuccess} bytes`}`,
+          ? `all behaviors matched Ethereum; three small size probes completed; via_ir probe ${viaIrSummary?.runtimeBytes ?? "missing"} bytes`
+          : `${differences.length} behavioral difference(s); ${firstFailure ? `first rejected runtime size ${firstFailure.size} bytes` : `no size rejection observed up to ${lastSuccess} bytes`}; via_ir ${viaIrSummary ? `recorded ${viaIrSummary.runtimeBytes} bytes` : `not run: ${viaIrError ?? "unknown"}`}`,
       classification: verdict === "PASS" ? null : "DESIGN-CHANGE",
       adaptation:
         verdict === "PASS"
           ? null
           : "record every difference in the G02 table; cap contract runtime size below the observed limit and keep the loop within the funded deposit",
       evidenceFiles,
-      details: { summary },
+      details: { chainIdentity, reviveConstants, summary },
     };
     const recordPath = await writeGateRecord(record);
     console.log(`record=${recordPath}`);
@@ -417,6 +498,7 @@ export async function run(options: { mode?: "live" | "local"; path?: DeployPath 
         classification: null,
         adaptation: null,
         evidenceFiles: [raw.relative(errorPath)],
+        details: { chainIdentity, reviveConstants },
       };
       const recordPath = await writeGateRecord(record);
       console.error(`record=${recordPath}`);

@@ -1,0 +1,59 @@
+# LIVE-2b register provider-1 — 2026-10-24T08:30:23Z — [live run]
+chain id: 420420777
+contract: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+provider-1: 0xf4ec143c743FF57c0D32e829f50692551CBf6029
+pre balance wei: 59887589439791516360
+pre nonce: 1
+
+$ MAKHZAN_CONTRACT="0x60481DFcFCA34A8F095939D9675eC715127B2e44" scripts/with-live-env.sh provider-1 -- npm --prefix apps/makhzan run cli -- register --bond 30
+
+> makhzan@0.1.0 cli
+> node src/cliMain.ts register --bond 30
+
+{
+  "label": "register",
+  "submitted": {
+    "hash": "0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91",
+    "nonce": 1
+  },
+  "included": {
+    "blockNumber": "172240",
+    "blockHash": "0x319912699ad3b8d819742f99e7e0638044671fab7cb89faef63f51c1b7ff1f89"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  }
+}
+cli exit=0
+
+## read-back 2026-10-24T08:30:44Z
+post balance wei: 18349874082486917480
+post nonce: 2
+providerOf(provider-1): 1 3000000000000000 [3e15] 0 true 
+
+## provider-1 doctor after registration
+ok  network: LIVE, chain 420420777, account 0xf4ec143c743FF57c0D32e829f50692551CBf6029, contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+ok  chain id: RPC reports 420420777, expected 420420777
+ok  account mapping: registered provider 1, bond is not read by the doctor
+ok  balance: balance 18.34987408248691748 tPOT covers 15 tPOT (existential deposit + deposits + gas)
+ok  contract code: 6566 B of runtime code at 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+doctor: ready
+doctor exit=0
+
+## raw receipt facts (evidence/receipts/live/0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91.json)
+tx hash: 0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91
+block: 172240; status: success; nonce: 1
+gasUsed: 354952018375776; effective gas price: 32505 wei
+value (bond): 30000000000000000000 wei = 30 tPOT
+actual fee (gasUsed * price): 11537715357304598880 wei = 11.537715357304598740 tPOT
+actual balance delta: 41537715357304598880 wei = 41.537715357304598740 tPOT
+estimated fee: 11718398430992266200 wei = 11.718398430992266412 tPOT
+actual/estimate: 0.984581248474
+cap (value + 1.25*estimated fee): 44647998038740332750 wei = 44.647998038740333016 tPOT
+within cap: True
+provider id: 1; bond read-back: 3000000000000000 units = 30000000000000000000 wei = 30 tPOT; activeDeals 0; registered true
+deposit note: the RPC exposes no separate storage-deposit field; the deposit is charged inside gasUsed, so the fee above is gas + storage deposit.

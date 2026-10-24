@@ -1,0 +1,26 @@
+{
+  "schema": "makhzan.verify-deployment/v0",
+  "network": "LOCAL",
+  "chainId": 420420777,
+  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "block": 1,
+  "utc": "2026-10-23T09:15:04Z",
+  "artifact": "/tmp/makhzan-verify-xjh4aw/Makhzan-tampered.json",
+  "match": false,
+  "runtimeBytes": 6566,
+  "artifactBytes": 6566,
+  "firstDiff": 100,
+  "reason": "runtime code differs at byte 100: chain de artifact 00",
+  "codeHash": "0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98",
+  "codeVerified": {
+    "method": "runtime-code-hash",
+    "sourceVerified": false,
+    "artifact": "/tmp/makhzan-verify-xjh4aw/Makhzan-tampered.json",
+    "note": "refused: runtime code differs at byte 100: chain de artifact 00"
+  },
+  "deployerMapping": {
+    "checked": false,
+    "note": "not checked: no Tier 0 deployer helper is configured or reachable on this network"
+  },
+  "helper": null
+}

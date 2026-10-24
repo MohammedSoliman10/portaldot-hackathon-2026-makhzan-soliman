@@ -1,0 +1,20 @@
+# LIVE-1 green — with-live-env wrapper, fake-env tests only
+# UTC: 2026-10-24T02:33:55Z
+
+$ node --test scripts/with-live-env.test.mjs
+✔ owner role loads only OWNER_KEY and sets the live network without printing any value (27.477001ms)
+✔ provider-1 role loads PROVIDER_1_KEY, not the owner key (25.647102ms)
+✔ the wrapper writes nothing: the fixture directory holds only the fake .env (28.179601ms)
+✔ an unknown role is refused without echoing file contents (2.3341ms)
+✔ a missing key, a missing file and a malformed key are refused (5.1424ms)
+✔ the -- separator is required (1.8353ms)
+ℹ tests 6
+ℹ pass 6
+ℹ fail 0
+
+# Real Tier 0 env file: only the selected key is loaded; the wrapper prints nothing from it.
+$ scripts/with-live-env.sh owner -- node -e <print network, rpc, chain, key length only>
+live https://test-evm-rpc-v3.portaldot.dev 420420777 keyLength=66
+
+# The same probe for provider-1 prints the same settings and a 66-character key.
+live https://test-evm-rpc-v3.portaldot.dev 420420777 keyLength=66

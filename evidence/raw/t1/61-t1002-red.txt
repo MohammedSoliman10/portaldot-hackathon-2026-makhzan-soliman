@@ -1,0 +1,151 @@
+# T1-002 red — 2026-10-24T08:54:49Z
+✔ each command parses its documented arguments (3.4434ms)
+✔ missing, extra and unknown arguments are rejected (1.2833ms)
+✔ invalid values are rejected before any transaction is built (0.9559ms)
+✔ a key on argv is refused and never echoed (0.4525ms)
+✔ create applies the documented fee policy and waits for finality before reading (3.4071ms)
+✔ a reverted receipt is reported with the mapped reason and takes no read-back (1.7441ms)
+✔ an RPC failure is surfaced verbatim, never treated as success (1.0632ms)
+✖ the CLI persists the submitted hash before waiting, and a receipt timeout keeps it (2.9975ms)
+✔ upload reports the acknowledgement and report names the report file (0.8037ms)
+✔ watch polls the deal until it resolves, then reads it back (0.6292ms)
+✔ register parses a tPOT bond into exact units and wei (0.4625ms)
+✔ register refuses a missing, malformed or unit-inexact bond (0.4518ms)
+✔ register sends the bond, waits for finality and claims no deal read-back (2.0353ms)
+✔ a poll cycle reads challengeStateOf and never queries logs (10.224301ms)
+✔ a closed challenge submits nothing and records nothing (3.918ms)
+✔ a failed answer attempt stays pending and is retried on the next poll (4.3391ms)
+✔ a reverted answer is never labelled passed (2.3467ms)
+✔ one failing deal does not stop the next deal (3.3644ms)
+✔ a late answer ends as unanswered without sending (2.1072ms)
+✔ drill mode answers with the wrong bytes, records submitted, and only then failed on a slash (2.413ms)
+✔ drill mode can skip the answer and still ends failed after the slash (2.0373ms)
+✔ a challenge on an unknown deal is reported unanswerable (1.3341ms)
+✔ a restart resumes without re-answering an already handled round (1.4609ms)
+✔ a submitted round is re-read after a restart, never re-sent (1.2864ms)
+✖ a 40 s delayed receipt stays submitted and is labelled passed on a later poll (3.2652ms)
+✖ a lost receipt response keeps the hash submitted, then the next poll labels passed (2.5131ms)
+✖ a closed challenge after a receipt timeout is labelled from the read-back, never unanswered (2.2149ms)
+✖ a submitted round past the deadline stays submitted, not unanswered (1.3707ms)
+✖ a timed-out answer that was slashed becomes failed from the read-back (1.8139ms)
+✔ a missing block is reported, never guessed (1.3683ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 24
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 588.156206
+
+✖ failing tests:
+
+test at test/cli.test.ts:147:1
+✖ the CLI persists the submitted hash before waiting, and a receipt timeout keeps it (2.9975ms)
+  AssertionError [ERR_ASSERTION]: the hash is on disk before the wait and is never replaced by a timeout label
+  + actual - expected
+  
+  + 'estimate,gasPrice,send,receipt'
+  - 'estimate,gasPrice,send,submitted:0x00000000000000000000000000000000000000000000000000000000000000aa:create:0,receipt'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/test/cli.test.ts:161:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'estimate,gasPrice,send,receipt',
+    expected: 'estimate,gasPrice,send,submitted:0x00000000000000000000000000000000000000000000000000000000000000aa:create:0,receipt',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/daemon.test.ts:269:1
+✖ a 40 s delayed receipt stays submitted and is labelled passed on a later poll (3.2652ms)
+  AssertionError [ERR_ASSERTION]: the fake receipt arrived after a simulated 40 s
+  
+  0 !== 40000
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/test/daemon.test.ts:276:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 40000,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/daemon.test.ts:291:1
+✖ a lost receipt response keeps the hash submitted, then the next poll labels passed (2.5131ms)
+  AssertionError [ERR_ASSERTION]: a timeout with a known hash never becomes unanswered
+  + actual - expected
+  
+  + 'passed'
+  - 'submitted'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/test/daemon.test.ts:299:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'passed',
+    expected: 'submitted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/daemon.test.ts:312:1
+✖ a closed challenge after a receipt timeout is labelled from the read-back, never unanswered (2.2149ms)
+  AssertionError [ERR_ASSERTION]: without a receipt the daemon does not guess
+  + actual - expected
+  
+  + 'passed'
+  - 'submitted'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/test/daemon.test.ts:324:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'passed',
+    expected: 'submitted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/daemon.test.ts:329:1
+✖ a submitted round past the deadline stays submitted, not unanswered (1.3707ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'unanswered'
+  - 'submitted'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/test/daemon.test.ts:340:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'unanswered',
+    expected: 'submitted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/daemon.test.ts:345:1
+✖ a timed-out answer that was slashed becomes failed from the read-back (1.8139ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'passed' !== 'failed'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/test/daemon.test.ts:357:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'passed',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

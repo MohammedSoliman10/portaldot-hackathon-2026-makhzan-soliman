@@ -1,0 +1,15 @@
+# G02 free read-only: largest eth_getLogs range
+at=2026-10-23T09:08:57Z
+method=eth_getLogs with address=0x0000000000000000000000000000000000000000, no topics
+tests:
+span=1000 from=157309 to=158308 ok=True logs=0
+span=10000 from=148309 to=158308 ok=True logs=0
+span=100000 from=58309 to=158308 ok=True logs=0
+span=158309 from=0 to=158308 ok=True logs=0
+largest_span_that_answered_blocks=158309
+from_block=0
+to_block=158308
+result=the full chain range answered; no range limit was observed for this empty filter
+control=eth_getLogs address=0x3155765dd7305e6f529d94aa1e3147e396aa0d92 from 0 to latest returned 1 log at block 157741 (0x2682d), so the full range also works with a result
+caveat=result-size limits were not tested; a query returning many logs may still be capped
+transactions_sent=0
