@@ -1,0 +1,27 @@
+# Live results check — 003-status-ui batch U2b
+UTC: 2026-10-24T10:24:20Z
+
+Public URL: https://status-ui-one.vercel.app/
+Latest production deployment: https://status-eq13uz6ro-soliman11.vercel.app
+
+## Headless Chromium, deployed production (Playwright 1.56)
+$ node /tmp/opencode/check-deployed.mjs
+OVERVIEW: Measured live — block 173,372 · chain 420420777 · test-evm-rpc-v3.portaldot.dev · 2026-10-24T10:24:22.821Z
+RESULTS: Read by this browser on each refresh. | FIELD	VALUE	LABEL	SOURCE | Provider 1 bond	24 tPOT	MEASURED	chain 420420777 @ block 173,372 · 2026-10-24T10:24:22.821Z | Deal 1 health	0 settled	MEASURED	chain 420420777 @ block 173,372 · 2026-10-24T10:24:22.821Z | Deal 
+DEALS: Measured live — block 173,373 · 2026-10-24T10:24:24.873Z
+DEALS has both: true | 172,266: true | settled: true
+PROOF live bond: The bond is read from providerOf(provider 1) on every refresh. | FIELD	VALUE	LABEL	SOURCE | Provider 1 bond now	24 tPOT	MEASURED	chain 420420777 @ block 173,373
+PROOF has 30/24/6/20%: true
+MOBILE overflow px: 0
+CONSOLE ERRORS: none
+
+## Expected values (user-provided, now confirmed by the reads above)
+provider 1 bond: 24 tPOT (2400000000000000 units)
+deal 1 health: 0 (settled)
+deal 2 health: 0 (settled)
+contract balance: 24 tPOT
+recorded pass answer: block 172585, slash resolve: block 172658, slash 6 tPOT = 20% of 30 tPOT
+
+## Result
+PASS — all three pages loaded with no console errors, every live value was MEASURED at a
+block and UTC time, and the phone layout has no horizontal overflow.
