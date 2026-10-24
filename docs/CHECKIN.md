@@ -99,11 +99,16 @@ Evidence:    evidence/raw/t1/59-live-deploy.txt,
 ## 9. Demo
 
 ```text
-<PASTE DEMO VIDEO OR HOSTED LIVE LINK HERE>
+Live read-only status page: https://status-ui-one.vercel.app/
 ```
 
-Placeholder only. The recorded script is [demo.md](demo.md) and the failure/backup plan is
-[DEMO-CHECKLIST.md](DEMO-CHECKLIST.md). No video or hosted demo link is published yet.
+The page reads the deployed Makhzan contract on Portaldot V3 (its bundle contains the contract address,
+chain `420420777`, the live RPC and read methods such as `healthOf`, `dealOf` and `challengeStateOf`)
+and sends no transactions. The **live challenge rounds are still `[pending live run]`**; the page is
+not evidence that any round ran.
+
+No demo video is published yet. The recorded script is [demo.md](demo.md) and the failure/backup plan
+is [DEMO-CHECKLIST.md](DEMO-CHECKLIST.md).
 
 ## 10. Portaldot relevance
 
