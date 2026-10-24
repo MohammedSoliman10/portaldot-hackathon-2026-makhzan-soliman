@@ -37,8 +37,8 @@ function Row({
 }) {
   return (
     <tr>
-      <td className="text-ash">{field}</td>
-      <td className="numeral whitespace-nowrap">
+      <td className="break-words text-ash">{field}</td>
+      <td className="numeral">
         {value}
         {unit ? (
           <>
@@ -134,7 +134,13 @@ export function Overview(options: LiveOptions) {
           </div>
         </dl>
         <div className="mt-4 overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full table-fixed">
+          <colgroup>
+            <col className="w-[26%]" />
+            <col className="w-[20%]" />
+            <col className="w-[20%]" />
+            <col className="w-[34%]" />
+          </colgroup>
           <caption>Deployment facts, transcribed from the recorded verification run.</caption>
           <thead>
             <tr>
@@ -218,7 +224,13 @@ export function Overview(options: LiveOptions) {
           Decoded from packed storage slot 0. {live.config ? "These values were read by this browser." : "These values are the recorded ones; a live read replaces them when an RPC answers."}
         </p>
         <div className="mt-4 overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full table-fixed">
+          <colgroup>
+            <col className="w-[26%]" />
+            <col className="w-[20%]" />
+            <col className="w-[20%]" />
+            <col className="w-[34%]" />
+          </colgroup>
           <caption>Packed slot 0, field by field.</caption>
           <thead>
             <tr>
