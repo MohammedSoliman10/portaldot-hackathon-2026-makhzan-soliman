@@ -35,6 +35,15 @@ test("local defaults are explicit values, not a hidden network", () => {
   assert.equal(settings.daemonPort, 8787);
   assert.equal(settings.pollMs, 6000);
   assert.equal(settings.daemonUrl, "http://127.0.0.1:8787");
+  assert.equal(settings.receiptTimeoutMs, 120_000);
+});
+
+test("the receipt wait cannot be configured below 120 s", () => {
+  assert.equal(loadSettings(env({ MAKHZAN_RECEIPT_TIMEOUT_MS: "600000" })).receiptTimeoutMs, 600_000);
+  assert.throws(
+    () => loadSettings(env({ MAKHZAN_RECEIPT_TIMEOUT_MS: "15000" })),
+    /at least 120000/,
+  );
 });
 
 test("live rejects a chain id that is not an integer", () => {

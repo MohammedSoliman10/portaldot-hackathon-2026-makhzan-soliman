@@ -1,0 +1,7 @@
+# T1-002 fix — old daemon stop — 2026-10-24T08:52:51Z
+old daemon node PID: 185029 (npm 185016, sh 185028)
+stopped
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+cycle: submitted=[] passed=[] failed=[] skipped=[] unanswered=[] unknownDeal=[]
+daemon stopping on SIGTERM: finishing the cycle in flight
+daemon stopped

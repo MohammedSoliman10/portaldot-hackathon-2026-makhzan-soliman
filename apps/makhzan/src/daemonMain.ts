@@ -133,7 +133,13 @@ export async function main(env: NodeJS.ProcessEnv, log: (line: string) => void):
           changed = true;
         }
         if (changed) writeState(stateFile, state);
-        return pollOnce({ client: wiring.chain as ChainClient, state, stateFile, drill: round });
+        return pollOnce({
+          client: wiring.chain as ChainClient,
+          state,
+          stateFile,
+          drill: round,
+          receiptTimeoutMs: settings.receiptTimeoutMs,
+        });
       },
       wait(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));

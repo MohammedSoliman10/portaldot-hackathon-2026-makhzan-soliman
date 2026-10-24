@@ -144,6 +144,27 @@ test("an RPC failure is surfaced verbatim, never treated as success", async () =
   await assert.rejects(() => execute(parseCommand(["settle", "7"]), deps), /ECONNREFUSED/);
 });
 
+test("the CLI persists the submitted hash before waiting, and a receipt timeout keeps it", async () => {
+  const { deps, order } = harness();
+  deps.chain.recordSubmitted = async (hash, action, nonce) => {
+    order.push(`submitted:${hash}:${action}:${nonce}`);
+  };
+  deps.chain.receipt = async () => {
+    order.push("receipt");
+    throw new Error("receipt wait timed out after 120 s");
+  };
+  const command = parseCommand([
+    "create", "--root", ROOT, "--size", "2048", "--leaf-count", "2",
+    "--provider", "1", "--duration", "100", "--price", "10",
+  ]);
+  await assert.rejects(() => execute(command, deps), /timed out/);
+  assert.equal(
+    order.join(","),
+    `estimate,gasPrice,send,submitted:${HASH}:create:0,receipt`,
+    "the hash is on disk before the wait and is never replaced by a timeout label",
+  );
+});
+
 test("upload reports the acknowledgement and report names the report file", async () => {
   const { deps, order } = harness();
   const upload = await execute(parseCommand(["upload", "file.bin", "--provider", "3"]), deps);

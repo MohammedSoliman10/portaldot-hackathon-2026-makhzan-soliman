@@ -55,6 +55,8 @@ export interface CommandDeps {
     gasPrice(): Promise<bigint>;
     nonce?(): Promise<number>;
     send(tx: TxRequest): Promise<Hex>;
+    /** T1-002: persist the hash before the receipt wait. */
+    recordSubmitted?(hash: Hex, action: string, nonce?: number): Promise<void>;
     receipt(hash: Hex, action?: string): Promise<Receipt>;
     waitForFinality(receipt: Receipt): Promise<Finality>;
     read(target: number | "created"): Promise<Record<string, unknown>>;
@@ -276,6 +278,7 @@ export async function execute(command: ParsedCommand, deps: CommandDeps): Promis
   const nonce = deps.chain.nonce ? await deps.chain.nonce() : 0;
   const hash = await deps.chain.send(tx);
   markSubmitted(record, hash, nonce);
+  await deps.chain.recordSubmitted?.(hash, command.name, nonce);
   const receipt = await deps.chain.receipt(hash, command.name);
   markIncluded(record, receipt.blockNumber, receipt.blockHash);
   if (receipt.status === "reverted") {

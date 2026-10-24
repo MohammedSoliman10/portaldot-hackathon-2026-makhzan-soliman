@@ -12,6 +12,9 @@ export const LOCAL_RPC = "http://127.0.0.1:8549";
 export const DEFAULT_STATE_DIR = ".state";
 export const DEFAULT_DAEMON_PORT = 8787;
 export const DEFAULT_POLL_MS = 6000;
+/** T1-002: a receipt wait is allowed to be slow; never shorter than two minutes. */
+export const MIN_RECEIPT_TIMEOUT_MS = 120_000;
+export const DEFAULT_RECEIPT_TIMEOUT_MS = MIN_RECEIPT_TIMEOUT_MS;
 
 export class SettingsError extends Error {
   constructor(message: string) {
@@ -30,6 +33,7 @@ export interface Settings {
   daemonPort: number;
   pollMs: number;
   daemonUrl: string;
+  receiptTimeoutMs: number;
 }
 
 function integer(value: string, name: string): number {
@@ -73,6 +77,14 @@ export function loadSettings(env: NodeJS.ProcessEnv): Settings {
     ? integer(env.MAKHZAN_DAEMON_PORT, "MAKHZAN_DAEMON_PORT")
     : DEFAULT_DAEMON_PORT;
   const pollMs = env.MAKHZAN_POLL_MS ? integer(env.MAKHZAN_POLL_MS, "MAKHZAN_POLL_MS") : DEFAULT_POLL_MS;
+  const receiptTimeoutMs = env.MAKHZAN_RECEIPT_TIMEOUT_MS
+    ? integer(env.MAKHZAN_RECEIPT_TIMEOUT_MS, "MAKHZAN_RECEIPT_TIMEOUT_MS")
+    : DEFAULT_RECEIPT_TIMEOUT_MS;
+  if (receiptTimeoutMs < MIN_RECEIPT_TIMEOUT_MS) {
+    throw new SettingsError(
+      `MAKHZAN_RECEIPT_TIMEOUT_MS must be at least ${MIN_RECEIPT_TIMEOUT_MS} (got ${receiptTimeoutMs})`,
+    );
+  }
   const daemonUrl = env.MAKHZAN_DAEMON_URL ?? `http://127.0.0.1:${daemonPort}`;
 
   return {
@@ -85,5 +97,6 @@ export function loadSettings(env: NodeJS.ProcessEnv): Settings {
     daemonPort,
     pollMs,
     daemonUrl,
+    receiptTimeoutMs,
   };
 }
