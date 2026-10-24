@@ -31,3 +31,6 @@ evidence/rpc-log/*.tmp
 
 # local demo file for the live runbook; never committed
 demo-1mib.bin
+
+# daemon block store: evidence, not repo content
+evidence/state/*/files/

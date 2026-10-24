@@ -5,8 +5,10 @@ missing block and be paid from the bond.**
 
 - Repository: https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
 - Live contract (Portaldot V3 testnet, chain `420420777`): `0x60481DFcFCA34A8F095939D9675eC715127B2e44`
-- Status: **contract deployed [live run]**; the live challenge rounds have **not** run yet and stay
-  `[pending live run]`. Everything not marked `[live run]` below is local (anvil) evidence.
+- Status: **contract deployed [live run]**; live registration, deal A and one challenge/answer also
+  ran [live run]. The answer passed on-chain (`healthOf(1) = 1`, bond unchanged), but the daemon
+  labelled it `unanswered` after a receipt timeout (defect T1-002). The slashed round and
+  claim/settle are still `[pending live run]`. Everything not marked `[live run]` is local evidence.
 
 ## The problem
 
@@ -88,8 +90,20 @@ text above; no URL pattern is invented.
 - `evidence/raw/t1/58-live-gate.txt`, `59-doctor-after-deploy.txt`, `59-pending-{sending,sent}.json`
 - Tier 0 calibration: `evidence/calibration.json` (ratio `0.984608251872`)
 
-The **live rounds are not claimed**: no live registration, deal, challenge, answer, slash, claim or
-settle has run. `[pending live run]`.
+**Live run so far [live run].** Provider-1 registered with a 30 tPOT bond (tx
+`0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91`), deal A was created at block
+`172266` (tx `0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1`), challenge 1
+opened at index `451` (tx `0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda`), and
+the daemon's answer landed at block `172295` (tx
+`0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3`) before the `172331`
+deadline. On-chain the round passed: `healthOf(1) = 1`, the bond is unchanged at 30 tPOT, and the
+provider paid `0.162915694292617500 tPOT` of gas.
+
+The daemon nevertheless recorded `unanswered`: its 15 s receipt wait timed out before the answer was
+mined, it did not persist the hash, and the next poll labelled the closed round unanswered. This is a
+daemon defect (T1-002), not a contract failure. **No live slash, claim or settle has run.** Evidence:
+`evidence/raw/t1/62-live-register.txt`, `60-live-pass.txt`, `60-live-answer-receipt.json`,
+`evidence/state/live/state.json`, `evidence/state/live-daemon.log`.
 
 ## Architecture
 
@@ -140,7 +154,8 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Decoded refusal evidence (`evidence:refusals`, `eth_call` only) | implemented, local | `evidence/raw/t1/94-refusals-anvil.txt` |
 | Read-only `doctor` with an exact fix per failed check | implemented, local | `evidence/raw/t1/97-doctor-anvil.txt` |
 | Live deploy on Portaldot V3 | **implemented [live run]** | `evidence/raw/t1/59-live-deploy.txt` |
-| Live registration, passed round, slashed round, claim/settle | `[pending live run]` | none yet |
+| Live registration + deal A + one challenge/answer | **implemented [live run]**; on-chain pass (`healthOf(1) = 1`, bond unchanged), daemon labelled it `unanswered` (receipt-timeout defect T1-002) | `62-live-register.txt`, `60-live-pass.txt` |
+| Live slashed round, claim, settle | `[pending live run]` | none yet |
 | Status web app (feature 003) | in progress, not merged | branch `003-status-ui` |
 | Front-end, agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
 | Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
@@ -220,7 +235,10 @@ are in [docs/CHECKIN.md](docs/CHECKIN.md).
 - A value-rejecting owner or provider can block its own payout; Tier 1 assumes externally owned
   accounts. Pull-payment escrow is a Tier 2 item.
 - No audit, no explorer source verification, no per-deal bond, no proof of replication.
-- The live rounds, live block time and live retrieval behaviour are `[pending live run]`.
+- One live answer passed on-chain; the live slashed round, claim, settle and live retrieval are
+  `[pending live run]`. Live block time was slow enough to outlast the daemon's 15 s receipt wait.
+- The daemon mislabelled that passed round `unanswered` (T1-002); its label is not yet trustworthy
+  under slow blocks, so verify the receipt before acting on a non-`passed` label.
 
 ## AI-assisted code disclosure
 

@@ -171,6 +171,11 @@ Record the round record (five statuses), challenge/answer hashes and blocks, the
 before/after, the provider's claim credit and the settle result. **Abort** if the daemon reports
 `unanswered`, the bond moved, or a read-back disagrees with the receipt.
 
+**Observed 2026-10-24 (T1-002).** On a slow block the answer can outlast the daemon's 15 s receipt
+wait: the tx landed in block `172295`, before the `172331` deadline, but the daemon stored
+`unanswered`. If that happens, read the answer receipt before treating the round as failed and never
+resend; the daemon fix is the next change.
+
 ### Step 6 — deal B, daemon in skip mode, slashed round
 
 Restart the daemon in skip mode (stop the old process first, record both PIDs):

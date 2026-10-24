@@ -51,15 +51,26 @@ back as window 50, block size 1024, slash 2000 bps, min bond 1e15 units, duratio
 
 Locally the full product is green: 152 Forge tests, 128 client/daemon tests, 45 gate tests and 3
 secret-scanner tests; a local end-to-end run covers a 1 MiB file (1,024 blocks), one passed challenge,
-one skipped challenge with exactly 20% slashed to the owner, claim and settle. Live registration and
-the two live challenge rounds have NOT run yet and are not claimed.
+one skipped challenge with exactly 20% slashed to the owner, claim and settle.
+
+Live run [live run]: provider-1 registered with a 30 tPOT bond (tx
+0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91), deal A was created (tx
+0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1), challenge 1 opened at index 451
+(tx 0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda), and the answer landed at
+block 172295 before the 172331 deadline (tx
+0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3). On-chain the round passed:
+healthOf(1)=1, bond unchanged at 30 tPOT, provider gas 0.162915694292617500 tPOT. The daemon labelled
+it unanswered because its 15 s receipt wait timed out before the answer was mined and it did not
+persist the hash (defect T1-002). No slash, claim or settle has run.
 ```
 
 ## 6. Outstanding items (paste)
 
 ```text
-- Live round: register provider-1 with a 30 tPOT bond, run one passed challenge and one slashed
-  challenge, then claim and settle, recording each receipt. [pending live run]
+- Fix the daemon receipt-timeout path (T1-002): persist the submitted hash before waiting, poll it in
+  later cycles, and never label a landed answer unanswered.
+- Re-run one passed round with the daemon label `passed`, then run one slashed challenge, claim and
+  settle, recording each receipt. [pending live run]
 - Status web app: feature 003 (health/deal status UI) is in progress on its own branch and not merged.
 - Replication/repair and a per-deal bond are roadmap; the current bond is shared across a provider's
   deals.
@@ -126,7 +137,9 @@ new chain with uneven RPC behaviour.
 
 ## 12. What is not claimed
 
-- Live registration, live rounds, live block time and live retrieval behaviour: `[pending live run]`.
+- Live slashed round, claim, settle, live block time across many blocks and live retrieval:
+  `[pending live run]`. One live answer passed on-chain, but the daemon labelled it unanswered
+  (T1-002), so the daemon's round label is not yet claimed as working.
 - No explorer source verification (records say `sourceVerified: false`); only byte-for-byte code match.
 - No audit, no per-deal bond, no replication proof, no pull-payment escrow.
 - A pass proves one block at one moment, not continuous storage.
@@ -145,5 +158,5 @@ new chain with uneven RPC behaviour.
 
 ## 14. Next proof milestone
 
-A live registration, one passed and one slashed live round, then claim and settle — replacing every
-`[pending live run]` row with a measured receipt hash.
+Fix T1-002, re-run one passed round with the daemon label `passed`, then one slashed round, claim and
+settle — replacing every remaining `[pending live run]` row with a measured receipt hash.

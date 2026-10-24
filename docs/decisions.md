@@ -279,3 +279,28 @@ transaction keeps the dry-run-before-every-tx rule, the pending-record rule and 
 **Evidence.** `evidence/calibration.json`, `evidence/raw/t1/104-live-env-red.txt`,
 `105-live-env-green.txt`, `106-calibration-shape-red.txt`, `107-calibration-shape-green.txt`,
 `108-doctor-owner-live.txt`, `109-doctor-provider1-live.txt`, `110-live-dry-run.txt`.
+
+## T1-002 — OBSERVED: a 15 s receipt wait can mislabel a landed answer as unanswered (2026-10-24, Tier 1)
+
+**Context.** LIVE-2b registered provider-1, created deal A, challenged index `451` and let the daemon
+answer. The answer transaction
+`0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3` was mined in block `172295`,
+36 blocks before the `172331` deadline. `chain.answer` waited with
+`waitForTransactionReceipt({timeout: 15_000})`; the receipt arrived after the timeout, the hash was
+lost, and the next poll saw a closed challenge with a stored `pending` record. The daemon labelled it
+`unanswered`. On-chain read-back: `healthOf(1) = 1`, deal flags `0`, bond unchanged at 30 tPOT, and
+the provider paid `0.162915694292617500 tPOT` of gas.
+
+**Decision.** Stop LIVE-2b at the abort condition. The daemon's label is not trusted for this round;
+do not resolve, claim or settle. The next change persists the submitted hash **before** waiting,
+returns it to the state file, and polls the receipt in later cycles. A receipt timeout must stay
+`submitted` (then be resolved by read-back), never become `unanswered`.
+
+**Consequences.** The round is a passed on-chain round with a failed daemon label. README and CHECKIN
+say exactly that; the live slashed round, claim and settle remain pending and need a new go after the
+fix. No contract change is implied.
+
+**Evidence.** `evidence/raw/t1/60-live-pass.txt`, `60-live-answer-receipt.json`,
+`evidence/state/live/state.json`, `evidence/state/live-daemon.log`,
+`evidence/receipts/live/0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91.json`,
+`evidence/receipts/live/0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1.json`.
