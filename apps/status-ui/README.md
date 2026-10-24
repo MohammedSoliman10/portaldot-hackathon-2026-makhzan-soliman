@@ -8,8 +8,9 @@ has no code path that signs, sends or spends.
 **Live page:** https://status-ui-one.vercel.app — the Overview reads the deployment live and falls
 back to the recorded evidence.
 
-**Status:** local, recorded evidence only. No live deployment is claimed by this app, and no number on
-it is `MEASURED` unless the browser read it in this session.
+**Status:** one deployment on the Portaldot testnet, read live by the browser and labelled `MEASURED`;
+the recorded layer is the fallback when the RPC does not answer. No number on
+the page is `MEASURED` unless the browser read it in this session.
 
 ## Commands
 
