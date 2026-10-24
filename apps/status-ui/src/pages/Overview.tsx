@@ -133,7 +133,8 @@ export function Overview(options: LiveOptions) {
             <dd className="mono break-all">{deployment?.txHash ?? "not recorded in the evidence"}</dd>
           </div>
         </dl>
-        <table className="mt-4">
+        <div className="mt-4 overflow-x-auto">
+        <table className="min-w-[34rem]">
           <caption>Deployment facts, transcribed from the recorded verification run.</caption>
           <thead>
             <tr>
@@ -171,6 +172,7 @@ export function Overview(options: LiveOptions) {
             />
           </tbody>
         </table>
+        </div>
       </section>
 
       <section aria-labelledby="code-heading">
@@ -215,7 +217,8 @@ export function Overview(options: LiveOptions) {
         <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
           Decoded from packed storage slot 0. {live.config ? "These values were read by this browser." : "These values are the recorded ones; a live read replaces them when an RPC answers."}
         </p>
-        <table className="mt-4">
+        <div className="mt-4 overflow-x-auto">
+        <table className="min-w-[34rem]">
           <caption>Packed slot 0, field by field.</caption>
           <thead>
             <tr>
@@ -246,6 +249,7 @@ export function Overview(options: LiveOptions) {
             )}
           </tbody>
         </table>
+        </div>
         {live.config && config ? (
           <p className="mt-2 text-xs text-ash">
             Recorded values for comparison: window {formatCount(bundle?.config.challengeWindowBlocks ?? 0)}, block size{" "}
