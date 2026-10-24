@@ -8,6 +8,7 @@
  *        MAKHZAN_ED_TPOT (default 1), MAKHZAN_DEPOSITS_TPOT (default 0), MAKHZAN_GAS_TPOT (default 0.01)
  */
 import { createPublicClient, http, parseEther, type Hex } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { diagnose, render } from "./doctor.ts";
 
 const args = process.argv.slice(2);
@@ -20,7 +21,10 @@ const network = (process.env.MAKHZAN_NETWORK ?? "local") as "local" | "live";
 const rpcUrl = arg("rpc", process.env.MAKHZAN_RPC_URL ?? (network === "local" ? "http://127.0.0.1:8549" : ""));
 const expectedChainId = Number(arg("chain-id", process.env.MAKHZAN_CHAIN_ID ?? (network === "local" ? "420420777" : "0")));
 const contract = arg("contract", process.env.MAKHZAN_CONTRACT ?? "");
-const address = arg("account", process.env.MAKHZAN_ACCOUNT ?? "");
+const address = arg("account", process.env.MAKHZAN_ACCOUNT ?? "") ||
+  (process.env.MAKHZAN_PRIVATE_KEY
+    ? privateKeyToAccount(process.env.MAKHZAN_PRIVATE_KEY as Hex).address
+    : "");
 const needsWei =
   parseEther(process.env.MAKHZAN_ED_TPOT ?? "1") +
   parseEther(process.env.MAKHZAN_DEPOSITS_TPOT ?? "0") +

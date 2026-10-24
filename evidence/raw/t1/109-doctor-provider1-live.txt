@@ -1,0 +1,14 @@
+# LIVE-1 doctor — provider-1 against the live chain (read-only, no contract yet)
+# UTC: 2026-10-24T02:35:19Z
+# Planned needs: 30 tPOT bond + 1 tPOT fees/slack = 31 tPOT.
+
+$ MAKHZAN_ED_TPOT=0 MAKHZAN_DEPOSITS_TPOT=30 MAKHZAN_GAS_TPOT=1 scripts/with-live-env.sh provider-1 -- node apps/makhzan/src/doctorMain.ts
+ok  network: LIVE, chain 420420777, account 0xf4ec143c743FF57c0D32e829f50692551CBf6029, contract not set
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=live MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 59.88758943979151636 tPOT covers 31 tPOT (existential deposit + deposits + gas)
+FAIL  contract code: no code at (no contract configured)
+      fix: deploy it with MAKHZAN_NETWORK=live node scripts/deploy.mjs, then set MAKHZAN_CONTRACT
+doctor: not ready; fix the FAIL lines above
+exit=1
