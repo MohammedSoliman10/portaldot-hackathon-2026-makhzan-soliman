@@ -17,7 +17,7 @@ export function Footer({ mode, evidence }: { mode: ModeState; evidence: Evidence
             read-only: this page cannot sign, send or spend. Mode {mode.mode}, chain{" "}
             {mode.expectedChainId}. Every number carries a label and a source.
           </p>
-          <p className="mt-2 text-ash-2">
+          <p className="mt-2 break-words text-ash-2">
             Source: {evidence.bundle?.source ?? "no evidence source recorded"}.
           </p>
         </div>

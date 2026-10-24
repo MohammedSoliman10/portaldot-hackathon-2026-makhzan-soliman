@@ -137,8 +137,8 @@ export function Overview(options: LiveOptions) {
         <table className="w-full table-fixed">
           <colgroup>
             <col className="w-[26%]" />
-            <col className="w-[20%]" />
-            <col className="w-[20%]" />
+            <col className="w-[18%]" />
+            <col className="w-[22%]" />
             <col className="w-[34%]" />
           </colgroup>
           <caption>Deployment facts, transcribed from the recorded verification run.</caption>
@@ -227,8 +227,8 @@ export function Overview(options: LiveOptions) {
         <table className="w-full table-fixed">
           <colgroup>
             <col className="w-[26%]" />
-            <col className="w-[20%]" />
-            <col className="w-[20%]" />
+            <col className="w-[18%]" />
+            <col className="w-[22%]" />
             <col className="w-[34%]" />
           </colgroup>
           <caption>Packed slot 0, field by field.</caption>
