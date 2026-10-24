@@ -1,7 +1,8 @@
 import { useMode } from "../app/app-context";
 import { useEvidence } from "../data/evidence-context";
-import { formatCount, formatNative, type Label } from "../data/labels";
+import { formatCount, formatNative, formatWeiAsNative, type Label } from "../data/labels";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
+import type { EvidenceBundle, RoundInfo } from "../data/schema";
 
 const REPO = "https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman";
 
@@ -12,6 +13,13 @@ const hostOf = (rpcUrl: string | null): string => {
   } catch {
     return rpcUrl;
   }
+};
+
+const HEALTH_TEXT: Record<number, string> = {
+  0: "settled",
+  1: "active",
+  2: "challenged",
+  3: "expired",
 };
 
 function Chip({ label }: { label: Label }) {
@@ -26,12 +34,14 @@ function Row({
   field,
   value,
   unit,
+  detail,
   label,
   source,
 }: {
   field: string;
   value: string;
   unit?: string;
+  detail?: string;
   label: Label;
   source: string;
 }) {
@@ -46,6 +56,7 @@ function Row({
             <span className="text-ash">{unit}</span>
           </>
         ) : null}
+        {detail ? <p className="mono mt-1 break-words text-xs text-ash-2">{detail}</p> : null}
       </td>
       <td>
         <Chip label={label} />
@@ -55,22 +66,62 @@ function Row({
   );
 }
 
-/** The one screen this check-in needs: what is deployed, what it is configured to do, and how to check it. */
+function TableHead() {
+  return (
+    <thead>
+      <tr>
+        <th scope="col">Field</th>
+        <th scope="col">Value</th>
+        <th scope="col">Label</th>
+        <th scope="col">Source</th>
+      </tr>
+    </thead>
+  );
+}
+
+function roundLine(round: RoundInfo): string {
+  const end = round.status === "passed" ? `answer ${round.answerTx ? "recorded" : "missing"}` : `resolve ${round.resolveTx ? "recorded" : "missing"}`;
+  return `Round ${round.id} · deal ${round.dealId} · index ${formatCount(round.index)} · ${round.status} · challenge ${formatCount(round.startBlock)} → ${end}`;
+}
+
+/** The one screen this check-in needs: what is deployed, what the chain holds now, and how to check it. */
 export function Overview(options: LiveOptions) {
   const mode = useMode();
   const evidence = useEvidence();
-  const bundle = evidence.bundle;
-  const live = useLiveDeployment(mode, options);
+  const bundle: EvidenceBundle | null = evidence.bundle;
+  const deals = bundle?.deals ?? [];
+  const providerAddress = bundle?.providers[0]?.address ?? null;
+  const live = useLiveDeployment(mode, {
+    ...options,
+    providerAddress,
+    dealIds: deals.map((deal) => deal.id),
+  });
 
   const config = live.config ?? bundle?.config ?? null;
   const liveLabel: Label = live.config ? "MEASURED" : "REPORTED";
   const configSource = live.config
     ? `chain ${mode.expectedChainId} @ block ${formatCount(live.block ?? 0)} · ${live.at}`
     : `evidence/${bundle?.id ?? "none"}.json`;
+  const recordedSource = `evidence/${bundle?.id ?? "none"}.json`;
 
   const deployment = bundle?.deployment ?? null;
   const codeVerified = deployment?.codeVerified ?? null;
-  const recordedSource = `evidence/${bundle?.id ?? "none"}.json`;
+  const provider = live.provider ?? bundle?.providers[0] ?? null;
+  const bondSource = live.provider ? configSource : recordedSource;
+  const txById = new Map((bundle?.transactions ?? []).map((tx) => [tx.id, tx]));
+  const txRow = (id: string, field: string) => {
+    const tx = txById.get(id);
+    return (
+      <Row
+        key={id}
+        field={field}
+        value={tx?.block === null || tx?.block === undefined ? "not recorded" : formatCount(tx.block)}
+        detail={tx?.hash ?? undefined}
+        label="REPORTED"
+        source={tx?.evidence ?? recordedSource}
+      />
+    );
+  };
 
   return (
     <section className="space-y-12">
@@ -134,50 +185,43 @@ export function Overview(options: LiveOptions) {
           </div>
         </dl>
         <div className="mt-4 overflow-x-auto">
-        <table className="w-full table-fixed">
-          <colgroup>
-            <col className="w-[26%]" />
-            <col className="w-[18%]" />
-            <col className="w-[22%]" />
-            <col className="w-[34%]" />
-          </colgroup>
-          <caption>Deployment facts, transcribed from the recorded verification run.</caption>
-          <thead>
-            <tr>
-              <th scope="col">Field</th>
-              <th scope="col">Value</th>
-              <th scope="col">Label</th>
-              <th scope="col">Source</th>
-            </tr>
-          </thead>
-          <tbody>
-            <Row
-              field="Block"
-              value={deployment ? formatCount(deployment.block ?? 0) : "not recorded"}
-              label="REPORTED"
-              source={recordedSource}
-            />
-            <Row
-              field="Chain id"
-              value={String(bundle?.chain.chainId ?? mode.expectedChainId)}
-              label="REPORTED"
-              source={recordedSource}
-            />
-            <Row
-              field="Deploy receipt"
-              value={bundle?.transactions[0]?.status ?? "not recorded"}
-              label="REPORTED"
-              source={recordedSource}
-            />
-            <Row
-              field="Runtime bytes"
-              value={deployment ? formatCount(deployment.runtimeBytes) : "not recorded"}
-              unit="bytes"
-              label="REPORTED"
-              source={recordedSource}
-            />
-          </tbody>
-        </table>
+          <table className="w-full table-fixed">
+            <colgroup>
+              <col className="w-[26%]" />
+              <col className="w-[18%]" />
+              <col className="w-[22%]" />
+              <col className="w-[34%]" />
+            </colgroup>
+            <caption>Deployment facts, transcribed from the recorded verification run.</caption>
+            <TableHead />
+            <tbody>
+              <Row
+                field="Block"
+                value={deployment ? formatCount(deployment.block ?? 0) : "not recorded"}
+                label="REPORTED"
+                source={recordedSource}
+              />
+              <Row
+                field="Chain id"
+                value={String(bundle?.chain.chainId ?? mode.expectedChainId)}
+                label="REPORTED"
+                source={recordedSource}
+              />
+              <Row
+                field="Deploy receipt"
+                value={bundle?.transactions[0]?.status ?? "not recorded"}
+                label="REPORTED"
+                source={recordedSource}
+              />
+              <Row
+                field="Runtime bytes"
+                value={deployment ? formatCount(deployment.runtimeBytes) : "not recorded"}
+                unit="bytes"
+                label="REPORTED"
+                source={recordedSource}
+              />
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -216,6 +260,100 @@ export function Overview(options: LiveOptions) {
         </div>
       </section>
 
+      <section aria-labelledby="results-heading">
+        <h2 id="results-heading" className="eyebrow">
+          Live results
+        </h2>
+        <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
+          The chain now, then the run that produced it. A settled deal is health 0; it does not mean
+          every challenge was answered.
+        </p>
+        <div
+          className="mt-4 overflow-x-auto"
+          data-testid={live.status === "live" ? "live-results" : undefined}
+        >
+          <table className="w-full table-fixed">
+            <colgroup>
+              <col className="w-[26%]" />
+              <col className="w-[18%]" />
+              <col className="w-[22%]" />
+              <col className="w-[34%]" />
+            </colgroup>
+            <caption>Read by this browser on each refresh.</caption>
+            <TableHead />
+            <tbody>
+              <Row
+                field="Provider 1 bond"
+                value={provider ? formatNative(provider.bondUnits) : "not recorded"}
+                unit="tPOT"
+                label={live.provider ? "MEASURED" : "REPORTED"}
+                source={bondSource}
+              />
+              {deals.map((deal) => {
+                const health = live.health[deal.id] ?? deal.health;
+                return (
+                  <Row
+                    key={deal.id}
+                    field={`Deal ${deal.id} health`}
+                    value={health === null ? "not read" : String(health)}
+                    unit={health === null ? undefined : HEALTH_TEXT[health]}
+                    label={live.health[deal.id] !== undefined && live.health[deal.id] !== null ? "MEASURED" : "REPORTED"}
+                    source={live.health[deal.id] !== undefined && live.health[deal.id] !== null ? configSource : recordedSource}
+                  />
+                );
+              })}
+              {live.balanceWei !== null ? (
+                <Row
+                  field="Contract balance"
+                  value={formatWeiAsNative(live.balanceWei)}
+                  unit="tPOT"
+                  label="MEASURED"
+                  source={configSource}
+                />
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+        {live.balanceWei === null ? (
+          <p className="mt-2 text-xs text-ash">
+            The contract balance was not part of the recorded evidence; it appears when the live read
+            answers.
+          </p>
+        ) : null}
+
+        <h3 className="mt-8 font-mono text-xs text-ash">Recorded run</h3>
+        <div className="mt-2 overflow-x-auto">
+          <table className="w-full table-fixed">
+            <colgroup>
+              <col className="w-[26%]" />
+              <col className="w-[18%]" />
+              <col className="w-[22%]" />
+              <col className="w-[34%]" />
+            </colgroup>
+            <caption>Every transaction below has a receipt file; the block is the inclusion block.</caption>
+            <TableHead />
+            <tbody>
+              {txRow("deploy", "Deploy")}
+              {txRow("register", "Register provider 1")}
+              {txRow("answer-2a", "Pass answer (deal 2)")}
+              {txRow("resolve-2b", "Slash resolve (deal 2)")}
+              <Row
+                field="Slash"
+                value="6"
+                unit="tPOT"
+                detail="exactly 20% of the 30 tPOT bond; owner credited exactly 6 tPOT"
+                label="REPORTED"
+                source={recordedSource}
+              />
+              {txRow("claim-1", "Claim deal 1")}
+              {txRow("settle-1", "Settle deal 1")}
+              {txRow("claim-2", "Claim deal 2")}
+              {txRow("settle-2", "Settle deal 2")}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section aria-labelledby="config-heading">
         <h2 id="config-heading" className="eyebrow">
           On-chain configuration
@@ -224,67 +362,62 @@ export function Overview(options: LiveOptions) {
           Decoded from packed storage slot 0. {live.config ? "These values were read by this browser." : "These values are the recorded ones; a live read replaces them when an RPC answers."}
         </p>
         <div className="mt-4 overflow-x-auto">
-        <table className="w-full table-fixed">
-          <colgroup>
-            <col className="w-[26%]" />
-            <col className="w-[18%]" />
-            <col className="w-[22%]" />
-            <col className="w-[34%]" />
-          </colgroup>
-          <caption>Packed slot 0, field by field.</caption>
-          <thead>
-            <tr>
-              <th scope="col">Field</th>
-              <th scope="col">Value</th>
-              <th scope="col">Label</th>
-              <th scope="col">Source</th>
-            </tr>
-          </thead>
-          <tbody>
-            {config === null ? (
-              <tr>
-                <td colSpan={4} className="text-ash">
-                  No configuration is recorded and no live read has answered.
-                </td>
-              </tr>
-            ) : (
-              <>
-                <Row field="Challenge window" value={formatCount(config.challengeWindowBlocks)} unit="blocks" label={liveLabel} source={configSource} />
-                <Row field="Challenge block size" value={formatCount(config.challengeBlockSize)} unit="bytes" label={liveLabel} source={configSource} />
-                <Row field="Slash" value={formatCount(config.slashBps)} unit="bps" label={liveLabel} source={configSource} />
-                <Row field="Minimum bond" value={formatNative(config.minBondUnits)} unit="tPOT" label={liveLabel} source={configSource} />
-                <Row field="Minimum duration" value={formatCount(config.minDurationBlocks)} unit="blocks" label={liveLabel} source={configSource} />
-                <Row field="Maximum duration" value={formatCount(config.maxDurationBlocks)} unit="blocks" label={liveLabel} source={configSource} />
-                <Row field="Next deal id" value={formatCount(config.nextDealId)} label={liveLabel} source={configSource} />
-                <Row field="Providers" value={formatCount(config.providerCount)} label={liveLabel} source={configSource} />
-              </>
-            )}
-          </tbody>
-        </table>
+          <table className="w-full table-fixed">
+            <colgroup>
+              <col className="w-[26%]" />
+              <col className="w-[18%]" />
+              <col className="w-[22%]" />
+              <col className="w-[34%]" />
+            </colgroup>
+            <caption>Packed slot 0, field by field.</caption>
+            <TableHead />
+            <tbody>
+              {config === null ? (
+                <tr>
+                  <td colSpan={4} className="text-ash">
+                    No configuration is recorded and no live read has answered.
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  <Row field="Challenge window" value={formatCount(config.challengeWindowBlocks)} unit="blocks" label={liveLabel} source={configSource} />
+                  <Row field="Challenge block size" value={formatCount(config.challengeBlockSize)} unit="bytes" label={liveLabel} source={configSource} />
+                  <Row field="Slash" value={formatCount(config.slashBps)} unit="bps" label={liveLabel} source={configSource} />
+                  <Row field="Minimum bond" value={formatNative(config.minBondUnits)} unit="tPOT" label={liveLabel} source={configSource} />
+                  <Row field="Minimum duration" value={formatCount(config.minDurationBlocks)} unit="blocks" label={liveLabel} source={configSource} />
+                  <Row field="Maximum duration" value={formatCount(config.maxDurationBlocks)} unit="blocks" label={liveLabel} source={configSource} />
+                  <Row field="Next deal id" value={formatCount(config.nextDealId)} label={liveLabel} source={configSource} />
+                  <Row field="Providers" value={formatCount(config.providerCount)} label={liveLabel} source={configSource} />
+                </>
+              )}
+            </tbody>
+          </table>
         </div>
-        {live.config && config ? (
-          <p className="mt-2 text-xs text-ash">
-            Recorded values for comparison: window {formatCount(bundle?.config.challengeWindowBlocks ?? 0)}, block size{" "}
-            {formatCount(bundle?.config.challengeBlockSize ?? 0)}, slash {formatCount(bundle?.config.slashBps ?? 0)} bps.
-          </p>
-        ) : null}
       </section>
 
       <section aria-labelledby="rounds-heading">
         <h2 id="rounds-heading" className="eyebrow">
           Live challenge rounds
         </h2>
-        <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        <p className="mt-3 text-sm">
+          <span className="text-paper">Recorded rounds: {formatCount(bundle?.rounds.length ?? 0)}</span>{" "}
+          <Chip label="REPORTED" />{" "}
+          <span className="text-paper-dim">
+            — {formatCount(bundle?.rounds.filter((round) => round.status === "passed").length ?? 0)} passed,{" "}
+            {formatCount(bundle?.rounds.filter((round) => round.status === "failed").length ?? 0)} slashed.
+          </span>
+        </p>
+        <ul className="mt-3 space-y-1 font-mono text-xs text-paper-dim">
+          {(bundle?.rounds ?? []).map((round) => (
+            <li key={round.id}>{roundLine(round)}</li>
+          ))}
+        </ul>
+        <p className="mt-4 flex flex-wrap items-center gap-2 text-sm">
           <Chip label="PENDING LIVE RUN" />
           <span className="text-paper">pending</span>
           <span className="text-paper-dim">
-            — no challenge round has been created: next deal id {formatCount(config?.nextDealId ?? 0)},
-            providers {formatCount(config?.providerCount ?? 0)}.
+            — no new challenge is scheduled; a round appears here only when the chain records one.
           </span>
-        </p>
-        <p className="mt-2 max-w-[62ch] text-xs text-ash">
-          Nothing has been challenged, answered or slashed on this deployment. A round appears here only
-          when the chain records one; an empty list is not a pass.
         </p>
       </section>
 
