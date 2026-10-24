@@ -1,27 +1,36 @@
 # Live Overview check — 003-status-ui batch U2a
-UTC: 2026-10-24T07:24:01Z
+UTC: 2026-10-24T07:33:51Z
 
-URL: https://status-ui-one.vercel.app/
-Deployment: https://status-gepa6airo-soliman11.vercel.app (production, aliased)
-Project: soliman11/status-ui
+Public URL: https://status-ui-one.vercel.app/
+Latest production deployment: https://status-8g5lwl57q-soliman11.vercel.app
+Project: soliman11/status-ui (deployment-specific URLs sit behind Vercel Authentication)
 
-## Headless Chromium (Playwright 1.56, cached chromium headless shell)
+## Headless Chromium, 1280x900 (Playwright 1.56, cached chromium headless shell)
 $ node /tmp/opencode/check-live.mjs
 URL: https://status-ui-one.vercel.app/
 BANNER: LIVE — chain 420420777 via test-evm-rpc-v3.portaldot.dev. Reads only.
-LIVE SOURCE: Measured live — block 171,576 · chain 420420777 · test-evm-rpc-v3.portaldot.dev · 2026-10-24T07:24:03.254Z
+LIVE SOURCE: Measured live — block 171,674 · chain 420420777 · test-evm-rpc-v3.portaldot.dev · 2026-10-24T07:33:53.706Z
 MEASURED CHIPS: 10
 HAS ADDRESS: true
 HAS WINDOW 50: true
 HAS PENDING: true
 CONSOLE ERRORS: none
 
-## RPC cross-check (same endpoint the page uses)
+## Headless Chromium, 390x844
+$ node /tmp/opencode/find-overflow.mjs
+{
+ "scrollWidth": 390,
+ "clientWidth": 390,
+ "offenders": []
+}
+
+## RPC cross-check (the endpoint the page reads)
 eth_chainId {"jsonrpc":"2.0","id":1,"result":"0x190f1ca9"}
-eth_blockNumber {"jsonrpc":"2.0","id":1,"result":"0x29e38"}
-eth_getCode length: 6566 bytes
-eth_call peek(0): {"jsonrpc":"2.0","id":1,"result":"0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000189c00000006400000000000000038d7ea4c6800007d0040000000032"}
+eth_blockNumber {"jsonrpc":"2.0","id":1,"result":"0x29e9b"}
+eth_getCode bytes: 6566
+eth_call peek([0]): {"jsonrpc":"2.0","id":1,"result":"0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000189c00000006400000000000000038d7ea4c6800007d0040000000032"}
 
 ## Result
-PASS — the deployed page loaded with no console errors, the banner read LIVE, ten values were
-MEASURED at block/time, and the measured runtime code hash matched the recorded 0x115036…6a98.
+PASS — the public page loads with no console errors, the banner reads LIVE, ten values are MEASURED
+at block/time, the measured runtime code hash matches the recorded 0x115036…6a98, and at 390 px the
+document scroll width equals the viewport (no horizontal overflow).
