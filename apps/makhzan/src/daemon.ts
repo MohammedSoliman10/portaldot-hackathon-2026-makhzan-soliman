@@ -6,15 +6,59 @@ import { createServer, type Server } from "node:http";
 import { existsSync, readFileSync } from "node:fs";
 import { bytesToHex } from "viem";
 import { buildTree, getPath } from "./merkle.ts";
+import type { FilePayload } from "./retrieve.ts";
 import { DEFAULT_RECEIPT_TIMEOUT_MS } from "./settings.ts";
 import { blockPathFor, writeState, type ChallengeRecord, type StateFile } from "./state.ts";
 import { UploadReceiver, type Acknowledgement } from "./upload.ts";
 
-/** Loopback-only HTTP endpoint: POST /upload carries one validated envelope per request. */
-export function startUploadServer(receiver: UploadReceiver, port = 0): Promise<Server> {
+export type FileSource = (root: string) => FilePayload | Promise<FilePayload>;
+
+/**
+ * Loopback-only HTTP endpoint: POST /upload carries one validated envelope per request; GET
+ * /file/<root> serves the stored blocks and Merkle paths to a read-only client.
+ */
+export function startUploadServer(
+  receiver: UploadReceiver,
+  port = 0,
+  fileSource?: FileSource,
+): Promise<Server> {
   return new Promise((resolve, reject) => {
     const server = createServer((req, res) => {
-      if (req.method !== "POST" || req.url !== "/upload") {
+      const path = req.url?.split("?")[0] ?? "";
+      if (req.method === "GET" && path.startsWith("/file/")) {
+        if (!fileSource) {
+          res.writeHead(404, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "not found" }));
+          return;
+        }
+        let root: string;
+        try {
+          root = decodeURIComponent(path.slice("/file/".length));
+        } catch {
+          res.writeHead(400, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "root is not valid URL encoding" }));
+          return;
+        }
+        if (!/^0x[0-9a-fA-F]{64}$/.test(root)) {
+          res.writeHead(400, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "root must be 32 bytes of hex" }));
+          return;
+        }
+        void Promise.resolve()
+          .then(() => fileSource(root))
+          .then((payload) => {
+            const body = JSON.stringify(payload);
+            res.writeHead(200, { "content-type": "application/json", "content-length": Buffer.byteLength(body) });
+            res.end(body);
+          })
+          .catch((err: Error) => {
+            const missing = /not in the provider store/.test(err.message);
+            res.writeHead(missing ? 404 : 500, { "content-type": "application/json" });
+            res.end(JSON.stringify({ error: err.message }));
+          });
+        return;
+      }
+      if (req.method !== "POST" || path !== "/upload") {
         res.writeHead(404, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "not found" }));
         return;

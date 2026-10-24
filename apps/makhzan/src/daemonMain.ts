@@ -16,6 +16,7 @@ import {
   type ChainClient,
   type PollResult,
 } from "./daemon.ts";
+import { buildFilePayload } from "./retrieve.ts";
 import { loadSettings } from "./settings.ts";
 import { emptyState, readState, writeState, type StateFile } from "./state.ts";
 import { UploadReceiver } from "./upload.ts";
@@ -94,8 +95,9 @@ export async function main(env: NodeJS.ProcessEnv, log: (line: string) => void):
     const state = seedState(loaded, settings, providerId);
     writeState(stateFile, state);
 
+    const blockSize = Number(env.MAKHZAN_BLOCK_SIZE ?? 1024);
     const receiver = new UploadReceiver({
-      blockSize: Number(env.MAKHZAN_BLOCK_SIZE ?? 1024),
+      blockSize,
       storeDir: join(stateDir, "files"),
     });
     const accept = receiver.accept.bind(receiver);
@@ -112,10 +114,13 @@ export async function main(env: NodeJS.ProcessEnv, log: (line: string) => void):
       }
       return ack;
     };
-    server = await startUploadServer(receiver, settings.daemonPort);
+    server = await startUploadServer(receiver, settings.daemonPort, (root) =>
+      buildFilePayload(state, stateFile, root, blockSize),
+    );
     log(
-      `daemon listening on ${settings.daemonUrl}/upload (network ${settings.network}, ` +
-        `provider ${providerId}, poll ${settings.pollMs} ms, max attempts ${MAX_ANSWER_ATTEMPTS})`,
+      `daemon listening on ${settings.daemonUrl}/upload and ${settings.daemonUrl}/file/<root> ` +
+        `(network ${settings.network}, provider ${providerId}, poll ${settings.pollMs} ms, ` +
+        `max attempts ${MAX_ANSWER_ATTEMPTS})`,
     );
 
     const loop: DaemonLoop = {
