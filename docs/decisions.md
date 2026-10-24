@@ -330,7 +330,7 @@ deal A and deal B.
 **Evidence.** `evidence/raw/t1/61-t1002-red.txt`, `61-t1002-green.txt`, `63-live-refusals.txt`,
 `64-live-claim-a.txt` .. `72-live-summary.txt`, `evidence/receipts/live/`.
 
-## SEC-001 — unredacted canary key material remains in public git history (2026-10-24, Tier 1)
+## SEC-001 — unredacted canary key material remains in public git history (2026-10-24, Tier 1) — CLOSED
 
 **Context.** The whole-history secret scan (`evidence/raw/t1/73-secret-history.txt`) found three
 key-shaped canary values in an older version of `evidence/raw/t1/55-secret-scan.txt` (commit
@@ -343,6 +343,13 @@ anywhere in the scan output.
 funded account. Do **not** rewrite public history without explicit owner approval; the repository rule
 forbids a history rewrite by default. Keep the finding and the redacted evidence visible.
 
-**Consequences.** LIVE-2c merged nothing to `main` after this finding; the docs/evidence commit stays
-on `002-core-storage-proofs` until the owner decides whether to rotate only, rewrite history with
-approval, or both.
+**Closure (2026-10-24T09:55:25Z).** The old blob was read in memory. The EVM address derived from
+the 64-hex canary key and the first account derived from the 12-word canary mnemonic were compared
+with six real accounts: owner, provider-1, provider-2, provider-3, provider-4 and vault-agent. Both
+canary addresses matched none of them and both had zero balance on chain `420420777`. No key, phrase
+or canary address was printed. The canary material is not a funded account, so no history rewrite is
+needed. **Decision: close SEC-001 without a history rewrite and merge the feature branch normally.**
+
+**Consequences.** The public history still contains the redacted-later canary blob, but it is not
+linked to a real or funded account. The closure evidence is
+`evidence/raw/t1/74-sec-001-closure.txt`; the result is recorded as yes/no only.

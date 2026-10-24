@@ -1,0 +1,6 @@
+# [live check] SEC-001 closure — 2026-10-24T09:55:25Z
+# chain 420420777; in-memory derivation from commit 2af8a44 blob; no key, phrase or canary address printed
+real accounts checked: owner, provider-1, provider-2, provider-3, provider-4, vault-agent (6)
+canary key address: matches any real account = no; balance zero = yes
+canary mnemonic first account: matches any real account = no; balance zero = yes
+# conclusion: both canary addresses match no real account and hold zero balance; no history rewrite needed.
