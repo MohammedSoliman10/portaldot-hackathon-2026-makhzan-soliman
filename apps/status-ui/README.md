@@ -5,6 +5,9 @@ judge can verify without a wallet, an account or a key. Evidence first: every ro
 versioned JSON bundle. When an address is configured, read-only view calls annotate the page — the app
 has no code path that signs, sends or spends.
 
+**Live page:** https://status-ui-one.vercel.app — the Overview reads the deployment live and falls
+back to the recorded evidence.
+
 **Status:** local, recorded evidence only. No live deployment is claimed by this app, and no number on
 it is `MEASURED` unless the browser read it in this session.
 

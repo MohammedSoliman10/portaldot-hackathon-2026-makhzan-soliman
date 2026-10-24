@@ -192,12 +192,18 @@ export function Overview(options: LiveOptions) {
             source verification: {codeVerified?.sourceVerified ? "present" : "not available on this network (no explorer)"}.
           </p>
           {live.codeHash ? (
-            <p className="mono break-all text-xs" data-testid="live-code">
-              <Chip label="MEASURED" /> runtime code hash {live.codeHash} · {formatCount(live.codeBytes ?? 0)} bytes ·{" "}
-              {live.codeHash === deployment?.codeHash
-                ? "matches the recorded hash"
-                : "differs from the recorded hash"}
-            </p>
+            <div className="text-xs" data-testid="live-code">
+              <p>
+                <Chip label="MEASURED" /> runtime code hash{" "}
+                <span className="mono break-all">{live.codeHash}</span> ·{" "}
+                {formatCount(live.codeBytes ?? 0)} bytes
+              </p>
+              <p className="mt-1 text-ash">
+                {live.codeHash === deployment?.codeHash
+                  ? "matches the recorded hash"
+                  : "differs from the recorded hash"}
+              </p>
+            </div>
           ) : null}
         </div>
       </section>
