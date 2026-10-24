@@ -49,7 +49,7 @@ byte for byte (6,566 B runtime; code hash
 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98) and the constructor config reads
 back as window 50, block size 1024, slash 2000 bps, min bond 1e15 units, duration 100...100800.
 
-Locally the full product is green: 152 Forge tests, 136 client/daemon tests, 45 gate tests and 3
+Locally the full product is green: 152 Forge tests, 143 client/daemon tests, 45 gate tests and 3
 secret-scanner tests; a local end-to-end run covers a 1 MiB file (1,024 blocks), one passed challenge,
 one skipped challenge with exactly 20% slashed to the owner, claim and settle.
 
@@ -80,13 +80,16 @@ failed. Claim B paid 5 tPOT (tx
 health 0 (tx 0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec, block 172887).
 Final balances: owner 172229122908433355700 wei, provider-1 27993410962002459140 wei, bond
 2400000000000000 units. Free eth_call refusals returned selectors 0x30cd7471 (NotOwner), 0x3480e2b2
-(NotProvider) and 0x019af637 (BadParams). Live retrieval is still pending.
+(NotProvider) and 0x019af637 (BadParams). A fresh read-only client then retrieved the 1 MiB file:
+1,024 blocks each verified against the deal root, sha256
+7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e matching the upload, and a
+one-byte tampered copy rejected with ProofRejected.
 ```
 
 ## 6. Outstanding items (paste)
 
 ```text
-- Live retrieval (a fresh client reading a block from the provider) is still `[pending live run]`.
+- Retrieval is measured at one moment; continuous storage and replication/repair remain roadmap.
 - Status web app: feature 003 (health/deal status UI) is in progress on its own branch and not merged.
 - Replication/repair and a per-deal bond are roadmap; the current bond is shared across a provider's
   deals.
@@ -131,8 +134,8 @@ Live read-only status page: https://status-ui-one.vercel.app/
 
 The page reads the deployed Makhzan contract on Portaldot V3 (its bundle contains the contract address,
 chain `420420777`, the live RPC and read methods such as `healthOf`, `dealOf` and `challengeStateOf`)
-and sends no transactions. The **live challenge rounds are still `[pending live run]`**; the page is
-not evidence that any round ran.
+and sends no transactions. The **live challenge rounds ran separately and are recorded in section 5**;
+the page is not evidence that any round ran.
 
 No demo video is published yet. The recorded script is [demo.md](demo.md) and the failure/backup plan
 is [DEMO-CHECKLIST.md](DEMO-CHECKLIST.md).
@@ -154,13 +157,17 @@ new chain with uneven RPC behaviour.
 - Claim (provider-only) and settle, exactly-once accounting.
 - `healthOf` availability view with every boundary tested.
 - CLI, daemon, deploy with pending record/resume, evidence bundle, verify:deployment, refusals, doctor.
-- 152 Forge + 136 + 45 + 3 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
+- Fresh read-only retrieval: 1,024 blocks verified against the on-chain root; sha256 matches the upload;
+  a tampered copy is rejected with `ProofRejected`.
+- 152 Forge + 143 + 45 + 3 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
 
 ## 12. What is not claimed
 
-- Live retrieval is `[pending live run]`. The live pass, slash, claim and settle did run; the slashed
-  round moved exactly 20% of the bond and credited the owner exactly 6 tPOT. T1-002 is fixed and the
-  daemon labelled both the passed and the slashed live round correctly after read-back.
+- Live retrieval from a fresh client is measured: 1,024 blocks verified, sha256 matches the upload and
+  a tampered copy rejected. The live pass, slash, claim and settle also ran; the slashed round moved
+  exactly 20% of the bond and credited the owner exactly 6 tPOT. T1-002 is fixed and the daemon
+  labelled both the passed and the slashed live round correctly after read-back. Retrieval proves the
+  provider served the file at that moment, not continuous storage.
 - No explorer source verification (records say `sourceVerified: false`); only byte-for-byte code match.
 - No audit, no per-deal bond, no replication proof, no pull-payment escrow.
 - A pass proves one block at one moment, not continuous storage.
@@ -179,5 +186,5 @@ new chain with uneven RPC behaviour.
 
 ## 14. Next proof milestone
 
-Run a live retrieval from a fresh client process, then finish the status web app (feature 003) on its
-own branch; keep the measured receipt hashes and 6 tPOT slash in the check-in.
+The live retrieval is measured. Finish the status web app (feature 003) on its own branch; keep the
+measured receipt hashes, the 6 tPOT slash and the retrieval sha256 in the check-in.

@@ -9,8 +9,9 @@ missing block and be paid from the bond.**
   passed and was claimed/settled, deal B passed with the fixed daemon, then a skipped second challenge
   was resolved with exactly 20% slashed to the owner, and deal B was claimed/settled. The first live
   pass exposed daemon defect T1-002 (a 15 s receipt wait mislabelled a landed answer); it is fixed and
-  the re-run is clean. Live retrieval is still `[pending live run]`; everything not marked `[live run]`
-  is local evidence.
+  the re-run is clean. A fresh read-only client then retrieved the 1 MiB file as 1,024 blocks, verified
+  every block against the on-chain root, and reproduced the upload sha256; a tampered copy was rejected.
+  Everything not marked `[live run]` is local evidence.
 
 ## The problem
 
@@ -190,6 +191,7 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Live deploy on Portaldot V3 | **implemented [live run]** | `evidence/raw/t1/59-live-deploy.txt` |
 | Live registration + deal A + one challenge/answer | **implemented [live run]**; on-chain pass (`healthOf(1) = 1`, bond unchanged). The first pass exposed T1-002; the fixed daemon then labelled deal B `passed` from read-back | `62-live-register.txt`, `60-live-pass.txt`, `67-live-answer-b.txt` |
 | Live slashed round, claim, settle | **implemented [live run]**; claim/settle A and B, second deal B challenge slashed exactly 20% and credited the owner 6 tPOT | `64-live-claim-a.txt` .. `71-live-settle-b.txt`, `72-live-summary.txt` |
+| Live retrieval from a fresh client | **implemented [live run]**; 1,024 blocks verified against the deal root, sha256 `7f2fd6d5...e21e` matches the upload, tampered copy rejected with `ProofRejected` | `75-live-retrieval.txt` |
 | Daemon receipt-timeout fix (T1-002) | **implemented, red then green**; hash persisted before wait, 120 s minimum, later poll labels from receipt/read-back | `61-t1002-red.txt`, `61-t1002-green.txt` |
 | Status web app (feature 003) | in progress, not merged | branch `003-status-ui` |
 | Front-end, agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
@@ -225,7 +227,7 @@ cd ../..
 node scripts/check-size.mjs
 ```
 
-Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **136 tests passed**;
+Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **143 tests passed**;
 `apps/gates` has **45 tests** and the secret scanner **3**; the e2e ends with
 `PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
 check prints **6,566 B ≤ 10,240 B**.
@@ -254,7 +256,8 @@ evidence/                  raw command output, deployment records, receipts, ver
 **Live read-only status page:** <https://status-ui-one.vercel.app/>. It is a read-only view over the
 deployed Makhzan contract on Portaldot V3: the page bundle contains the contract address, chain
 `420420777` and the live RPC, and calls only read methods (`healthOf`, `dealOf`, `challengeStateOf`,
-`providerOf`). It sends no transactions. The live challenge rounds are still `[pending live run]`.
+`providerOf`). It sends no transactions. The live challenge rounds ran separately and are recorded in
+the check-in; this page is a read-only view and is not evidence that a round ran.
 
 The 3-minute local script is [docs/demo.md](docs/demo.md). It deploys to anvil, registers a provider,
 uploads a 1 MiB file as 1,024 blocks, passes one challenge, then skips a second and shows exactly 20%
@@ -275,9 +278,10 @@ A recorded video is **not yet published** (`[pending]`). The check-in text is in
 - A value-rejecting owner or provider can block its own payout; Tier 1 assumes externally owned
   accounts. Pull-payment escrow is a Tier 2 item.
 - No audit, no explorer source verification, no per-deal bond, no proof of replication.
-- The live pass, slash, claim and settle all ran; live retrieval is still `[pending live run]`.
-  Live block time was measured across deal B (`172578`..`172878`) and was slow enough to outlast the
-  old 15 s receipt wait.
+- The live pass, slash, claim and settle all ran, and a fresh read-only client retrieved the file with
+  every block verified against the deal root. Retrieval proves the provider served the file at that
+  moment, not continuous storage. Live block time was measured across deal B (`172578`..`172878`) and
+  was slow enough to outlast the old 15 s receipt wait.
 - T1-002 is fixed: the daemon persisted the hash before waiting and labelled a passed and a slashed
   live round correctly. The receipt, not the label alone, remains the primary evidence.
 

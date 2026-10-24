@@ -4,8 +4,9 @@
 **done**. LIVE-2a (the deploy) is **done**: one transaction, contract
 `0x60481DFcFCA34A8F095939D9675eC715127B2e44`, record `evidence/raw/t1/59-live-deploy.txt`.
 LIVE-2b/2c (registration, the passed round, the slashed round, claim and settle) are **done**; see
-`evidence/raw/t1/60-live-pass.txt` and `64-live-claim-a.txt` .. `72-live-summary.txt`. Live retrieval
-and the evidence bundle remain `[pending live run]`.
+`evidence/raw/t1/60-live-pass.txt` and `64-live-claim-a.txt` .. `72-live-summary.txt`. LIVE-2d (a fresh
+read-only client retrieving the file) is **done**; see `evidence/raw/t1/75-live-retrieval.txt`. The
+evidence bundle remains `[pending live run]`.
 
 ## LIVE-1 results (executed 2026-10-24, no transaction)
 
@@ -209,6 +210,25 @@ accrued price and does **not** move the bond. `settle` then releases the deal. R
 as above. Record `evidence/raw/t1/61-live-slash.txt`: challenge/resolve hashes
 and blocks, bond before/after (exactly 20% down), owner credit in wei, the daemon's `failed` status,
 the provider's claim credit and the settle result.
+
+### Step 6.5 — fresh read-only retrieval
+
+Keep the provider daemon running in normal answer mode on the state dir that holds the file. Then run
+the retrieval client from a new shell with no `MAKHZAN_*` variables and no daemon state:
+
+```bash
+env -i PATH="$(dirname "$(command -v node)"):/usr/local/bin:/usr/bin:/bin" HOME="$(mktemp -d)" \
+  node apps/makhzan/scripts/retrieve-live.mjs \
+  --deal 1 --also-deal 2 --out evidence/raw/t1/75-live-retrieval.bin \
+  --contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
+  --rpc https://test-evm-rpc-v3.portaldot.dev --chain-id 420420777 \
+  --daemon http://127.0.0.1:8787 --block-size 1024 --tamper-test
+```
+
+The client reads `dealOf` from the chain, fetches `GET /file/<root>` from the provider, verifies every
+1 KiB block with its Merkle path against the on-chain root, and writes the file only after all blocks
+pass. `--tamper-test` flips one byte in an in-memory copy; the run fails unless the verifier returns
+`ProofRejected`. Compare the printed sha256 with the upload record (`evidence/raw/t1/60-live-pass.txt`).
 
 ### Step 7 — refusal snapshot and evidence bundle
 
