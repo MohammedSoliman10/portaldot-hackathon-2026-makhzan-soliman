@@ -1,0 +1,20 @@
+# F2 — verifier expected-length rule on a short last block (FR-014, FR-016)
+# UTC: 2026-10-21T07:17:57Z
+# Local Foundry only; no RPC, no keys.
+
+$ forge test --match-path test/makhzan/Verifier.t.sol
+No files changed, compilation skipped
+
+Ran 9 tests for test/makhzan/Verifier.t.sol:VerifierTest
+[PASS] test_correctAnswerIsAccepted() (gas: 139881)
+[PASS] test_emptyPayloadIsRejected() (gas: 135736)
+[PASS] test_hashUsedAsPayloadIsRejected() (gas: 135952)
+[PASS] test_pathForAnotherIndexIsRejected() (gas: 139934)
+[PASS] test_pathOneElementShortAndLongIsRejected() (gas: 151510)
+[PASS] test_payloadOneByteShortAndLongIsRejected() (gas: 143965)
+[PASS] test_reorderedPathIsRejected() (gas: 139923)
+[PASS] test_sevenLeafShortLastBlockVerifiesWithRemainderLength() (gas: 233038)
+[PASS] test_threeLeafShortLastBlockVerifiesWithRemainderLength() (gas: 119913)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.28ms (2.56ms CPU time)
+
+Ran 1 test suite in 6.56ms (1.28ms CPU time): 9 tests passed, 0 failed, 0 skipped (9 total tests)

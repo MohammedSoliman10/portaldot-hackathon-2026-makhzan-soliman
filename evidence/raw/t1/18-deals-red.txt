@@ -1,0 +1,38 @@
+# T020 — deal creation and escrow suite (RED before T021), regenerated against the corrected suite
+# UTC: 2026-10-21T07:24:55Z
+# Local Foundry only; no RPC, no keys. Makhzan reverted to the T020 commit for this run; every failure is the NotImplemented createDeal stub.
+
+$ forge test --match-path test/makhzan/Deals.t.sol
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_durationOutOfRangeRejected() (gas: 40859)
+[FAIL: NotImplemented()] test_escrowAndActiveDealCount() (gas: 40653)
+[FAIL: NotImplemented()] test_eventCarriesDocumentedFields() (gas: 44084)
+[FAIL: NotImplemented()] test_idsAreUniqueAndMonotone() (gas: 40763)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_leafCountMustMatchSizeAndBlockSize() (gas: 40837)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_nonMultipleValueRejected() (gas: 40931)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_pausedProtocolRejectsNewDeals() (gas: 67945)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_providerBelowMinimumBondRejected() (gas: 70568)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_unknownProviderRejected() (gas: 40834)
+[FAIL: NotImplemented()] test_validDealStoresEveryField() (gas: 40523)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_valueAboveUnitCapRejected() (gas: 41717)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_valueMustEqualPriceTimesUnit() (gas: 40692)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroRootRejected() (gas: 40920)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroSizeRejected() (gas: 41052)
+Suite result: FAILED. 0 passed; 14 failed; 0 skipped; finished in 1.57ms (2.62ms CPU time)
+Ran 1 test suite in 6.61ms (1.57ms CPU time): 0 tests passed, 14 failed, 0 skipped (14 total tests)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_durationOutOfRangeRejected() (gas: 40859)
+[FAIL: NotImplemented()] test_escrowAndActiveDealCount() (gas: 40653)
+[FAIL: NotImplemented()] test_eventCarriesDocumentedFields() (gas: 44084)
+[FAIL: NotImplemented()] test_idsAreUniqueAndMonotone() (gas: 40763)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_leafCountMustMatchSizeAndBlockSize() (gas: 40837)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_nonMultipleValueRejected() (gas: 40931)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_pausedProtocolRejectsNewDeals() (gas: 67945)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_providerBelowMinimumBondRejected() (gas: 70568)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_unknownProviderRejected() (gas: 40834)
+[FAIL: NotImplemented()] test_validDealStoresEveryField() (gas: 40523)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_valueAboveUnitCapRejected() (gas: 41717)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_valueMustEqualPriceTimesUnit() (gas: 40692)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroRootRejected() (gas: 40920)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_zeroSizeRejected() (gas: 41052)
+
+$ forge build --sizes | grep Makhzan (T020 skeleton + registry)
+| Makhzan | 4,295 | 4,917 | 20,281 | 44,235 |

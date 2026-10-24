@@ -1,0 +1,59 @@
+# M7 — remove admin and paused (no requirement found in spec.md, plan.md, contracts/*.md)
+# UTC: 2026-10-21T11:29:09Z
+# Local Foundry only; no RPC, no keys. Removed: admin, paused, the createDeal pause check,
+# MakhzanHarness.setPaused, and the two pause tests. The constructor lost its admin_ parameter.
+# Consequence: config now packs into ONE slot (30/32 bytes); slots move to 0=config,
+# 1=providerIdOf, 2=providers, 3=deals. Decision recorded as DR-010.
+
+$ grep -rn "admin\|paused" src/makhzan test/makhzan || echo none
+test/makhzan/StorageLayout.t.sol:48:        // Removing admin and paused lets window | blockSize | slashBps | minBond | nextDealId
+
+$ forge test --match-path test/makhzan/StorageLayout.t.sol
+[FAIL: NotImplemented()] test_challengeUsesOnlyTheExistingDealSlots() (gas: 31846)
+[PASS] test_configPacksIntoOneSlot() (gas: 6946)
+[PASS] test_dealUsesThreeSlots() (gas: 12358)
+[PASS] test_providerUsesTwoSlots() (gas: 10513)
+[FAIL: NotImplemented()] test_twoChallengeRoundsAddNoStorage() (gas: 32486)
+Suite result: FAILED. 3 passed; 2 failed; 0 skipped; finished in 976.80µs (574.10µs CPU time)
+[FAIL: NotImplemented()] test_challengeUsesOnlyTheExistingDealSlots() (gas: 31846)
+[FAIL: NotImplemented()] test_twoChallengeRoundsAddNoStorage() (gas: 32486)
+
+$ forge test
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 445.60µs (113.90µs CPU time)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 348.30µs (190.30µs CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.82ms (2.60ms CPU time)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 3.30ms (3.04ms CPU time)
+Suite result: FAILED. 0 passed; 4 failed; 0 skipped; finished in 3.66ms (517.80µs CPU time)
+Suite result: FAILED. 0 passed; 5 failed; 0 skipped; finished in 3.75ms (615.00µs CPU time)
+Suite result: FAILED. 1 passed; 12 failed; 0 skipped; finished in 4.90ms (1.74ms CPU time)
+Suite result: FAILED. 3 passed; 12 failed; 0 skipped; finished in 4.98ms (1.68ms CPU time)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.17ms (708.70µs CPU time)
+Suite result: FAILED. 3 passed; 2 failed; 0 skipped; finished in 626.60µs (188.60µs CPU time)
+Suite result: FAILED. 0 passed; 18 failed; 0 skipped; finished in 6.86ms (4.97ms CPU time)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 7.10ms (112.00µs CPU time)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 17.14ms (16.90ms CPU time)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 26.99ms (26.74ms CPU time)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 57.35ms (57.16ms CPU time)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 6.44ms (6.12ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 132.12ms (132.60ms CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 597.84ms (597.49ms CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 771.22ms (5.28s CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 772.85ms (772.64ms CPU time)
+Suite result: FAILED. 1 passed; 1 failed; 0 skipped; finished in 4.63s (4.63s CPU time)
+Ran 21 test suites in 4.64s (7.06s CPU time): 83 tests passed, 56 failed, 0 skipped (139 total tests)
+Encountered 18 failing tests in test/makhzan/Challenge.t.sol:ChallengeTest
+Encountered 4 failing tests in test/makhzan/ChallengeIndex.t.sol:ChallengeIndexTest
+Encountered 12 failing tests in test/makhzan/Guards.t.sol:GuardsTest
+Encountered 5 failing tests in test/makhzan/InvariantEdges.t.sol:InvariantEdgesTest
+Encountered 1 failing test in test/makhzan/MerklePositionBinding.t.sol:MerklePositionBindingTest
+Encountered 12 failing tests in test/makhzan/Payments.t.sol:PaymentsTest
+Encountered 1 failing test in test/makhzan/Rounds.t.sol:RoundsTest
+Encountered 2 failing tests in test/makhzan/StorageLayout.t.sol:StorageLayoutTest
+Encountered 1 failing test in test/makhzan/invariant/MakhzanInvariant.t.sol:MakhzanInvariantTest
+Encountered a total of 56 failing tests, 83 tests succeeded
+
+$ forge build --sizes
+| Makhzan           | 5,523            | 6,086             | 19,053             | 43,066              |
+| MakhzanHarness    | 5,893            | 6,469             | 18,683             | 42,683              |
+| MaliciousReceiver | 2,666            | 2,882             | 21,910             | 46,270              |
+| TreeHarness       | 3,594            | 3,625             | 20,982             | 45,527              |

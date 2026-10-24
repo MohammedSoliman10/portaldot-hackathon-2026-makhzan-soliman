@@ -1,0 +1,31 @@
+# R1 green — healthOf availability view (the only contract change)
+# UTC: 2026-10-23T08:20:03Z
+# Cases: unknown 0; healthy 1; challenge open 2; exact deadline block 2; next block 3;
+# answered 1; resolved 1; settled 0. Interface surface updated to 15 selectors.
+
+$ forge test --match-contract HealthOfTest
+[PASS] test_answeredChallengeIsHealthyAgain() (gas: 926438)
+[PASS] test_dealWithoutChallengeIsHealthy() (gas: 129448)
+[PASS] test_openChallengeInsideWindowIsTwoIncludingTheDeadlineBlock() (gas: 216124)
+[PASS] test_resolvedChallengeIsHealthy() (gas: 251750)
+[PASS] test_settledDealIsZero() (gas: 201936)
+[PASS] test_unknownDealIsZero() (gas: 14302)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 4.09ms (3.31ms CPU time)
+Ran 1 test suite in 6.90ms (4.09ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)
+
+$ forge fmt --check
+exit=0
+
+$ forge test
+
+Ran 22 test suites in 3.53s (11.38s CPU time): 150 tests passed, 0 failed, 0 skipped (150 total tests)
+
+$ forge snapshot --check
+
+Ran 22 test suites in 3.68s (7.97s CPU time): 150 tests passed, 0 failed, 0 skipped (150 total tests)
+
+$ forge build --sizes
+| Contract          | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
+| Makhzan           | 6,566            | 7,154             | 18,010             | 41,998              |
+
+# runtime 6,566 B vs 6,378 B before = +188 B (limit +200 B, budget 10,240 B)

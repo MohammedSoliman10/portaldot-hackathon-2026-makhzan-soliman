@@ -1,0 +1,19 @@
+{
+  "schema": "makhzan.evidence-index/v0",
+  "kind": "transactions",
+  "derivedFrom": "evidence/receipts",
+  "network": "LIVE",
+  "chainId": 420420777,
+  "generatedAt": "2026-10-24T06:57:14Z",
+  "entries": [
+    {
+      "hash": "0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7",
+      "action": "deploy",
+      "block": null,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-24T06:57:14Z",
+      "receiptPath": "evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json"
+    }
+  ]
+}

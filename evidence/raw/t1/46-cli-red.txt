@@ -1,0 +1,36 @@
+# T048 red — CLI and error-mapping suites fail on behaviour
+# UTC: 2026-10-21T16:36:46Z
+# Local Node only; no RPC, no keys, no file writes. cli.ts and errors.ts expose the documented exports
+# and throw "not implemented". Covered: every command's arguments, missing/extra/unknown rejection,
+# invalid root/size/leafCount/duration/price before any tx, integer-only tPOT -> units -> wei, the
+# WEI_PER_UNIT multiple and uint64 cap, argv key refusal without echoing the value, the documented fee
+# policy (gas = estimate x 1.2, maxFeePerGas = chain gas price, priority fee 0), finality before the
+# read-back, a reverted receipt mapped and left without a read-back, an RPC failure surfaced verbatim,
+# upload/report, watch polling, and all 17 documented custom-error messages plus verbatim unknowns.
+
+$ node --test test/errors.test.ts
+✖ all 17 custom errors map to their documented message (1.2345ms)
+✖ a revert string in either shape resolves to the documented message (0.1515ms)
+✖ WindowOpen says it covers both directions of the window (0.083ms)
+✖ an unknown error string is surfaced verbatim, never swallowed (0.1278ms)
+ℹ tests 4
+ℹ pass 0
+ℹ fail 4
+✖ failing tests:
+
+$ node --test test/cli.test.ts
+✖ each command parses its documented arguments (0.7445ms)
+✖ missing, extra and unknown arguments are rejected (0.7782ms)
+✖ invalid values are rejected before any transaction is built (0.2574ms)
+✖ a key on argv is refused and never echoed (0.3806ms)
+✖ create applies the documented fee policy and waits for finality before reading (0.2482ms)
+✖ a reverted receipt is reported with the mapped reason and takes no read-back (0.166ms)
+✖ an RPC failure is surfaced verbatim, never treated as success (0.194ms)
+✖ upload reports the acknowledgement and report names the report file (0.1914ms)
+✖ watch polls the deal until it resolves, then reads it back (0.1829ms)
+ℹ tests 9
+ℹ pass 0
+ℹ fail 9
+
+$ node --test test/errors.test.ts   # reason
+  Error: not implemented

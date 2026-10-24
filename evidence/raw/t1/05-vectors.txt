@@ -1,0 +1,24 @@
+$ node packages/merkle-vectors/generate.ts
+wrote /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json (1772792 bytes)
+wrote /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json (1772792 bytes)
+
+$ sha256sum packages/merkle-vectors/vectors.json contracts/test/fixtures/vectors.json
+f169ad965de2cd4374a1a6d5ca7a12a7b522b8d3ce9a9e21a17c8f86311d4b35  packages/merkle-vectors/vectors.json
+f169ad965de2cd4374a1a6d5ca7a12a7b522b8d3ce9a9e21a17c8f86311d4b35  contracts/test/fixtures/vectors.json
+
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed
+exit=0
+
+# negative: append one byte to the contract fixture
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+exit=1
+
+# restored
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed

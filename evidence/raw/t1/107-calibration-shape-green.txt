@@ -1,0 +1,20 @@
+# LIVE-1 green — the deploy dry run reads the Tier 0 calibration shape
+# UTC: 2026-10-24T02:37:09Z
+
+$ node --test test/deploy-calibration.test.ts   (apps/makhzan)
+✔ without a calibration file the dry-run says it is not verified (0.7724ms)
+✔ a measured ratio is printed with its source (0.5449ms)
+✔ a calibration file without a positive ratio is not trusted (0.6295ms)
+✔ a ratio of exactly 1 is accepted (0.2327ms)
+✔ the Tier 0 calibration shape is read from makhzan_projection.measured_ratio (0.2095ms)
+✔ without the projection, the last measured deploy entry is used (0.2256ms)
+✔ a Tier 0 file with a non-positive or missing measured ratio is still not verified (0.3574ms)
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+
+$ npm test && npm run typecheck   (apps/makhzan)
+ℹ tests 125
+ℹ pass 125
+ℹ fail 0
+typecheck exit=0

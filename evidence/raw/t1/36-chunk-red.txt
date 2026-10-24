@@ -1,0 +1,21 @@
+# T038 red — chunker suite fails on behaviour, not module resolution
+# UTC: 2026-10-21T12:30:25Z
+# Local Node only; no RPC, no keys. src/chunk.ts exposes the documented exports and throws
+# "not implemented"; the tests assert block counts, exact lengths, the remainder, the single-leaf
+# case, empty-file rejection and block-size range.
+
+$ node --test test/chunk.test.ts
+✖ 1 MiB with 1 KiB blocks yields 1024 leaves (6.3622ms)
+✖ every block except the last is exactly blockSize and the last is the remainder (0.1432ms)
+✖ a file smaller than one block yields one leaf with the whole file (0.0812ms)
+✖ an exact multiple of the block size has no empty last block (0.1054ms)
+✖ a zero-length file is rejected (0.6339ms)
+✖ the block size must be an integer inside 1..65535 (0.2463ms)
+✖ the input is copied, not aliased (0.1336ms)
+ℹ tests 7
+ℹ pass 0
+ℹ fail 7
+✖ failing tests:
+✖ 1 MiB with 1 KiB blocks yields 1024 leaves (6.3622ms)
+✖ every block except the last is exactly blockSize and the last is the remainder (0.1432ms)
+✖ a file smaller than one block yields one leaf with the whole file (0.0812ms)

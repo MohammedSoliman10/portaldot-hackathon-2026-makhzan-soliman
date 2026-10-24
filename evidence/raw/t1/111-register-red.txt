@@ -1,0 +1,20 @@
+# LIVE-1 red — the CLI has no register command (doctor already prints one)
+# UTC: 2026-10-24T02:44Z (recorded from the run before the implementation)
+#
+# $ node --test test/cli.test.ts   (apps/makhzan)
+#
+# ✖ register parses a tPOT bond into exact units and wei (0.285ms)
+# ✖ register refuses a missing, malformed or unit-inexact bond (0.478ms)
+# ✖ register sends the bond, waits for finality and claims no deal read-back (0.207ms)
+# ℹ tests 12
+# ℹ pass 9
+# ℹ fail 3
+#
+# The doctor's fix line already tells the owner to run `cliMain.ts register --bond <tPOT>`,
+# but COMMANDS did not include `register`; LIVE-2 could not register provider-1 without a
+# key-on-argv workaround, which the key rule forbids. The command is added here, test first.
+# First implementation run still failed on two honest points and was fixed:
+#   - registerProvider was missing from the local ABI array (AbiFunctionNotFoundError)
+#   - the test expected a "not a decimal" message; the library says "invalid tPOT amount"
+#   - 1.0000000001 tPOT is a whole number of units (1e-14 is one unit), so the test now
+#     uses 15 decimal places, which is the real rejection.

@@ -1,0 +1,26 @@
+# D1 red — daemon evidence-based round labels and retries
+# UTC: 2026-10-21T23:15:43Z
+# Local Node only; no RPC, no keys, temp dirs. The suite now requires evidence, not a send: a round is
+# "passed" only after a read-back shows the challenge closed and the bond unchanged, "failed" only on an
+# observed slash, "submitted" right after a send, "pending" after a thrown/reverted answer (retried on
+# the next poll while block < deadline, bounded by MAX_ANSWER_ATTEMPTS), and "unanswered" when late or
+# exhausted. A per-deal failure must not stop the next deal. The old implementation labels a round
+# "passed" immediately and has no retry, so the new cases fail on assertions.
+
+$ node --test test/daemon.test.ts
+✖ a poll cycle reads challengeStateOf and never queries logs (5.3417ms)
+✔ a closed challenge submits nothing and records nothing (1.2388ms)
+✖ a failed answer attempt stays pending and is retried on the next poll (1.4285ms)
+✖ a reverted answer is never labelled passed (1.2232ms)
+✖ one failing deal does not stop the next deal (2.0757ms)
+✖ a late answer ends as unanswered without sending (1.3467ms)
+✖ drill mode answers with the wrong bytes, records submitted, and only then failed on a slash (1.5653ms)
+✖ drill mode can skip the answer and still ends failed after the slash (1.1603ms)
+✔ a challenge on an unknown deal is reported unanswerable (0.6373ms)
+✔ a restart resumes without re-answering an already handled round (0.7718ms)
+✖ a submitted round is re-read after a restart, never re-sent (0.6647ms)
+✔ a missing block is reported, never guessed (1.087ms)
+ℹ tests 12
+ℹ pass 4
+ℹ fail 8
+✖ failing tests:

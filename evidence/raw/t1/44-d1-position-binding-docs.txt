@@ -1,0 +1,17 @@
+# D1 — FR-017/FR-041(8) narrowed to the documented identical-block exception
+# UTC: 2026-10-21T11:52:23Z
+# Local only; no RPC, no keys. No contract, vector or fixture change: leafHash stays
+# keccak256(0x00 || data), per the owner decision (DR-011 option B).
+
+$ grep -n "FR-017" specs/002-core-storage-proofs/spec.md
+91:- The provider answers with the correct block but a path for a different position: the answer is rejected because directions are derived from the challenged position, not from the proof (the sole exception is byte-identical blocks, FR-017).
+132:- **FR-017**: The verifier MUST bind the proof to the challenged position: a proof accepted for position `i` MUST be rejected at any other position `j`, unless the bytes at `i` and `j` and every sibling hash that differs between the two paths make the two root computations identical — which happens only when the blocks, or whole subtrees, involved are byte-identical. Byte-identical blocks are the one documented exception: the same bytes prove the same possession, so one stored copy answers either challenge. Outside that case, changing the index, the bytes or the path ordering MUST fail.
+166:- **FR-041**: The feature MUST enforce and test these invariants: (1) the protocol balance is at least the sum of bonds, escrowed deposits and unclaimed payouts; (2) a slash never exceeds the bond; (3) a challenge resolves at most once; (4) accrued payments never exceed the deposit; (8) a valid proof for position `i` never verifies for position `j`, except when the blocks or whole subtrees involved are byte-identical (FR-017). The ids are the project's invariant register ids and `(8)` is intentional, not a gap in the list.
+
+$ grep -n "byte-identical" specs/002-core-storage-proofs/contracts/merkle.md specs/002-core-storage-proofs/data-model.md specs/002-core-storage-proofs/plan.md
+specs/002-core-storage-proofs/contracts/merkle.md:92:   happens only when the blocks, or whole subtrees, involved are byte-identical — the proof is
+specs/002-core-storage-proofs/data-model.md:130:| 8 | A valid proof for `i` never verifies for `j`, except when the blocks or whole subtrees involved are byte-identical (FR-017) | `MerkleLib.verify` + the on-chain index/path-length binding; `MerklePositionBinding.t.sol` documents the exception |
+specs/002-core-storage-proofs/plan.md:224:  expected path length, expected leaf length, position binding with the byte-identical-block exception) plus worked vectors.
+
+$ grep -n "DECIDED" docs/decisions.md
+123:## DR-011 — DECIDED (B): position binding vs identical adjacent blocks (2026-10-21, Tier 1)

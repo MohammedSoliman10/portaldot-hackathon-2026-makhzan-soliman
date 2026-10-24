@@ -1,0 +1,22 @@
+# M4 — challenge selector distribution over 40 prevrandao values on a 4-leaf deal (RED)
+# UTC: 2026-10-21T11:24:27Z
+# Local Foundry only; no RPC, no keys. 40 samples must show at least 3 distinct indices and
+# every index must be inside the committed leaf count. Block number is held constant, so only
+# prevrandao varies: a selector that ignores it cannot pass this test.
+
+$ forge test --match-path test/makhzan/ChallengeIndex.t.sol
+Ran 4 tests for test/makhzan/ChallengeIndex.t.sol:ChallengeIndexTest
+[FAIL: NotImplemented()] test_everyLeafIndexAcceptsItsOwnAnswer() (gas: 155907)
+[FAIL: NotImplemented()] test_lastLeafAcceptsOnlyTheExactByteLength() (gas: 155932)
+[FAIL: NotImplemented()] test_selectorVariesAcrossBlocksAndPrevrandao() (gas: 155112)
+[FAIL: NotImplemented()] test_singleLeafDealAcceptsEmptyPath() (gas: 177142)
+Suite result: FAILED. 0 passed; 4 failed; 0 skipped; finished in 2.50ms (758.40µs CPU time)
+Ran 1 test suite in 6.61ms (2.50ms CPU time): 0 tests passed, 4 failed, 0 skipped (4 total tests)
+[FAIL: NotImplemented()] test_everyLeafIndexAcceptsItsOwnAnswer() (gas: 155907)
+[FAIL: NotImplemented()] test_lastLeafAcceptsOnlyTheExactByteLength() (gas: 155932)
+[FAIL: NotImplemented()] test_selectorVariesAcrossBlocksAndPrevrandao() (gas: 155112)
+[FAIL: NotImplemented()] test_singleLeafDealAcceptsEmptyPath() (gas: 177142)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |

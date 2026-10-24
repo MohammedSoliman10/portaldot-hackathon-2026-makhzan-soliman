@@ -1,0 +1,40 @@
+# M6 — malicious receiver mode 5 re-enters claim, settle, resolve and withdrawBond (RED)
+# UTC: 2026-10-21T11:25:43Z
+# Local Foundry only; no RPC, no keys. The receiver counts every attempt; the test asserts all
+# four are tried on each payout, that each authorised path pays exactly once, that the receiver
+# breaks even to the wei and that only the unrelated fixture bond stays in the contract.
+
+$ forge test --match-path test/makhzan/Guards.t.sol
+Ran 14 tests for test/makhzan/Guards.t.sol:GuardsTest
+[FAIL: NotImplemented()] test_belowMinimumBondProviderRefusedNewDealButExistingDealSurvives() (gas: 154659)
+[FAIL: Error != expected error: NotImplemented() != NoDeal()] test_challengeErrorsAreReachable() (gas: 32717)
+[FAIL: NotImplemented()] test_combinedModeFiveReentryPaysEachPathOnce() (gas: 338396)
+[FAIL: Error != expected error: NotImplemented() != DealExpired()] test_dealErrorsAreReachable() (gas: 250065)
+[FAIL: registration survives the reverted withdrawal: 2 != 1] test_failedTransferRevertsTheWholeCall() (gas: 212187)
+[PASS] test_pausedProtocolRejectsNewDeal() (gas: 72352)
+[FAIL: Error != expected error: NotImplemented() != NotProvider()] test_paymentErrorsAreReachable() (gas: 156588)
+[FAIL: NotImplemented()] test_reentrantClaimCannotDoublePay() (gas: 320615)
+[FAIL: NotImplemented()] test_reentrantResolveCannotDoublePay() (gas: 274802)
+[FAIL: NotImplemented()] test_reentrantSettleCannotDoublePay() (gas: 324381)
+[PASS] test_reentrantWithdrawBondCannotDoublePay() (gas: 198194)
+[FAIL: NotImplemented()] test_registryErrorsAreReachable() (gas: 306351)
+[FAIL: NotImplemented()] test_secondResolveRevertsNoChallenge() (gas: 154175)
+[FAIL: NotImplemented()] test_withdrawBondBlockedWhileDealOpenAndAllowedAfterSettle() (gas: 222959)
+Suite result: FAILED. 2 passed; 12 failed; 0 skipped; finished in 3.06ms (3.38ms CPU time)
+Ran 1 test suite in 7.22ms (3.06ms CPU time): 2 tests passed, 12 failed, 0 skipped (14 total tests)
+[FAIL: NotImplemented()] test_belowMinimumBondProviderRefusedNewDealButExistingDealSurvives() (gas: 154659)
+[FAIL: Error != expected error: NotImplemented() != NoDeal()] test_challengeErrorsAreReachable() (gas: 32717)
+[FAIL: NotImplemented()] test_combinedModeFiveReentryPaysEachPathOnce() (gas: 338396)
+[FAIL: Error != expected error: NotImplemented() != DealExpired()] test_dealErrorsAreReachable() (gas: 250065)
+[FAIL: registration survives the reverted withdrawal: 2 != 1] test_failedTransferRevertsTheWholeCall() (gas: 212187)
+[FAIL: Error != expected error: NotImplemented() != NotProvider()] test_paymentErrorsAreReachable() (gas: 156588)
+[FAIL: NotImplemented()] test_reentrantClaimCannotDoublePay() (gas: 320615)
+[FAIL: NotImplemented()] test_reentrantResolveCannotDoublePay() (gas: 274802)
+[FAIL: NotImplemented()] test_reentrantSettleCannotDoublePay() (gas: 324381)
+[FAIL: NotImplemented()] test_registryErrorsAreReachable() (gas: 306351)
+[FAIL: NotImplemented()] test_secondResolveRevertsNoChallenge() (gas: 154175)
+[FAIL: NotImplemented()] test_withdrawBondBlockedWhileDealOpenAndAllowedAfterSettle() (gas: 222959)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |

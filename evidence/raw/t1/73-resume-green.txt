@@ -1,0 +1,24 @@
+# S2 green — resume-safe deploy with a pending record
+# UTC: 2026-10-23T02:55:21Z
+# Fake clients only (no RPC): receipt timeout once -> retry; exhausted -> pending kept and a
+# second run refuses; --resume completes without sending; --force-new sends once; bounded at 5.
+
+$ node --test test/deploy-resume.test.ts
+✔ the receipt wait times out once and recovers, then removes the pending record (30.0803ms)
+✔ an exhausted wait keeps the pending record and a second run refuses to send (2.8958ms)
+✔ --resume waits for the recorded tx and writes the final record without sending (2.609ms)
+✔ --force-new overrides a pending record and sends exactly once (2.7104ms)
+✔ the receipt wait is bounded (2.6348ms)
+✔ --resume and --dry-run cannot be combined (0.2933ms)
+ℹ tests 6
+ℹ pass 6
+ℹ fail 0
+
+$ npm test
+ℹ tests 103
+ℹ pass 103
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+

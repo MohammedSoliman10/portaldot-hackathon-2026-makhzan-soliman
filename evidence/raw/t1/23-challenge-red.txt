@@ -1,0 +1,45 @@
+# T025 — challenge/answer/resolve/slash suite (RED before T026; no implementation in batch 2)
+# UTC: 2026-10-21T07:27:54Z
+# Local Foundry only; no RPC, no keys. Every failure is a NotImplemented stub.
+
+$ forge test --match-path test/makhzan/Challenge.t.sol
+[FAIL: NotImplemented()] test_answerAfterDeadlineRevertsWindowOpen() (gas: 154081)
+[FAIL: Error != expected error: NotImplemented() != NoChallenge()] test_answerWithoutChallengeRevertsNoChallenge() (gas: 929481)
+[FAIL: Error != expected error: NotImplemented() != DealExpired()] test_challengeOnExpiredDealRevertsDealExpired() (gas: 174695)
+[FAIL: NotImplemented()] test_challengeOnSettledDealReverts() (gas: 174195)
+[FAIL: Error != expected error: NotImplemented() != NoDeal()] test_challengeOnUnknownDealRevertsNoDeal() (gas: 33025)
+[FAIL: NotImplemented()] test_challengeOpenedEventCarriesFields() (gas: 154998)
+[FAIL: NotImplemented()] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 167642)
+[FAIL: NotImplemented()] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 154587)
+[FAIL: Error != expected error: NotImplemented() != NotOwner()] test_onlyDealOwnerCanChallenge() (gas: 156931)
+[FAIL: NotImplemented()] test_onlyProviderCanAnswer() (gas: 154235)
+[FAIL: NotImplemented()] test_openChallengeStaysResolvableAfterEndBlock() (gas: 173651)
+[FAIL: NotImplemented()] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 173673)
+[FAIL: NotImplemented()] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 154430)
+[FAIL: NotImplemented()] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 154364)
+[FAIL: NotImplemented()] test_secondResolveRevertsNoChallenge() (gas: 154144)
+[FAIL: NotImplemented()] test_strangerResolvePaysOwnerNotCaller() (gas: 173805)
+[FAIL: NotImplemented()] test_validAnswerBeforeDeadlinePasses() (gas: 173478)
+Suite result: FAILED. 0 passed; 17 failed; 0 skipped; finished in 4.78ms (6.04ms CPU time)
+Ran 1 test suite in 6.68ms (4.78ms CPU time): 0 tests passed, 17 failed, 0 skipped (17 total tests)
+[FAIL: NotImplemented()] test_answerAfterDeadlineRevertsWindowOpen() (gas: 154081)
+[FAIL: Error != expected error: NotImplemented() != NoChallenge()] test_answerWithoutChallengeRevertsNoChallenge() (gas: 929481)
+[FAIL: Error != expected error: NotImplemented() != DealExpired()] test_challengeOnExpiredDealRevertsDealExpired() (gas: 174695)
+[FAIL: NotImplemented()] test_challengeOnSettledDealReverts() (gas: 174195)
+[FAIL: Error != expected error: NotImplemented() != NoDeal()] test_challengeOnUnknownDealRevertsNoDeal() (gas: 33025)
+[FAIL: NotImplemented()] test_challengeOpenedEventCarriesFields() (gas: 154998)
+[FAIL: NotImplemented()] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 167642)
+[FAIL: NotImplemented()] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 154587)
+[FAIL: Error != expected error: NotImplemented() != NotOwner()] test_onlyDealOwnerCanChallenge() (gas: 156931)
+[FAIL: NotImplemented()] test_onlyProviderCanAnswer() (gas: 154235)
+[FAIL: NotImplemented()] test_openChallengeStaysResolvableAfterEndBlock() (gas: 173651)
+[FAIL: NotImplemented()] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 173673)
+[FAIL: NotImplemented()] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 154430)
+[FAIL: NotImplemented()] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 154364)
+[FAIL: NotImplemented()] test_secondResolveRevertsNoChallenge() (gas: 154144)
+[FAIL: NotImplemented()] test_strangerResolvePaysOwnerNotCaller() (gas: 173805)
+[FAIL: NotImplemented()] test_validAnswerBeforeDeadlinePasses() (gas: 173478)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan        | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness | 6,017            | 6,654             | 18,559             | 42,498              |

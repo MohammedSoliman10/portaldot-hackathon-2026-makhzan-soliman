@@ -1,0 +1,20 @@
+# T043 green — atomic JSON state store
+# UTC: 2026-10-21T12:32:20Z
+# Local Node only; no RPC, no keys. Write = encode (so bad values fail first) + temp file + rename,
+# so no partial file is ever visible. Read reports a corrupt file by name and leaves it in place; a
+# missing file reads as an empty state. derivePaths re-derives each root from its stored blocks and
+# reports the ones that cannot be served (FR-032).
+
+$ node --test test/state.test.ts
+✔ an atomic write leaves no partial file and round-trips (1.4586ms)
+✔ a failed write leaves the previous file intact (0.352ms)
+✔ a corrupt state file is reported and never replaced (0.394ms)
+✔ a missing file is an empty state that can be rebuilt (0.1678ms)
+✔ a restart re-derives block paths from the stored tree (0.4584ms)
+ℹ tests 5
+ℹ pass 5
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+

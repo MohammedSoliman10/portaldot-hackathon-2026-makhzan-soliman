@@ -1,0 +1,27 @@
+# T045 green — validated upload + loopback acknowledgement endpoint
+# UTC: 2026-10-21T12:33:41Z
+# Local Node only; no RPC, no keys. UploadReceiver validates the exact field set, types, block size,
+# size/leafCount agreement, index range, per-index byte length and arrival order; it recomputes the
+# root from the stored blocks before acknowledging (root, size, leafCount) and clears the session.
+# daemon.ts exposes the same receiver on 127.0.0.1 POST /upload: 202 until complete, 200 + ack when
+# complete, 400 + verbatim reason on any rejection.
+
+$ node --test test/upload.test.ts
+✔ a complete valid file is acknowledged with (root, size, leafCount) (4.245201ms)
+✔ an extra field is rejected (0.5661ms)
+✔ a missing field is rejected (0.3334ms)
+✔ a wrong block size is rejected (0.3662ms)
+✔ an out-of-range index is rejected (0.5368ms)
+✔ a wrong data length is rejected (0.7216ms)
+✔ a block out of order is rejected (0.3855ms)
+✔ a declared root that does not match the recomputed root is rejected (1.2192ms)
+✔ size and leaf count must agree with ceil(size/blockSize) (0.4769ms)
+✔ a malformed value type is rejected with a verbatim reason (0.4013ms)
+✔ the loopback endpoint acknowledges through the receiver (42.475103ms)
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+

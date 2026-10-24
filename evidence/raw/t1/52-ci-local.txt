@@ -1,0 +1,53 @@
+# T054 — CI command list run locally, with exit codes
+# UTC: 2026-10-21T23:18:38Z
+# Local only. Both CI jobs' commands (research.md D13) run here in order; the optimizer/via_ir flags
+# exist only in contracts/foundry.toml, which both jobs inherit. `npm ci` runs against the committed
+# lockfiles. Exit code 0 is required for every line.
+
+$ forge fmt --check
+exit=0
+
+$ forge build --sizes
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+exit=0
+
+$ node scripts/check-size.mjs
+Makhzan runtime 6378 B <= budget 10240 B (margin 3862 B)
+exit=0
+
+$ forge test -vvv
+
+Ran 21 test suites in 5.61s (24.67s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ forge snapshot --check
+
+Ran 21 test suites in 4.45s (11.29s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+exit=0
+
+$ npm ci
+
+found 0 vulnerabilities
+exit=0
+
+$ npm ci
+
+found 0 vulnerabilities
+exit=0
+
+$ npm run typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm test
+ℹ todo 0
+ℹ duration_ms 1338.161151
+exit=0
+
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed
+exit=0
+

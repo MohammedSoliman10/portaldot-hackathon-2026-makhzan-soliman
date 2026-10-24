@@ -1,0 +1,27 @@
+# C3 green — units at the boundary, plus the honest limits in the README/EXPLAIN plans
+# UTC: 2026-10-21T12:27:52Z
+# Local Node only; no RPC, no keys. Docs: deploy script/CLI/daemon pass minBond and every amount in
+# native units (10 tPOT = 1e15 units); wei only as msg.value = units * WEI_PER_UNIT. Limits added to
+# README Known limits and to the T059 EXPLAIN plan: one block in a window (not continuous storage);
+# one bond backs every deal; a value-rejecting owner/provider can block its own payouts and the
+# counterparty's exit (EOA assumption); the challenge index source is the D5 fallback until G03.
+
+$ node --test test/units.test.ts
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
+
+$ sed -n "/## Known limits/,/^$/p" ../../README.md
+## Known limits
+
+- Identical blocks, and whole identical subtrees, are interchangeable in a Merkle proof by design: one stored copy answers either challenge and this does not reduce what a provider must store (FR-017, DR-011).
+- The protocol proves retrieval of one challenged block inside a response window, not continuous local storage.
+- One bond is not locked per deal: it backs every deal the provider holds, so the bond is the economic bound, not a per-deal deposit.
+- A contract owner or provider that rejects incoming value can block its own payouts and the counterparty's exit; Tier 1 assumes externally owned accounts for both roles.
+- The challenge index source is the D5 fallback (parent hash, prevrandao, deal id) until the randomness gate (G03) rules; it is not claimed unpredictable yet.
+
+## AI assistance

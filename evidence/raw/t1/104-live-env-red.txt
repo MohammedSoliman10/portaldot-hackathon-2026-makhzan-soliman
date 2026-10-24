@@ -1,0 +1,7 @@
+# LIVE-1 red — no with-live-env wrapper
+# UTC: 2026-10-24T02:33:14Z
+
+$ node --test scripts/with-live-env.test.mjs
+ℹ tests 1
+ℹ pass 0
+ℹ fail 1

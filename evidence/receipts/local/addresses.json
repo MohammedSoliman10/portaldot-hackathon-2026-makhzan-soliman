@@ -1,0 +1,21 @@
+{
+  "schema": "makhzan.evidence-index/v0",
+  "kind": "addresses",
+  "derivedFrom": "evidence/receipts",
+  "network": "LOCAL",
+  "chainId": 420420777,
+  "generatedAt": "2026-10-23T09:27:25Z",
+  "entries": [
+    {
+      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "actions": [
+        "answer",
+        "challenge",
+        "claim",
+        "create",
+        "resolve",
+        "settle"
+      ]
+    }
+  ]
+}

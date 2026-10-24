@@ -1,0 +1,37 @@
+# T034 — five FR-041 invariants, 256 runs x 50 calls (RED: challenge/answer/resolve/claim/settle are stubs)
+# UTC: 2026-10-21T07:36:36Z
+# Local Foundry only; no RPC, no keys. The coverage invariant is the red gate on purpose: with no
+# reachable challenge, the other four invariants are vacuous and must not be reported as proven.
+# The MakhzanHarness/TreeHarness setters are excluded from the target set: fuzzing setBond would
+# fake a violation instead of testing the protocol (found and fixed before T035).
+
+$ sed -n "/\[invariant\]/,\$p" foundry.toml
+[invariant]
+runs = 256
+depth = 50
+fail_on_revert = false
+
+$ forge test --match-path "test/makhzan/invariant/*"
+Ran 1 test for test/makhzan/invariant/MakhzanInvariant.t.sol:MakhzanInvariantTest
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+MakhzanInvariantTest invariants: 1/6 invariants broken
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_proofIsPositionBound
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+[PASS] invariant_slashNeverExceedsBond
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 3.29s (3.28s CPU time)
+Ran 1 test suite in 3.29s (3.29s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+MakhzanInvariantTest invariants: 1/6 invariants broken
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_proofIsPositionBound
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+[PASS] invariant_slashNeverExceedsBond
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |

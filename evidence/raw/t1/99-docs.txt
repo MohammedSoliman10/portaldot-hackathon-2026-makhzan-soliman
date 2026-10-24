@@ -1,0 +1,16 @@
+# R7 docs — CHECKIN, THREAT_MODEL, DEMO-CHECKLIST, README roadmap
+# UTC: 2026-10-23T09:23:14Z
+
+$ wc -l docs/CHECKIN.md docs/THREAT_MODEL.md docs/DEMO-CHECKLIST.md
+   96 docs/CHECKIN.md
+   64 docs/THREAT_MODEL.md
+   52 docs/DEMO-CHECKLIST.md
+  212 total
+
+$ grep -c "pending live run" docs/CHECKIN.md docs/THREAT_MODEL.md docs/DEMO-CHECKLIST.md README.md
+docs/CHECKIN.md:5
+docs/THREAT_MODEL.md:2
+docs/DEMO-CHECKLIST.md:3
+README.md:3
+
+# No live claim: every live row is [pending live run].

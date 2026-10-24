@@ -1,0 +1,41 @@
+# T030 — PayLib + claim/settle (T029 suite green, and T025 fully green now)
+# UTC: 2026-10-21T11:57:03Z
+# Local Foundry only; no RPC, no keys. Accrual is floor(price * (min(at,end)-start)/(end-start)) in
+# native units; every payout is units * WEI_PER_UNIT. CEI: claimed and the settled flag are
+# written before any transfer, so a re-entrant claim sees ZeroClaim/AlreadySettled.
+# settle allows block.number == endBlock and pays (accrued - claimed) to the provider plus
+# (price - accrued) to the owner; claimed is left as the last claimed accrual, which is what the
+# suite measures ("provider receives PRICE - claimedNow").
+
+$ forge test --match-path test/makhzan/Payments.t.sol
+[PASS] test_accrualAtMidpointIsFlooredLinearShare() (gas: 154365)
+[PASS] test_accrualCapsAtPriceAfterEndBlock() (gas: 154057)
+[PASS] test_accrualIsZeroAtStartBlock() (gas: 135920)
+[PASS] test_claimByStrangerRevertsNotProvider() (gas: 178953)
+[PASS] test_claimOnUnknownDealRevertsNoDeal() (gas: 34520)
+[PASS] test_claimWithNoAccrualRevertsZeroClaim() (gas: 163837)
+[PASS] test_cumulativeClaimsNeverExceedPrice() (gas: 324118)
+[PASS] test_midDealClaimPaysAccruedAndUpdatesClaimed() (gas: 232212)
+[PASS] test_secondImmediateClaimRevertsZeroClaim() (gas: 226491)
+[PASS] test_secondSettleRevertsAlreadySettled() (gas: 225624)
+[PASS] test_settleBeforeEndRevertsBeforeEnd() (gas: 157194)
+[PASS] test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 240499)
+[PASS] test_settlePaysProviderUnpaidAccrued() (gas: 294434)
+[PASS] test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 227028)
+[PASS] test_strangerSettleMatchesOwnerSettle() (gas: 391837)
+Suite result: ok. 15 passed; 0 failed; 0 skipped; finished in 3.15ms (4.17ms CPU time)
+
+$ forge test --match-path test/makhzan/Challenge.t.sol
+# The 18th T025 test settles a deal before challenging; it was the only red in 24-challenge-green.txt
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 8.57ms (22.35ms CPU time)
+
+$ forge test --match-path test/makhzan/Interface.t.sol
+# The NotImplemented stub test was removed: every entry point is now implemented.
+[PASS] test_abiIsExactlyTheDocumentedSurface() (gas: 665734)
+[PASS] test_peekReturnsRawSlotsInRequestOrder() (gas: 23163)
+[PASS] test_unknownIdsReadAsZero() (gas: 35588)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.19ms (2.47ms CPU time)
+
+$ forge build --sizes
+| Makhzan           | 9,128            | 9,691             | 15,448             | 39,461              |
+| MakhzanHarness    | 9,498            | 10,074            | 15,078             | 39,078              |

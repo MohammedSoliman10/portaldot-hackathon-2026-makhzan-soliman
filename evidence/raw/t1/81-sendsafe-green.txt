@@ -1,0 +1,26 @@
+# S5 green — pending record written as "sending" before the send
+# UTC: 2026-10-23T08:12:45Z
+# Fake clients only. A send that throws leaves state "sending" with no hash and a second run
+# refuses with the nonce/explorer guidance; a successful send records state "sent" + hash;
+# --resume and --force-new behave as before.
+
+$ node --test test/deploy-resume.test.ts
+✔ the receipt wait times out once and recovers, then removes the pending record (29.3762ms)
+✔ an exhausted wait keeps the pending record and a second run refuses to send (2.8867ms)
+✔ a send that throws after the node accepted it leaves a sending record and blocks a re-run (1.9886ms)
+✔ --resume waits for the recorded tx and writes the final record without sending (2.652ms)
+✔ --force-new overrides a pending record and sends exactly once (4.0649ms)
+✔ the receipt wait is bounded (1.3429ms)
+✔ --resume and --dry-run cannot be combined (0.253ms)
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+
+$ npm test
+ℹ tests 108
+ℹ pass 108
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+

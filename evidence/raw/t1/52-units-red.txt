@@ -1,0 +1,22 @@
+# C3 red — native-unit conversion is asserted before it exists
+# UTC: 2026-10-21T12:27:28Z
+# Local Node only; no RPC, no keys. Decision: the deploy script, the CLI and the daemon pass
+# minBond and every amount in native units, never wei. 10 tPOT = 1e15 units; msg.value alone is
+# units * WEI_PER_UNIT. Red for the right reason: the module resolves and the assertions fail on
+# the throwing stubs, not on module resolution.
+
+$ node --test test/units.test.ts
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+
+test at test/units.test.ts:34:1
+✖ units to wei multiplies by WEI_PER_UNIT exactly (0.1187ms)
+  Error: not implemented
+      at unitsToWei (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/src/units.ts:13:9)
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan/test/units.test.ts:35:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)

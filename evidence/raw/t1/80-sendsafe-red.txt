@@ -1,0 +1,16 @@
+# S5 red — a send that throws after acceptance leaves no record
+# UTC: 2026-10-23T08:12:10Z
+# Fake clients only. Two cases fail: the pending record has no state field, and a send that
+# throws leaves no record at all (so a re-run would deploy twice).
+
+$ node --test test/deploy-resume.test.ts
+✔ the receipt wait times out once and recovers, then removes the pending record (30.458302ms)
+✖ an exhausted wait keeps the pending record and a second run refuses to send (2.7017ms)
+✖ a send that throws after the node accepted it leaves a sending record and blocks a re-run (1.2755ms)
+✔ --resume waits for the recorded tx and writes the final record without sending (2.695201ms)
+✔ --force-new overrides a pending record and sends exactly once (3.4317ms)
+✔ the receipt wait is bounded (2.6912ms)
+✔ --resume and --dry-run cannot be combined (0.4019ms)
+ℹ tests 7
+ℹ pass 5
+ℹ fail 2

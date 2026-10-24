@@ -1,0 +1,16 @@
+# T040 red — five-state pipeline suite fails on behaviour
+# UTC: 2026-10-21T12:31:12Z
+# Local Node only; no RPC, no keys. Asserts: submitted -> included -> executed -> finalized order,
+# a read-back slot that only opens after a successful execution, an observed finality argument
+# (tag or labelled heuristic), refusal to act before execution, verbatim reverted reason with no
+# read-back, and no stage skipping or rewriting.
+
+$ node --test test/status.test.ts
+✖ the five state slots fill in order (0.5884ms)
+✖ a record refuses to act before executed (0.117401ms)
+✖ finalized requires an observed finality and cannot precede execution (0.0909ms)
+✖ a reverted transaction keeps the verbatim reason and takes no read-back (0.089ms)
+✖ stages cannot be skipped or rewritten (0.0861ms)
+ℹ tests 5
+ℹ pass 0
+ℹ fail 5

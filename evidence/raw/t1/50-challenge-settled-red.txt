@@ -1,0 +1,44 @@
+# C2 red — a settled deal must never take a new challenge
+# UTC: 2026-10-21T12:25:33Z
+# Local Foundry only; no RPC, no keys. At block == endBlock settle is legal and challenge is legal,
+# so the test settles first and expects the challenge to revert; it does not revert today.
+# The handler gains invariant_noSettledDealHasOpenChallenge as a standing guard.
+
+$ forge test --match-path test/makhzan/Challenge.t.sol
+[PASS] test_answerAfterDeadlineRevertsWindowOpen() (gas: 1003436)
+[PASS] test_answerAfterEndBlockButBeforeDeadlinePasses() (gas: 3297593)
+[PASS] test_answerWithoutChallengeRevertsNoChallenge() (gas: 934220)
+[FAIL: next call did not revert as expected] test_challengeOnDealSettledAtTheEndBlockReverts() (gas: 261299)
+[PASS] test_challengeOnExpiredDealRevertsDealExpired() (gas: 175043)
+[PASS] test_challengeOnSettledDealReverts() (gas: 231540)
+[PASS] test_challengeOnUnknownDealRevertsNoDeal() (gas: 35246)
+[PASS] test_challengeOpenedEventCarriesFields() (gas: 181411)
+[PASS] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 212830)
+[PASS] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 1831455)
+[PASS] test_onlyDealOwnerCanChallenge() (gas: 157153)
+[PASS] test_onlyProviderCanAnswer() (gas: 982014)
+[PASS] test_openChallengeStaysResolvableAfterEndBlock() (gas: 282944)
+[PASS] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 332184)
+[PASS] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 215969)
+[PASS] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 212197)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 277564)
+[PASS] test_strangerResolvePaysOwnerNotCaller() (gas: 291119)
+[PASS] test_validAnswerBeforeDeadlinePasses() (gas: 1060316)
+Suite result: FAILED. 18 passed; 1 failed; 0 skipped; finished in 8.61ms (26.05ms CPU time)
+[FAIL: next call did not revert as expected] test_challengeOnDealSettledAtTheEndBlockReverts() (gas: 261299)
+
+$ forge test --match-path "test/makhzan/invariant/*"
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noSettledDealHasOpenChallenge
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+ MakhzanInvariantTest invariants (runs: 256, calls: 12800, reverts: 5621)
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1742934)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2971815)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 695529)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.69s (2.69s CPU time)

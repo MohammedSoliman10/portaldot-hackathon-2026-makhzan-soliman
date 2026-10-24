@@ -1,0 +1,42 @@
+# STEP 0 — DR-012: via_ir enabled (size-only), full re-run
+# UTC: 2026-10-21T16:32:57Z
+# Local Foundry + Node only; no RPC, no keys. Decision: via_ir = true and nothing else (peek and
+# events stay). solc 0.8.28, evm_version paris, optimizer_runs 1, bytecode_hash none,
+# cbor_metadata false unchanged. CI inherits contracts/foundry.toml, so no workflow edit.
+# Before: runtime 9,210 B, creation 9,773 B. After is below.
+
+$ rm -rf out cache && /usr/bin/time -f "cold build wall=%e s" forge build --sizes
+| Makhzan           | 6,378            | 6,966             | 18,198             | 42,186              |
+| MakhzanHarness    | 6,540            | 7,128             | 18,036             | 42,024              |
+cold build wall=36.14 s
+
+$ forge build --sizes
+| Makhzan           | 6,378            | 6,966             | 18,198             | 42,186              |
+| MakhzanHarness    | 6,540            | 7,128             | 18,036             | 42,024              |
+
+$ forge fmt --check
+fmt: clean
+
+$ forge test
+Ran 21 test suites in 3.27s (7.08s CPU time): 144 tests passed, 0 failed, 0 skipped (144 total tests)
+
+$ forge test --match-path "test/makhzan/invariant/*"
+MakhzanInvariantTest invariants:
+ MakhzanInvariantTest invariants (runs: 256, calls: 12800, reverts: 5623)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.84s (2.84s CPU time)
+
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed
+
+$ cd apps/makhzan && npm test && npm run typecheck
+ℹ tests 39
+ℹ pass 39
+ℹ fail 0
+> tsc --noEmit
+
+
+# Sizes: runtime 9,210 -> 6,378 B (-2,832); creation 9,773 -> 6,966 B (-2,807).
+# Planning estimate at 0.079 tPOT/byte + 13: 517 tPOT (was 741).
+# Cold build wall 36 s. No test, fuzz, invariant, vector or TS behaviour changed.

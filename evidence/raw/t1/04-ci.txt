@@ -1,0 +1,54 @@
+$ cat .github/workflows/ci.yml
+name: ci
+
+on:
+  push:
+    branches: ["002-core-storage-proofs"]
+  pull_request:
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.5
+      - name: Format check
+        working-directory: contracts
+        run: forge fmt --check
+      - name: Build sizes
+        working-directory: contracts
+        run: forge build --sizes
+      - name: Size budget
+        run: node scripts/check-size.mjs
+      - name: Contract tests
+        working-directory: contracts
+        run: forge test -vvv
+      - name: Gas snapshot
+        working-directory: contracts
+        run: forge snapshot --check
+
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.20.0"
+      - name: Install tier-0 package (imported helper dependency)
+        working-directory: apps/gates
+        run: npm ci
+      - name: Install makhzan package
+        working-directory: apps/makhzan
+        run: npm ci
+      - name: Typecheck
+        working-directory: apps/makhzan
+        run: npm run typecheck
+      - name: Test
+        working-directory: apps/makhzan
+        run: npm test
+      - name: Golden vector check
+        run: node packages/merkle-vectors/generate.ts --check

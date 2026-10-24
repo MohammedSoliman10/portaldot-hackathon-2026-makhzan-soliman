@@ -1,0 +1,24 @@
+{
+  "network": "local",
+  "evidenceLabel": "[local run]",
+  "chainId": 420420777,
+  "rpcUrl": "http://127.0.0.1:8600",
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "txHash": "0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2",
+  "blockNumber": "1",
+  "codeHash": "0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98",
+  "runtimeBytes": 6566,
+  "artifact": "/home/mohammed_soliman/hackathons/portaldot-tier1/contracts/out/Makhzan.sol/Makhzan.json",
+  "constructor": {
+    "challengeWindowBlocks": 10,
+    "challengeBlockSize": 1024,
+    "slashBps": 2000,
+    "minBondUnits": "10000000000000000",
+    "minBondWei": "100000000000000000000",
+    "minDurationBlocks": 10,
+    "maxDurationBlocks": 1000
+  },
+  "estimatedCostTpot": "0.003008",
+  "utc": "2026-10-23T09:17:58Z"
+}

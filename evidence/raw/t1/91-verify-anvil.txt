@@ -1,0 +1,17 @@
+# R3 anvil run — matching artifact and one tampered byte
+# UTC: 2026-10-23T09:14:59Z
+# Local anvil only; anvil public test mnemonic passed by env, never printed. The deploy also
+# proves the R2 raw receipt (evidence/receipts/local/<hash>.json) and derived txs.json.
+
+$ node apps/makhzan/scripts/verify-anvil.mjs
+deployed 0x5FbDB2315678afecb367f032d93F642f64180aa3 on anvil :8599
+match: 0x5FbDB2315678afecb367f032d93F642f64180aa3 block 1, 6566 B runtime, artifact 6566 B
+record /tmp/makhzan-verify-xjh4aw/evidence/verify-deployment.json
+verify exit=0
+MISMATCH: 0x5FbDB2315678afecb367f032d93F642f64180aa3 block 1, 6566 B runtime, artifact 6566 B
+refused: runtime code differs at byte 100: chain de artifact 00
+record /tmp/makhzan-verify-xjh4aw/tampered-evidence/verify-deployment.json
+tampered verify exit=1 (expected 1)
+record(ok) written to evidence/verify-deployment.local-anvil.json
+receipts 20 lines in txs.json
+[5.2s] done

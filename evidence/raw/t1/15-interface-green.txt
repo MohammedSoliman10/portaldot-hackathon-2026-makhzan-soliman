@@ -1,0 +1,18 @@
+# T017 — interface conformance suite (structural; no red by design)
+# UTC: 2026-10-21T07:20:30Z
+# Local Foundry only; no RPC, no keys.
+
+$ forge test --match-path test/makhzan/Interface.t.sol -vv
+No files changed, compilation skipped
+
+Ran 4 tests for test/makhzan/Interface.t.sol:InterfaceTest
+[PASS] test_abiIsExactlyTheDocumentedSurface() (gas: 386130)
+[PASS] test_everyStateChangingStubRevertsNotImplemented() (gas: 208457)
+[PASS] test_peekReturnsRawSlotsInRequestOrder() (gas: 23353)
+[PASS] test_unknownIdsReadAsZero() (gas: 35725)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.74ms (2.17ms CPU time)
+
+Ran 1 test suite in 6.41ms (1.74ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)
+
+$ forge build --sizes | grep Makhzan
+| Makhzan       | 2,958            | 3,580             | 21,618             | 45,572              |

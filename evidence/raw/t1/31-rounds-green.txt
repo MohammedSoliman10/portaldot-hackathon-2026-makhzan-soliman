@@ -1,0 +1,9 @@
+# T033 — one passed round and one failed round on the same deal (Rounds.t.sol green)
+# UTC: 2026-10-21T11:59:01Z
+# Local Foundry only; no RPC, no keys. Round 1 answers before the deadline (bond unchanged, no
+# slash) and round 2 times out (bond slashed by floor(20%)); the deal stays active and settle pays
+# exactly the escrowed price minus what was claimed.
+
+$ forge test --match-path test/makhzan/Rounds.t.sol
+[PASS] test_onePassedAndOneFailedRoundOnTheSameDealThenSettle() (gas: 1410661)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 4.77ms (2.56ms CPU time)

@@ -1,0 +1,16 @@
+# S2 red — resume-safe deploy tests fail on behaviour
+# UTC: 2026-10-23T02:54:10Z
+# The 4th argument is ignored by the old runDeploy, so every case falls through to the RPC and fails;
+# no case fails on a missing export (DeployDeps is a type-only import).
+
+$ node --test test/deploy-resume.test.ts
+✖ the receipt wait times out once and recovers, then removes the pending record (1108.115707ms)
+✖ an exhausted wait keeps the pending record and a second run refuses to send (1059.330807ms)
+✖ --resume waits for the recorded tx and writes the final record without sending (2112.844513ms)
+✖ --force-new overrides a pending record and sends exactly once (2111.914489ms)
+✖ the receipt wait is bounded (1057.220666ms)
+✖ --resume and --dry-run cannot be combined (1056.578565ms)
+ℹ tests 6
+ℹ pass 0
+ℹ fail 6
+✖ failing tests:

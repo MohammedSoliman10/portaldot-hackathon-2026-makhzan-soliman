@@ -1,0 +1,22 @@
+# T023 — packing verification (no growth found, no code change required)
+# UTC: 2026-10-21T07:25:55Z
+# Local Foundry only; no RPC, no keys.
+# T022 passed on its corrected first run because T016 already ships the packed state from
+# contracts/storage-layout.md: provider 1 slot, deal 3 slots, config 2 slots, no challenge slot.
+# This commit records that outcome; it changes no Solidity. The T022 commit message says
+# "failing" because the suite was authored in the red slot; the evidence is authoritative.
+
+$ forge test --match-path test/makhzan/StorageLayout.t.sol
+No files changed, compilation skipped
+
+Ran 3 tests for test/makhzan/StorageLayout.t.sol:StorageLayoutTest
+[PASS] test_dealUsesThreeSlots() (gas: 12314)
+[PASS] test_providerUsesTwoSlots() (gas: 10513)
+[PASS] test_twoConfigSlotsAreWrittenOnce() (gas: 7653)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 750.60µs (295.80µs CPU time)
+
+Ran 1 test suite in 6.67ms (750.60µs CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan        | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness | 6,017            | 6,654             | 18,559             | 42,498              |

@@ -1,0 +1,90 @@
+# T009a — Merkle fuzz properties and mutation check (FR-040, SC-003)
+# UTC: 2026-10-21T07:17:03Z
+# Repo: portaldot-tier1 (branch 002-core-storage-proofs); local Foundry only, no RPC, no keys.
+
+## Baseline suite (green)
+$ forge test --match-path test/makhzan/MerkleFuzz.t.sol
+No files changed, compilation skipped
+
+Ran 8 tests for test/makhzan/MerkleFuzz.t.sol:MerkleFuzzTest
+[PASS] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 1000, μ: 96908, ~: 50574)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 151177, ~: 86556)
+[PASS] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 1000, μ: 107524, ~: 60980)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 138799, ~: 87603)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 152699, ~: 88104)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 215576, ~: 83430)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 182052, ~: 148318)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 226349, ~: 221324)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 665.21ms (5.10s CPU time)
+
+Ran 1 test suite in 665.80ms (665.21ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+
+## Mutation 1: drop the `p == path.length` check in MerkleLib.verify
+$ git diff --stat src/makhzan/lib/MerkleLib.sol
+ contracts/src/makhzan/lib/MerkleLib.sol | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ forge test --match-path test/makhzan/MerkleFuzz.t.sol
+[PASS] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 1000, μ: 101565, ~: 59303)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 145485, ~: 85613)
+[PASS] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 1000, μ: 112434, ~: 70769)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 142636, ~: 97063)
+[FAIL: long path accepted; counterexample: calldata=0xea9bb15800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003ecc args=[0, 16076 [1.607e4]]] testFuzz_longPathIsRejected(uint8,uint32) (runs: 0, μ: 0, ~: 0)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 227184, ~: 100845)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 187176, ~: 164357)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 237015, ~: 237138)
+Suite result: FAILED. 7 passed; 1 failed; 0 skipped; finished in 626.73ms (4.36s CPU time)
+[FAIL: long path accepted; counterexample: calldata=0xea9bb15800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003ecc args=[0, 16076 [1.607e4]]] testFuzz_longPathIsRejected(uint8,uint32) (runs: 0, μ: 0, ~: 0)
+
+## Mutation 2: use the wrong parity for the sibling direction
+$ git diff --stat src/makhzan/lib/MerkleLib.sol
+ contracts/src/makhzan/lib/MerkleLib.sol | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ forge test --match-path test/makhzan/MerkleFuzz.t.sol
+[FAIL: valid proof rejected; counterexample: calldata=0xa9aa5d170000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000005db580000000000000000000000000000000000000000000000000000000000000035 args=[3, 383832 [3.838e5], 53]] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 144380, ~: 82303)
+[FAIL: valid length rejected; counterexample: calldata=0x9218524c00000000000000000000000000000000000000000000000000000000000000870000000000000000000000000000000000000000000000000000000000001ef4000000000000000000000000000000000000000000000000000000000000002a args=[135, 7924, 42]] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 147369, ~: 98507)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 145894, ~: 83945)
+[FAIL: proof replayed at another index; counterexample: calldata=0x885faba9000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000 args=[1, 1, 0]] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 4, μ: 265124, ~: 257905)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 182299, ~: 148093)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 236542, ~: 236797)
+Suite result: FAILED. 5 passed; 3 failed; 0 skipped; finished in 461.68ms (2.76s CPU time)
+[FAIL: valid proof rejected; counterexample: calldata=0xa9aa5d170000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000005db580000000000000000000000000000000000000000000000000000000000000035 args=[3, 383832 [3.838e5], 53]] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+[FAIL: valid length rejected; counterexample: calldata=0x9218524c00000000000000000000000000000000000000000000000000000000000000870000000000000000000000000000000000000000000000000000000000001ef4000000000000000000000000000000000000000000000000000000000000002a args=[135, 7924, 42]] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+[FAIL: proof replayed at another index; counterexample: calldata=0x885faba9000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000 args=[1, 1, 0]] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 4, μ: 265124, ~: 257905)
+
+## Mutation 3: skip the leaf prefix (hash the bytes without 0x00)
+$ git diff --stat src/makhzan/lib/MerkleLib.sol
+ contracts/src/makhzan/lib/MerkleLib.sol | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ forge test --match-path test/makhzan/MerkleFuzz.t.sol
+[FAIL: valid proof rejected; counterexample: calldata=0xa9aa5d17000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006 args=[1, 5, 6]] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 142650, ~: 74577)
+[FAIL: valid length rejected; counterexample: calldata=0x9218524c00000000000000000000000000000000000000000000000000000000000000870000000000000000000000000000000000000000000000000000000000001ef4000000000000000000000000000000000000000000000000000000000000002a args=[135, 7924, 42]] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 138787, ~: 92180)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 144148, ~: 76219)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 216083, ~: 96477)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 178511, ~: 138474)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 236552, ~: 247423)
+Suite result: FAILED. 6 passed; 2 failed; 0 skipped; finished in 613.94ms (4.27s CPU time)
+[FAIL: valid proof rejected; counterexample: calldata=0xa9aa5d17000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006 args=[1, 5, 6]] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+[FAIL: valid length rejected; counterexample: calldata=0x9218524c00000000000000000000000000000000000000000000000000000000000000870000000000000000000000000000000000000000000000000000000000001ef4000000000000000000000000000000000000000000000000000000000000002a args=[135, 7924, 42]] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 0, μ: 0, ~: 0)
+
+## Restored: git diff on MerkleLib.sol must be empty
+$ git diff --stat src/makhzan/lib/MerkleLib.sol
+exit=0
+
+## Restored suite (green again)
+$ forge test --match-path test/makhzan/MerkleFuzz.t.sol
+Ran 8 tests for test/makhzan/MerkleFuzz.t.sol:MerkleFuzzTest
+[PASS] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 1000, μ: 98405, ~: 57071)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 136927, ~: 73221)
+[PASS] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 1000, μ: 109223, ~: 67446)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 142491, ~: 101009)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 138410, ~: 74861)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 220212, ~: 95158)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 173119, ~: 118925)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 227823, ~: 234576)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 700.51ms (5.57s CPU time)
+
+Ran 1 test suite in 701.10ms (700.51ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)

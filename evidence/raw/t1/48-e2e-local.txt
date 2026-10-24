@@ -1,0 +1,98 @@
+# T050 — local end-to-end run on anvil (re-run in batch 6, daemon read-back included)
+# UTC: 2026-10-21T23:22:02Z
+# Local only: anvil on 127.0.0.1:8549, chain 420420777, anvil's public default accounts. No live RPC,
+# no real key, no deployment. One 1 MiB file in 1,024 blocks: a challenged round is answered correctly
+# (bond unchanged), a second round is deliberately skipped and slashed 20% after the window, then the
+# deal is settled. Every transaction hash below is local and reproducible from a fresh anvil.
+
+$ node scripts/e2e-local.mjs
+chain id 420420777 on http://127.0.0.1:8549 (local anvil)
+
+== deploy ==
+Makhzan deployed at 0x5fbdb2315678afecb367f032d93f642f64180aa3 (tx 0x8d03db9de05b23a374441ef4d995754cd1e8b10631c2b2c63fae19cccb3ea538)
+
+== register provider ==
+provider 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 id=1 bond=10000000000000000 units (tx 0xf7809cfa53a18fba195192aedc734c2bbacd15f2fd7502961149bb0644aac5fc)
+
+== chunk, build and upload 1 MiB ==
+root 0x3bb74aa75b7de7d472983940cc20bf821a9b222b8d2dd58dfce541928a36f7b8 size 1048576 leafCount 1024 acknowledged
+
+== create deal ==
+deal 1 created, owner 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, end block 53 (tx 0xea6dfade70b4619b39a5d9e97c5b8d4ae5e0eedc65a392c455dfbde008f0117f)
+
+== challenge 1 - answered (expected pass) ==
+index 54, path length 10, answer 0xd64e51e45c08c6701b4d12879be451cb57b724c875d403e2543324c015527068, bond unchanged
+
+== challenge 2 - skipped on purpose (expected slash) ==
+daemon re-read the round: failed
+index 58, slash 2000000000000000 units, owner credited 20000000000000000000 wei
+
+== settle ==
+settle tx 0x8de3cea6e509b43fe8b43f14723da1ac7d9786cc36993fb159c01991c3ea5faf; provider +10000000000000000000 wei; claimed 1000000000000000
+
+== summary ==
+{
+  "tier1LocalRun": {
+    "settle": {
+      "tx": "0x8de3cea6e509b43fe8b43f14723da1ac7d9786cc36993fb159c01991c3ea5faf",
+      "block": "55",
+      "status": "success",
+      "providerBalanceBeforeWei": "9899999695509565813977",
+      "providerBalanceAfterWei": "9909999695509565813977",
+      "providerCreditWei": "10000000000000000000",
+      "claimed": "1000000000000000",
+      "claimableAfter": "0",
+      "settledFlag": 1
+    },
+    "chainId": 420420777,
+    "rpc": "http://127.0.0.1:8549",
+    "makhzan": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+    "dealId": 1,
+    "providerId": 1,
+    "root": "0x3bb74aa75b7de7d472983940cc20bf821a9b222b8d2dd58dfce541928a36f7b8",
+    "size": 1048576,
+    "leafCount": 1024,
+    "blockSize": 1024,
+    "priceUnits": "1000000000000000",
+    "minBondUnits": "10000000000000000",
+    "slashBps": "2000",
+    "rounds": [
+      {
+        "outcome": "passed",
+        "dealId": 1,
+        "index": 54,
+        "pathLength": 10,
+        "challengeTx": "0xe6fff2362993d544303246aef9226e590a6b9efbff9b4d09c579a74caa8fec38",
+        "challengeBlock": "4",
+        "challengeStatus": "success",
+        "answerTx": "0xd64e51e45c08c6701b4d12879be451cb57b724c875d403e2543324c015527068",
+        "answerBlock": "5",
+        "answerStatus": "success",
+        "challengeOpenAfter": false,
+        "bondBefore": "10000000000000000",
+        "bondAfter": "10000000000000000"
+      },
+      {
+        "outcome": "slashed",
+        "dealId": 1,
+        "index": 58,
+        "skipped": true,
+        "challengeTx": "0xfb76e56babe0461c6d57a767bd418cfb89054fb9f9b9b01d3df16d93a9ba2d18",
+        "challengeBlock": "6",
+        "challengeStatus": "success",
+        "resolveTx": "0x6f835f73df96d577fb472286b6a928dff1aa4dfec0dc001991442574b0c2e400",
+        "resolveBlock": "18",
+        "resolveStatus": "success",
+        "daemonStatusAfterResolve": "failed",
+        "bondBefore": "10000000000000000",
+        "bondAfter": "8000000000000000",
+        "slashed": "2000000000000000",
+        "ownerBalanceBeforeWei": "9989996767439178360684",
+        "ownerBalanceAfterWei": "10009996767439178360684",
+        "ownerCreditWei": "20000000000000000000"
+      }
+    ]
+  }
+}
+
+PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil

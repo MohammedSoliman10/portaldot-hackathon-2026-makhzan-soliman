@@ -1,0 +1,33 @@
+# P1 green — deploy command
+# UTC: 2026-10-22T02:08:16Z
+# Local anvil only (chain 420420777, port 8561), anvil's public test account #0 from the environment.
+# Exercises: explicit network (no default), live preconditions, key from env only, whole-unit minBond,
+# constructor bounds, --artifact loading, --dry-run estimate in tPOT with no transaction, DR-012
+# reserve refusal, and a real deploy whose record is checked against the chain (address, tx, block,
+# code hash, runtime bytes from the artifact, config read back from packed slot 0).
+
+$ node --test test/deploy.test.ts
+✔ the network must be explicit: no default (168.649699ms)
+✔ live needs an RPC URL and a chain id (0.477ms)
+✔ the key is required and must be key-shaped (0.3033ms)
+✔ a minBond that is not a whole protocol unit is refused (0.5516ms)
+✔ an out-of-bound constructor value is refused (0.7014ms)
+✔ a missing artifact is refused before any transaction (0.85ms)
+✔ dry-run prints a tPOT estimate and sends nothing (57.280599ms)
+✔ a dry run that would leave the owner below the reserve is refused (14.5659ms)
+✔ a deploy on anvil writes a correct record (51.4378ms)
+✔ a custom artifact is measured, not assumed (1.6838ms)
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+
+$ npm run typecheck
+> tsc --noEmit
+
+
+$ env -u MAKHZAN_NETWORK -u MAKHZAN_PRIVATE_KEY node scripts/deploy.mjs --dry-run --min-bond 100000000000000000000
+deploy failed: MAKHZAN_NETWORK must be set to "local" or "live" (got null)
+exit=1
+
+# The wrapper (scripts/deploy.mjs) parses argv and calls main(); the suite above drives the same main()
+# for every case. With no network set it refuses before touching the RPC.

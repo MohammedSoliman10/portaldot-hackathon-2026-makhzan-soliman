@@ -1,0 +1,10 @@
+# R2 red — the bundle schema has no writer or validator
+# UTC: 2026-10-23T09:08:06Z
+
+$ node --test test/evidence.test.ts
+
+✖ failing tests:
+
+test at test/evidence.test.ts:1:1
+✖ test/evidence.test.ts (70.674594ms)
+  'test failed'

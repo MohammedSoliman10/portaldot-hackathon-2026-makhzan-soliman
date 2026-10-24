@@ -30,3 +30,6 @@ evidence/rpc-log/*.tmp
 # OS / editor
 .DS_Store
 *.swp
+
+# local demo file for the live runbook; never committed
+demo-1mib.bin

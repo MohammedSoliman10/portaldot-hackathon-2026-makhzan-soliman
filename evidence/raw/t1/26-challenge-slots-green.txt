@@ -1,0 +1,16 @@
+# T028 — challenge rounds add no storage (T027 suite green, no fix needed)
+# UTC: 2026-10-21T11:53:43Z
+# Local Foundry only; no RPC, no keys. The challenge path reuses deal slots A and C: the open
+# flag in slot A and index/start in slot C. Two consecutive rounds leave the slot after the
+# deal record at zero and do not shift any other field.
+
+$ forge test --match-path test/makhzan/StorageLayout.t.sol
+[PASS] test_challengeUsesOnlyTheExistingDealSlots() (gas: 51681)
+[PASS] test_configPacksIntoOneSlot() (gas: 6946)
+[PASS] test_dealUsesThreeSlots() (gas: 12358)
+[PASS] test_providerUsesTwoSlots() (gas: 10513)
+[PASS] test_twoChallengeRoundsAddNoStorage() (gas: 158214)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.61ms (972.90µs CPU time)
+
+$ forge build --sizes
+| Makhzan           | 7,930            | 8,493             | 16,646             | 40,659              |

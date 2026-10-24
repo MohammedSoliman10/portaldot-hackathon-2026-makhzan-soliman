@@ -1,0 +1,21 @@
+# P1 red — deploy command suite fails on behaviour
+# UTC: 2026-10-22T02:07:01Z
+# Local anvil only (chain 420420777, port 8561), anvil's public test key from the environment. The
+# module under test keeps its documented exports and throws "not implemented", so every failure below
+# is an assertion or a refusal, never a compile or module-resolution error.
+
+$ node --test test/deploy.test.ts
+✖ the network must be explicit: no default (178.5923ms)
+✖ live needs an RPC URL and a chain id (1.6148ms)
+✖ the key is required and must be key-shaped (0.5637ms)
+✖ a minBond that is not a whole protocol unit is refused (0.2282ms)
+✖ an out-of-bound constructor value is refused (0.3156ms)
+✖ a missing artifact is refused before any transaction (0.1887ms)
+✖ dry-run prints a tPOT estimate and sends nothing (70.189701ms)
+✖ a dry run that would leave the owner below the reserve is refused (0.8618ms)
+✖ a deploy on anvil writes a correct record (1.0253ms)
+✖ a custom artifact is measured, not assumed (1.4657ms)
+ℹ tests 10
+ℹ pass 0
+ℹ fail 10
+✖ failing tests:

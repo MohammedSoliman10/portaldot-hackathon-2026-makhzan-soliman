@@ -1,0 +1,26 @@
+{
+  "name": "makhzan",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "daemon": "node src/daemonMain.ts",
+    "cli": "node src/cliMain.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.ts",
+    "e2e:local": "node scripts/e2e-local.mjs",
+    "verify:deployment": "node scripts/verify-deployment.mjs",
+    "evidence:refusals": "node scripts/evidence-refusals.mjs",
+    "doctor": "node src/doctorMain.ts"
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "5.9.3"
+  }
+}

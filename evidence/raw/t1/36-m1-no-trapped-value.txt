@@ -1,0 +1,32 @@
+# M1 — invariant_noTrappedValue: balance EQUALS bonds + unclaimed deposits exactly
+# UTC: 2026-10-21T11:22:25Z
+# Local Foundry only; no RPC, no keys. This stronger sibling of FR-041(1) passes today because no
+# exit path is reachable; it is the check that would catch a payout that over- or under-drains.
+# The suite still fails on the old coverage gate, removed in M2.
+
+$ forge test --match-path "test/makhzan/invariant/*"
+Ran 1 test for test/makhzan/invariant/MakhzanInvariant.t.sol:MakhzanInvariantTest
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+MakhzanInvariantTest invariants: 1/7 invariants broken
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+[PASS] invariant_slashNeverExceedsBond
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 4.15s (4.15s CPU time)
+Ran 1 test suite in 4.15s (4.15s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+MakhzanInvariantTest invariants: 1/7 invariants broken
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[FAIL: no challenge was reachable: 0 <= 0] invariant_reachablePathsAreExercised
+[PASS] invariant_slashNeverExceedsBond
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan           | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness    | 6,017            | 6,654             | 18,559             | 42,498              |

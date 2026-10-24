@@ -1,0 +1,11 @@
+# LIVE-2a owner doctor after the deploy (read-only)
+# UTC: 2026-10-24T06:58:18Z
+$ MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 MAKHZAN_ED_TPOT=0 MAKHZAN_GAS_TPOT=100 scripts/with-live-env.sh owner -- node apps/makhzan/src/doctorMain.ts
+ok  network: LIVE, chain 420420777, account 0x0948EBD7637D1C32858a6FC5D947E85A6600205C, contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+ok  chain id: RPC reports 420420777, expected 420420777
+FAIL  account mapping: this account is not a registered provider
+      fix: MAKHZAN_NETWORK=live MAKHZAN_PRIVATE_KEY=<key> node apps/makhzan/src/cliMain.ts register --bond <tPOT>
+ok  balance: balance 199.435042290680279745 tPOT covers 100 tPOT (existential deposit + deposits + gas)
+ok  contract code: 6566 B of runtime code at 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+doctor: not ready; fix the FAIL lines above
+exit=1

@@ -1,0 +1,51 @@
+# LIVE-2a deploy — ONE real Makhzan creation transaction
+# UTC: 2026-10-24T06:57:04Z
+# Pre-send balance (exact): 729279359108146266225 wei = 729.279359108146266225 tPOT
+# Constructor: window 50, blockSize 1024, slash 2000 bps, minBond 10000000000000000000 wei (1e15 units = 10 tPOT),
+#              minDuration 100, maxDuration 100800.
+
+$ scripts/with-live-env.sh owner -- node scripts/deploy.mjs --min-bond 10000000000000000000 --window 50 --block-size 1024 --slash-bps 2000 --min-duration 100 --max-duration 100800
+estimated deploy cost 538.123540 tPOT; owner balance 729.279359 tPOT; reserve 100 tPOT
+sending deploy tx (nonce 3); pending record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/pending-live-420420777.json
+tx sent 0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7 (nonce 3); pending record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/pending-live-420420777.json
+deployed 0x60481DFcFCA34A8F095939D9675eC715127B2e44 [live run] tx 0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7 block 171308
+code 6566 B, codeHash 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98, config read back
+record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/live-420420777-20261024-065714Z.json
+exit=0
+
+# ---------------------------------------------------------------------------
+# [live run] measured facts
+# ---------------------------------------------------------------------------
+# chain id:              420420777
+# deployer:              0x0948EBD7637D1C32858a6FC5D947E85A6600205C
+# contract address:      0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# tx hash:               0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7
+# nonce:                 3
+# block:                 171308 (finalized block 171311 observed afterwards)
+# status:                success
+# gas used:              16262870374998956 (raw receipt units)
+# effective gas price:   32580 wei
+# gas limit sent:        16516990194562195 (the estimate; no multiplier)
+# estimate:              538.123540 tPOT (16516990194562195 x 32580 = 538123540538836313100 wei)
+# measured balance drop: 529844316817465986480 wei = 529.844316817465986480 tPOT
+#                         (729279359108146266225 - 199435042290680279745)
+# balance after:         199.435042290680279745 tPOT
+# measured ratio:        529844316817465986480 / 538123540538836313100 = 0.9846146412530473
+# calibration ratio:     0.984608251872 (Tier 0, DR-013)
+# difference:            +0.000006389381 absolute (+0.00065%) - inside the 10% band
+# runtime bytes:         6566 (codeHash 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98)
+# creation bytes:        7154
+# verify:deployment:     match true, block 171310, runtime 6566 B / artifact 6566 B, firstDiff null
+# config read back:      window 50, blockSize 1024, slashBps 2000, minBond 1000000000000000 units
+#                        (10000000000000000000 wei), nextDealId 0, providerCount 0,
+#                        minDuration 100, maxDuration 100800
+# slot0:                 0x0000000189c00000006400000000000000038d7ea4c6800007d0040000000032
+# pending record:        state "sending" written before the send, state "sent" + hash after;
+#                        removed only after the receipt (snapshots 59-pending-sending.json,
+#                        59-pending-sent.json); no pending record remains
+# receipt:               evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json
+# record:                evidence/deployments/live-420420777-20261024-065714Z.json
+# verify record:         evidence/verify-deployment.json
+# doctor after deploy:   contract code ok (6566 B), balance 199.435... covers the 100 tPOT reserve;
+#                        the mapping FAIL is expected for the owner, who never registers
+# no second deploy:      exactly one transaction sent; no --force-new, no --resume used

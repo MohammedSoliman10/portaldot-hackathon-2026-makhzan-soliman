@@ -1,0 +1,28 @@
+# T018 — provider registry suite (RED before T019), regenerated against the corrected suite
+# UTC: 2026-10-21T07:23:01Z
+# Local Foundry only; no RPC, no keys. Source reverted to the T018 skeleton for this run; every failure is the NotImplemented stub.
+
+$ forge test --match-path test/makhzan/Registry.t.sol
+[FAIL: Error != expected error: NotImplemented() != NotRegistered()] test_addBondByStrangerRevertsNotRegistered() (gas: 39118)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_nonMultipleValueRevertsBadParams() (gas: 39105)
+[FAIL: Error != expected error: NotImplemented() != BondTooSmall()] test_registerBelowMinimumRevertsBondTooSmall() (gas: 39239)
+[FAIL: NotImplemented()] test_registerEventCarriesDocumentedFields() (gas: 41193)
+[FAIL: NotImplemented()] test_registerStoresBondAndStableId() (gas: 38508)
+[FAIL: NotImplemented()] test_secondRegistrationRevertsAlreadyRegistered() (gas: 38772)
+[FAIL: NotImplemented()] test_topUpUpdatesBondReadBack() (gas: 38596)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_unitsAboveUint64CapRevertBadParams() (gas: 40155)
+[FAIL: NotImplemented()] test_withdrawBondClearsRegistrationAndPaysFullBond() (gas: 38794)
+Suite result: FAILED. 0 passed; 9 failed; 0 skipped; finished in 1.09ms (1.24ms CPU time)
+Ran 1 test suite in 6.87ms (1.09ms CPU time): 0 tests passed, 9 failed, 0 skipped (9 total tests)
+[FAIL: Error != expected error: NotImplemented() != NotRegistered()] test_addBondByStrangerRevertsNotRegistered() (gas: 39118)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_nonMultipleValueRevertsBadParams() (gas: 39105)
+[FAIL: Error != expected error: NotImplemented() != BondTooSmall()] test_registerBelowMinimumRevertsBondTooSmall() (gas: 39239)
+[FAIL: NotImplemented()] test_registerEventCarriesDocumentedFields() (gas: 41193)
+[FAIL: NotImplemented()] test_registerStoresBondAndStableId() (gas: 38508)
+[FAIL: NotImplemented()] test_secondRegistrationRevertsAlreadyRegistered() (gas: 38772)
+[FAIL: NotImplemented()] test_topUpUpdatesBondReadBack() (gas: 38596)
+[FAIL: Error != expected error: NotImplemented() != BadParams()] test_unitsAboveUint64CapRevertBadParams() (gas: 40155)
+[FAIL: NotImplemented()] test_withdrawBondClearsRegistrationAndPaysFullBond() (gas: 38794)
+
+$ forge build --sizes | grep Makhzan (T018 skeleton, no BondLib)
+| Makhzan | 2,958 | 3,580 | 21,618 | 45,572 |

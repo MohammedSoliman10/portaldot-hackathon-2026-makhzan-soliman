@@ -1,0 +1,14 @@
+# R4 — challenge selector includes the deal id (confirmed before changing anything)
+# UTC: 2026-10-23T09:23:56Z
+# Source: _selectIndex = keccak256(abi.encodePacked(blockhash(block.number-1), block.prevrandao, dealId))
+#         % leafCount. The deal id is in the seed, so no STOP and no contract change.
+
+$ forge test --match-contract ChallengeSeedTest
+[PASS] test_dealsAcrossFortyBlocksKeepVaryingIndices() (gas: 6918561)
+[PASS] test_manyDealsInOneBlockDoNotShareOneIndex() (gas: 2761618)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.15ms (5.92ms CPU time)
+Ran 1 test suite in 11.24ms (7.15ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)
+
+$ forge test
+
+Ran 23 test suites in 7.42s (21.05s CPU time): 152 tests passed, 0 failed, 0 skipped (152 total tests)

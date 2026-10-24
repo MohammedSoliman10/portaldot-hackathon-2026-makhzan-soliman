@@ -1,0 +1,15 @@
+# R5 green — refusal test suite
+# UTC: 2026-10-23T09:20:22Z
+
+$ node --test test/refusals.test.ts
+✔ a refused eth_call is decoded to its custom error, never to a revert string (5.973099ms)
+✔ an unexpected revert is recorded as unknown, not dropped (0.3534ms)
+✔ a call that unexpectedly succeeds is a refusal-test failure, not a recorded success (0.7491ms)
+ℹ tests 3
+ℹ pass 3
+ℹ fail 0
+
+$ npm test
+ℹ tests 117
+ℹ pass 117
+ℹ fail 0

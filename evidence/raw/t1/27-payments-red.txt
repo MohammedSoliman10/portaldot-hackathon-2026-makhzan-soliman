@@ -1,0 +1,39 @@
+# T029 — accrual, claim and settlement suite (RED before T030; no implementation in batch 2)
+# UTC: 2026-10-21T07:28:52Z
+# Local Foundry only; no RPC, no keys. The three accrual reads pass (read surface from T016);
+# every value-moving case fails on the claim/settle NotImplemented stubs.
+
+$ forge test --match-path test/makhzan/Payments.t.sol
+[PASS] test_accrualAtMidpointIsFlooredLinearShare() (gas: 156867)
+[PASS] test_accrualCapsAtPriceAfterEndBlock() (gas: 156677)
+[PASS] test_accrualIsZeroAtStartBlock() (gas: 137975)
+[FAIL: Error != expected error: NotImplemented() != NotProvider()] test_claimByStrangerRevertsNotProvider() (gas: 174422)
+[FAIL: Error != expected error: NotImplemented() != NoDeal()] test_claimOnUnknownDealRevertsNoDeal() (gas: 32321)
+[FAIL: Error != expected error: NotImplemented() != ZeroClaim()] test_claimWithNoAccrualRevertsZeroClaim() (gas: 156368)
+[FAIL: NotImplemented()] test_cumulativeClaimsNeverExceedPrice() (gas: 173512)
+[FAIL: NotImplemented()] test_midDealClaimPaysAccruedAndUpdatesClaimed() (gas: 190577)
+[FAIL: NotImplemented()] test_secondImmediateClaimRevertsZeroClaim() (gas: 173773)
+[FAIL: NotImplemented()] test_secondSettleRevertsAlreadySettled() (gas: 173764)
+[FAIL: Error != expected error: NotImplemented() != BeforeEnd()] test_settleBeforeEndRevertsBeforeEnd() (gas: 156940)
+[FAIL: NotImplemented()] test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 188854)
+[FAIL: NotImplemented()] test_settlePaysProviderUnpaidAccrued() (gas: 173913)
+[FAIL: NotImplemented()] test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 154219)
+[FAIL: NotImplemented()] test_strangerSettleMatchesOwnerSettle() (gas: 306178)
+Suite result: FAILED. 3 passed; 12 failed; 0 skipped; finished in 3.00ms (3.73ms CPU time)
+Ran 1 test suite in 6.68ms (3.00ms CPU time): 3 tests passed, 12 failed, 0 skipped (15 total tests)
+[FAIL: Error != expected error: NotImplemented() != NotProvider()] test_claimByStrangerRevertsNotProvider() (gas: 174422)
+[FAIL: Error != expected error: NotImplemented() != NoDeal()] test_claimOnUnknownDealRevertsNoDeal() (gas: 32321)
+[FAIL: Error != expected error: NotImplemented() != ZeroClaim()] test_claimWithNoAccrualRevertsZeroClaim() (gas: 156368)
+[FAIL: NotImplemented()] test_cumulativeClaimsNeverExceedPrice() (gas: 173512)
+[FAIL: NotImplemented()] test_midDealClaimPaysAccruedAndUpdatesClaimed() (gas: 190577)
+[FAIL: NotImplemented()] test_secondImmediateClaimRevertsZeroClaim() (gas: 173773)
+[FAIL: NotImplemented()] test_secondSettleRevertsAlreadySettled() (gas: 173764)
+[FAIL: Error != expected error: NotImplemented() != BeforeEnd()] test_settleBeforeEndRevertsBeforeEnd() (gas: 156940)
+[FAIL: NotImplemented()] test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 188854)
+[FAIL: NotImplemented()] test_settlePaysProviderUnpaidAccrued() (gas: 173913)
+[FAIL: NotImplemented()] test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 154219)
+[FAIL: NotImplemented()] test_strangerSettleMatchesOwnerSettle() (gas: 306178)
+
+$ forge build --sizes | grep -E "Makhzan"
+| Makhzan        | 5,542            | 6,164             | 19,034             | 42,988              |
+| MakhzanHarness | 6,017            | 6,654             | 18,559             | 42,498              |
