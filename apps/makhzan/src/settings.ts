@@ -36,6 +36,9 @@ export interface Settings {
   receiptTimeoutMs: number;
 }
 
+/** Everything `verify` needs, and nothing that needs a key. */
+export type ReadOnlySettings = Omit<Settings, "key" | "daemonPort" | "pollMs" | "daemonUrl" | "receiptTimeoutMs">;
+
 function integer(value: string, name: string): number {
   if (!/^\d+$/.test(value)) throw new SettingsError(`${name} must be a non-negative integer (got ${JSON.stringify(value)})`);
   const parsed = Number(value);
@@ -50,22 +53,7 @@ function address(value: string | undefined): Hex {
 }
 
 export function loadSettings(env: NodeJS.ProcessEnv): Settings {
-  const network = env.MAKHZAN_NETWORK;
-  if (network !== "local" && network !== "live") {
-    throw new SettingsError(`MAKHZAN_NETWORK must be set to "local" or "live" (got ${JSON.stringify(network ?? null)})`);
-  }
-
-  let rpcUrl: string;
-  let chainId: number;
-  if (network === "live") {
-    if (!env.MAKHZAN_RPC_URL) throw new SettingsError("MAKHZAN_NETWORK=live needs MAKHZAN_RPC_URL");
-    if (!env.MAKHZAN_CHAIN_ID) throw new SettingsError("MAKHZAN_NETWORK=live needs MAKHZAN_CHAIN_ID");
-    rpcUrl = env.MAKHZAN_RPC_URL;
-    chainId = integer(env.MAKHZAN_CHAIN_ID, "MAKHZAN_CHAIN_ID");
-  } else {
-    rpcUrl = env.MAKHZAN_RPC_URL ?? LOCAL_RPC;
-    chainId = env.MAKHZAN_CHAIN_ID ? integer(env.MAKHZAN_CHAIN_ID, "MAKHZAN_CHAIN_ID") : LOCAL_CHAIN_ID;
-  }
+  const base = loadReadOnlySettings(env);
 
   const key = env.MAKHZAN_PRIVATE_KEY;
   if (!key) throw new SettingsError("MAKHZAN_PRIVATE_KEY is not set; keys are never accepted on argv");
@@ -88,15 +76,42 @@ export function loadSettings(env: NodeJS.ProcessEnv): Settings {
   const daemonUrl = env.MAKHZAN_DAEMON_URL ?? `http://127.0.0.1:${daemonPort}`;
 
   return {
-    network,
-    rpcUrl,
-    chainId,
-    contract: address(env.MAKHZAN_CONTRACT),
+    ...base,
     key: key as Hex,
-    stateDir: env.MAKHZAN_STATE_DIR ?? DEFAULT_STATE_DIR,
     daemonPort,
     pollMs,
     daemonUrl,
     receiptTimeoutMs,
+  };
+}
+
+/**
+ * The network, RPC, chain id and contract, with no key. `verify` uses this: a read-only command must
+ * not need a signing key at all.
+ */
+export function loadReadOnlySettings(env: NodeJS.ProcessEnv): ReadOnlySettings {
+  const network = env.MAKHZAN_NETWORK;
+  if (network !== "local" && network !== "live") {
+    throw new SettingsError(`MAKHZAN_NETWORK must be set to "local" or "live" (got ${JSON.stringify(network ?? null)})`);
+  }
+
+  let rpcUrl: string;
+  let chainId: number;
+  if (network === "live") {
+    if (!env.MAKHZAN_RPC_URL) throw new SettingsError("MAKHZAN_NETWORK=live needs MAKHZAN_RPC_URL");
+    if (!env.MAKHZAN_CHAIN_ID) throw new SettingsError("MAKHZAN_NETWORK=live needs MAKHZAN_CHAIN_ID");
+    rpcUrl = env.MAKHZAN_RPC_URL;
+    chainId = integer(env.MAKHZAN_CHAIN_ID, "MAKHZAN_CHAIN_ID");
+  } else {
+    rpcUrl = env.MAKHZAN_RPC_URL ?? LOCAL_RPC;
+    chainId = env.MAKHZAN_CHAIN_ID ? integer(env.MAKHZAN_CHAIN_ID, "MAKHZAN_CHAIN_ID") : LOCAL_CHAIN_ID;
+  }
+
+  return {
+    network,
+    rpcUrl,
+    chainId,
+    contract: address(env.MAKHZAN_CONTRACT),
+    stateDir: env.MAKHZAN_STATE_DIR ?? DEFAULT_STATE_DIR,
   };
 }
