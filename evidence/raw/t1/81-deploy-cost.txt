@@ -1,14 +1,56 @@
-T1 deploy cost derivation (from evidence/raw/t1/59-live-deploy.txt)
-collected_at_utc: 2026-10-26T00:21:27Z
-mode: local arithmetic on recorded numbers; no network, no key
-gasUsed: 16262870374998956
-effective_gas_price_wei: 32580
-cost_wei: 529844316817465986480
-cost_tPOT: 529.844316817465986480
-runtime_bytes: 6566
-creation_bytes: 7154
-cost_per_runtime_byte_tPOT: 0.08069514420004051
-cost_per_runtime_byte_tPOT_rounded: 0.0807
-cost_per_creation_byte_tPOT: 0.07406266659455772
-estimate_tPOT: 538.123540 (rounded; the exact ratio 0.9846146412530473 is in 59-live-deploy.txt)
-reading: the measured balance drop equals gasUsed x effective gas price exactly; this is the gas charge, not a storage deposit
+T1 deploy cost: measured owner drop and what sits inside it
+collected_at_utc: 2026-10-26T05:52:10Z
+mode: local arithmetic on recorded numbers; no network, no key, no transaction
+reason: the earlier version of this file called the whole drop "the gas charge, not a storage deposit".
+        The reconciliation below shows the contract's reserved storage deposit is inside that drop.
+
+sources
+  owner balance before/after: evidence/raw/t1/59-live-deploy.txt
+    before_wei: 729279359108146266225
+    after_wei:  199435042290680279745
+  deploy tx value and creation: evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json
+    value_wei: 0
+    status: success, block: 171308
+  contract account deposits: evidence/raw/t1/79-account-mapping-deposits.txt
+    reserved_planck: 16551300000000000
+    storageBaseDeposit_planck: 12709800000000000
+    storageItemDeposit_planck: 1500000000000
+    storageByteDeposit_planck: 3840000000000000
+    reserved_equals_sum: yes
+  1 planck = 10000 wei (revive.nativeToEthRatio = 10000)
+
+derivation
+  owner_drop_wei: 529844316817465986480
+  owner_drop_tPOT: 529.844316817465986480
+  reserved_wei: 165513000000000000000
+  reserved_tPOT: 165.513000000000000000
+  execution_fee_wei: 364331316817465986480
+  execution_fee_tPOT: 364.331316817465986480
+  reserved_plus_execution_equals_drop: yes
+  reserved_share_of_drop_pct: 31.238043845437726
+
+  gasUsed: 16262870374998956
+  effective_gas_price_wei: 32580
+  gasUsed_x_price_wei: 529844316817465986480 (= owner_drop_wei)
+
+  runtime_bytes: 6566
+  creation_bytes: 7154
+  cost_per_runtime_byte_total_tPOT: 0.08069514420004051
+  cost_per_runtime_byte_total_tPOT_rounded: 0.0807
+  cost_per_runtime_byte_reserved_tPOT: 0.025207584526347852
+  cost_per_runtime_byte_execution_tPOT: 0.055487559673692656
+  cost_per_creation_byte_tPOT: 0.07406266659455772
+  estimate_tPOT: 538.123540
+  measured_over_estimate: 0.9846146412530473 (the ratio recorded in 59-live-deploy.txt)
+
+reading
+  1. The owner's measured balance drop is 529.844316817465986480 tPOT. That is the total deploy cost.
+  2. The contract account holds 165.513 tPOT as a reserved storage deposit: the sum of
+     storageBaseDeposit + storageItemDeposit + storageByteDeposit from revive.accountInfoOf equals
+     system.account.reserved exactly (evidence 79).
+  3. The deploy transaction carried value 0 and the contract did not exist before it, so no other
+     payment could have funded that reserve. It must be inside the 529.84.
+  4. The remainder, 364.331316817465986480 tPOT, is the execution fee.
+  label: owner_drop and reserved are [measured]; the SPLIT into reserved + execution fee is
+         [inferred from reconciliation], not a receipt field.
+  refundability of the reserved deposit: not measured.

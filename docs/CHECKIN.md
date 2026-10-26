@@ -44,7 +44,9 @@ The Tier-1 contract is deployed on the Portaldot V3 testnet [live run]: address
 0x60481DFcFCA34A8F095939D9675eC715127B2e44, deploy tx
 0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7 at block 171308, chain
 420420777. Measured deploy cost 529.844316817465986480 tPOT against a 538.123540 tPOT estimate
-(ratio 0.9846146412530473; Tier-0 calibration 0.984608251872). verify:deployment matches the artifact
+(ratio 0.9846146412530473; Tier-0 calibration 0.984608251872); of that, 165.513 tPOT is the
+contract's reserved storage deposit and 364.331316817465986480 tPOT is execution fees
+[inferred from reconciliation]. verify:deployment matches the artifact
 byte for byte (6,566 B runtime; code hash
 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98) and the constructor config reads
 back as window 50, block size 1024, slash 2000 bps, min bond 1e15 units, duration 100...100800.

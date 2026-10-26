@@ -29,14 +29,22 @@ Evidence: `evidence/raw/t1/59-live-deploy.txt`, `evidence/verify-deployment.json
 | --- | --- |
 | Runtime / creation bytes | `6,566 B` / `7,154 B` |
 | `gasUsed` / effective price | `16262870374998956` / `32580 wei` |
-| Measured cost | `529.844316817465986480 tPOT` |
+| Total cost (owner balance drop) | `529.844316817465986480 tPOT` |
+| ... reserved storage deposit in the contract | `165.513 tPOT` |
+| ... execution fee (remainder) | `364.331316817465986480 tPOT` |
 | Estimate | `538.123540 tPOT` |
 | Measured / estimate | `0.9846146412530473` |
 | Cost per runtime byte | `0.0806951442000405 tPOT` |
 | Cost per creation byte | `0.0740626665945577 tPOT` |
 
-This cost is the gas charge (`gasUsed × 32,580 wei`), **not** a storage deposit. The contract's
-separate storage deposit is covered in section 8.
+The total cost is `529.844316817465986480 tPOT`: the owner's measured balance drop across the
+deploy. Of that, `165.513 tPOT` sits in the contract account as a reserved storage deposit
+(`revive.accountInfoOf`, section 8) and the rest, `364.331316817465986480 tPOT`, is execution fees.
+The transaction carried `value: 0` and the contract did not exist before it, so nothing else could
+have funded the reserve, and the two parts add up to the drop exactly.
+
+The split is `[inferred from reconciliation]`, not a receipt field: the receipt reports `gasUsed`
+and effective price only. Refundability of the reserved deposit: not measured.
 
 `[design note]` Budget a deployment from measured runtime bytes, not from the artifact size and not
 from the estimate: the estimate was 1.56% high, and the cost per creation byte is about 9% lower than the cost per runtime byte (0.0807 vs 0.0741 tPOT).
@@ -146,6 +154,12 @@ The account-level split **is** readable through `revive.accountInfoOf(h160)`. Fo
 
 `revive.nativeDepositOf` is a two-key map; `entries()` returned `0` rows on this testnet, and both
 EOAs hold `reserved = 0`. So no caller-held deposit exists to be refunded.
+
+This reserve was not paid on top of the deploy: the deploy transaction carried `value: 0`, the
+contract did not exist before it, and the owner's measured balance drop of
+`529.844316817465986480 tPOT` (section 2) splits exactly into this `165.513 tPOT` reserve plus
+`364.331316817465986480 tPOT` of execution fees. The split is `[inferred from reconciliation]`;
+refundability of the reserved deposit is not measured.
 
 **Correction to the brief.** The check-in note said "storage-deposit split not exposed by the RPC".
 Measured reality: the per-receipt split is not exposed, but the per-account split is, and it
