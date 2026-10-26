@@ -68,7 +68,9 @@
       "flags": 1,
       "state": "settled",
       "health": 0,
-      "roundIds": [1]
+      "roundIds": [
+        1
+      ]
     },
     {
       "id": 2,
@@ -85,7 +87,10 @@
       "flags": 1,
       "state": "settled",
       "health": 0,
-      "roundIds": [2, 3]
+      "roundIds": [
+        2,
+        3
+      ]
     }
   ],
   "rounds": [
@@ -164,8 +169,16 @@
       "block": 171308,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json",
       "note": "deployment receipt, status success"
     },
@@ -176,8 +189,16 @@
       "block": 172240,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91.json",
       "note": "provider 1 registered with a 30 tPOT bond"
     },
@@ -188,8 +209,16 @@
       "block": 172266,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1.json",
       "note": "deal 1, 150 blocks, price 5 tPOT"
     },
@@ -200,8 +229,16 @@
       "block": 172281,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda.json",
       "note": "index 451, deadline 172331"
     },
@@ -212,8 +249,16 @@
       "block": 172295,
       "status": "success",
       "receipt": "not-recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/raw/t1/60-live-pass.txt",
       "note": "the answer is on chain, 36 blocks before the deadline; the client timed out and wrote no receipt file, so the receipt is not recorded"
     },
@@ -224,8 +269,16 @@
       "block": 172557,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b.json",
       "note": "claimed 5 tPOT, the whole price; the bond did not move"
     },
@@ -236,8 +289,16 @@
       "block": 172564,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3.json",
       "note": "flags 1, healthOf(1) = 0"
     },
@@ -248,8 +309,16 @@
       "block": 172578,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3.json",
       "note": "deal 2, 300 blocks, price 5 tPOT, same 1 MiB root"
     },
@@ -260,8 +329,16 @@
       "block": 172584,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb.json",
       "note": "index 29, deadline 172634"
     },
@@ -272,8 +349,16 @@
       "block": 172585,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210.json",
       "note": "answered one block after the challenge; the bond did not move"
     },
@@ -284,8 +369,16 @@
       "block": 172602,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db.json",
       "note": "index 623, deadline 172652; this round was left unanswered on purpose"
     },
@@ -296,8 +389,16 @@
       "block": 172658,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3.json",
       "note": "bond 3000000000000000 -> 2400000000000000 units; owner credited 6000000000000000000 wei (exactly 6 tPOT)"
     },
@@ -308,8 +409,16 @@
       "block": 172881,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee.json",
       "note": "claimed 5 tPOT; the bond stayed at 24 tPOT"
     },
@@ -320,12 +429,39 @@
       "block": 172887,
       "status": "success",
       "receipt": "recorded",
-      "finality": { "kind": "tag", "tag": "finalized" },
-      "stages": ["submitted", "included", "executed", "finalized"],
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
       "evidence": "evidence/receipts/live/0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec.json",
       "note": "flags 1, healthOf(2) = 0, bond 2400000000000000 units"
     }
   ],
+  "retrieval": {
+    "utc": "2026-10-24T10:12:07Z",
+    "dealIds": [
+      1,
+      2
+    ],
+    "blockSize": 1024,
+    "blockCount": 1024,
+    "size": 1048576,
+    "sha256": "0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e",
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "sha256Match": true,
+    "tamper": {
+      "rejected": true,
+      "firstMismatchingBlock": 0,
+      "error": "ProofRejected: block 0 does not match the expected root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+    },
+    "source": "portaldot-tier1/evidence/raw/t1/75-live-retrieval.txt, 75-live-retrieval-client.json"
+  },
   "refusals": [
     {
       "id": "challenge-not-owner",

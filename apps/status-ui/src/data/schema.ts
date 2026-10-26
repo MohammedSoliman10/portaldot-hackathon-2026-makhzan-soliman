@@ -121,6 +121,19 @@ export interface TransactionInfo {
   note: string;
 }
 
+export interface RetrievalInfo {
+  utc: string;
+  dealIds: number[];
+  blockSize: number;
+  blockCount: number;
+  size: number;
+  sha256: Hex;
+  root: Hex;
+  sha256Match: boolean;
+  tamper: { rejected: boolean; firstMismatchingBlock: number; error: string };
+  source: string;
+}
+
 export interface RefusalInfo {
   id: string;
   attempted: string;
@@ -145,6 +158,7 @@ export interface EvidenceBundle {
   deals: DealInfo[];
   rounds: RoundInfo[];
   transactions: TransactionInfo[];
+  retrieval?: RetrievalInfo | null;
   refusals: RefusalInfo[];
   limits: string[];
 }
@@ -184,13 +198,13 @@ function fail(path: string, message: string): never {
 const isObject = (value: unknown): value is Obj =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-function object(value: unknown, path: string, keys: readonly string[]): Obj {
+function object(value: unknown, path: string, keys: readonly string[], optional: readonly string[] = []): Obj {
   if (!isObject(value)) return fail(path, "must be an object");
   for (const key of Object.keys(value)) {
     if (!keys.includes(key)) fail(path, `unknown key: ${key}`);
   }
   for (const key of keys) {
-    if (!(key in value)) fail(path, `missing key: ${key}`);
+    if (!optional.includes(key) && !(key in value)) fail(path, `missing key: ${key}`);
   }
   return value;
 }
@@ -267,8 +281,12 @@ const TRANSACTION_KEYS = [
 const REFUSAL_KEYS = ["id", "attempted", "error", "reason", "source", "note"] as const;
 const BUNDLE_KEYS = [
   "schema", "id", "environment", "label", "generatedAt", "source", "chain", "timing", "deployment",
-  "config", "providers", "deals", "rounds", "transactions", "refusals", "limits",
+  "config", "providers", "deals", "rounds", "transactions", "retrieval", "refusals", "limits",
 ] as const;
+const RETRIEVAL_KEYS = [
+  "utc", "dealIds", "blockSize", "blockCount", "size", "sha256", "root", "sha256Match", "tamper", "source",
+] as const;
+const TAMPER_KEYS = ["rejected", "firstMismatchingBlock", "error"] as const;
 const MANIFEST_KEYS = ["schema", "current", "files"] as const;
 const MANIFEST_FILE_KEYS = ["id", "url", "sha256", "environment", "generatedAt"] as const;
 
@@ -478,8 +496,43 @@ function assertUnique<T>(items: T[], key: (item: T) => string | number, label: s
   }
 }
 
+function hex32(value: unknown, path: string): Hex {
+  const text = string(value, path, { max: 66 });
+  if (!/^0x[0-9a-fA-F]{64}$/.test(text)) fail(path, "must be 32 bytes of hex");
+  return text as Hex;
+}
+
+function parseRetrieval(value: unknown, path: string): RetrievalInfo {
+  const raw = object(value, path, RETRIEVAL_KEYS);
+  const blockSize = integer(raw.blockSize, `${path}.blockSize`, 1, 65535);
+  const size = integer(raw.size, `${path}.size`, 1);
+  const blockCount = integer(raw.blockCount, `${path}.blockCount`, 1);
+  if (blockCount !== Math.ceil(size / blockSize)) {
+    fail(path, "block count does not match size and block size");
+  }
+  const tamper = object(raw.tamper, `${path}.tamper`, TAMPER_KEYS);
+  return {
+    utc: parseGeneratedAt(raw.utc, `${path}.utc`),
+    dealIds: array(raw.dealIds, `${path}.dealIds`, 1, 256).map((id, index) =>
+      integer(id, `${path}.dealIds[${index}]`, 1),
+    ),
+    blockSize,
+    blockCount,
+    size,
+    sha256: hex32(raw.sha256, `${path}.sha256`),
+    root: hex32(raw.root, `${path}.root`),
+    sha256Match: boolean(raw.sha256Match, `${path}.sha256Match`),
+    tamper: {
+      rejected: boolean(tamper.rejected, `${path}.tamper.rejected`),
+      firstMismatchingBlock: integer(tamper.firstMismatchingBlock, `${path}.tamper.firstMismatchingBlock`, 0),
+      error: string(tamper.error, `${path}.tamper.error`),
+    },
+    source: string(raw.source, `${path}.source`),
+  };
+}
+
 export function parseEvidence(value: unknown): EvidenceBundle {
-  const raw = object(value, "bundle", BUNDLE_KEYS);
+  const raw = object(value, "bundle", BUNDLE_KEYS, ["retrieval"]);
   if (raw.schema !== "makhzan.evidence/v0") {
     fail("bundle.schema", `unsupported schema ${String(raw.schema)}`);
   }
@@ -494,6 +547,8 @@ export function parseEvidence(value: unknown): EvidenceBundle {
   const limits = array(raw.limits, "limits", 1, 16).map((item, index) =>
     string(item, `limits[${index}]`),
   );
+  const retrieval =
+    raw.retrieval === undefined || raw.retrieval === null ? null : parseRetrieval(raw.retrieval, "bundle.retrieval");
 
   assertUnique(providers, (item) => item.id, "provider");
   assertUnique(deals, (item) => item.id, "deal");
@@ -555,6 +610,7 @@ export function parseEvidence(value: unknown): EvidenceBundle {
     deals,
     rounds,
     transactions,
+    retrieval,
     refusals,
     limits,
   };

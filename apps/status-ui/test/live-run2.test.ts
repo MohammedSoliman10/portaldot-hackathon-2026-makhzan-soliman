@@ -46,4 +46,18 @@ describe("the recorded live run", () => {
     expect(byId.get("answer-2a")?.hash).toBe("0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210");
     expect(byId.get("answer-1")?.receipt).toBe("not-recorded");
   });
+
+  it("records the fresh-client retrieval and the tamper rejection", () => {
+    const retrieval = bundle.retrieval;
+    expect(retrieval).not.toBeNull();
+    expect(retrieval?.dealIds).toEqual([1, 2]);
+    expect(retrieval?.sha256).toBe("0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e");
+    expect(retrieval?.blockCount).toBe(1024);
+    expect(retrieval?.blockSize).toBe(1024);
+    expect(retrieval?.size).toBe(1048576);
+    expect(retrieval?.sha256Match).toBe(true);
+    expect(retrieval?.tamper.rejected).toBe(true);
+    expect(retrieval?.tamper.firstMismatchingBlock).toBe(0);
+    expect(retrieval?.tamper.error).toMatch(/ProofRejected/);
+  });
 });
