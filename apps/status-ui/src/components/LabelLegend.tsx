@@ -1,7 +1,7 @@
 import { EVIDENCE_STAGES, ROUND_STATUSES, STAGE_LABELS } from "../data/status";
 
 const LABEL_NOTES: { label: string; note: string }[] = [
-  { label: "MEASURED", note: "this browser read it from the chain, with a block and a UTC time" },
+  { label: "MEASURED", note: "this browser read it from the chain, or computed it from the bytes you loaded; the source says which" },
   { label: "REPORTED", note: "recorded in the evidence file, with the file and its UTC" },
   { label: "SIMULATED", note: "extrapolated between reads; the basis is named" },
   { label: "PENDING LIVE RUN", note: "no value exists yet — text, never a zero" },
