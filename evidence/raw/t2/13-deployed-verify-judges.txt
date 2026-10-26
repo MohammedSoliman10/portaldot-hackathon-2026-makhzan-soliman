@@ -1,7 +1,7 @@
 # Deployed check — Verify and Judges — [live] against https://status-ui-one.vercel.app
-utc: 2026-10-26T00:18:37Z
-main: 2996768837ab86aade79aafa3f9141bb52efe0b9
-deployment: https://status-ui-one.vercel.app (vercel --prod)
+utc: 2026-10-26T00:25:14Z
+main HEAD at deploy: 425ffe803dd44e93109cc1167e9d3594aefb8781
+deployment: https://status-ui-one.vercel.app (vercel --prod, status-miego66x5-soliman11.vercel.app)
 sample served: 200, 1048576 bytes, sha256 7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
 
 ## Verify (playwright chromium, desktop 1280x900 and 390x844)
@@ -20,7 +20,7 @@ sample served: 200, 1048576 bytes, sha256 7f2fd6d50bfe106c35d95a8aaef403c4b2ca53
 CONSOLE ERRORS: none
 
 ## Judges (playwright chromium, desktop and 390x844)
-live: Measured live — block 195,989 · chain 420420777 · 2026-10-26T00:18:46.399Z
+live: Measured live — block 196,056 · chain 420420777 · 2026-10-26T00:25:25.300Z
 rows: 8
 design note: true
 not proven: true
