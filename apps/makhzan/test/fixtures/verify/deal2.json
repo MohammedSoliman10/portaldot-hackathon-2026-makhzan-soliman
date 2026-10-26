@@ -1,0 +1,72 @@
+{
+  "note": "Fixture mirrored from the live chain at block 195919 (read-only): deal 2 had two challenges, the second left unanswered and slashed. Used to test the answered-or-slashed pairing and the slash amount, without the network.",
+  "dealId": 2,
+  "blockSize": 1024,
+  "latestBlock": 195919,
+  "deal": {
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 172578,
+    "endBlock": 172878,
+    "providerId": 1,
+    "flags": 1,
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "500000000000000"
+  },
+  "provider": { "id": 1, "bond": "2400000000000000", "activeDeals": 0, "registered": true },
+  "accrued": { "accrued": "500000000000000", "claimable": "0" },
+  "challenge": { "open": false, "index": 0, "start": 0, "deadline": 0 },
+  "health": 0,
+  "logsError": null,
+  "logs": [
+    {
+      "kind": "created",
+      "block": 172578,
+      "txHash": "0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3",
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "size": 1048576,
+      "endBlock": 172878,
+      "price": "500000000000000"
+    },
+    {
+      "kind": "opened",
+      "block": 172584,
+      "txHash": "0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb",
+      "index": 29,
+      "deadline": 172634
+    },
+    {
+      "kind": "passed",
+      "block": 172585,
+      "txHash": "0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210"
+    },
+    {
+      "kind": "opened",
+      "block": 172602,
+      "txHash": "0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db",
+      "index": 623,
+      "deadline": 172652
+    },
+    {
+      "kind": "failed",
+      "block": 172658,
+      "txHash": "0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3",
+      "slash": "600000000000000"
+    },
+    {
+      "kind": "claimed",
+      "block": 172881,
+      "txHash": "0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee",
+      "amount": "500000000000000"
+    },
+    {
+      "kind": "settled",
+      "block": 172887,
+      "txHash": "0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec",
+      "toProvider": "0",
+      "remainder": "0"
+    }
+  ]
+}

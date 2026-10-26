@@ -12,6 +12,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { scanText } from "./secret-scan.mjs";
 
 const REPO = dirname(dirname(fileURLToPath(import.meta.url)));
 const SCANNER = join(REPO, "scripts", "secret-scan.mjs");
@@ -56,4 +57,37 @@ test("the allowlist is narrow: a key-shaped line elsewhere is still a finding", 
   rmSync(dir, { recursive: true, force: true });
   assert.equal(result.code, 1, result.out);
   assert.match(result.out, /C\/hex-key-shape/);
+});
+
+/**
+ * The history scan imports `scanText`, so these two assertions pin the shared rule set: one blob with
+ * all three shapes is flagged on the same lines the tree scan reports, and a `.test.ts` path keeps the
+ * deliberate fixture exemption.
+ */
+test("scanText returns rule and line for each shape, without the tree walk", () => {
+  const key = `0x${"ab".repeat(32)}`;
+  const phrase = Array(12).fill("alpha").join(" ");
+  const text = `${"-----BEGIN"} RSA PRIVATE KEY-----\nsome key material ${key}\nphrase = "${phrase}"\n`;
+  const findings = scanText("evidence/example.txt", text);
+  assert.deepEqual(
+    findings.map((finding) => [finding.rule, finding.line]),
+    [
+      ["A/pem", 1],
+      ["C/hex-key-shape", 2],
+      ["D/mnemonic", 3],
+    ],
+  );
+});
+
+test("scanText reports a literal key assignment on its own", () => {
+  const key = `0x${"ab".repeat(32)}`;
+  assert.deepEqual(
+    scanText("evidence/example.txt", `PRIVATE_KEY=${key}\n`).map((finding) => [finding.rule, finding.line]),
+    [["B/key-literal", 1]],
+  );
+});
+
+test("scanText keeps the test-file exemption used by the tree scan", () => {
+  const key = `0x${"ab".repeat(32)}`;
+  assert.deepEqual(scanText("apps/makhzan/test/guards.test.ts", `PRIVATE_KEY=${key}\n`), []);
 });

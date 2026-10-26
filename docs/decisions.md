@@ -512,6 +512,29 @@ needed. **Decision: close SEC-001 without a history rewrite and merge the featur
 linked to a real or funded account. The closure evidence is
 `evidence/raw/t1/74-sec-001-closure.txt`; the result is recorded as yes/no only.
 
+## T1-003 — MEASURED: the storage-deposit split is readable per account, not per receipt (2026-10-26, Tier 1)
+
+**Context.** The post-check-in brief said "storage-deposit split not exposed by the RPC". A read-only
+pass on `portaldot-v3` spec `3002` shows two different answers. A receipt carries
+`status`/`blockNumber`/`gasUsed`/`effectiveGasPrice`/`logs` and no gas-versus-deposit line, so the
+per-transaction split is indeed not exposed. But `revive.accountInfoOf(h160)` reports the contract's
+`storageBaseDeposit`, `storageItemDeposit` and `storageByteDeposit`, and their sum
+(`16551300000000000` planck) equals the contract's `system.account.reserved` exactly.
+`revive.nativeDepositOf` is a two-key map with `0` entries, and both EOAs hold `reserved = 0`.
+
+**Decision.** Record the measured split in `docs/V3-GOTCHAS.md` section 8 instead of repeating the
+brief's wording, and do not claim any caller refund. The answer and settle deltas are fee-only
+(`−162,915,694,292,617,500`, `−15,314,505,821,880,160`, `−15,314,494,987,996,050` wei, each equal to
+`gasUsed × effectiveGasPrice`), so there is no keeper-refund story to tell. The deploy cost
+(`529.844316817465986480 tPOT`) is likewise gas, not a deposit; the contract's reserved deposit is
+reported separately.
+
+**Consequences.** The docs say "receipt-level split: not exposed; account-level split: exposed and
+reconciles". No contract or CLI change follows from this entry.
+
+**Evidence.** `evidence/raw/t1/78-chain-facts.txt`, `evidence/raw/t1/79-account-mapping-deposits.txt`,
+`evidence/raw/t1/65-live-settle-a.txt`, `71-live-settle-b.txt`.
+
 ## D-11 — the Verify sample is the deal file itself, not a seeded file (2026-10-26, feature 003)
 
 **Context.** The Verify screen needs a file a judge can load in one click whose root matches the deal

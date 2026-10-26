@@ -7,6 +7,7 @@
 import { pathToFileURL } from "node:url";
 import { makeChain } from "./chain.ts";
 import { execute, parseCommand, type CommandDeps } from "./cli.ts";
+import { runVerify } from "./dealVerifyCli.ts";
 import { mapContractError } from "./errors.ts";
 import { loadSettings } from "./settings.ts";
 
@@ -30,6 +31,8 @@ export async function runCommand(argv: string[], deps: CommandDeps, log: (line: 
 
 export async function main(argv: string[], env: NodeJS.ProcessEnv, log: (line: string) => void): Promise<number> {
   try {
+    // `verify` is read-only: it must run without MAKHZAN_PRIVATE_KEY, so it is dispatched first.
+    if (argv[0] === "verify") return await runVerify(argv.slice(1), env, log);
     const settings = loadSettings(env);
     const wiring = makeChain(settings, env);
     return await runCommand(

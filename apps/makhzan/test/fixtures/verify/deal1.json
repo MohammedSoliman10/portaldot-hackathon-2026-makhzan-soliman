@@ -1,0 +1,59 @@
+{
+  "note": "Fixture mirrored from the live chain at block 195919 (read-only): dealOf/accruedOf/challengeStateOf/healthOf/providerOf plus decoded logs. It exists so the verify logic is tested without the network; the live run is separate evidence.",
+  "dealId": 1,
+  "blockSize": 1024,
+  "latestBlock": 195919,
+  "deal": {
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 172266,
+    "endBlock": 172416,
+    "providerId": 1,
+    "flags": 1,
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "500000000000000"
+  },
+  "provider": { "id": 1, "bond": "2400000000000000", "activeDeals": 0, "registered": true },
+  "accrued": { "accrued": "500000000000000", "claimable": "0" },
+  "challenge": { "open": false, "index": 0, "start": 0, "deadline": 0 },
+  "health": 0,
+  "logsError": null,
+  "logs": [
+    {
+      "kind": "created",
+      "block": 172266,
+      "txHash": "0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1",
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "size": 1048576,
+      "endBlock": 172416,
+      "price": "500000000000000"
+    },
+    {
+      "kind": "opened",
+      "block": 172281,
+      "txHash": "0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda",
+      "index": 451,
+      "deadline": 172331
+    },
+    {
+      "kind": "passed",
+      "block": 172295,
+      "txHash": "0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3"
+    },
+    {
+      "kind": "claimed",
+      "block": 172557,
+      "txHash": "0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b",
+      "amount": "500000000000000"
+    },
+    {
+      "kind": "settled",
+      "block": 172564,
+      "txHash": "0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3",
+      "toProvider": "0",
+      "remainder": "0"
+    }
+  ]
+}

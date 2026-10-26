@@ -1,0 +1,11 @@
+T1 custom-error selectors: derived vs observed
+collected_at_utc: 2026-10-26T00:17:42Z
+mode: local computation (viem keccak256); no network call, no key
+
+signature | keccak256(signature)[0..4] | observed live payload | source | match
+NotOwner() | 0x30cd7471 | 0x30cd7471 | challenge by non-owner, block 172280 | yes
+NotProvider() | 0x3480e2b2 | 0x3480e2b2 | answer by non-provider, block 172290 | yes
+BadParams() | 0x019af637 | 0x019af637 | createDeal with duration 99, latest | yes
+
+all_three_match: yes
+observed payloads are the raw revert data in evidence/raw/t1/63-live-refusals.txt

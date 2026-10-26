@@ -45,6 +45,18 @@ CLI/daemon pair.
 The daemon never trusts its own tx hash: after sending it re-reads `challengeStateOf` and the provider
 bond, and only then labels the round `passed` or `failed`.
 
+### Why not TransactionStorage
+
+Portaldot's own `TransactionStorage` pallet is the obvious first candidate: metadata read at spec
+`3002` shows `store`, `renew` and `checkProof`, an `8 MiB` per-transaction limit and a `100,800`-block
+retention `[measured]` (`evidence/raw/t1/78-chain-facts.txt`). The bytes go into blocks, but the
+pallet's metadata exposes no client-facing promise, payment, bond or penalty entry point: there is no
+call for a client to name a provider, escrow a price for that provider, or slash a bond when a block
+is missing `[design note]`. Makhzan adds exactly those pieces on the EVM side: a bonded provider, a
+random challenge, a 20% slash and `healthOf(dealId)` as a gate other contracts can read. The pallet
+does show what storage costs: a dry-run `store` of `1 MiB` quoted `104.86915567090586 tPOT` and
+`4 MiB` quoted `419.44210364626048 tPOT` `[measured]`.
+
 ## Portaldot V3 features used
 
 - **EVM via pallet-revive.** The contract is ordinary Solidity (`solc`, `via_ir = true`), deployed as
@@ -55,7 +67,15 @@ bond, and only then labels the round `passed` or `failed`.
   live chain in Tier 0 and is used unchanged in the contract, CLI and deploy script.
 - **Account mapping.** The same H160 is mapped to a Substrate account on Portaldot. The deployed
   contract address `0x60481D…2e44` maps to `5EEwsqgiEVZNUdUHdmsEMqBQzJjNy5PULPBYoo5yF2GX45DZ`
-  (read from the Pindex API). Keys stay in the environment; the wrapper never prints or stores one.
+  (`accountId32 = h160 ‖ 0xee × 12`, SS58 prefix `42`; confirmed by an exact native/EVM balance
+  reconciliation in `evidence/raw/t1/79-account-mapping-deposits.txt`). Keys stay in the environment;
+  the wrapper never prints or stores one.
+
+Measured caveats that cost us real debugging time — via IR acceptance, the `0.0807 tPOT` per runtime
+byte deploy cost, the observed gas-price band, the `10,000 wei` factor with the `0.1 tPOT` existential
+deposit, the `15 s` receipt trap (T1-002), the three custom selectors, the account mapping, the
+storage-deposit split and the absence of any answer/settle refund — are collected in
+[docs/V3-GOTCHAS.md](docs/V3-GOTCHAS.md), each with its evidence file.
 
 ## Deployment — Portaldot V3 testnet `[live run]`
 
@@ -76,13 +96,21 @@ bond, and only then labels the round `passed` or `failed`.
 | `verify:deployment` | **match**, 6,566 B runtime = 6,566 B artifact, `firstDiff: null` |
 | Config read back | window `50`, block size `1024`, slash `2000 bps`, min bond `1e15 units` (`1e19` wei), duration `100…100800` |
 
-**Explorer.** The only confirmed deep link is the Pindex address route:
-<https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44> (the page performs
-the lookup client-side; the API returns the mapped account). Pindex **does not have a confirmed
-transaction-hash route** — its 64-hex search treats the value as a block hash — so search the address
-above or block **`171308`**. The official node console <https://node-console.portaldot.dev/> has no
-confirmed deep-link format; open it and search the same address or block. The tx hash is shown as plain
-text above; no URL pattern is invented.
+**Explorer.** Confirmed deep links:
+
+- Scanner block page: <https://scanner-testnet-v3.portaldot.dev/blocks/171308>. The route returns HTTP
+  `200`, and its backend (`https://scanner-testnet-v3-api.portaldot.dev/blocks/171308`) returns height
+  `171308` with hash `0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98`, identical
+  to `chain.getBlockHash(171308)`. The page is a client-rendered SPA, so the route and its data are
+  confirmed, not a screenshot (`evidence/raw/t1/78-chain-facts.txt`).
+- Pindex address route:
+  <https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44> (the page performs
+  the lookup client-side; the API returns the mapped account).
+
+Pindex **does not have a confirmed transaction-hash route** — its 64-hex search treats the value as a
+block hash — so search the address above or block **`171308`**. The official node console
+<https://node-console.portaldot.dev/> has no confirmed deep-link format; open it and search the same
+address or block. The tx hash is shown as plain text above; no URL pattern is invented.
 
 **Evidence** (all committed):
 
@@ -135,10 +163,16 @@ After the fix the full live path ran:
   `0x3480e2b2` (NotProvider) and `0x019af637` (BadParams), so R2 is yes.
 
 Final measured balances: owner `172229122908433355700` wei, provider-1
-`27993410962002459140` wei, provider bond `2400000000000000` units. Evidence:
+`27993410962002459140` wei, provider bond `2400000000000000` units. A keyless
+`makhzan verify 1` and `makhzan verify 2` re-read the chain and printed `RESULT: PASS` for both deals
+(`evidence/raw/t1/76-verify-deal1.txt`, `77-verify-deal2.txt`). Evidence:
 `evidence/raw/t1/60-live-pass.txt`, `62-live-register.txt`, `63-live-refusals.txt`,
 `64-live-claim-a.txt` through `72-live-summary.txt`, plus the raw receipts under
 `evidence/receipts/live/`.
+
+Read-only chain facts gathered after the run — `TransactionStorage` metadata and fees, block
+`171308` on the scanner, the account mapping and the storage-deposit split — are in
+`evidence/raw/t1/78-chain-facts.txt` and `79-account-mapping-deposits.txt`.
 
 ## Architecture
 
@@ -181,13 +215,14 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Answer verification, pass without bond movement, 20% slash on `resolve` | implemented, local | `evidence/raw/t1/31-rounds-green.txt`, `48-e2e-local.txt` |
 | `claim` (provider-only) and `settle`, exactly-once accounting | implemented, local | `evidence/raw/t1/28-payments-green.txt` |
 | Provider daemon: poll, rebuild path, submit, label only from read-back, drills | implemented, local | `evidence/raw/t1/44-daemon-red.txt`, `59-daemon-evidence-green.txt` |
-| Client CLI: upload, create, register, challenge, watch, claim, settle, resolve, report | implemented, local | `evidence/raw/t1/47-cli-green.txt`, `112-register-green.txt` |
+| Client CLI: upload, create, register, challenge, watch, claim, settle, resolve, report, verify (read-only) | implemented, local + live verify | `evidence/raw/t1/47-cli-green.txt`, `112-register-green.txt`, `76-verify-deal1.txt` |
 | Network-explicit deploy: reserve guard, pending record, resume, calibration | implemented, local + one live deploy | `61-deploy-green.txt`, `59-live-deploy.txt` |
 | `healthOf(uint32)` availability view | implemented, local | `evidence/raw/t1/84-health-red.txt`, `85-health-green.txt` |
 | Versioned evidence bundle (`makhzan.evidence/v0`) + raw receipts + derived views | implemented, local | `evidence/raw/t1/88-evidence-red.txt`, `89-evidence-green.txt` |
 | Byte-for-byte deployment verification | implemented, local + live | `evidence/verify-deployment.json` |
 | Decoded refusal evidence (`evidence:refusals`, `eth_call` only) | implemented, local | `evidence/raw/t1/94-refusals-anvil.txt` |
 | Read-only `doctor` with an exact fix per failed check | implemented, local | `evidence/raw/t1/97-doctor-anvil.txt` |
+| Read-only `makhzan verify <dealId>`: provider bond, deal root, each challenge's block/index, answered or slashed with block and amounts, `claimed = accrued`, final `healthOf` | **implemented [live run]**; keyless, exits non-zero on FAIL or INCOMPLETE, reports a refused log range instead of guessing | `evidence/raw/t1/76-verify-deal1.txt`, `77-verify-deal2.txt` |
 | Live deploy on Portaldot V3 | **implemented [live run]** | `evidence/raw/t1/59-live-deploy.txt` |
 | Live registration + deal A + one challenge/answer | **implemented [live run]**; on-chain pass (`healthOf(1) = 1`, bond unchanged). The first pass exposed T1-002; the fixed daemon then labelled deal B `passed` from read-back | `62-live-register.txt`, `60-live-pass.txt`, `67-live-answer-b.txt` |
 | Live slashed round, claim, settle | **implemented [live run]**; claim/settle A and B, second deal B challenge slashed exactly 20% and credited the owner 6 tPOT | `64-live-claim-a.txt` .. `71-live-settle-b.txt`, `72-live-summary.txt` |
@@ -225,11 +260,23 @@ cd ../..
 
 # Deployed size budget
 node scripts/check-size.mjs
+
+# Docs hygiene: every address/hash/block/bond figure must match evidence/
+node --test scripts/docs-hygiene.test.mjs
+node scripts/docs-hygiene.mjs
+
+# Read-only deal audit on the live testnet (no key needed; MAKHZAN_PRIVATE_KEY unset)
+cd apps/makhzan
+MAKHZAN_NETWORK=live \
+MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
+MAKHZAN_CHAIN_ID=420420777 \
+MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
+node src/cliMain.ts verify 1
 ```
 
-Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **143 tests passed**;
-`apps/gates` has **45 tests** and the secret scanner **3**; the e2e ends with
-`PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
+Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **157 tests passed**;
+`apps/gates` has **49 tests**, the secret scanner **6** and the docs-hygiene check **5**; the e2e ends
+with `PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
 check prints **6,566 B ≤ 10,240 B**.
 
 The live run needs a funded key in the environment; `scripts/with-live-env.sh owner|provider-1 --
@@ -244,7 +291,7 @@ contracts/                 Solidity source, Foundry tests, size budget, snapshot
   src/tier0/               disposable Tier-0 probe contracts (not on the product path)
 apps/makhzan/              TypeScript client: Merkle, CLI, daemon, deploy, evidence, verify, doctor
 apps/gates/                Tier-0 read-only network gates and shared chain helpers
-scripts/                   deploy.mjs, check-size.mjs, secret-scan.mjs, with-live-env.sh
+scripts/                   deploy.mjs, check-size.mjs, secret-scan.mjs, secret-scan-history.mjs, docs-hygiene.mjs, with-live-env.sh
 specs/002-core-storage-proofs/   spec, plan, tasks, quickstart, research
 docs/                      architecture, live runbook, decisions, evidence schema, threat model,
                            demo, check-in, explainer, demo checklist

@@ -1,0 +1,20 @@
+# [live run] makhzan verify 2 — read-only, no key, no transaction
+# utc: 2026-10-26T00:14:42Z
+# env: MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev MAKHZAN_CHAIN_ID=420420777 MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 (MAKHZAN_PRIVATE_KEY unset)
+# command: node src/cliMain.ts verify 2
+
+makhzan verify 2 — read-only: no key, no transaction
+network LIVE chain 420420777 contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+block 195949
+PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+PASS deal 2 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 172578..172878
+PASS DealCreated at block 172578 (tx 0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3) matches root, size, endBlock and price
+PASS challenge #1 issued at block 172584 index 29 deadline 172634 (tx 0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb)
+PASS challenge #1 answered at block 172585 (tx 0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210); no bond movement in the event
+PASS challenge #2 issued at block 172602 index 623 deadline 172652 (tx 0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db)
+PASS challenge #2 slashed at block 172658 (tx 0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3): 600000000000000 units moved from the bond to the owner
+PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+PASS healthOf(2) = 0 matches the stored state
+RESULT: PASS (9 pass, 0 fail, 0 unknown, 0 pending)
+
+exit=0

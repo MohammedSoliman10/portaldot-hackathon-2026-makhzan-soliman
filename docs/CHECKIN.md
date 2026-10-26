@@ -49,9 +49,10 @@ byte for byte (6,566 B runtime; code hash
 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98) and the constructor config reads
 back as window 50, block size 1024, slash 2000 bps, min bond 1e15 units, duration 100...100800.
 
-Locally the full product is green: 152 Forge tests, 143 client/daemon tests, 45 gate tests and 3
-secret-scanner tests; a local end-to-end run covers a 1 MiB file (1,024 blocks), one passed challenge,
-one skipped challenge with exactly 20% slashed to the owner, claim and settle.
+Locally the full product is green: 152 Forge tests, 157 client/daemon tests, 49 gate tests, 6
+secret-scanner tests and 5 docs-hygiene tests; a local end-to-end run covers a 1 MiB file (1,024
+blocks), one passed challenge, one skipped challenge with exactly 20% slashed to the owner, claim and
+settle.
 
 Live run [live run]: provider-1 registered with a 30 tPOT bond (tx
 0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91), deal A was created (tx
@@ -83,7 +84,10 @@ Final balances: owner 172229122908433355700 wei, provider-1 27993410962002459140
 (NotProvider) and 0x019af637 (BadParams). A fresh read-only client then retrieved the 1 MiB file:
 1,024 blocks each verified against the deal root, sha256
 7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e matching the upload, and a
-one-byte tampered copy rejected with ProofRejected.
+one-byte tampered copy rejected with ProofRejected. A keyless read-only `makhzan verify` then re-read
+state and logs for both deals and printed RESULT: PASS — deal 1: challenge index 451 answered at
+block 172295, claimed = accrued, healthOf(1)=0; deal 2: index 29 answered at block 172585, index 623
+slashed at block 172658 for 600000000000000 units, claimed = accrued, healthOf(2)=0.
 ```
 
 ## 6. Outstanding items (paste)
@@ -93,8 +97,9 @@ one-byte tampered copy rejected with ProofRejected.
 - Status web app: feature 003 (health/deal status UI) is in progress on its own branch and not merged.
 - Replication/repair and a per-deal bond are roadmap; the current bond is shared across a provider's
   deals.
-- README/check-in polish: demo video or hosted live link is not yet published; the explorer has no
-  confirmed transaction-hash route (the address and block search work).
+- README/check-in polish: demo video or hosted live link is not yet published; the scanner block page
+  scanner-testnet-v3.portaldot.dev/blocks/171308 is confirmed against the chain hash, but no
+  transaction-hash route is claimed.
 - No audit, no explorer source verification, no proven randomness beyond the documented D5 fallback.
 ```
 
@@ -159,7 +164,7 @@ new chain with uneven RPC behaviour.
 - CLI, daemon, deploy with pending record/resume, evidence bundle, verify:deployment, refusals, doctor.
 - Fresh read-only retrieval: 1,024 blocks verified against the on-chain root; sha256 matches the upload;
   a tampered copy is rejected with `ProofRejected`.
-- 152 Forge + 143 + 45 + 3 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
+- 152 Forge + 157 + 49 + 6 + 5 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
 
 ## 12. What is not claimed
 
