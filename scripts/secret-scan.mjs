@@ -25,7 +25,8 @@ const targets = process.argv.slice(2).length > 0 ? process.argv.slice(2) : ["."]
 const ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
 // `dist` is build output: the minified viem bundle contains 32-hex error strings that rule C reads as
 // key shapes. It is gitignored and never shipped as source, so the scan reads what we commit.
-const SKIP_DIRS = new Set([".git", "node_modules", "lib", "out", "cache", "broadcast", ".next", "dist"]);
+// `out-viair` / `cache-viair` are the same for the via-IR Foundry profile.
+const SKIP_DIRS = new Set([".git", "node_modules", "lib", "out", "out-viair", "cache", "cache-viair", "broadcast", ".next", "dist"]);
 export const TEXT = new Set([".sol", ".ts", ".mjs", ".js", ".json", ".md", ".yml", ".yaml", ".toml", ".txt", ".env", ""]);
 const LITERAL = /(0x[0-9a-fA-F]{32,}|[A-Za-z0-9+/=]{32,})/;
 const QUOTED_MNEMONIC = /["'`]((?:[a-z]{3,8}[ \t]+){11,23}[a-z]{3,8})["'`]/;
