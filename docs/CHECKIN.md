@@ -49,7 +49,7 @@ byte for byte (6,566 B runtime; code hash
 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98) and the constructor config reads
 back as window 50, block size 1024, slash 2000 bps, min bond 1e15 units, duration 100...100800.
 
-Locally the full product is green: 152 Forge tests, 156 client/daemon tests, 49 gate tests, 6
+Locally the full product is green: 152 Forge tests, 157 client/daemon tests, 49 gate tests, 6
 secret-scanner tests and 5 docs-hygiene tests; a local end-to-end run covers a 1 MiB file (1,024
 blocks), one passed challenge, one skipped challenge with exactly 20% slashed to the owner, claim and
 settle.
@@ -164,7 +164,7 @@ new chain with uneven RPC behaviour.
 - CLI, daemon, deploy with pending record/resume, evidence bundle, verify:deployment, refusals, doctor.
 - Fresh read-only retrieval: 1,024 blocks verified against the on-chain root; sha256 matches the upload;
   a tampered copy is rejected with `ProofRejected`.
-- 152 Forge + 156 + 49 + 6 + 5 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
+- 152 Forge + 157 + 49 + 6 + 5 TypeScript tests; gate and process-level e2e green (see `evidence/raw/t1/`).
 
 ## 12. What is not claimed
 

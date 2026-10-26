@@ -274,7 +274,7 @@ MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
 node src/cliMain.ts verify 1
 ```
 
-Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **156 tests passed**;
+Expected: Forge reports **152 tests passed**; `apps/makhzan` reports **157 tests passed**;
 `apps/gates` has **49 tests**, the secret scanner **6** and the docs-hygiene check **5**; the e2e ends
 with `PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
 check prints **6,566 B ≤ 10,240 B**.
