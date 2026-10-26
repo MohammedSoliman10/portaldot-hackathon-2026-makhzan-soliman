@@ -1,0 +1,108 @@
+LIVE-3a B: TransactionStorage store — can the owner store a ~300-byte payload?
+collected_at_utc: 2026-10-26T10:29:27Z
+mode: read-only. Metadata, storage reads and one paymentInfo fee query. No key loaded, nothing signed or submitted.
+substrate_ws: wss://test-node-v3.portaldot.dev
+genesis_hash: 0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+spec_name: portaldot-v3
+spec_version: 3002
+substrate_head: 202076
+
+== pallet ==
+pallet: TransactionStorage (index 51)
+
+== calls ==
+store(data: Bytes)
+  doc: Index and store data off chain. Minimum data size is 1 byte, maximum is
+  doc: `MaxTransactionSize`. Data will be removed after `RetentionPeriod` blocks, unless
+  doc: `renew` is called.
+  doc: 
+  doc: Emits [`Stored`](Event::Stored) when successful.
+  doc: 
+  doc: ## Complexity
+  doc: 
+  doc: O(n*log(n)) of data size, as all data is pushed to an in-memory trie.
+renew(block: u32, index: u32)
+  doc: Renew previously stored data. Parameters are the block number that contains previous
+  doc: `store` or `renew` call and transaction index within that block. Transaction index is
+  doc: emitted in the `Stored` or `Renewed` event. Applies same fees as `store`.
+  doc: 
+  doc: Emits [`Renewed`](Event::Renewed) when successful.
+  doc: 
+  doc: ## Complexity
+  doc: 
+  doc: O(1).
+checkProof(proof: SpTransactionStorageProofTransactionStorageProof)
+  doc: Check storage proof for block number `block_number() - RetentionPeriod`. If such a block
+  doc: does not exist, the proof is expected to be `None`.
+  doc: 
+  doc: ## Complexity
+  doc: 
+  doc: Linear w.r.t the number of indexed transactions in the proved block for random probing.
+  doc: There's a DB read for each transaction.
+
+== constants ==
+maxBlockTransactions: 512
+maxTransactionSize: 8388608 bytes
+
+== storage items ==
+Authorizations [map]
+  doc:  Authorizations, keyed by scope.
+Transactions [map]
+  doc:  Collection of transaction metadata by block number.
+ByteFee [plain]
+  doc:  Storage fee per byte.
+EntryFee [plain]
+  doc:  Storage fee per transaction.
+RetentionPeriod [plain]
+  doc:  Number of blocks for which stored data must be retained.
+  doc: 
+  doc:  Data older than `RetentionPeriod` blocks is eligible for removal unless it
+  doc:  has been explicitly renewed. Validators are required to prove possession of
+  doc:  data corresponding to block `N - RetentionPeriod` when producing block `N`.
+BlockTransactions [plain]
+ProofChecked [plain]
+  doc:  Was the proof checked in this block?
+
+== live values ==
+byteFee_planck: 10
+entryFee_planck: 1000
+retentionPeriod_blocks: 100800
+authorizations_entries: 0
+transactions_entries: 19
+  stored block 129021: 1 transaction(s), sizes 64400 bytes
+  stored block 129233: 1 transaction(s), sizes 46441 bytes
+  stored block 129232: 1 transaction(s), sizes 650984 bytes
+  stored block 129230: 1 transaction(s), sizes 2526019 bytes
+  stored block 129022: 1 transaction(s), sizes 2280 bytes
+
+== owner ==
+origin_ss58: 5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE
+origin_h160: 0x0948ebd7637d1c32858a6fc5d947e85a6600205c
+origin_note: owner H160 + 12 x 0xEE native mapping (evidence/raw/t1/79-account-mapping-deposits.txt)
+native_free_planck: 17232912290843335 (172.32912290843335 tPOT)
+native_reserved_planck: 0
+native_nonce: 12
+
+== dry-run fee query for store (unsigned) ==
+call: transactionStorage.store(300 bytes)
+payload_size_ok: true
+paymentInfo.partialFee_planck: 4110627994333
+paymentInfo.partialFee_tPOT: 0.04110627994333
+paymentInfo.weight.refTime: 861511400
+paymentInfo.weight.proofSize: 50535
+paymentInfo.class: Normal
+paymentInfo computes a fee only; it does not execute or persist the call.
+
+== pallet's own storage charge ==
+byteFee * 300 + entryFee = 10 * 300 + 1000 = 4000 planck
+pallet_storage_charge_tPOT: 0.00000000004000
+the pallet holds and then slashes this amount to the fee destination (pallet source, apply_fee); it is not returned as a deposit
+
+== answer ==
+YES — the owner account could store a ~300-byte payload. [measured] data size and fee; [design note] authorization rule.
+1. 300 bytes is inside 1..8,388,608 (MaxTransactionSize). [measured]
+2. paymentInfo for transactionStorage.store(300 B) from the owner returns a fee and does not error. [measured]
+3. Authorizations has 0 entries, while 19 stored transactions exist on chain: storing does not require an entry for a signed origin. [measured]
+4. The pallet's store path charges byte_fee*size + entry_fee = 4,000 planck and does not consult Authorizations; the authorization scope exists for the unsigned/preimage path. [design note, read from the pallet source]
+caveat: this is a dry-run answer. No store transaction was signed or sent, so the dispatch path was not exercised end-to-end.
+caveat: the pallet source read is polkadot-sdk master; the deployed runtime is spec 3002 and exposes the same calls, storage items and errors, but the runtime code itself was not audited line by line.
