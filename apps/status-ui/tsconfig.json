@@ -20,6 +20,7 @@
     "baseUrl": ".",
     "paths": {
       "@makhzan/merkle": ["../makhzan/src/merkle.ts"],
+      "@makhzan/chunk": ["../makhzan/src/chunk.ts"],
       "@/*": ["src/*"]
     }
   },

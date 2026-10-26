@@ -14,6 +14,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@makhzan/merkle": fileURLToPath(new URL("../makhzan/src/merkle.ts", import.meta.url)),
+      "@makhzan/chunk": fileURLToPath(new URL("../makhzan/src/chunk.ts", import.meta.url)),
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
     dedupe: ["viem", "react", "react-dom"],
