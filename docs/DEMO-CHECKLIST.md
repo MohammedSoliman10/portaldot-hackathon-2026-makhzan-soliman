@@ -7,7 +7,7 @@ Local demo is the default. Nothing on this list claims a live run; live rows are
 - [ ] `cd contracts && forge build --sizes` → Makhzan runtime 6,566 B (budget 10,240 B).
 - [ ] `node scripts/check-size.mjs` → PASS.
 - [ ] `cd apps/makhzan && npm test` → 0 failed (117 tests at batch 10b).
-- [ ] `cd apps/gates && npm test` → 0 failed (45 tests).
+- [ ] `cd apps/gates && npm test` → 0 failed (49 tests).
 - [ ] Free ports 8549 (anvil), 8564 (e2e), 8588 (daemon).
 - [ ] Fresh shell without stray `MAKHZAN_*` variables; never echo a key.
 - [ ] Screen recording on, terminal font readable, no `.env` in the frame.

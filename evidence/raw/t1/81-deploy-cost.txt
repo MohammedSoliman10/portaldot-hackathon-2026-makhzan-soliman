@@ -1,0 +1,14 @@
+T1 deploy cost derivation (from evidence/raw/t1/59-live-deploy.txt)
+collected_at_utc: 2026-10-26T00:21:27Z
+mode: local arithmetic on recorded numbers; no network, no key
+gasUsed: 16262870374998956
+effective_gas_price_wei: 32580
+cost_wei: 529844316817465986480
+cost_tPOT: 529.844316817465986480
+runtime_bytes: 6566
+creation_bytes: 7154
+cost_per_runtime_byte_tPOT: 0.08069514420004051
+cost_per_runtime_byte_tPOT_rounded: 0.0807
+cost_per_creation_byte_tPOT: 0.07406266659455772
+estimate_tPOT: 538.123540 (rounded; the exact ratio 0.9846146412530473 is in 59-live-deploy.txt)
+reading: the measured balance drop equals gasUsed x effective gas price exactly; this is the gas charge, not a storage deposit

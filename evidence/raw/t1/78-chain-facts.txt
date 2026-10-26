@@ -1,0 +1,86 @@
+T1 chain facts: TransactionStorage metadata + fees + scanner block URL
+collected_at_utc: 2026-10-26T00:17:59Z
+mode: read-only (metadata, storage reads, paymentInfo dry-run, HTTP GET). No key used, nothing signed or submitted.
+substrate_ws: wss://test-node-v3.portaldot.dev
+evm_rpc: https://test-evm-rpc-v3.portaldot.dev
+
+== chain identity ==
+genesis_hash: 0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+spec_name: portaldot-v3
+spec_version: 3002
+block_number_at_read: 195982
+
+== pallet transactionStorage ==
+pallet_name: TransactionStorage
+pallet_index: 51
+pallet_docs: []
+
+calls (api.tx.transactionStorage.*):
+  checkProof(proof:SpTransactionStorageProofTransactionStorageProof)
+  renew(block:u32, index:u32)
+  store(data:Bytes)
+
+constants (api.consts.transactionStorage.*):
+  maxBlockTransactions = 512
+  maxTransactionSize = 8388608
+
+storage items declared by the pallet (metadata):
+  Authorizations [map(Blake2_128Concat)] docs=[" Authorizations, keyed by scope."]
+  Transactions [map(Blake2_128Concat)] docs=[" Collection of transaction metadata by block number."]
+  ByteFee [plain] docs=[" Storage fee per byte."]
+  EntryFee [plain] docs=[" Storage fee per transaction."]
+  RetentionPeriod [plain] docs=[" Number of blocks for which stored data must be retained.",""," Data older than `RetentionPeriod` blocks is eligible for removal unless it"," has been explicitly renewed. Validators are required to prove possession of"," data corresponding to block `N - RetentionPeriod` when producing block `N`."]
+  BlockTransactions [plain] docs=[]
+  ProofChecked [plain] docs=[" Was the proof checked in this block?"]
+
+storage values read at the block above (api.query.transactionStorage.*):
+  byteFee = 10
+  entryFee = 1000
+  retentionPeriod = 100800
+  proofChecked = false
+
+retention interpretation: RetentionPeriod = 100800 blocks, in the pallet's own doc words:
+  |  Number of blocks for which stored data must be retained.
+  | 
+  |  Data older than `RetentionPeriod` blocks is eligible for removal unless it
+  |  has been explicitly renewed. Validators are required to prove possession of
+  |  data corresponding to block `N - RetentionPeriod` when producing block `N`.
+storage period constant in runtime constants: not shown (only MaxBlockTransactions, MaxTransactionSize are constants; retention is a storage item)
+
+== paymentInfo for transactionStorage.store (no signing, public address) ==
+fee_query_account: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+payload | weight.refTime | weight.proofSize | partialFee planck | partialFee tPOT (1 tPOT = 10^14 planck)
+  0 B | 859208000 | 50535 | 1100634563202 | 0.01100634563202
+  1024 B | 867070272 | 50535 | 11350639380136 | 0.11350639380136
+  32768 B | 1110800704 | 50535 | 328830788705109 | 3.28830788705109
+  1048576 B | 8910174528 | 50535 | 10486915567090586 | 104.86915567090585
+  4194304 B | 33063074112 | 50535 | 41944210364626047 | 419.44210364626048
+  8388608 B | error: No response received from RPC endpoint in 60s
+
+implied store() fee slope between 0 B and 1024 B: 10009770329 planck/byte (base fee excluded)
+note: the pallet's ByteFee storage item reads 10 planck, a different quantity; this file does not claim the two are the same unit.
+
+paymentInfo transactionStorage.renew(block=171000,index=0): partialFee 1170665277570 planck
+paymentInfo returns one partialFee; it does not break the fee into base, length, weight or storage components
+paymentInfo transactionStorage.checkProof: not run (needs a real proof struct; no fixture available, and inventing one would not be a fact)
+
+== EVM RPC ==
+eth_chainId: 0x190f1ca9
+eth_blockNumber: 195995
+
+== native block 171308: scanner page and backend ==
+substrate chain.getBlockHash(171308): 0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98
+scanner_page: https://scanner-testnet-v3.portaldot.dev/blocks/171308
+scanner_page_http: 200
+scanner_page_bytes: 656
+scanner_page_is_spa_shell: true
+scanner_page_has_no_ssr_block_data: true
+scanner_backend: https://scanner-testnet-v3-api.portaldot.dev/blocks/171308
+scanner_backend_http: 200
+scanner_backend_height: 171308
+scanner_backend_hash: 0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98
+hash_matches_substrate: true
+scanner_backend_time_ms: 1792825032000 (2026-10-24T06:57:12Z)
+scanner_backend_parentHash: 0x48edd797153334179c0992a2c4c85217e1820d02824069c25d454c4a1bc355a6
+scanner_route_format: https://scanner-testnet-v3.portaldot.dev/blocks/<number> (route "/blocks/:id" in /static/js/main.ccefe6b0.js)
+scanner_page_confirmed: yes (SPA shell 200 + backend returns the same block hash as the chain)
