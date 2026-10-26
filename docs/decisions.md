@@ -531,3 +531,31 @@ from the loaded bytes `MEASURED`, with the source on every row naming which is w
 
 **Consequences.** A judge can check the bytes they received against the sha256, but cannot rebuild the
 file from a short seed. This is recorded as a deviation from the request in the u2c checkpoint.
+
+## D-12 — the evidence bundle gains an optional `retrieval` block (2026-10-26, feature 003)
+
+**Context.** The Judges page needs a link for the fresh-client retrieval and the tamper rejection.
+The `portaldot-live-run2` bundle recorded both in the raw run logs
+(`portaldot-tier1/evidence/raw/t1/75-live-retrieval*.txt`) but had no field for them, so the page would
+have shown a value with no evidence behind it.
+
+**Decision.** Add `retrieval` as an optional top-level key (utc, dealIds, blockSize, blockCount, size,
+sha256, root, sha256Match, tamper, source) to the schema, its validator, the contract document and the
+run2 bundle. Absent or `null` means "not recorded", and the page shows `PENDING LIVE RUN`; the earlier
+bundles stay valid and immutable. `scripts/check-evidence.mjs` re-validates the bundle on every build.
+
+**Consequences.** The schema is no longer "all keys required, no others allowed" for this one key. It is
+recorded in `specs/003-status-ui/contracts/evidence-schema.md` so the document and the code agree.
+
+## D-13 — the secret scan skips build output (2026-10-26, feature 003)
+
+**Context.** `node scripts/secret-scan.mjs` failed with 7 findings, all in
+`apps/status-ui/dist/assets/index-*.js`: the minified viem bundle contains 32-hex error strings that
+rule C (a 64-hex key shape on a line that names a key) reads as key material. `dist` is gitignored and
+never committed.
+
+**Decision.** Add `dist` to the scanner's `SKIP_DIRS`, so the scan reads source, specs and evidence —
+what we actually commit. No allowlist entry was added, and the planted-secret tests still pass.
+
+**Consequences.** A secret pasted into build output would not be caught by this scan. That output is
+reproducible from the scanned source, so the risk stays with the source.

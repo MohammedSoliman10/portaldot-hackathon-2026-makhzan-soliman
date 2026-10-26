@@ -61,6 +61,7 @@ All keys are required, and no others are allowed.
 | `deals` | array | 0–256 entries |
 | `rounds` | array | 0–256 entries |
 | `transactions` | array | 0–256 entries |
+| `retrieval` | object or `null` | optional; see below. Absent or `null` means the run recorded no retrieval |
 | `refusals` | array | 0–256 entries |
 | `limits` | array of strings | 1–16 entries, each ≤ 280 characters |
 
@@ -198,6 +199,27 @@ when the run did not capture the transaction at all. `finality` is
 `{ "kind": "tag", "tag": "finalized" }`, `{ "kind": "heuristic", "confirmations": N }` with N ≥ 1, or
 `null` when it was not observed. A heuristic is never rendered as protocol finality; it is rendered
 as `heuristic(confirmations = N)`.
+
+### `retrieval` (optional)
+
+```json
+{
+  "utc": "2026-10-24T10:12:07Z",
+  "dealIds": [1, 2],
+  "blockSize": 1024, "blockCount": 1024, "size": 1048576,
+  "sha256": "0x7f2f…e21e", "root": "0xd2ba…70c7",
+  "sha256Match": true,
+  "tamper": { "rejected": true, "firstMismatchingBlock": 0, "error": "ProofRejected: …" },
+  "source": "evidence/raw/t1/75-live-retrieval.txt"
+}
+```
+
+The fresh-client retrieval: a second client fetched the payload for `dealIds`, wrote it to disk and
+compared its sha256 with the upload. `blockCount` must equal `ceil(size / blockSize)`.
+`tamper.rejected` is the result of replaying the original path for the block whose bytes changed, so
+`firstMismatchingBlock` names that block. `null` (or a missing key) means the run recorded none, and
+the Judges page shows `PENDING LIVE RUN` rather than a zero. Bundles written before this key existed
+stay valid.
 
 ### `refusals[]`
 
