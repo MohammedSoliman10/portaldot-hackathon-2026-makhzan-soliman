@@ -89,6 +89,7 @@ storage-deposit split and the absence of any answer/settle refund — are collec
 | Block | `171308` (finalized block `171311` observed afterwards) |
 | Status / gas | `success` / `16262870374998956` gas, effective price `32580` wei |
 | Estimate → measured | `538.123540 tPOT` → `529.844316817465986480 tPOT` |
+| Cost split `[inferred from reconciliation]` | `165.513 tPOT` reserved storage deposit in the contract + `364.331316817465986480 tPOT` execution fees |
 | Ratio vs calibration | `0.9846146412530473` vs Tier 0 `0.984608251872` (+0.00065%) |
 | Owner balance after | `199.435042290680279745 tPOT` (100 tPOT reserve intact) |
 | Runtime / creation | `6,566 B` / `7,154 B` (budget `10,240 B`) |

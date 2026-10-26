@@ -525,9 +525,11 @@ per-transaction split is indeed not exposed. But `revive.accountInfoOf(h160)` re
 **Decision.** Record the measured split in `docs/V3-GOTCHAS.md` section 8 instead of repeating the
 brief's wording, and do not claim any caller refund. The answer and settle deltas are fee-only
 (`−162,915,694,292,617,500`, `−15,314,505,821,880,160`, `−15,314,494,987,996,050` wei, each equal to
-`gasUsed × effectiveGasPrice`), so there is no keeper-refund story to tell. The deploy cost
-(`529.844316817465986480 tPOT`) is likewise gas, not a deposit; the contract's reserved deposit is
-reported separately.
+`gasUsed × effectiveGasPrice`), so there is no keeper-refund story to tell. The deploy's total cost is
+the owner's measured drop of `529.844316817465986480 tPOT`, and `165.513 tPOT` of that is the
+contract's reserved deposit (the remainder, `364.331316817465986480 tPOT`, is execution fees). That
+split is `[inferred from reconciliation]`; the receipt has no such field, and refundability of the
+reserved deposit is not measured.
 
 **Consequences.** The docs say "receipt-level split: not exposed; account-level split: exposed and
 reconciles". No contract or CLI change follows from this entry.
