@@ -1,0 +1,59 @@
+/*
+ * Makhzan design tokens — a ledger, not a dashboard.
+ * Ink page, paper text, one ochre accent, one semantic red. No gradients, no shadows.
+ */
+:root {
+  --ink: #0b0c0b;
+  --ink-2: #121310;
+  --ink-3: #191a16;
+  --paper: #ede7da;
+  --paper-dim: #d8d1c2;
+  --ash: #8c877c;
+  --ash-2: #6a665d;
+  --ochre: #d9a441;
+  --ochre-dim: #8a6a2a;
+  --red: #e5484d;
+  --rule: rgb(237 231 218 / 14%);
+  --rule-strong: rgb(237 231 218 / 30%);
+  --focus: #f0c065;
+
+  --step--1: 0.78rem;
+  --step-0: 0.95rem;
+  --step-1: 1.18rem;
+  --step-2: 1.5rem;
+  --step-3: 2rem;
+  --step-4: 2.9rem;
+  --step-5: 4.2rem;
+
+  --gap: 1rem;
+  --rail: 13.5rem;
+  --measure: 74rem;
+  --hairline: 1px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-ash: var(--ash);
+  --color-ash-2: var(--ash-2);
+  --color-ochre: var(--ochre);
+  --color-ochre-dim: var(--ochre-dim);
+  --color-red: var(--red);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+
+  --font-sans: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --text-xs: var(--step--1);
+  --text-sm: var(--step-0);
+  --text-md: var(--step-1);
+  --text-lg: var(--step-2);
+  --text-xl: var(--step-3);
+  --text-2xl: var(--step-4);
+  --text-3xl: var(--step-5);
+}

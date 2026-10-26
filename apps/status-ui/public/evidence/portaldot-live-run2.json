@@ -1,0 +1,498 @@
+{
+  "schema": "makhzan.evidence/v0",
+  "id": "portaldot-live-run2",
+  "environment": "portaldot-testnet",
+  "label": "REPORTED",
+  "generatedAt": "2026-10-24T09:35:38Z",
+  "source": "portaldot-tier1/evidence: txs.json, receipts/live/*.json, raw/t1/60-live-pass.txt, 64-live-claim-a.txt, 65-live-settle-a.txt, 66-live-deal-b.txt, 67-live-answer-b.txt, 69-live-resolve-b.txt, 70-live-claim-b.txt, 71-live-settle-b.txt, 72-live-summary.txt",
+  "chain": {
+    "chainId": 420420777,
+    "name": "Portaldot testnet",
+    "rpcHost": "test-evm-rpc-v3.portaldot.dev",
+    "explorer": null,
+    "explorerNote": "no explorer is configured for this network"
+  },
+  "timing": {
+    "blockTimeSeconds": 1,
+    "basis": "assumption",
+    "source": "not measured; the page does not extrapolate from it"
+  },
+  "deployment": {
+    "address": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+    "txHash": "0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7",
+    "block": 171308,
+    "codeHash": "0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98",
+    "runtimeBytes": 6566,
+    "creationBytes": null,
+    "compiler": "solc 0.8.28, evm paris, via_ir, optimizer runs 1",
+    "codeVerified": {
+      "method": "runtime-code-hash",
+      "sourceVerified": false,
+      "artifact": "contracts/out/Makhzan.sol/Makhzan.json",
+      "note": "runtime code compared byte for byte with the artifact at block 171310; no explorer source verification exists"
+    }
+  },
+  "config": {
+    "challengeWindowBlocks": 50,
+    "challengeBlockSize": 1024,
+    "slashBps": 2000,
+    "minBondUnits": "1000000000000000",
+    "nextDealId": 2,
+    "providerCount": 1,
+    "minDurationBlocks": 100,
+    "maxDurationBlocks": 100800,
+    "slot0": "0x0000000189c00000006400010000000200038d7ea4c6800007d0040000000032"
+  },
+  "providers": [
+    {
+      "id": 1,
+      "address": "0xf4ec143c743FF57c0D32e829f50692551CBf6029",
+      "bondUnits": "2400000000000000",
+      "activeDeals": 0,
+      "registered": true
+    }
+  ],
+  "deals": [
+    {
+      "id": 1,
+      "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "providerId": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "leafCount": 1024,
+      "size": 1048576,
+      "blockSize": 1024,
+      "startBlock": 172266,
+      "endBlock": 172416,
+      "priceUnits": "500000000000000",
+      "claimedUnits": "500000000000000",
+      "flags": 1,
+      "state": "settled",
+      "health": 0,
+      "roundIds": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "providerId": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "leafCount": 1024,
+      "size": 1048576,
+      "blockSize": 1024,
+      "startBlock": 172578,
+      "endBlock": 172878,
+      "priceUnits": "500000000000000",
+      "claimedUnits": "500000000000000",
+      "flags": 1,
+      "state": "settled",
+      "health": 0,
+      "roundIds": [
+        2,
+        3
+      ]
+    }
+  ],
+  "rounds": [
+    {
+      "id": 1,
+      "dealId": 1,
+      "outcome": "passed",
+      "status": "passed",
+      "index": 451,
+      "startBlock": 172281,
+      "deadline": 172331,
+      "expectedPathLength": 10,
+      "challengeTx": "0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda",
+      "answerTx": "0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3",
+      "resolveTx": null,
+      "bondBeforeUnits": "3000000000000000",
+      "bondAfterUnits": "3000000000000000",
+      "slashUnits": "0",
+      "ownerCreditWei": "0",
+      "readBack": {
+        "challengeOpenAfter": false,
+        "bondAfterUnits": "3000000000000000"
+      },
+      "note": "answer landed at block 172295, 36 blocks before the deadline; the client timed out before writing its receipt file, but the chain shows health 1 and a closed challenge"
+    },
+    {
+      "id": 2,
+      "dealId": 2,
+      "outcome": "passed",
+      "status": "passed",
+      "index": 29,
+      "startBlock": 172584,
+      "deadline": 172634,
+      "expectedPathLength": 10,
+      "challengeTx": "0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb",
+      "answerTx": "0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210",
+      "resolveTx": null,
+      "bondBeforeUnits": "3000000000000000",
+      "bondAfterUnits": "3000000000000000",
+      "slashUnits": "0",
+      "ownerCreditWei": "0",
+      "readBack": {
+        "challengeOpenAfter": false,
+        "bondAfterUnits": "3000000000000000"
+      },
+      "note": "answered at block 172585, one block after the challenge; the read-back ran before health flipped and the settle step recorded health 0"
+    },
+    {
+      "id": 3,
+      "dealId": 2,
+      "outcome": "slashed",
+      "status": "failed",
+      "index": 623,
+      "startBlock": 172602,
+      "deadline": 172652,
+      "expectedPathLength": 10,
+      "challengeTx": "0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db",
+      "answerTx": null,
+      "resolveTx": "0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3",
+      "bondBeforeUnits": "3000000000000000",
+      "bondAfterUnits": "2400000000000000",
+      "slashUnits": "600000000000000",
+      "ownerCreditWei": "6000000000000000000",
+      "readBack": {
+        "challengeOpenAfter": false,
+        "bondAfterUnits": "2400000000000000"
+      },
+      "note": "no answer before block 172652; resolve at block 172658 slashed exactly 600000000000000 units (20% of 3000000000000000) and credited the owner exactly 6 tPOT"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "deploy",
+      "label": "Deploy Makhzan",
+      "hash": "0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7",
+      "block": 171308,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json",
+      "note": "deployment receipt, status success"
+    },
+    {
+      "id": "register",
+      "label": "Register provider 1",
+      "hash": "0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91",
+      "block": 172240,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91.json",
+      "note": "provider 1 registered with a 30 tPOT bond"
+    },
+    {
+      "id": "create-1",
+      "label": "Create deal 1",
+      "hash": "0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1",
+      "block": 172266,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1.json",
+      "note": "deal 1, 150 blocks, price 5 tPOT"
+    },
+    {
+      "id": "challenge-1",
+      "label": "Challenge deal 1",
+      "hash": "0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda",
+      "block": 172281,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda.json",
+      "note": "index 451, deadline 172331"
+    },
+    {
+      "id": "answer-1",
+      "label": "Pass answer, deal 1",
+      "hash": "0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3",
+      "block": 172295,
+      "status": "success",
+      "receipt": "not-recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/raw/t1/60-live-pass.txt",
+      "note": "the answer is on chain, 36 blocks before the deadline; the client timed out and wrote no receipt file, so the receipt is not recorded"
+    },
+    {
+      "id": "claim-1",
+      "label": "Claim deal 1",
+      "hash": "0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b",
+      "block": 172557,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b.json",
+      "note": "claimed 5 tPOT, the whole price; the bond did not move"
+    },
+    {
+      "id": "settle-1",
+      "label": "Settle deal 1",
+      "hash": "0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3",
+      "block": 172564,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3.json",
+      "note": "flags 1, healthOf(1) = 0"
+    },
+    {
+      "id": "create-2",
+      "label": "Create deal 2",
+      "hash": "0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3",
+      "block": 172578,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3.json",
+      "note": "deal 2, 300 blocks, price 5 tPOT, same 1 MiB root"
+    },
+    {
+      "id": "challenge-2a",
+      "label": "Challenge deal 2 (first)",
+      "hash": "0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb",
+      "block": 172584,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb.json",
+      "note": "index 29, deadline 172634"
+    },
+    {
+      "id": "answer-2a",
+      "label": "Pass answer, deal 2",
+      "hash": "0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210",
+      "block": 172585,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210.json",
+      "note": "answered one block after the challenge; the bond did not move"
+    },
+    {
+      "id": "challenge-2b",
+      "label": "Challenge deal 2 (second)",
+      "hash": "0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db",
+      "block": 172602,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db.json",
+      "note": "index 623, deadline 172652; this round was left unanswered on purpose"
+    },
+    {
+      "id": "resolve-2b",
+      "label": "Slash resolve, deal 2",
+      "hash": "0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3",
+      "block": 172658,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3.json",
+      "note": "bond 3000000000000000 -> 2400000000000000 units; owner credited 6000000000000000000 wei (exactly 6 tPOT)"
+    },
+    {
+      "id": "claim-2",
+      "label": "Claim deal 2",
+      "hash": "0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee",
+      "block": 172881,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee.json",
+      "note": "claimed 5 tPOT; the bond stayed at 24 tPOT"
+    },
+    {
+      "id": "settle-2",
+      "label": "Settle deal 2",
+      "hash": "0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec",
+      "block": 172887,
+      "status": "success",
+      "receipt": "recorded",
+      "finality": {
+        "kind": "tag",
+        "tag": "finalized"
+      },
+      "stages": [
+        "submitted",
+        "included",
+        "executed",
+        "finalized"
+      ],
+      "evidence": "evidence/receipts/live/0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec.json",
+      "note": "flags 1, healthOf(2) = 0, bond 2400000000000000 units"
+    }
+  ],
+  "retrieval": {
+    "utc": "2026-10-24T10:12:07Z",
+    "dealIds": [
+      1,
+      2
+    ],
+    "blockSize": 1024,
+    "blockCount": 1024,
+    "size": 1048576,
+    "sha256": "0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e",
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "sha256Match": true,
+    "tamper": {
+      "rejected": true,
+      "firstMismatchingBlock": 0,
+      "error": "ProofRejected: block 0 does not match the expected root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7"
+    },
+    "source": "portaldot-tier1/evidence/raw/t1/75-live-retrieval.txt, 75-live-retrieval-client.json"
+  },
+  "refusals": [
+    {
+      "id": "challenge-not-owner",
+      "attempted": "challenge(1) from a non-owner, eth_call at block 172280",
+      "error": "0x30cd7471",
+      "reason": "NotOwner",
+      "source": "evidence/raw/t1/63-live-refusals.txt",
+      "note": "the contract refuses before any state change; no transaction was sent"
+    },
+    {
+      "id": "answer-not-provider",
+      "attempted": "answer(...) from a non-provider, eth_call at block 172290",
+      "error": "0x3480e2b2",
+      "reason": "NotProvider",
+      "source": "evidence/raw/t1/63-live-refusals.txt",
+      "note": "the contract refuses before any state change; no transaction was sent"
+    },
+    {
+      "id": "create-bad-duration",
+      "attempted": "createDeal with duration 99 blocks, eth_call",
+      "error": "0x019af637",
+      "reason": "BadParams",
+      "source": "evidence/raw/t1/63-live-refusals.txt",
+      "note": "below the 100-block minimum; the contract refuses, no transaction was sent"
+    }
+  ],
+  "limits": [
+    "Deals 1 and 2 are settled. Health 0 means settled, not that every challenge was answered.",
+    "One slash exists on this deployment: 6 tPOT, exactly 20% of the 30 tPOT bond.",
+    "The owner credit is derived from balances before and after resolve, not from an explorer transfer list.",
+    "No explorer is configured for this network; each transaction is backed by a receipt file under portaldot-tier1/evidence/receipts/live.",
+    "The pass answer on deal 1 is on chain at block 172295, but its receipt file is missing, so it is marked not-recorded."
+  ]
+}

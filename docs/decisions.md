@@ -534,3 +534,51 @@ reconciles". No contract or CLI change follows from this entry.
 
 **Evidence.** `evidence/raw/t1/78-chain-facts.txt`, `evidence/raw/t1/79-account-mapping-deposits.txt`,
 `evidence/raw/t1/65-live-settle-a.txt`, `71-live-settle-b.txt`.
+
+## D-11 — the Verify sample is the deal file itself, not a seeded file (2026-10-26, feature 003)
+
+**Context.** The Verify screen needs a file a judge can load in one click whose root matches the deal
+the chain holds. The request asked for a 1 MiB seeded demo file with the generator seed shown so
+anyone can rebuild it.
+
+**Reality.** Deals 1 and 2 committed the root of a 1 MiB file created on 2026-10-24 with
+`dd if=/dev/urandom bs=1024 count=1024`. The chain holds
+`0xd2ba07e1…70c7`; the file's sha256 is `0x7f2fd6d5…e21e`. Keccak-256 is preimage-resistant, so no
+seed-derived file can reproduce that root, and a seeded sample would make the one-click check FAIL.
+
+**Decision.** Serve the exact deal file byte-for-byte at `/samples/demo-1mib.bin`, and show its
+sha256, size, block count, root and the exact command that created it, saying plainly that it has no
+seed. `scripts/check-sample.mjs` re-derives all four values from the bytes on every build, so the page
+cannot drift from the file. The page labels the recorded values `REPORTED` and the values it computes
+from the loaded bytes `MEASURED`, with the source on every row naming which is which.
+
+**Consequences.** A judge can check the bytes they received against the sha256, but cannot rebuild the
+file from a short seed. This is recorded as a deviation from the request in the u2c checkpoint.
+
+## D-12 — the evidence bundle gains an optional `retrieval` block (2026-10-26, feature 003)
+
+**Context.** The Judges page needs a link for the fresh-client retrieval and the tamper rejection.
+The `portaldot-live-run2` bundle recorded both in the raw run logs
+(`portaldot-tier1/evidence/raw/t1/75-live-retrieval*.txt`) but had no field for them, so the page would
+have shown a value with no evidence behind it.
+
+**Decision.** Add `retrieval` as an optional top-level key (utc, dealIds, blockSize, blockCount, size,
+sha256, root, sha256Match, tamper, source) to the schema, its validator, the contract document and the
+run2 bundle. Absent or `null` means "not recorded", and the page shows `PENDING LIVE RUN`; the earlier
+bundles stay valid and immutable. `scripts/check-evidence.mjs` re-validates the bundle on every build.
+
+**Consequences.** The schema is no longer "all keys required, no others allowed" for this one key. It is
+recorded in `specs/003-status-ui/contracts/evidence-schema.md` so the document and the code agree.
+
+## D-13 — the secret scan skips build output (2026-10-26, feature 003)
+
+**Context.** `node scripts/secret-scan.mjs` failed with 7 findings, all in
+`apps/status-ui/dist/assets/index-*.js`: the minified viem bundle contains 32-hex error strings that
+rule C (a 64-hex key shape on a line that names a key) reads as key material. `dist` is gitignored and
+never committed.
+
+**Decision.** Add `dist` to the scanner's `SKIP_DIRS`, so the scan reads source, specs and evidence —
+what we actually commit. No allowlist entry was added, and the planted-secret tests still pass.
+
+**Consequences.** A secret pasted into build output would not be caught by this scan. That output is
+reproducible from the scanned source, so the risk stays with the source.

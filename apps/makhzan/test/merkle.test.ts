@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildTree, getPath, leafHash, verify, type Hex } from "../src/merkle.ts";
+import { buildTree, buildTreeFromLeafHashes, getPath, leafHash, verify, type Hex } from "../src/merkle.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VECTORS = join(HERE, "..", "..", "..", "packages", "merkle-vectors", "vectors.json");
@@ -27,8 +27,21 @@ test("builder matches every shared vector", () => {
   }
 });
 
-test("every shared path is reproduced and verifies", () => {
+test("building from leaf hashes gives the same root, levels and paths", () => {
   for (const count of COUNTS) {
+    const vector = json.vectors[`leafCount${count}`];
+    const leaves = (vector.leaves as string[]).map(bytes);
+    const fromBytes = buildTree(leaves);
+    const fromHashes = buildTreeFromLeafHashes(leaves.map(leafHash));
+    assert.equal(fromHashes.root, fromBytes.root, `root for ${count}`);
+    assert.deepEqual(fromHashes.levels, fromBytes.levels, `levels for ${count}`);
+    for (let i = 0; i < count; i += 1) {
+      assert.deepEqual(getPath(fromHashes, i), vector.paths[i], `path ${i} of ${count}`);
+    }
+  }
+});
+
+test("every shared path is reproduced and verifies", () => {  for (const count of COUNTS) {
     const vector = json.vectors[`leafCount${count}`];
     const leaves = (vector.leaves as string[]).map(bytes);
     const tree = buildTree(leaves);

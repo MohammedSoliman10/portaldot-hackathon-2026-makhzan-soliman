@@ -1,0 +1,29 @@
+# Deployed check — Verify and Judges — [live] against https://status-ui-one.vercel.app
+utc: 2026-10-26T00:25:14Z
+main HEAD at deploy: 425ffe803dd44e93109cc1167e9d3594aefb8781
+deployment: https://status-ui-one.vercel.app (vercel --prod, status-miego66x5-soliman11.vercel.app)
+sample served: 200, 1048576 bytes, sha256 7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
+
+## Verify (playwright chromium, desktop 1280x900 and 390x844)
+[desktop] sample meta has sha256: true
+[desktop] verdict: PASS — The file root equals the deal 2 root read from the chain now.
+[desktop] both roots + blocks: true true true
+[desktop] chain source: true
+[desktop] tamper: Tampered copy One byte of block 1,023 was flipped in a copy held in memory. The file you loaded was not touched. FAIL — the original path for block 1,023 no longer verifies against the file root, so the same check the co
+[desktop] overflow px: 0
+[mobile] sample meta has sha256: true
+[mobile] verdict: PASS — The file root equals the deal 2 root read from the chain now.
+[mobile] both roots + blocks: true true true
+[mobile] chain source: true
+[mobile] tamper: Tampered copy One byte of block 1,023 was flipped in a copy held in memory. The file you loaded was not touched. FAIL — the original path for block 1,023 no longer verifies against the file root, so the same check the co
+[mobile] overflow px: 0
+CONSOLE ERRORS: none
+
+## Judges (playwright chromium, desktop and 390x844)
+live: Measured live — block 196,056 · chain 420420777 · 2026-10-26T00:25:25.300Z
+rows: 8
+design note: true
+not proven: true
+retrieval sha: true
+mobile overflow px: 0
+CONSOLE ERRORS: none

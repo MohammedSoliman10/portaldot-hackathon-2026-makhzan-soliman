@@ -30,9 +30,12 @@ evidence/rpc-log/*.tmp
 # OS / editor
 .DS_Store
 *.swp
+.vercel
 
-# local demo file for the live runbook; never committed
+# local demo file for the live runbook; never committed — except the copy the Verify page serves,
+# which must ship byte-for-byte so a judge can load the exact file deals 1 and 2 committed
 demo-1mib.bin
+!apps/status-ui/public/samples/demo-1mib.bin
 
 # daemon block store: evidence, not repo content
 evidence/state/*/files/
