@@ -1,0 +1,58 @@
+# LIVE-3a C: the five REPRODUCE.md commands, run in the LIVE-3a worktree
+# base commit at run time: 8dacc2d (LIVE-3a changes were not committed yet)
+# utc: 2026-10-26T10:30:39Z
+# mode: read-only. verify reads the public testnet; the other three are local. No key, no transaction.
+
+$ cd apps/makhzan && MAKHZAN_NETWORK=live ... node src/cliMain.ts verify 1
+makhzan verify 1 — read-only: no key, no transaction
+network LIVE chain 420420777 contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+block 202088
+PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+PASS deal 1 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 172266..172416
+PASS DealCreated at block 172266 (tx 0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1) matches root, size, endBlock and price
+PASS challenge #1 issued at block 172281 index 451 deadline 172331 (tx 0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda)
+PASS challenge #1 answered at block 172295 (tx 0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3); no bond movement in the event
+PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+PASS healthOf(1) = 0 matches the stored state
+RESULT: PASS (7 pass, 0 fail, 0 unknown, 0 pending)
+exit=0
+
+$ cd apps/makhzan && MAKHZAN_NETWORK=live ... node src/cliMain.ts verify 2
+block 202088
+PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+PASS deal 2 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 172578..172878
+PASS DealCreated at block 172578 (tx 0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3) matches root, size, endBlock and price
+PASS challenge #1 issued at block 172584 index 29 deadline 172634 (tx 0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb)
+PASS challenge #1 answered at block 172585 (tx 0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210); no bond movement in the event
+PASS challenge #2 issued at block 172602 index 623 deadline 172652 (tx 0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db)
+PASS challenge #2 slashed at block 172658 (tx 0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3): 600000000000000 units moved from the bond to the owner
+PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+PASS healthOf(2) = 0 matches the stored state
+RESULT: PASS (9 pass, 0 fail, 0 unknown, 0 pending)
+exit=0
+
+$ cd apps/makhzan && node --test --test-name-pattern "verifyFile accepts" test/retrieve.test.ts
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 258.4635
+exit=0
+
+$ cd apps/makhzan && node --test --test-name-pattern "rejects one flipped data byte" test/retrieve.test.ts
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 252.816499
+exit=0
+
+$ node scripts/docs-hygiene.mjs
+docs hygiene: 100 facts in README.md, docs/CHECKIN.md all match evidence/
+exit=0

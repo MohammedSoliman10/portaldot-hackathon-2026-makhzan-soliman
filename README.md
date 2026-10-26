@@ -234,6 +234,37 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
 | PolkaVM (`resolc`) deployment path | simulated only (compiler probe) | `evidence/raw/t1/` Tier-0 gates |
 
+## Who would pay and why (hypothesis, not validated)
+
+**This section is a hypothesis.** It is not backed by interviews, a pilot, a survey or a pricing
+test. No external team has used Makhzan, and the only live deals are our own. Treat it as a plan to
+be tested, not as evidence of demand.
+
+| Payer | The job they need done | Why they might pay | What they would need to see first |
+| --- | --- | --- | --- |
+| A storage or backup provider | Prove to a client that a specific file is still held, on demand | A challengeable receipt with money at risk is cheaper than a bespoke audit or an SLA credit negotiation | An independent run, a retention window with several challenges, and a price per deal |
+| A buyer of storage (archive, media, compliance) | A check it can run itself, without trusting the vendor's logs | Keyless verification from public chain data; a wrong answer costs the provider its bond | A clean reproduce path, a threat model it accepts, and a dispute runbook |
+| A chain or ecosystem team | A small, auditable availability primitive it can point users at | Reuse of the contract and the measured V3 notes instead of rebuilding the plumbing | A security review and a second implementation |
+
+What has to be true for the hypothesis to survive: a provider must prefer this to its own auditing;
+the bond must be large enough to matter but small enough to be affordable; the price per deal must
+cover gas, storage and support; and a buyer must accept a Merkle commitment as proof of possession
+rather than a certification.
+
+### Three milestones (no dates)
+
+1. **Independent provider pilot.** A provider we do not operate stores a real file under its own key
+   and answers challenges for a full retention window. Success = an outside operator completes a
+   deal without our daemon or our help.
+2. **Retrieval that is paid for.** Extend the challenge from "did you answer?" to "did you serve the
+   bytes?" with sampling across the deal, and price that work. Success = a measured run where
+   non-serving is detected and the bond responds, not just a missed answer.
+3. **One paid deal with a design partner.** A non-team buyer pays the on-chain price and settles,
+   with a written runbook for disputes. Success = one real invoice, or a signed pilot with a named
+   partner; until then this criterion stays unvalidated.
+
+`docs/JUDGING.md` maps these claims to evidence and lists the weak spots criterion by criterion.
+
 ## Quick start
 
 Prerequisites: Node 24, Foundry 1.8.5 (`forge`, `anvil`, `cast`), git.
@@ -295,7 +326,7 @@ apps/gates/                Tier-0 read-only network gates and shared chain helpe
 scripts/                   deploy.mjs, check-size.mjs, secret-scan.mjs, secret-scan-history.mjs, docs-hygiene.mjs, with-live-env.sh
 specs/002-core-storage-proofs/   spec, plan, tasks, quickstart, research
 docs/                      architecture, live runbook, decisions, evidence schema, threat model,
-                           demo, check-in, explainer, demo checklist
+                           demo, check-in, explainer, demo checklist, judging, reproduce
 evidence/                  raw command output, deployment records, receipts, verification, calibrations
 ```
 

@@ -1,0 +1,70 @@
+LIVE-3a A: native deploy dry-run (unsigned) for Makhzan
+collected_at_utc: 2026-10-26T10:29:06Z
+mode: read-only. ReviveApi_instantiate via state_call, plus one paymentInfo fee query. No key loaded, nothing signed or submitted.
+substrate_ws: wss://test-node-v3.portaldot.dev
+genesis_hash: 0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd
+spec_name: portaldot-v3
+spec_version: 3002
+substrate_head: 202072
+
+== API used ==
+api.call.reviveApi.instantiate  (metadata name: ReviveApi_instantiate)
+signature: instantiate(origin: SpCoreCryptoAccountId32, value: u128, gas_limit: Option<SpWeightsWeightV2Weight>, storage_deposit_limit: Option<u128>, code: PalletReviveTypesRuntimeApiTypesContractCodeV1, data: Bytes, salt: Option<[u8;32]>)
+returns: PalletReviveTypesRuntimeApiTypesContractContractResultV1InstantiateReturnValueV1
+not used: eth_estimateGas (EVM estimate), tx.revive.instantiate (extrinsic with code hash)
+
+== inputs ==
+origin_ss58: 5CGsx4vqstCP2bnkGn4TsAvCCYE3jBUohM2tGCtbSVLduZpE
+origin_accountId32: 0x0948ebd7637d1c32858a6fc5d947e85a6600205ceeeeeeeeeeeeeeeeeeeeeeee
+origin_note: owner H160 + 12 x 0xEE (apps/gates/src/keygen.ts); same mapping recorded in evidence/raw/t1/79-account-mapping-deposits.txt
+value: 0
+gas_limit: None (runtime default)
+storage_deposit_limit: None (runtime reports the required deposit)
+code: Upload(7154 B creation bytecode from contracts/out/Makhzan.sol/Makhzan.json)
+data: "0x" (in this runtime the constructor args must be part of the Upload buffer; the EVM create tx carried them the same way)
+salt: None
+owner_native_free_planck: 17232912290843335 (172.32912290843335 tPOT)
+owner_native_reserved_planck: 0
+
+== dry-run result ==
+success: true
+created_address: 0x5ee99e8ae165d0c33677c812d70b0b07820c1dca
+weightRequired.refTime: 165855596
+weightRequired.proofSize: 10673
+weightConsumed.refTime: 165855596
+weightConsumed.proofSize: 10257
+storageDeposit.charge_planck: 13093950000000000
+storageDeposit.charge_tPOT: 130.93950000000000
+maxStorageDeposit.charge_planck: 13093950000000000 (limit was None)
+gasConsumed: 4340001656960491
+returned_runtime_bytes: 6566
+returned_runtime_keccak256: 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98
+returned_runtime_matches_deployed_code_hash: true
+
+== second encoding, for the record ==
+code=creation only, data=constructor args: success=false error={"module":{"index":80,"error":"0x36000000"}} weights=0
+conclusion: pass the creation bytecode with the ABI-encoded constructor args appended, exactly as the EVM create tx did.
+
+== fee query for the equivalent signed extrinsic (still unsigned) ==
+extrinsic: revive.instantiateWithCode(value=0, weightLimit={"refTime":165855596,"proofSize":10673}, storageDepositLimit=None, code=7346 B, data=0x)
+paymentInfo.partialFee_planck: 74671152401064
+paymentInfo.partialFee_tPOT: 0.74671152401064
+paymentInfo.weight: {"refTime":1730582552,"proofSize":29680} (includes code-upload weight; the runtime API's weightRequired above excludes it)
+paymentInfo computes a fee only; it does not execute or persist the call.
+
+== comparison with the EVM deploy (evidence/raw/t1/81-deploy-cost.txt) ==
+evm_total_cost_tPOT: 529.844316817465986480 (owner balance drop)
+evm_reserved_storage_deposit_planck: 16551300000000000 (165.51300000000000 tPOT)
+native_dryrun_storage_deposit_planck: 13093950000000000 (130.93950000000000 tPOT)
+difference_native_minus_evm_planck: -3457350000000000 (34.57350000000000 tPOT)
+native_over_evm_pct: 79.111308
+the two paths do not charge the same storage deposit; this dry-run does not explain the difference and no explanation is claimed
+
+== reported by another team (not reproduced here) ==
+pot-watch reports a native deploy at 0.36 tPOT fee plus a refundable deposit hold. [reported by another team]
+this file does not reproduce 0.36 tPOT and does not claim the deposit is refundable: refundability is not measured.
+
+== limits ==
+dry-run only: nothing was signed, submitted or persisted; the created address is a simulation result.
+storageDeposit is what the runtime reports at the block above; it is not a receipt and it is not a refund promise.
+the native weight fee and the EVM gas fee are different units; no equivalence between them is claimed.
