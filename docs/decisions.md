@@ -511,3 +511,23 @@ needed. **Decision: close SEC-001 without a history rewrite and merge the featur
 **Consequences.** The public history still contains the redacted-later canary blob, but it is not
 linked to a real or funded account. The closure evidence is
 `evidence/raw/t1/74-sec-001-closure.txt`; the result is recorded as yes/no only.
+
+## D-11 — the Verify sample is the deal file itself, not a seeded file (2026-10-26, feature 003)
+
+**Context.** The Verify screen needs a file a judge can load in one click whose root matches the deal
+the chain holds. The request asked for a 1 MiB seeded demo file with the generator seed shown so
+anyone can rebuild it.
+
+**Reality.** Deals 1 and 2 committed the root of a 1 MiB file created on 2026-10-24 with
+`dd if=/dev/urandom bs=1024 count=1024`. The chain holds
+`0xd2ba07e1…70c7`; the file's sha256 is `0x7f2fd6d5…e21e`. Keccak-256 is preimage-resistant, so no
+seed-derived file can reproduce that root, and a seeded sample would make the one-click check FAIL.
+
+**Decision.** Serve the exact deal file byte-for-byte at `/samples/demo-1mib.bin`, and show its
+sha256, size, block count, root and the exact command that created it, saying plainly that it has no
+seed. `scripts/check-sample.mjs` re-derives all four values from the bytes on every build, so the page
+cannot drift from the file. The page labels the recorded values `REPORTED` and the values it computes
+from the loaded bytes `MEASURED`, with the source on every row naming which is which.
+
+**Consequences.** A judge can check the bytes they received against the sha256, but cannot rebuild the
+file from a short seed. This is recorded as a deviation from the request in the u2c checkpoint.
