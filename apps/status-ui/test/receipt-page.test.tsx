@@ -8,9 +8,10 @@ const bundle = run2 as unknown as EvidenceBundle;
 const evidenceState = () => ({ bundle, verified: true, error: null, loading: false });
 const SLASH_TX = "0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3";
 
-function rowText(container: HTMLElement, field: string): string {
+/** The value cell only: the source is rendered under the field name on a phone. */
+function valueText(container: HTMLElement, field: string): string {
   const row = container.querySelector(`[data-testid="receipt-row-${field}"]`);
-  return (row?.textContent ?? "").replace(/\s+/g, " ").trim();
+  return (row?.querySelector(".numeral")?.textContent ?? "").replace(/\s+/g, " ").trim();
 }
 
 describe("the receipt page", () => {
@@ -21,12 +22,12 @@ describe("the receipt page", () => {
     });
 
     expect(container.textContent).toMatch(/deal 2/i);
-    expect(rowText(container, "bond-before")).toContain("30");
-    expect(rowText(container, "bond-after")).toContain("24");
-    expect(rowText(container, "slash")).toContain("6");
-    expect(rowText(container, "slash")).toContain("600,000,000,000,000 units");
-    expect(rowText(container, "owner-credited")).toContain("6");
-    expect(rowText(container, "owner-credited")).toContain("6,000,000,000,000,000,000 wei");
+    expect(valueText(container, "bond-before")).toContain("30");
+    expect(valueText(container, "bond-after")).toContain("24");
+    expect(valueText(container, "slash")).toContain("6");
+    expect(valueText(container, "slash")).toContain("600,000,000,000,000 units");
+    expect(valueText(container, "owner-credited")).toContain("6");
+    expect(valueText(container, "owner-credited")).toContain("6,000,000,000,000,000,000 wei");
     for (const row of container.querySelectorAll("[data-testid^='receipt-row-']")) {
       expect(row.querySelector("[data-label='REPORTED']")).not.toBeNull();
     }
@@ -35,10 +36,10 @@ describe("the receipt page", () => {
   it("shows deal 1 as 30 to 30 with no slash, and says so in words", () => {
     const { container } = renderApp(<AppRoutes />, { route: "/receipt/1", evidence: evidenceState() });
 
-    expect(rowText(container, "bond-before")).toContain("30");
-    expect(rowText(container, "bond-after")).toContain("30");
-    expect(rowText(container, "slash")).toMatch(/^slash\s*0/i);
-    expect(rowText(container, "owner-credited")).toMatch(/^owner credited\s*0/i);
+    expect(valueText(container, "bond-before")).toContain("30");
+    expect(valueText(container, "bond-after")).toContain("30");
+    expect(valueText(container, "slash")).toMatch(/^0 tPOT/);
+    expect(valueText(container, "owner-credited")).toMatch(/^0 tPOT/);
     expect(container.textContent).toMatch(/no slash/i);
   });
 

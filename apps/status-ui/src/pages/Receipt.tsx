@@ -23,7 +23,10 @@ function Chip({ label }: { label: Label }) {
 function Row({ field, value, unit, detail, label, source }: ReceiptRow) {
   return (
     <tr data-testid={`receipt-row-${slug(field)}`}>
-      <td className="break-words text-ash">{field}</td>
+      <td className="break-words text-ash">
+        {field}
+        <p className="mono mt-1 break-all text-[10px] text-ash-2 sm:hidden">{source}</p>
+      </td>
       <td className="numeral">
         {value}
         {unit ? <span className="text-ash"> {unit}</span> : null}
@@ -32,7 +35,7 @@ function Row({ field, value, unit, detail, label, source }: ReceiptRow) {
       <td>
         <Chip label={label} />
       </td>
-      <td className="mono break-words text-xs text-ash-2">{source}</td>
+      <td className="mono hidden break-words text-xs text-ash-2 sm:table-cell">{source}</td>
     </tr>
   );
 }
@@ -132,12 +135,12 @@ export function Receipt() {
           Bond, slash, credit
         </h2>
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full table-fixed">
+          <table className="w-full table-auto sm:table-fixed">
             <colgroup>
-              <col className="w-[26%]" />
-              <col className="w-[30%]" />
-              <col className="w-[18%]" />
-              <col className="w-[26%]" />
+              <col className="sm:w-[26%]" />
+              <col className="sm:w-[30%]" />
+              <col className="sm:w-[18%]" />
+              <col className="sm:w-[26%]" />
             </colgroup>
             <caption>
               Every number is transcribed from {source}; the resolve transaction records the slash and
@@ -148,7 +151,9 @@ export function Receipt() {
                 <th scope="col">Field</th>
                 <th scope="col">Value</th>
                 <th scope="col">Label</th>
-                <th scope="col">Source</th>
+                <th scope="col" className="hidden sm:table-cell">
+                  Source
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -170,18 +175,20 @@ export function Receipt() {
             : `No explorer is configured for this network, so each hash opens the evidence file that records it (${source}). The hash itself is the receipt.`}
         </p>
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full table-fixed">
+          <table className="w-full table-auto sm:table-fixed">
             <colgroup>
-              <col className="w-[22%]" />
-              <col className="w-[28%]" />
-              <col className="w-[14%]" />
-              <col className="w-[36%]" />
+              <col className="sm:w-[22%]" />
+              <col className="hidden sm:table-cell sm:w-[28%]" />
+              <col className="sm:w-[14%]" />
+              <col className="sm:w-[36%]" />
             </colgroup>
             <caption>The steps the deployment recorded, in the order they happened.</caption>
             <thead>
               <tr>
                 <th scope="col">Step</th>
-                <th scope="col">What it did</th>
+                <th scope="col" className="hidden sm:table-cell">
+                  What it did
+                </th>
                 <th scope="col">Block</th>
                 <th scope="col">Transaction</th>
               </tr>
@@ -190,7 +197,7 @@ export function Receipt() {
               {receipt.transactions.map((tx) => (
                 <tr key={tx.id} data-testid={`receipt-tx-${tx.id}`}>
                   <td className="mono break-words text-xs text-ash">{tx.id}</td>
-                  <td className="break-words">{tx.label}</td>
+                  <td className="hidden break-words sm:table-cell">{tx.label}</td>
                   <td className="numeral">{tx.block === null ? "not recorded" : formatCount(tx.block)}</td>
                   <td className="mono break-all text-xs">
                     {tx.hash === null ? (
