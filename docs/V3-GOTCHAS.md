@@ -211,3 +211,39 @@ contract with its own bonded provider, random challenge, slash and `healthOf` ga
 wrapper around `store`.
 
 Evidence: `evidence/raw/t1/78-chain-facts.txt`.
+
+## 11. `healthOf` is a challenge check, not an expiry check `[measured]`
+
+Read from `contracts/src/makhzan/Makhzan.sol:331-339` and pinned by
+`contracts/test/makhzan/HealthSemantics.t.sol` (5 tests, all passing):
+
+| Code | Meaning | Condition |
+| --- | --- | --- |
+| `0` | No such deal **or** settled | `owner == address(0)` or the `DEAL_SETTLED` flag |
+| `1` | Healthy | deal exists, not settled, **no open challenge** |
+| `2` | Challenge pending | open and `block.number <= challengeStart + challengeWindow` (deadline block included) |
+| `3` | In default | open and `block.number > challengeStart + challengeWindow` |
+
+What the table does **not** say, and what cost us a review round:
+
+- A deal whose `endBlock` has passed but that was never settled still returns `1`. The end block is
+  never read by `healthOf`.
+- A deal that was never challenged returns `1` for its whole life until it is settled.
+- `0` conflates "settled" with "never existed".
+- At the exact deadline block the code is `2`; the first block past it is `3`.
+
+A consumer that needs expiry must read `endBlock` itself. `dealOf(uint32 dealId)` returns a tuple
+whose **third** value is `uint32 endBlock` (`startBlock` is second; there is no `endBlockOf`):
+
+```solidity
+(address owner, uint32 startBlock, uint32 endBlock, uint16 providerId, uint8 flags, bytes32 root,
+ uint24 leafCount, uint32 size, uint32 challengeIndex, uint32 challengeStart, uint64 price,
+ uint64 claimed) = IMakhzan(addr).dealOf(dealId);
+```
+
+Test config: `challengeWindow = 50`, `duration 600…14 400` blocks; deployed config: window `50`,
+duration `100…100 800`. `price` is `uint64` **planck**, and `createDeal` requires
+`msg.value == price * 10 000` wei (`WEI_PER_UNIT`, `Makhzan.sol:15`).
+
+Evidence: `contracts/test/makhzan/HealthSemantics.t.sol`; deploy config in
+`evidence/raw/t1/59-live-deploy.txt`.
