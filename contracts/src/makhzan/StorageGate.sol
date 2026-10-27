@@ -13,10 +13,13 @@ contract StorageGate {
     error AlreadyLocked();
     error NotLocked();
     error NotPayee();
+    error NotPayer();
+    error RefundNotAllowed();
     error TransferFailed();
 
     event Locked(uint32 indexed dealId, address indexed payer, address indexed payee, uint96 amount);
     event Released(uint32 indexed dealId, address indexed payee, uint96 amount);
+    event Refunded(uint32 indexed dealId, address indexed payer, uint96 amount);
 
     struct Lock {
         address payer; // slot 0: 20 bytes
@@ -52,6 +55,23 @@ contract StorageGate {
         uint96 amount = l.amount;
         l.status = 2;
         emit Released(dealId, msg.sender, amount);
+
+        (bool ok,) = msg.sender.call{value: amount}("");
+        if (!ok) revert TransferFailed();
+    }
+
+    /// @notice The payer recovers the payment after a default, or once the term is over unreleased.
+    function refund(uint32 dealId) external {
+        Lock storage l = lockOf[dealId];
+        if (l.status != 1) revert NotLocked();
+        if (msg.sender != l.payer) revert NotPayer();
+        if (makhzan.healthOf(dealId) != 3 && block.number < MakhzanGuard.endBlockOf(makhzan, dealId)) {
+            revert RefundNotAllowed();
+        }
+
+        uint96 amount = l.amount;
+        l.status = 3;
+        emit Refunded(dealId, msg.sender, amount);
 
         (bool ok,) = msg.sender.call{value: amount}("");
         if (!ok) revert TransferFailed();

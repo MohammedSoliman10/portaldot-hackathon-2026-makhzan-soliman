@@ -29,7 +29,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
       one lock per deal, zero payee/value refused, not-healthy refused.
 - [x] **T007** `StorageGateRelease.t.sol` first, then `release`: payee-only, healthy-only, state
       before send, one payment, double release refused.
-- [ ] **T008** `StorageGateRefund.t.sol` first, then `refund`: payer-only, `healthOf == 3` or
+- [x] **T008** `StorageGateRefund.t.sol` first, then `refund`: payer-only, `healthOf == 3` or
       `block.number >= endBlock` with no release, one payment, double refund refused.
 
 ## Phase 4 — Evidence (SC-003, SC-004)
