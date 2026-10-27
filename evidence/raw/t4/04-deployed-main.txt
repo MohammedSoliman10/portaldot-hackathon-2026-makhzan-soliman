@@ -1,0 +1,38 @@
+# deployed check on main (merge of 006) — 2026-10-27T11:08Z
+# tree d93227d · production status-lanoih1qs-soliman11.vercel.app · alias https://status-ui-one.vercel.app
+
+[1280] /replay h1="The recorded run, step by step" progress=1/8 step="Create deal 2"
+[1280] /replay REPORTED=true recording=true
+[1280] /replay block link https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172578
+[1280] /replay next -> progress=2 step="Challenge 1 of 2"
+[1280] /replay deal 1 max=5 step="Create deal 1" slashStep=false
+[1280] /replay overflow 0px
+[1280] /proof block links=2 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172602
+[1280] /proof overflow 0px
+[1280] /receipt/2 block links=7 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172578
+[1280] /receipt/2 note=true
+[1280] /receipt/2 overflow 0px
+[1280] /deal/2 block links=4 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172266
+[1280] /deal/2 overflow 0px
+[1280] / block links=9 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/171308
+[1280] / overflow 0px
+[390] /replay h1="The recorded run, step by step" progress=1/8 step="Create deal 2"
+[390] /replay REPORTED=true recording=true
+[390] /replay block link https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172578
+[390] /replay next -> progress=2 step="Challenge 1 of 2"
+[390] /replay deal 1 max=5 step="Create deal 1" slashStep=false
+[390] /replay overflow 0px
+[390] /proof block links=2 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172602
+[390] /proof overflow 0px
+[390] /receipt/2 block links=7 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172578
+[390] /receipt/2 note=true
+[390] /receipt/2 overflow 0px
+[390] /deal/2 block links=4 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172266
+[390] /deal/2 overflow 0px
+[390] / block links=9 sample=https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/171308
+[390] / overflow 0px
+CONSOLE https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/172578
+CONSOLE HTTP 200 shows block 172,578: true
+CONSOLE extrinsics shown: true
+CONSOLE snippet: PortaldotV3 Test portaldot-v3/3002 #216,807 Accounts Network Governance Developer Settings Wiki Explorer Chain info Block details Latency Forks Node info API stats deposits 14.0856 tPOT transfers 5.0000 tPOT ref time 10,806,555,499 0% proof size 267,966 0% event count 13 extrinsic count 2 172,578 hash parent next state
+CONSOLE/NETWORK ERRORS: none
