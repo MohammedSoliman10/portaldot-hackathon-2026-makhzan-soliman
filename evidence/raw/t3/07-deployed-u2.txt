@@ -1,0 +1,30 @@
+# UI2 deployed check — 2026-10-27T10:43:12.252Z
+# https://status-ui-one.vercel.app (production, aliased)
+# deployment https://status-oh52ahssw-soliman11.vercel.app
+
+[1280x900] refusal non-owner-challenge :: Selector 0x30cd7471 MEASURED eth_call at latest · 2026-10-27T10:43:17.269Z Decoded error NotOwner() MEASURED decoded from the ABI: NotOwner() Revert data 0x30cd7471 MEASURED the node's answer to eth_call Calldata sent 0xf3c72faa0000000000000000000000000000000000000000000000000000000000000001 MEASURED 1 attempt · 476 ms
+[1280x900] refusal non-provider-answer :: Selector 0x3480e2b2 MEASURED eth_call at latest · 2026-10-27T10:43:17.873Z Decoded error NotProvider() MEASURED decoded from the ABI: NotProvider() Revert data 0x3480e2b2 MEASURED the node's answer to eth_call Calldata sent 0x9ad19c6d00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 MEASURED 1 attempt · 268 ms
+[1280x900] refusal bad-params-create :: Selector 0x019af637 MEASURED eth_call at latest · 2026-10-27T10:43:18.201Z Decoded error BadParams() MEASURED decoded from the ABI: BadParams() Revert data 0x019af637 MEASURED the node's answer to eth_call Calldata sent 0xc4f8f6f1000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 MEASURED 1 attempt · 295 ms
+[1280x900] /verify overflow 0px
+[1280x900] /receipt/2 :: Bond before 30 tPOT REPORTED evidence/portaldot-live-run2.json | Slash 6 tPOT 600,000,000,000,000 units · exactly 20% of the bond REPORTED evidence/portaldot-live-run2.json | Bond after 24 tPOT REPORTED evidence/portaldot-live-run2.json | Owner credited 6 tPOT 6,000,000,000,000,000,000 wei REPORTED evidence/portaldot-live-run2.json
+[1280x900] /receipt/2 tx rows 7 · overflow 0px
+[1280x900] /receipt/1 :: Bond before 30 tPOT REPORTED evidence/portaldot-live-run2.json | Slash 0 tPOT no slash was recorded on this deal REPORTED evidence/portaldot-live-run2.json | Bond after 30 tPOT REPORTED evidence/portaldot-live-run2.json | Owner credited 0 tPOT no credit was recorded on this deal REPORTED evidence/portaldot-live-run2.json
+[1280x900] /receipt/1 tx rows 5 · overflow 0px
+[1280x900] /#/receipt/2 h1 "Receipt — deal 2" rows 8
+[1280x900] / wording "Deals 1 and 2 are both settled on this deployment: deal 1 was answered in time, deal 2 took one slash."
+[1280x900] / wording "Health 0 is the settled state, not a fault — a deal ends at 0 whether it was answered or slashed, so read the rounds below to see which happened."
+[1280x900] / live Measured live — block 216,549 · chain 420420777 · test-evm-rpc-v3
+[390x844] refusal non-owner-challenge :: Selector 0x30cd7471 MEASURED eth_call at latest · 2026-10-27T10:43:32.602Z Decoded error NotOwner() MEASURED decoded from the ABI: NotOwner() Revert data 0x30cd7471 MEASURED the node's answer to eth_call Calldata sent 0xf3c72faa0000000000000000000000000000000000000000000000000000000000000001 MEASURED 1 attempt · 344 ms
+[390x844] refusal non-provider-answer :: Selector 0x3480e2b2 MEASURED eth_call at latest · 2026-10-27T10:43:33.329Z Decoded error NotProvider() MEASURED decoded from the ABI: NotProvider() Revert data 0x3480e2b2 MEASURED the node's answer to eth_call Calldata sent 0x9ad19c6d00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 MEASURED 1 attempt · 257 ms
+[390x844] refusal bad-params-create :: Selector 0x019af637 MEASURED eth_call at latest · 2026-10-27T10:43:33.665Z Decoded error BadParams() MEASURED decoded from the ABI: BadParams() Revert data 0x019af637 MEASURED the node's answer to eth_call Calldata sent 0xc4f8f6f1000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 MEASURED 1 attempt · 276 ms
+[390x844] /verify overflow 0px
+[390x844] /receipt/2 :: Bond before evidence/portaldot-live-run2.json 30 tPOT REPORTED | Slash evidence/portaldot-live-run2.json 6 tPOT 600,000,000,000,000 units · exactly 20% of the bond REPORTED | Bond after evidence/portaldot-live-run2.json 24 tPOT REPORTED | Owner credited evidence/portaldot-live-run2.json 6 tPOT 6,000,000,000,000,000,000 wei REPORTED
+[390x844] /receipt/2 tx rows 7 · overflow 0px
+[390x844] /receipt/1 :: Bond before evidence/portaldot-live-run2.json 30 tPOT REPORTED | Slash evidence/portaldot-live-run2.json 0 tPOT no slash was recorded on this deal REPORTED | Bond after evidence/portaldot-live-run2.json 30 tPOT REPORTED | Owner credited evidence/portaldot-live-run2.json 0 tPOT no credit was recorded on this deal REPORTED
+[390x844] /receipt/1 tx rows 5 · overflow 0px
+[390x844] /#/receipt/2 h1 "Receipt — deal 2" rows 8
+[390x844] / wording "Deals 1 and 2 are both settled on this deployment: deal 1 was answered in time, deal 2 took one slash."
+[390x844] / wording "Health 0 is the settled state, not a fault — a deal ends at 0 whether it was answered or slashed, so read the rounds below to see which happened."
+[390x844] / live Measured live — block 216,551 · chain 420420777 · test-evm-rpc-v3
+
+CONSOLE/NETWORK ERRORS: none
