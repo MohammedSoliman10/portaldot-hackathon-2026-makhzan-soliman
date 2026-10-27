@@ -18,7 +18,7 @@ contract StorageGateFuzzTest is MakhzanTestBase {
         gate = new StorageGate(m);
         uint32 dealId = _createDeal();
         vm.prank(client);
-        gate.lock{value: AMOUNT}(dealId, stranger);
+        gate.lock{value: AMOUNT}(dealId, stranger, 0);
     }
 
     /// @dev Applies one fuzzed history to deal 1 and returns the end block.
@@ -50,14 +50,14 @@ contract StorageGateFuzzTest is MakhzanTestBase {
             gate.release(1);
             assertEq(stranger.balance, before + AMOUNT, "released exactly once");
             assertEq(address(gate).balance, 0, "gate emptied");
-            (,,, uint8 status) = gate.lockOf(1);
+            (,,,, uint8 status) = gate.lockOf(1);
             assertEq(status, 2, "released flag");
         } else {
             vm.expectRevert();
             gate.release(1);
             assertEq(stranger.balance, before, "no value moved");
             assertEq(address(gate).balance, AMOUNT, "value stayed in the gate");
-            (,,, uint8 status) = gate.lockOf(1);
+            (,,,, uint8 status) = gate.lockOf(1);
             assertEq(status, 1, "still locked");
         }
         assertEq(m.healthOf(1), health, "release never changes the deal");
@@ -76,14 +76,14 @@ contract StorageGateFuzzTest is MakhzanTestBase {
             gate.refund(1);
             assertEq(client.balance, before + AMOUNT, "refunded exactly once");
             assertEq(address(gate).balance, 0, "gate emptied");
-            (,,, uint8 status) = gate.lockOf(1);
+            (,,,, uint8 status) = gate.lockOf(1);
             assertEq(status, 3, "refunded flag");
         } else {
             vm.expectRevert();
             gate.refund(1);
             assertEq(client.balance, before, "no value moved");
             assertEq(address(gate).balance, AMOUNT, "value stayed in the gate");
-            (,,, uint8 status) = gate.lockOf(1);
+            (,,,, uint8 status) = gate.lockOf(1);
             assertEq(status, 1, "still locked");
         }
     }

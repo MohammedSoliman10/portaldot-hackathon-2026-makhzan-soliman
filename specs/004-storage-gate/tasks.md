@@ -48,7 +48,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
 
 - [x] **T011** `AfterSlash.t.sol`: challenge → deadline → resolve, and read `healthOf` before,
       right after and ten blocks later; read the provider bond. Report the view that returns it.
-- [ ] **T012** Bond-aware gate: `lock(dealId, payee, minBond)` and `release` refusing
+- [x] **T012** Bond-aware gate: `lock(dealId, payee, minBond)` and `release` refusing
       `BondTooLow` when the deal provider's current bond is below the floor. Tests first: slash
       drops the bond, `minBond == 0` unchanged, boundary at equality, non-provider payee, refund
       unchanged; existing fuzz still holds.

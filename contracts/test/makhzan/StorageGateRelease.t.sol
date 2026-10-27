@@ -52,7 +52,7 @@ contract StorageGateReleaseTest is MakhzanTestBase {
 
     function _lock(uint32 dealId, address payee) internal {
         vm.prank(client);
-        gate.lock{value: AMOUNT}(dealId, payee);
+        gate.lock{value: AMOUNT}(dealId, payee, 0);
     }
 
     function test_releasePaysThePayeeExactlyOnce() public {
@@ -65,7 +65,7 @@ contract StorageGateReleaseTest is MakhzanTestBase {
 
         assertEq(stranger.balance, before + AMOUNT, "payee paid exactly the lock");
         assertEq(address(gate).balance, 0, "gate emptied");
-        (,,, uint8 status) = gate.lockOf(dealId);
+        (,,,, uint8 status) = gate.lockOf(dealId);
         assertEq(status, 2, "released");
     }
 

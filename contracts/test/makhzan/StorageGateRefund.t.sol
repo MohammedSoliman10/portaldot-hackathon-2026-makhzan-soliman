@@ -18,7 +18,7 @@ contract StorageGateRefundTest is MakhzanTestBase {
 
     function _lock(uint32 dealId, address payee) internal {
         vm.prank(client);
-        gate.lock{value: AMOUNT}(dealId, payee);
+        gate.lock{value: AMOUNT}(dealId, payee, 0);
     }
 
     function test_refundAfterDefaultPaysThePayer() public {
@@ -35,7 +35,7 @@ contract StorageGateRefundTest is MakhzanTestBase {
 
         assertEq(client.balance, before + AMOUNT, "payer refunded inside the term");
         assertEq(address(gate).balance, 0, "gate emptied");
-        (,,, uint8 status) = gate.lockOf(dealId);
+        (,,,, uint8 status) = gate.lockOf(dealId);
         assertEq(status, 3, "refunded");
     }
 

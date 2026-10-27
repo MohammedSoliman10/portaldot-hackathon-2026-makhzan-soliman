@@ -20,12 +20,13 @@ contract StorageGateLockTest is MakhzanTestBase {
         uint32 dealId = _createDeal();
 
         vm.prank(client);
-        gate.lock{value: AMOUNT}(dealId, stranger);
+        gate.lock{value: AMOUNT}(dealId, stranger, 0);
 
-        (address payer, uint96 amount, address payee, uint8 status) = gate.lockOf(dealId);
+        (address payer, uint96 amount, address payee, uint64 minBond, uint8 status) = gate.lockOf(dealId);
         assertEq(payer, client, "payer");
         assertEq(payee, stranger, "payee");
         assertEq(amount, AMOUNT, "amount");
+        assertEq(minBond, 0, "no floor by default");
         assertEq(status, 1, "locked");
         assertEq(address(gate).balance, AMOUNT, "gate holds the value");
     }
@@ -33,31 +34,31 @@ contract StorageGateLockTest is MakhzanTestBase {
     function test_secondLockForTheSameDealReverts() public {
         uint32 dealId = _createDeal();
         vm.prank(client);
-        gate.lock{value: AMOUNT}(dealId, stranger);
+        gate.lock{value: AMOUNT}(dealId, stranger, 0);
 
         vm.prank(client);
         vm.expectRevert(StorageGate.AlreadyLocked.selector);
-        gate.lock{value: AMOUNT}(dealId, provider);
+        gate.lock{value: AMOUNT}(dealId, provider, 0);
     }
 
     function test_lockWithoutValueReverts() public {
         uint32 dealId = _createDeal();
         vm.prank(client);
         vm.expectRevert(StorageGate.BadLock.selector);
-        gate.lock{value: 0}(dealId, stranger);
+        gate.lock{value: 0}(dealId, stranger, 0);
     }
 
     function test_lockWithZeroPayeeReverts() public {
         uint32 dealId = _createDeal();
         vm.prank(client);
         vm.expectRevert(StorageGate.BadLock.selector);
-        gate.lock{value: AMOUNT}(dealId, address(0));
+        gate.lock{value: AMOUNT}(dealId, address(0), 0);
     }
 
     function test_lockOnUnknownDealRevertsSettledOrNone() public {
         vm.prank(client);
         vm.expectRevert(MakhzanGuard.SettledOrNone.selector);
-        gate.lock{value: AMOUNT}(999, stranger);
+        gate.lock{value: AMOUNT}(999, stranger, 0);
     }
 
     function test_lockOnSettledDealRevertsSettledOrNone() public {
@@ -67,7 +68,7 @@ contract StorageGateLockTest is MakhzanTestBase {
 
         vm.prank(client);
         vm.expectRevert(MakhzanGuard.SettledOrNone.selector);
-        gate.lock{value: AMOUNT}(dealId, stranger);
+        gate.lock{value: AMOUNT}(dealId, stranger, 0);
     }
 
     function test_lockWithPendingChallengeRevertsPending() public {
@@ -76,7 +77,7 @@ contract StorageGateLockTest is MakhzanTestBase {
 
         vm.prank(client);
         vm.expectRevert(MakhzanGuard.Pending.selector);
-        gate.lock{value: AMOUNT}(dealId, stranger);
+        gate.lock{value: AMOUNT}(dealId, stranger, 0);
     }
 
     function test_lockInDefaultRevertsDefault() public {
@@ -87,7 +88,7 @@ contract StorageGateLockTest is MakhzanTestBase {
 
         vm.prank(client);
         vm.expectRevert(MakhzanGuard.Default.selector);
-        gate.lock{value: AMOUNT}(dealId, stranger);
+        gate.lock{value: AMOUNT}(dealId, stranger, 0);
     }
 
     function test_lockAfterTheEndBlockRevertsExpired() public {
@@ -96,6 +97,6 @@ contract StorageGateLockTest is MakhzanTestBase {
 
         vm.prank(client);
         vm.expectRevert(MakhzanGuard.Expired.selector);
-        gate.lock{value: AMOUNT}(dealId, stranger);
+        gate.lock{value: AMOUNT}(dealId, stranger, 0);
     }
 }
