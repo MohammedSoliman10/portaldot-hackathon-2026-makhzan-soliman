@@ -1,0 +1,38 @@
+# UI2 gate — 2026-10-27T10:40:23Z — branch 005-ui-refusals-receipts @ 766552a
+
+$ npm --prefix apps/status-ui run typecheck
+
+> status-ui@0.1.0 typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm --prefix apps/status-ui test
+ RUN  v4.1.12 /home/mohammed_soliman/hackathons/portaldot-ui/apps/status-ui
+
+
+ Test Files  24 passed (24)
+      Tests  197 passed (197)
+   Start at  13:40:27
+   Duration  3.65s (transform 2.63s, setup 3.87s, import 8.97s, tests 10.66s, environment 16.00s)
+
+
+$ npm --prefix apps/status-ui run build
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.86s
+
+$ npm --prefix apps/status-ui run check:evidence
+
+evidence OK: portaldot-live-run2 (sha256 0x12feb5e6c9ebcd98105df763828bd369f22bd741a3590599a2bc64108a190cf9)
+
+$ npm --prefix apps/status-ui run check:sample
+
+sample OK: 8192 bytes, 8 blocks, root 0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7; deal sample OK: 1048576 bytes, 1024 blocks, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e, root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+
+$ npm --prefix apps/status-ui run smoke
+
+smoke OK: 8 routes served the shell directly
+
+$ node scripts/secret-scan.mjs
+secret scan PASS — 0 findings in 641 files (718 paths)

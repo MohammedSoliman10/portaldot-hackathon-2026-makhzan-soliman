@@ -1,0 +1,92 @@
+# contracts gate — 2026-10-27T10:50Z — ce064b8
+
+$ forge fmt --check
+exit=0
+
+$ forge build --sizes
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/StorageGateFuzz.t.sol:37:17
+   │
+37 │         vm.roll(block.number + (extra % 700));
+   │         ────────━━━━━━━━━━━━───────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+
+$ node scripts/check-size.mjs
+Makhzan runtime 6566 B <= budget 10240 B (margin 3674 B)
+
+$ forge snapshot --check
+Diff in "MerkleFuzzTest::testFuzz_differentRootIsRejected(uint8,uint32)": consumed "(runs: 1000, μ: 170911, ~: 118721)" gas, expected "(runs: 1000, μ: 168898, ~: 116359)" gas 
+Diff in "MerkleFuzzTest::testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8)": consumed "(runs: 1000, μ: 131472, ~: 92381)" gas, expected "(runs: 1000, μ: 128684, ~: 90672)" gas 
+Diff in "MerkleFuzzTest::testFuzz_longPathIsRejected(uint8,uint32)": consumed "(runs: 1000, μ: 172781, ~: 120645)" gas, expected "(runs: 1000, μ: 170868, ~: 118407)" gas 
+Diff in "MerkleFuzzTest::testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8)": consumed "(runs: 1000, μ: 224272, ~: 126972)" gas, expected "(runs: 1000, μ: 219172, ~: 124158)" gas 
+Diff in "MerkleFuzzTest::testFuzz_shortPathIsRejected(uint8,uint32)": consumed "(runs: 1000, μ: 199829, ~: 162019)" gas, expected "(runs: 1000, μ: 197170, ~: 158847)" gas 
+Diff in "MerkleFuzzTest::testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8)": consumed "(runs: 1000, μ: 243578, ~: 233767)" gas, expected "(runs: 1000, μ: 240326, ~: 232214)" gas 
+exit=0
+
+$ forge snapshot --check  (recorded verbatim; exit 1)
+run exit=1, 7 diffs, identical across two runs; contracts/ is byte-identical to 2a7c3f6
+
+Diff in "MerkleFuzzTest::testFuzz_correctProofVerifies(uint8,uint32,uint8)": consumed "(runs: 1000, μ: 120309, ~: 81744)" gas, expected "(runs: 1000, μ: 117603, ~: 80134)" gas 
+Diff in "MerkleFuzzTest::testFuzz_differentRootIsRejected(uint8,uint32)": consumed "(runs: 1000, μ: 170911, ~: 118721)" gas, expected "(runs: 1000, μ: 168898, ~: 116359)" gas 
+Diff in "MerkleFuzzTest::testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8)": consumed "(runs: 1000, μ: 131472, ~: 92381)" gas, expected "(runs: 1000, μ: 128684, ~: 90672)" gas 
+Diff in "MerkleFuzzTest::testFuzz_longPathIsRejected(uint8,uint32)": consumed "(runs: 1000, μ: 172781, ~: 120645)" gas, expected "(runs: 1000, μ: 170868, ~: 118407)" gas 
+Diff in "MerkleFuzzTest::testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8)": consumed "(runs: 1000, μ: 224272, ~: 126972)" gas, expected "(runs: 1000, μ: 219172, ~: 124158)" gas 
+Diff in "MerkleFuzzTest::testFuzz_shortPathIsRejected(uint8,uint32)": consumed "(runs: 1000, μ: 199829, ~: 162019)" gas, expected "(runs: 1000, μ: 197170, ~: 158847)" gas 
+Diff in "MerkleFuzzTest::testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8)": consumed "(runs: 1000, μ: 243578, ~: 233767)" gas, expected "(runs: 1000, μ: 240326, ~: 232214)" gas 
+
+All 208 contract tests pass; only the recorded gas means differ (stale .gas-snapshot from 6391e1a).
+
+# merge gate — 005 into main — 2026-10-27T10:52Z — tree ce064b8
+
+$ node packages/merkle-vectors/generate.ts --check
+ok /home/mohammed_soliman/hackathons/portaldot-ui/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-ui/contracts/test/fixtures/vectors.json
+golden vector check passed
+exit=0
+
+$ npm --prefix apps/makhzan run typecheck
+> makhzan@0.1.0 typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm --prefix apps/makhzan test
+ℹ pass 157
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9144.753722
+exit=0
+
+$ npm --prefix apps/status-ui run typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm --prefix apps/status-ui test
+ Test Files  24 passed (24)
+      Tests  197 passed (197)
+   Start at  13:53:17
+   Duration  4.01s (transform 3.53s, setup 5.56s, import 9.88s, tests 8.97s, environment 19.25s)
+
+exit=0
+
+$ npm --prefix apps/status-ui run build (LIVE env)
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.88s
+exit=0
+
+$ check:evidence / check:sample / smoke
+evidence OK: portaldot-live-run2 (sha256 0x12feb5e6c9ebcd98105df763828bd369f22bd741a3590599a2bc64108a190cf9)
+sample OK: 8192 bytes, 8 blocks, root 0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7; deal sample OK: 1048576 bytes, 1024 blocks, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e, root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+smoke OK: 8 routes served the shell directly
+
+$ node scripts/secret-scan.mjs
+secret scan PASS — 0 findings in 642 files (725 paths)

@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import { useMode } from "../app/app-context";
+import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, formatWeiAsNative, type Label } from "../data/labels";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
@@ -20,7 +22,7 @@ function Row({
   source,
 }: {
   field: string;
-  value: string;
+  value: ReactNode;
   unit?: string;
   detail?: string;
   label: Label;
@@ -134,7 +136,7 @@ export function Proof(options: LiveOptions) {
               />
               <Row
                 field="Challenge block"
-                value={slash ? formatCount(slash.startBlock) : "not recorded"}
+                value={<BlockLink block={slash?.startBlock} />}
                 label="REPORTED"
                 source={recordedSource}
               />
@@ -146,7 +148,7 @@ export function Proof(options: LiveOptions) {
               />
               <Row
                 field="Resolve block"
-                value={resolveTx?.block === null || resolveTx?.block === undefined ? "not recorded" : formatCount(resolveTx.block)}
+                value={<BlockLink block={resolveTx?.block} />}
                 detail={resolveTx?.hash ?? slash?.resolveTx ?? undefined}
                 label="REPORTED"
                 source={recordedSource}
@@ -221,8 +223,9 @@ export function Proof(options: LiveOptions) {
             with the daemon paused, to exercise the path.
           </li>
           <li>
-            No explorer is configured for this network, so the proof is the receipt files and the live
-            read, not a third-party explorer page.
+            No EVM explorer is configured for this network, so the proof is the receipt files and the
+            live read. Block numbers open in the Portaldot node console; a transaction hash has no page
+            to open, so it stays backed by its receipt file.
           </li>
         </ul>
         <p className="mt-4 text-xs text-ash">

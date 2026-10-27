@@ -1,0 +1,35 @@
+# deployed check on main (merge of 005) — 2026-10-27T10:55Z
+# tree 380903c · production status-5mv37275d-soliman11.vercel.app · alias https://status-ui-one.vercel.app
+
+[desktop] /verify HTTP ok, overflow 0px
+[desktop] /verify refusal buttons: 3
+[desktop] refusal non-owner-challenge in 817ms :: Selector 0x30cd7471 MEASURED eth_call at latest · 2026-10-27T10:55:41.846Z Decoded error NotOwner() MEASURED decoded from the ABI: NotOwner() Revert data 0x30cd7471 MEASURED the node's answer to eth_call Calldata sent 0xf3c72faa000000000000
+[desktop] refusal non-provider-answer in 308ms :: Selector 0x3480e2b2 MEASURED eth_call at latest · 2026-10-27T10:55:42.577Z Decoded error NotProvider() MEASURED decoded from the ABI: NotProvider() Revert data 0x3480e2b2 MEASURED the node's answer to eth_call Calldata sent 0x9ad19c6d000000
+[desktop] refusal bad-params-create in 319ms :: Selector 0x019af637 MEASURED eth_call at latest · 2026-10-27T10:55:42.902Z Decoded error BadParams() MEASURED decoded from the ABI: BadParams() Revert data 0x019af637 MEASURED the node's answer to eth_call Calldata sent 0xc4f8f6f10000000000
+[desktop] /receipt/2 overflow 0px
+[desktop]   bond-before: Bond before 30 tPOT REPORTED evidence/portaldot-live-run2.json
+[desktop]   slash: Slash 6 tPOT 600,000,000,000,000 units · exactly 20% of the bond REPORTED evidence/portaldot-live-run2.json
+[desktop]   bond-after: Bond after 24 tPOT REPORTED evidence/portaldot-live-run2.json
+[desktop]   owner-credited: Owner credited 6 tPOT 6,000,000,000,000,000,000 wei REPORTED evidence/portaldot-live-run2.json
+[desktop]   tx rows: 7
+[desktop]   hash link href: /evidence/portaldot-live-run2.json
+[desktop]   image download: makhzan-receipt-deal-2.png
+[desktop]   copy link -> https://status-ui-one.vercel.app/#/receipt/2
+[desktop]   copy button now: Copied
+[desktop] /receipt/1 overflow 0px
+[desktop]   bond-before: Bond before 30 tPOT REPORTED evidence/portaldot-live-run2.json
+[desktop]   slash: Slash 0 tPOT no slash was recorded on this deal REPORTED evidence/portaldot-live-run2.json
+[desktop]   bond-after: Bond after 30 tPOT REPORTED evidence/portaldot-live-run2.json
+[desktop]   owner-credited: Owner credited 0 tPOT no credit was recorded on this deal REPORTED evidence/portaldot-live-run2.json
+[desktop] /#/receipt/2 h1="Receipt — deal 2" rows=8
+[desktop] / wording: Deals 1 and 2 are both settled on this deployment: deal 1 was answered in time, deal 2 took one slash.
+[desktop] / wording: Health 0 is the settled state, not a fault — a deal ends at 0 whether it was answered or slashed, so read the rounds below to see which happened.
+[desktop] / live line: Measured live — block 216,673
+[mobile] /verify overflow 0px h1="Verify a file"
+[mobile] /receipt/1 overflow 0px h1="Receipt — deal 1"
+[mobile] /receipt/2 overflow 0px h1="Receipt — deal 2"
+[mobile] /#/receipt/2 overflow 0px h1="Receipt — deal 2"
+[mobile] / overflow 0px h1="Makhzan on Portaldot testnet"
+[mobile] refusal non-owner: Selector 0x30cd7471 MEASURED eth_call at latest · 2026-10-27T10:56:08.247Z Decoded error NotOwner() MEASURED decoded from the ABI: NotOwner() Revert data 0x30cd
+
+CONSOLE/NETWORK ERRORS: none

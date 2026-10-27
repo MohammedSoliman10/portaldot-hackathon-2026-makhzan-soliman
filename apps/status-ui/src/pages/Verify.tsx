@@ -1,11 +1,14 @@
-import { useState, type DragEvent } from "react";
+import { useMemo, useState, type DragEvent } from "react";
 import { useParams } from "react-router-dom";
 import { getPath, verify as verifyPath } from "@makhzan/merkle";
 import { useMode } from "../app/app-context";
+import { createReadClient } from "../data/client";
 import { useEvidence } from "../data/evidence-context";
 import { blockAt, buildFileTree, firstMismatchingBlock, type FileTree, type FileTreeOptions } from "../data/file-tree";
 import { formatCount, type Label } from "../data/labels";
 import { readFileBytes } from "../data/read-file";
+import { runRefusal, type RefusalOutcome, type RefusalRunOptions } from "../data/refusal-run";
+import { REFUSAL_CALLER, REFUSAL_CALLS, calldataFor, type RefusalCall, type RefusalId } from "../data/refusals";
 import { loadSample, SAMPLE } from "../data/sample";
 import { sha256Hex } from "../data/sha256";
 import type { Hex } from "../data/schema";
@@ -14,6 +17,7 @@ import { useLiveDeployment, type LiveOptions } from "../data/use-live";
 export interface VerifyOptions extends LiveOptions {
   fetchImpl?: typeof fetch;
   buildOptions?: FileTreeOptions;
+  refusalOptions?: RefusalRunOptions;
 }
 
 interface LoadedFile {
@@ -84,15 +88,17 @@ const reason = (error: unknown): string => (error instanceof Error ? error.messa
  * of freezing, and the tree comes from the shared Merkle module the contract's tests use.
  */
 export function Verify(options: VerifyOptions) {
-  const { fetchImpl, buildOptions, ...liveOptions } = options;
+  const { fetchImpl, buildOptions, refusalOptions, ...liveOptions } = options;
   const mode = useMode();
   const evidence = useEvidence();
   const params = useParams();
   const dealId = params.dealId === undefined ? 2 : Number(params.dealId);
   const bundle = evidence.bundle;
   const recordedDeal = bundle?.deals.find((deal) => deal.id === dealId) ?? null;
+  const client = useMemo(() => liveOptions.client ?? createReadClient(mode), [liveOptions.client, mode]);
   const live = useLiveDeployment(mode, {
     ...liveOptions,
+    client: client ?? undefined,
     providerAddress: bundle?.providers[0]?.address ?? null,
     dealIds: [dealId],
   });
@@ -102,6 +108,8 @@ export function Verify(options: VerifyOptions) {
   const [tamper, setTamper] = useState<TamperResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [runs, setRuns] = useState<Partial<Record<RefusalId, RefusalOutcome>>>({});
+  const [busy, setBusy] = useState<RefusalId | null>(null);
 
   const liveDeal = live.deals[dealId] ?? null;
   const dealRoot = liveDeal?.root ?? recordedDeal?.root ?? null;
@@ -150,6 +158,17 @@ export function Verify(options: VerifyOptions) {
       await run(file.name, bytes, "file");
     } catch (caught) {
       setError(reason(caught));
+    }
+  }
+
+  async function runCall(call: RefusalCall): Promise<void> {
+    if (client === null || mode.address === null) return;
+    setBusy(call.id);
+    try {
+      const outcome = await runRefusal(client, mode.address, call, refusalOptions);
+      setRuns((current) => ({ ...current, [call.id]: outcome }));
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -332,6 +351,102 @@ export function Verify(options: VerifyOptions) {
             {error}
           </p>
         ) : null}
+      </section>
+
+      <section aria-labelledby="refusals-heading">
+        <h2 id="refusals-heading" className="eyebrow">
+          Refusals we can run
+        </h2>
+        <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
+          Three calls the contract must reject. Each button sends an{" "}
+          <code className="mono">eth_call</code> from <span className="mono break-all">{REFUSAL_CALLER}</span> — the
+          burn address, which is neither the deal owner nor provider 1 — and shows the selector that came
+          back with the error name decoded from the ABI. Nothing is signed or sent, and no value is
+          attached, so this cannot move a tPOT.
+        </p>
+        <ul className="mt-4 space-y-5">
+          {REFUSAL_CALLS.map((call) => {
+            const run = runs[call.id] ?? null;
+            const running = busy === call.id;
+            const available = client !== null && mode.clientEnabled && mode.address !== null;
+            return (
+              <li key={call.id} className="border-t border-rule pt-3">
+                <h3 className="text-base">{call.title}</h3>
+                <p className="mt-1 max-w-[62ch] text-sm text-paper-dim">{call.description}</p>
+                <p className="mono mt-2 break-all text-[11px] text-ash-2">checks first: {call.expectedCheck}</p>
+                <p className="mono mt-1 break-all text-[11px] text-ash-2">
+                  eth_call to {mode.address ?? "no address"} · from {REFUSAL_CALLER}
+                </p>
+                <p className="mono mt-1 break-all text-[11px] text-ash-2">calldata {calldataFor(call)}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => void runCall(call)}
+                    disabled={!available || running}
+                    className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre disabled:opacity-50"
+                  >
+                    {running ? "Running…" : "Run the call"}
+                  </button>
+                  {available ? null : (
+                    <span className="label-chip" data-label="PENDING LIVE RUN">
+                      PENDING LIVE RUN
+                    </span>
+                  )}
+                  {available ? null : (
+                    <span className="text-xs text-ash">no live client in this build, so there is nothing to call</span>
+                  )}
+                </div>
+                {run !== null ? (
+                  <dl className="mt-3" data-testid={`refusal-result-${call.id}`}>
+                    {run.status === "reverted" ? (
+                      <>
+                        <Field
+                          name="Selector"
+                          value={run.selector ?? "not a four-byte selector"}
+                          label="MEASURED"
+                          source={`eth_call at latest · ${run.at}`}
+                          mono
+                        />
+                        <Field
+                          name="Decoded error"
+                          value={run.name === null ? "unknown selector" : `${run.name}()`}
+                          label="MEASURED"
+                          source={run.note}
+                          mono
+                        />
+                        <Field
+                          name="Revert data"
+                          value={run.raw}
+                          label="MEASURED"
+                          source="the node's answer to eth_call"
+                          mono
+                        />
+                        <Field
+                          name="Calldata sent"
+                          value={run.calldata}
+                          label="MEASURED"
+                          source={`${run.attempts} attempt${run.attempts === 1 ? "" : "s"} · ${formatCount(run.ms)} ms`}
+                          mono
+                        />
+                      </>
+                    ) : (
+                      <Field
+                        name="Result"
+                        value={run.status === "returned" ? "returned data" : run.status}
+                        label="MEASURED"
+                        source={"message" in run ? run.message : run.note}
+                      />
+                    )}
+                  </dl>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-3 max-w-[62ch] text-xs text-ash">
+          Each attempt times out after 8 s and is retried once, so a slow phone sees a timeout instead of
+          a spinner that never stops. A revert is never retried: it is the answer.
+        </p>
       </section>
 
       {result !== null ? (

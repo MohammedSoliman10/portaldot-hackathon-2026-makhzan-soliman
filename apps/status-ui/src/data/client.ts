@@ -24,6 +24,8 @@ export interface ReadClient {
     functionName: string;
     args?: readonly unknown[];
   }): Promise<unknown>;
+  /** A raw `eth_call`: no value, no signature, no transaction. Used for the refusal probes. */
+  call(args: { to: Hex; data: Hex; account: Hex }): Promise<Hex>;
   getChainId(): Promise<number>;
   getCode(args: { address: Hex }): Promise<Hex | undefined>;
   getBlockNumber(): Promise<bigint>;
