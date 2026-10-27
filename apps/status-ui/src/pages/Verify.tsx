@@ -359,7 +359,7 @@ export function Verify(options: VerifyOptions) {
         </h2>
         <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
           Three calls the contract must reject. Each button sends an{" "}
-          <code className="mono">eth_call</code> from <span className="mono">{REFUSAL_CALLER}</span> — the
+          <code className="mono">eth_call</code> from <span className="mono break-all">{REFUSAL_CALLER}</span> — the
           burn address, which is neither the deal owner nor provider 1 — and shows the selector that came
           back with the error name decoded from the ABI. Nothing is signed or sent, and no value is
           attached, so this cannot move a tPOT.
