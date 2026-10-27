@@ -1,0 +1,8 @@
+files=2026-10-20.jsonl
+ticks=119 first=2026-10-20T04:55:59Z last=2026-10-20T10:45:21Z
+evm_ok=117/119 ws_ok=119/119
+evm_failures=2
+  2026-10-20T06:15:23Z {"ok":false,"error":"TimeoutError: The operation was aborted due to timeout"}
+  2026-10-20T06:42:23Z {"ok":false,"error":"TimeoutError: The operation was aborted due to timeout"}
+ws_failures=0
+max_gap_s=189 between 2026-10-20T06:12:14Z and 2026-10-20T06:15:23Z

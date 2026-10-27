@@ -1,0 +1,22 @@
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+at=2026-10-20T10:37:53.785Z rpc=https://test-evm-rpc-v3.portaldot.dev from=0x0948ebd7637d1c32858a6fc5d947e85a6600205c
+balance=0
+evm estimateGas=992776261379918
+evm eth_call=data:0x6080604052348015600f57600080fd5b5060043610603c5760003560e01c8063
+pvm estimateGas=5727093404219694
+pvm eth_call=data:0x
