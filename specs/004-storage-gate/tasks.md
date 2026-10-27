@@ -19,7 +19,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
 
 ## Phase 2 — Guard (P1)
 
-- [ ] **T005** `MakhzanGuard.t.sol` first (truth table: codes 0/1/2/3, expired-healthy, both
+- [x] **T005** `MakhzanGuard.t.sol` first (truth table: codes 0/1/2/3, expired-healthy, both
       boundaries, exact errors), then `contracts/src/makhzan/MakhzanGuard.sol`.
       Red run → green run → commit (`feat(makhzan): add MakhzanGuard ...`).
 
