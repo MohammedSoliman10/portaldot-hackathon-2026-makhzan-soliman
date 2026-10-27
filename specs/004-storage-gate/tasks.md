@@ -44,6 +44,20 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
       `healthOf == 1` means "no open challenge", not "the file is stored", and links to the guard.
       Run the full local gate, commit, then write `CHECKPOINT-GATE.md` to the sync folder.
 
+## Phase 6 — After a slash: what the gate can see (round 2)
+
+- [x] **T011** `AfterSlash.t.sol`: challenge → deadline → resolve, and read `healthOf` before,
+      right after and ten blocks later; read the provider bond. Report the view that returns it.
+- [ ] **T012** Bond-aware gate: `lock(dealId, payee, minBond)` and `release` refusing
+      `BondTooLow` when the deal provider's current bond is below the floor. Tests first: slash
+      drops the bond, `minBond == 0` unchanged, boundary at equality, non-provider payee, refund
+      unchanged; existing fuzz still holds.
+- [ ] **T013** README example and honest note, size and gas evidence, snapshot, full gate.
+- [ ] **T014** Merge `origin/main` (`6585f04`) into the branch, then merge into `main`, run the
+      full gate on `main`, push.
+- [ ] **T015** Branch `005-docs-refresh`: fix the stale live-run labels, the 6,378 B figure and the
+      missing `/replay` route; run docs-hygiene; merge when green.
+
 ## Status vocabulary
 
 `done` = committed and green; `in progress` = branch work started; `blocked` = waiting on an owner
