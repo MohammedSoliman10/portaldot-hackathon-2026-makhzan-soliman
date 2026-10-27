@@ -1,0 +1,36 @@
+# merge gate — 006 into main — 2026-10-27T11:07Z — tree 4c53ef5
+
+$ forge fmt --check
+exit=0
+$ node scripts/check-size.mjs
+Makhzan runtime 6566 B <= budget 10240 B (margin 3674 B)
+$ forge test
+
+Ran 31 test suites in 3.47s (8.66s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+$ forge snapshot --check
+exit=1 (pre-existing: 7 fuzz-gas diffs, stale .gas-snapshot from 6391e1a; contracts/ unchanged by 006)
+
+$ node packages/merkle-vectors/generate.ts --check
+golden vector check passed
+exit=0
+$ npm --prefix apps/makhzan run typecheck
+
+exit=0
+$ npm --prefix apps/makhzan test
+ℹ pass 157
+ℹ fail 0
+$ npm --prefix apps/status-ui run typecheck
+
+exit=0
+$ npm --prefix apps/status-ui test
+ Test Files  28 passed (28)
+      Tests  222 passed (222)
+$ npm --prefix apps/status-ui run build (LIVE env)
+✓ built in 2.12s
+exit=0
+$ check:evidence / check:sample / smoke
+evidence OK: portaldot-live-run2 (sha256 0x12feb5e6c9ebcd98105df763828bd369f22bd741a3590599a2bc64108a190cf9)
+sample OK: 8192 bytes, 8 blocks, root 0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7; deal sample OK: 1048576 bytes, 1024 blocks, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e, root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+smoke OK: 8 routes served the shell directly
+$ node scripts/secret-scan.mjs
+secret scan PASS — 0 findings in 651 files (738 paths)
