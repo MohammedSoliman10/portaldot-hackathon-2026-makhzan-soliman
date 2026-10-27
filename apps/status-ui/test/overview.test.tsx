@@ -129,6 +129,19 @@ describe("Overview, live overlay", () => {
     expect(text).toContain("24 tPOT");
   });
 
+  it("says deals 1 and 2 are settled, so health 0 reads as settled and not as a fault", async () => {
+    const { container, findByTestId } = renderApp(<Overview client={liveClient()} />, {
+      mode: live(),
+      evidence: evidenceState(),
+    });
+    await findByTestId("live-results");
+    const text = (container.textContent ?? "").replace(/\s+/g, " ");
+    expect(text).toMatch(/deals 1 and 2 are both settled/i);
+    expect(text).toMatch(/health 0 is the settled state, not a fault/i);
+    expect(text).toMatch(/deal 1 was answered in time/i);
+    expect(text).toMatch(/deal 2 took one slash/i);
+  });
+
   it("keeps the last good value and shows STALE after a failed re-read", async () => {
     let clock = Date.UTC(2026, 9, 24, 10, 0, 0);
     let fail = false;

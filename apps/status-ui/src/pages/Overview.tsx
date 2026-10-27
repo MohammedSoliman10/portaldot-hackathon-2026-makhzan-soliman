@@ -265,8 +265,10 @@ export function Overview(options: LiveOptions) {
           Live results
         </h2>
         <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
-          The chain now, then the run that produced it. A settled deal is health 0; it does not mean
-          every challenge was answered.
+          The chain now, then the run that produced it. Deals 1 and 2 are both settled on this
+          deployment: deal 1 was answered in time, deal 2 took one slash. Health 0 is the settled
+          state, not a fault — a deal ends at 0 whether it was answered or slashed, so read the
+          rounds below to see which happened.
         </p>
         <div
           className="mt-4 overflow-x-auto"
