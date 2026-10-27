@@ -152,6 +152,11 @@ function DealCard({
             verify deal {deal.id}
           </a>
         </li>
+        <li>
+          <a className="link-quiet underline" href={`/receipt/${deal.id}`}>
+            receipt for deal {deal.id}
+          </a>
+        </li>
       </ul>
     </article>
   );
