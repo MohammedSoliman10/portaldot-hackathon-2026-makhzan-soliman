@@ -1,0 +1,1512 @@
+# T014 — full local gate on 004-storage-gate after merging origin/main (6585f04)
+# utc: 2026-10-27T09:52:17Z
+# branch: 004-storage-gate, merge commit d60a10e
+# merge: origin/main 6585f04 (evidence-only: pvm probes, preflight estimate, rpc logs, tier-0 logs)
+# conflicts: none. 11 files added, all under evidence/.
+# mode: local only. anvil for the e2e, no live RPC, no key, no deploy.
+# command: bash /tmp/opencode/gate.sh
+
+
+== forge fmt --check ==
+
+== forge build --sizes ==
+No files changed, compilation skipped
+
+╭-------------------+------------------+-------------------+--------------------+---------------------╮
+| Contract          | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
++=====================================================================================================+
+| BehaviorProbe     | 592              | 619               | 23,984             | 48,533              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| CounterProbe      | 224              | 249               | 24,352             | 48,903              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| GuardProbe        | 729              | 756               | 23,847             | 48,396              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| HashProbe         | 292              | 319               | 24,284             | 48,833              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| Makhzan           | 6,566            | 7,154             | 18,010             | 41,998              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| MakhzanHarness    | 6,728            | 7,316             | 17,848             | 41,836              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| MaliciousReceiver | 2,371            | 2,581             | 22,205             | 46,571              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| ReentrantPayee    | 538              | 674               | 24,038             | 48,478              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| SizeProbe         | 4                | 89                | 24,572             | 49,063              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| StorageGate       | 2,528            | 2,682             | 22,048             | 46,470              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| TreeHarness       | 2,823            | 2,850             | 21,753             | 46,302              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| ValueEcho         | 448              | 475               | 24,128             | 48,677              |
+|-------------------+------------------+-------------------+--------------------+---------------------|
+| VerifyHarness     | 1,416            | 1,443             | 23,160             | 47,709              |
+╰-------------------+------------------+-------------------+--------------------+---------------------╯
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/BehaviorProbe.sol:7:10
+  │
+7 │ contract BehaviorProbe {
+  │          ━━━━━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[locked-ether]: contract can receive ETH but has no mechanism to send it out
+  ╭▸ src/tier0/ValueEcho.sol:7:10
+  │
+7 │ contract ValueEcho {
+  │          ━━━━━━━━━
+  │
+  ╰ help: https://getfoundry.sh/forge/linting/locked-ether
+
+warning[weak-prng]: weak randomness derived from a predictable on-chain value
+    ╭▸ src/makhzan/Makhzan.sol:228:24
+    │
+228 │         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), block.prevrandao, dealId));
+    │                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/weak-prng
+
+warning[unused-return]: return value of an external call is not used
+   ╭▸ src/makhzan/MakhzanGuard.sol:42:9
+   │
+42 │         (,, endBlock,,,,,,,,,) = makhzan.dealOf(dealId);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/makhzan/lib/BondLib.sol:29:18
+   │
+29 │         p.bond = uint64(next);
+   │                  ━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/makhzan/lib/PayLib.sol:13:16
+   │
+13 │         return uint64(uint256(price) * (capped - startBlock) / (endBlock - startBlock));
+   │                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/makhzan/StorageGate.sol:47:43
+   │
+47 │         lockOf[dealId] = Lock(msg.sender, uint96(msg.value), payee, minBond, 1);
+   │                                           ━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint96' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/makhzan/Makhzan.sol:152:24
+    │
+152 │         uint32 start = uint32(block.number);
+    │                        ━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/makhzan/StorageGate.sol:48:48
+   │
+48 │         emit Locked(dealId, msg.sender, payee, uint96(msg.value));
+   │                                                ━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint96' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/makhzan/Makhzan.sol:219:28
+    │
+219 │         d.challengeStart = uint32(block.number);
+    │                            ━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/makhzan/Makhzan.sol:221:45
+    │
+221 │         emit ChallengeOpened(dealId, index, uint32(deadline));
+    │                                             ━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unused-return]: return value of an external call is not used
+   ╭▸ src/makhzan/StorageGate.sol:88:43
+   │
+88 │         (,,, uint16 providerId,,,,,,,,) = makhzan.dealOf(dealId);
+   │                                           ━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[unused-return]: return value of an external call is not used
+   ╭▸ src/makhzan/StorageGate.sol:89:41
+   │
+89 │         (uint16 id, uint64 current,,) = makhzan.providerOf(payee);
+   │                                         ━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/AfterSlash.t.sol:17:31
+   │
+17 │         uint32 start = uint32(block.number);
+   │                               ━━━━━━━━━━━━
+   ‡
+21 │         vm.roll(start + WINDOW + 1);
+   │         ─────────────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ src/makhzan/MakhzanGuard.sol:25:16
+   │
+25 │         return block.number < endBlockOf(makhzan, dealId);
+   │                ━━━━━━━━━━━━
+   │
+   ⸬  test/makhzan/AfterSlash.t.sol:21:9
+   │
+21 │         vm.roll(start + WINDOW + 1);
+   │         ─────────────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ src/makhzan/MakhzanGuard.sol:25:16
+   │
+25 │         return block.number < endBlockOf(makhzan, dealId);
+   │                ━━━━━━━━━━━━
+   │
+   ⸬  test/makhzan/AfterSlash.t.sol:33:9
+   │
+33 │         vm.roll(block.number + 10);
+   │         ────────────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/AfterSlash.t.sol:33:17
+   │
+33 │         vm.roll(block.number + 10);
+   │         ────────━━━━━━━━━━━━────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+    ╭▸ test/makhzan/Challenge.t.sol:253:35
+    │
+253 │         assertEq(deadline, uint32(block.number) + 700, "long 700-block window");
+    │                                   ━━━━━━━━━━━━
+    ‡
+257 │         vm.roll(endBlock + 10);
+    │         ────────────────────── `vm.roll` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockNumber()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/ChallengeIndex.t.sol:19:21
+   │
+19 │             vm.roll(block.number + 1);
+   │             ────────━━━━━━━━━━━━───── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/ChallengeSeed.t.sol:43:31
+   │
+43 │         uint32 start = uint32(block.number);
+   │                               ━━━━━━━━━━━━
+   ‡
+47 │             vm.roll(start + i);
+   │             ────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/HealthOf.t.sol:20:31
+   │
+20 │         uint32 start = uint32(block.number);
+   │                               ━━━━━━━━━━━━
+   ‡
+24 │         vm.roll(start + WINDOW);
+   │         ─────────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/HealthSemantics.t.sol:43:31
+   │
+43 │         uint32 start = uint32(block.number);
+   │                               ━━━━━━━━━━━━
+   ‡
+48 │         vm.roll(start + WINDOW);
+   │         ─────────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/MakhzanGuard.t.sol:69:31
+   │
+69 │         uint32 start = uint32(block.number);
+   │                               ━━━━━━━━━━━━
+70 │         _openChallenge(dealId);
+71 │         vm.roll(start + WINDOW + 1);
+   │         ─────────────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ src/makhzan/MakhzanGuard.sol:25:16
+   │
+25 │         return block.number < endBlockOf(makhzan, dealId);
+   │                ━━━━━━━━━━━━
+   │
+   ⸬  test/makhzan/MakhzanGuard.t.sol:88:9
+   │
+88 │         vm.roll(end);
+   │         ──────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ src/makhzan/MakhzanGuard.sol:25:16
+   │
+25 │         return block.number < endBlockOf(makhzan, dealId);
+   │                ━━━━━━━━━━━━
+   │
+   ⸬  test/makhzan/MakhzanGuard.t.sol:94:9
+   │
+94 │         vm.roll(uint256(end) + 1);
+   │         ───────────────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+    ╭▸ test/makhzan/MakhzanGuard.t.sol:115:35
+    │
+115 │         assertEq(endBlock, uint32(block.number) + DURATION, "dealOf third field");
+    │                                   ━━━━━━━━━━━━
+116 │         assertTrue(MakhzanGuard.isHealthy(m, dealId));
+117 │         vm.roll(endBlock);
+    │         ───────────────── `vm.roll` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockNumber()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+    ╭▸ src/makhzan/MakhzanGuard.sol:25:16
+    │
+ 25 │         return block.number < endBlockOf(makhzan, dealId);
+    │                ━━━━━━━━━━━━
+    │
+    ⸬  test/makhzan/MakhzanGuard.t.sol:117:9
+    │
+117 │         vm.roll(endBlock);
+    │         ───────────────── `vm.roll` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockNumber()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/StorageGateFuzz.t.sol:29:36
+   │
+29 │             uint32 openAt = uint32(block.number) + (delay % DURATION);
+   │                                    ━━━━━━━━━━━━
+30 │             vm.roll(openAt);
+   │             ─────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.number` may be reused across `vm.roll`
+   ╭▸ test/makhzan/StorageGateFuzz.t.sol:37:17
+   │
+37 │         vm.roll(block.number + (extra % 700));
+   │         ────────━━━━━━━━━━━━───────────────── `vm.roll` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockNumber()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+
+== node scripts/check-size.mjs ==
+Makhzan runtime 6566 B <= budget 10240 B (margin 3674 B)
+
+== forge test -vvv ==
+No files changed, compilation skipped
+
+Ran 3 tests for test/tier0/HashProbe.t.sol:HashProbeTest
+[PASS] testHashMatchesKeccak() (gas: 27628)
+[PASS] testReferenceEventShape() (gas: 33793)
+[PASS] testWriteSlotStores() (gas: 51587)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 658.40µs (160.50µs CPU time)
+
+Ran 8 tests for test/makhzan/MerkleLib.t.sol:MerkleLibTest
+[PASS] test_everyValidPathVerifies() (gas: 129605)
+[PASS] test_proofForOneIndexIsRejectedAtEveryOtherIndex() (gas: 210240)
+[PASS] test_sevenLeafRootAndPathLengths() (gas: 21027)
+[PASS] test_shortenedReorderedAndExtendedPathsAreRejected() (gas: 33608)
+[PASS] test_singleLeafRootIsTheLeafHash() (gas: 2519)
+[PASS] test_threeLeafRootPromotesTheOddNode() (gas: 9648)
+[PASS] test_wrongBytesAreRejected() (gas: 13278)
+[PASS] test_zeroLeafCountAndOutOfRangeIndexAreRejected() (gas: 6863)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 4.43ms (4.17ms CPU time)
+
+Ran 2 tests for test/makhzan/AfterSlash.t.sol:AfterSlashTest
+[PASS] test_dealContinuesAfterASlashAndHealthReturnsToTwoOnTheNextChallenge() (gas: 302393)
+[PASS] test_slashIsInvisibleToHealthAndToTheGuard() (gas: 369680)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 6.41ms (781.40µs CPU time)
+
+Ran 9 tests for test/makhzan/StorageGateBond.t.sol:StorageGateBondTest
+[PASS] test_floorDoesNotOverrideHealth() (gas: 313187)
+[PASS] test_lockStoresTheBondFloor() (gas: 232866)
+[PASS] test_nonProviderPayeeCannotMeetAFloor() (gas: 265629)
+[PASS] test_refundAfterResolveStillRefusesInsideTheTerm() (gas: 397762)
+[PASS] test_refundInDefaultIsUnchangedByTheFloor() (gas: 342617)
+[PASS] test_releaseAtExactlyTheFloorPasses() (gas: 283632)
+[PASS] test_releaseBelowTheFloorAfterASlashRevertsBondTooLow() (gas: 424935)
+[PASS] test_releasePassesAgainAfterTheBondIsToppedUp() (gas: 513241)
+[PASS] test_zeroFloorIgnoresTheSlash() (gas: 409115)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 7.56ms (2.89ms CPU time)
+
+Ran 17 tests for test/makhzan/Payments.t.sol:PaymentsTest
+[PASS] test_accrualAtMidpointIsFlooredLinearShare() (gas: 149854)
+[PASS] test_accrualCapsAtPriceAfterEndBlock() (gas: 149721)
+[PASS] test_accrualIsZeroAtStartBlock() (gas: 132712)
+[PASS] test_claimAfterSettleRevertsAlreadySettled() (gas: 230636)
+[PASS] test_claimByStrangerRevertsNotProvider() (gas: 174948)
+[PASS] test_claimOnUnknownDealRevertsNoDeal() (gas: 34661)
+[PASS] test_claimWithNoAccrualRevertsZeroClaim() (gas: 160378)
+[PASS] test_cumulativeClaimsNeverExceedPrice() (gas: 316219)
+[PASS] test_midDealClaimPaysAccruedAndUpdatesClaimed() (gas: 226217)
+[PASS] test_secondImmediateClaimRevertsZeroClaim() (gas: 221444)
+[PASS] test_secondSettleRevertsAlreadySettled() (gas: 223817)
+[PASS] test_settleBeforeEndRevertsBeforeEnd() (gas: 153877)
+[PASS] test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 237178)
+[PASS] test_settlePaysProviderUnpaidAccrued() (gas: 306638)
+[PASS] test_settleSetsClaimedToPriceBeforePaying() (gas: 219438)
+[PASS] test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 221421)
+[PASS] test_strangerSettleMatchesOwnerSettle() (gas: 388984)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 8.24ms (3.12ms CPU time)
+
+Ran 5 tests for test/makhzan/HealthSemantics.t.sol:HealthSemanticsTest
+[PASS] test_a_endPassedUnsettledIsOne() (gas: 157381)
+[PASS] test_b_neverChallengedIsOne() (gas: 140642)
+[PASS] test_c_settledIsZero() (gas: 199084)
+[PASS] test_d_openChallengePastDeadlineIsThree() (gas: 213520)
+[PASS] test_e_unknownDealIsZero() (gas: 14137)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 9.18ms (671.80µs CPU time)
+
+Ran 9 tests for test/makhzan/Registry.t.sol:RegistryTest
+[PASS] test_addBondByStrangerRevertsNotRegistered() (gas: 41961)
+[PASS] test_nonMultipleValueRevertsBadParams() (gas: 181734)
+[PASS] test_registerBelowMinimumRevertsBondTooSmall() (gas: 44230)
+[PASS] test_registerEventCarriesDocumentedFields() (gas: 116872)
+[PASS] test_registerStoresBondAndStableId() (gas: 240558)
+[PASS] test_secondRegistrationRevertsAlreadyRegistered() (gas: 145987)
+[PASS] test_topUpUpdatesBondReadBack() (gas: 165197)
+[PASS] test_unitsAboveUint64CapRevertBadParams() (gas: 233125)
+[PASS] test_withdrawBondClearsRegistrationAndPaysFullBond() (gas: 156254)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.30ms (922.50µs CPU time)
+
+Ran 2 tests for test/makhzan/ChallengeSeed.t.sol:ChallengeSeedTest
+[PASS] test_dealsAcrossFortyBlocksKeepVaryingIndices() (gas: 6918561)
+[PASS] test_manyDealsInOneBlockDoNotShareOneIndex() (gas: 2761618)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 12.68ms (7.49ms CPU time)
+
+Ran 6 tests for test/makhzan/HealthOf.t.sol:HealthOfTest
+[PASS] test_answeredChallengeIsHealthyAgain() (gas: 926438)
+[PASS] test_dealWithoutChallengeIsHealthy() (gas: 129448)
+[PASS] test_openChallengeInsideWindowIsTwoIncludingTheDeadlineBlock() (gas: 216124)
+[PASS] test_resolvedChallengeIsHealthy() (gas: 251750)
+[PASS] test_settledDealIsZero() (gas: 201936)
+[PASS] test_unknownDealIsZero() (gas: 14302)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 12.78ms (7.28ms CPU time)
+
+Ran 8 tests for test/makhzan/MakhzanGuard.t.sol:MakhzanGuardTest
+[PASS] test_answeredChallengeBecomesHealthyAgain() (gas: 960633)
+[PASS] test_defaultIsNotHealthyAndNamesDefault() (gas: 218942)
+[PASS] test_expiredHealthyDealNamesExpired() (gas: 265458)
+[PASS] test_guardReadsTheEndBlockFromDealOf() (gas: 173623)
+[PASS] test_healthyInsideTheTermIsTrue() (gas: 158258)
+[PASS] test_pendingChallengeIsNotHealthyAndNamesPending() (gas: 252287)
+[PASS] test_settledDealIsNotHealthyAndNamesSettledOrNone() (gas: 221939)
+[PASS] test_unknownDealIsNotHealthyAndNamesSettledOrNone() (gas: 30650)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 12.39ms (7.26ms CPU time)
+
+Ran 5 tests for test/makhzan/InvariantEdges.t.sol:InvariantEdgesTest
+[PASS] test_claimAtExactEndBlockPaysTheWholePrice() (gas: 289629)
+[PASS] test_settleInTheSameBlockAChallengeFails() (gas: 324118)
+[PASS] test_slashAtMinimumBondLeavesEightyPercent() (gas: 281612)
+[PASS] test_slashAtUint64BondCapDoesNotOverflow() (gas: 367432)
+[PASS] test_twoDealsOneProviderConserveValue() (gas: 1316212)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 13.02ms (7.29ms CPU time)
+
+Ran 2 tests for test/makhzan/MerklePositionBinding.t.sol:MerklePositionBindingTest
+[PASS] test_distinctBlocksNeverShareAProof() (gas: 770829)
+[PASS] test_identicalAdjacentBlocksShareAProof() (gas: 569887)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 11.48ms (11.35ms CPU time)
+
+Ran 13 tests for test/makhzan/Guards.t.sol:GuardsTest
+[PASS] test_belowMinimumBondProviderRefusedNewDealButExistingDealSurvives() (gas: 400341)
+[PASS] test_challengeErrorsAreReachable() (gas: 1264766)
+[PASS] test_combinedModeFiveReentryPaysEachPathOnce() (gas: 738536)
+[PASS] test_dealErrorsAreReachable() (gas: 240793)
+[PASS] test_failedTransferRevertsTheWholeCall() (gas: 225476)
+[PASS] test_paymentErrorsAreReachable() (gas: 343544)
+[PASS] test_reentrantClaimCannotDoublePay() (gas: 372451)
+[PASS] test_reentrantResolveCannotDoublePay() (gas: 436978)
+[PASS] test_reentrantSettleCannotDoublePay() (gas: 381753)
+[PASS] test_reentrantWithdrawBondCannotDoublePay() (gas: 196601)
+[PASS] test_registryErrorsAreReachable() (gas: 331082)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 271817)
+[PASS] test_withdrawBondBlockedWhileDealOpenAndAllowedAfterSettle() (gas: 291771)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 17.43ms (12.31ms CPU time)
+
+Ran 1 test for test/makhzan/Rounds.t.sol:RoundsTest
+[PASS] test_onePassedAndOneFailedRoundOnTheSameDealThenSettle() (gas: 1325230)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 12.43ms (7.71ms CPU time)
+
+Ran 3 tests for test/makhzan/Interface.t.sol:InterfaceTest
+[PASS] test_abiIsExactlyTheDocumentedSurface() (gas: 579172)
+[PASS] test_peekReturnsRawSlotsInRequestOrder() (gas: 23248)
+[PASS] test_unknownIdsReadAsZero() (gas: 36423)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 14.67ms (14.50ms CPU time)
+
+Ran 10 tests for test/makhzan/StorageGateRelease.t.sol:StorageGateReleaseTest
+[PASS] test_onlyThePayeeCanRelease() (gas: 275185)
+[PASS] test_reentrantPayeeCannotReleaseTwice() (gas: 538062)
+[PASS] test_releaseAtTheEndBlockRevertsExpired() (gas: 278585)
+[PASS] test_releaseEmitsTheAmount() (gas: 275453)
+[PASS] test_releaseInDefaultRevertsDefault() (gas: 313759)
+[PASS] test_releaseOnSettledDealRevertsSettledOrNone() (gas: 329335)
+[PASS] test_releasePaysThePayeeExactlyOnce() (gas: 282230)
+[PASS] test_releaseWithPendingChallengeRevertsPending() (gas: 313471)
+[PASS] test_releaseWithoutALockReverts() (gas: 158140)
+[PASS] test_secondReleaseReverts() (gas: 299233)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 8.83ms (2.74ms CPU time)
+
+Ran 5 tests for test/makhzan/StorageLayout.t.sol:StorageLayoutTest
+[PASS] test_challengeUsesOnlyTheExistingDealSlots() (gas: 51815)
+[PASS] test_configPacksIntoOneSlot() (gas: 7114)
+[PASS] test_dealUsesThreeSlots() (gas: 13374)
+[PASS] test_providerUsesTwoSlots() (gas: 10580)
+[PASS] test_twoChallengeRoundsAddNoStorage() (gas: 156058)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.22ms (616.20µs CPU time)
+
+Ran 9 tests for test/makhzan/StorageGateLock.t.sol:StorageGateLockTest
+[PASS] test_lockAfterTheEndBlockRevertsExpired() (gas: 191818)
+[PASS] test_lockInDefaultRevertsDefault() (gas: 226818)
+[PASS] test_lockOnHealthyDealStoresPayerPayeeAndAmount() (gas: 235783)
+[PASS] test_lockOnSettledDealRevertsSettledOrNone() (gas: 242971)
+[PASS] test_lockOnUnknownDealRevertsSettledOrNone() (gas: 49812)
+[PASS] test_lockWithPendingChallengeRevertsPending() (gas: 226161)
+[PASS] test_lockWithZeroPayeeReverts() (gas: 160899)
+[PASS] test_lockWithoutValueReverts() (gas: 156294)
+[PASS] test_secondLockForTheSameDealReverts() (gas: 256580)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 6.02ms (1.53ms CPU time)
+
+Ran 10 tests for test/makhzan/StorageGateRefund.t.sol:StorageGateRefundTest
+[PASS] test_onlyThePayerCanRefund() (gas: 298195)
+[PASS] test_refundAfterDefaultPaysThePayer() (gas: 351146)
+[PASS] test_refundAfterReleaseReverts() (gas: 317683)
+[PASS] test_refundAfterTheEndBlockWithoutAReleasePaysThePayer() (gas: 295527)
+[PASS] test_refundAtTheEndBlockIsAllowed() (gas: 294692)
+[PASS] test_refundEmitsTheAmount() (gas: 294174)
+[PASS] test_refundOnSettledDealStillReturnsThePayer() (gas: 352232)
+[PASS] test_refundWhileHealthyInsideTheTermReverts() (gas: 262186)
+[PASS] test_refundWithPendingChallengeReverts() (gas: 319729)
+[PASS] test_secondRefundReverts() (gas: 317825)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 17.20ms (7.31ms CPU time)
+
+Ran 9 tests for test/makhzan/Verifier.t.sol:VerifierTest
+[PASS] test_correctAnswerIsAccepted() (gas: 121928)
+[PASS] test_emptyPayloadIsRejected() (gas: 118731)
+[PASS] test_hashUsedAsPayloadIsRejected() (gas: 119016)
+[PASS] test_pathForAnotherIndexIsRejected() (gas: 121932)
+[PASS] test_pathOneElementShortAndLongIsRejected() (gas: 131018)
+[PASS] test_payloadOneByteShortAndLongIsRejected() (gas: 124933)
+[PASS] test_reorderedPathIsRejected() (gas: 122005)
+[PASS] test_sevenLeafShortLastBlockVerifiesWithRemainderLength() (gas: 197815)
+[PASS] test_threeLeafShortLastBlockVerifiesWithRemainderLength() (gas: 98538)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 5.61ms (5.28ms CPU time)
+
+Ran 8 tests for test/tier0/BehaviorProbe.t.sol:BehaviorProbeTest
+[PASS] testBlockNumberIsMonotonic() (gas: 162052)
+[PASS] testBoomRevertsWithReason() (gas: 9349)
+[PASS] testCustomRevertReasonIsPropagated() (gas: 9307)
+[PASS] testEventHasIndexedSenderAndValue() (gas: 129405)
+[PASS] testFuzzStoredValueAndPayment(uint256,uint96) (runs: 1000, μ: 135870, ~: 136598)
+[PASS] testPayableValueIsAccepted() (gas: 124494)
+[PASS] testStorageWriteThenRead() (gas: 133421)
+[PASS] testTimestampIsMonotonic() (gas: 161985)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 51.39ms (51.18ms CPU time)
+
+Ran 14 tests for test/makhzan/Deals.t.sol:DealsTest
+[PASS] test_durationOutOfRangeRejected() (gas: 76519)
+[PASS] test_escrowAndActiveDealCount() (gas: 134850)
+[PASS] test_eventCarriesDocumentedFields() (gas: 127189)
+[PASS] test_idsAreUniqueAndMonotone() (gas: 278564)
+[PASS] test_leafCountMustMatchSizeAndBlockSize() (gas: 86189)
+[PASS] test_nonMultipleValueRejected() (gas: 47962)
+[PASS] test_producedPathVerifiesAgainstStoredRoot() (gas: 3236697)
+[PASS] test_providerBelowMinimumBondRejected() (gas: 77170)
+[PASS] test_unknownProviderRejected() (gas: 43032)
+[PASS] test_validDealStoresEveryField() (gas: 137879)
+[PASS] test_valueAboveUnitCapRejected() (gas: 48813)
+[PASS] test_valueMustEqualPriceTimesUnit() (gas: 124729)
+[PASS] test_zeroRootRejected() (gas: 40755)
+[PASS] test_zeroSizeRejected() (gas: 40907)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 37.78ms (37.67ms CPU time)
+
+Ran 5 tests for test/tier0/CounterProbe.t.sol:CounterProbeTest
+[PASS] testBoomRevertsWithReason() (gas: 8838)
+[PASS] testFuzzSetGet(uint256) (runs: 1000, μ: 52405, ~: 52788)
+[PASS] testSetEmitsIndexedValue() (gas: 54282)
+[PASS] testSetThenGet() (gas: 52988)
+[PASS] testStartsAtZero() (gas: 7614)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 73.70ms (73.41ms CPU time)
+
+Ran 4 tests for test/tier0/ValueEcho.t.sol:ValueEchoTest
+[PASS] testEchoReturnsSentValueAndSender() (gas: 35639)
+[PASS] testFuzzValueIsEchoedExactly(uint96) (runs: 1000, μ: 159768, ~: 160601)
+[PASS] testRecordStoresValueAndEmits() (gas: 147730)
+[PASS] testRecordWithoutValueStoresZero() (gas: 99962)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 72.63ms (72.55ms CPU time)
+
+Ran 1 test for test/makhzan/GoldenVectors.t.sol:GoldenVectorsTest
+[PASS] test_allSharedVectors() (gas: 179407632)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.24s (1.24s CPU time)
+
+Ran 4 tests for test/makhzan/ChallengeIndex.t.sol:ChallengeIndexTest
+[PASS] test_everyLeafIndexAcceptsItsOwnAnswer() (gas: 3823032)
+[PASS] test_lastLeafAcceptsOnlyTheExactByteLength() (gas: 924041)
+[PASS] test_selectorVariesAcrossBlocksAndPrevrandao() (gas: 30313970)
+[PASS] test_singleLeafDealAcceptsEmptyPath() (gas: 297505)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.95s (319.73ms CPU time)
+
+Ran 3 tests for test/makhzan/StorageGateFuzz.t.sol:StorageGateFuzzTest
+[PASS] testFuzz_closedLockNeverPaysAgain(uint8,uint32,uint32,bool) (runs: 1000, μ: 264586, ~: 143108)
+[PASS] testFuzz_refundOnlyOnDefaultOrAfterTheEnd(uint8,uint32,uint32) (runs: 1000, μ: 285426, ~: 148037)
+[PASS] testFuzz_releaseOnlyWhileHealthy(uint8,uint32,uint32) (runs: 1000, μ: 292556, ~: 136524)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.94s (5.73s CPU time)
+
+Ran 8 tests for test/makhzan/MerkleFuzz.t.sol:MerkleFuzzTest
+[PASS] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 1000, μ: 119188, ~: 76913)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 160292, ~: 107828)
+[PASS] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 1000, μ: 130343, ~: 90517)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 170932, ~: 129322)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 162232, ~: 109875)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 221087, ~: 123281)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 190184, ~: 148841)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 237983, ~: 225721)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.95s (12.73s CPU time)
+
+Ran 19 tests for test/makhzan/Challenge.t.sol:ChallengeTest
+[PASS] test_answerAfterDeadlineRevertsWindowOpen() (gas: 927096)
+[PASS] test_answerAfterEndBlockButBeforeDeadlinePasses() (gas: 2612584)
+[PASS] test_answerWithoutChallengeRevertsNoChallenge() (gas: 859915)
+[PASS] test_challengeOnDealSettledAtTheEndBlockReverts() (gas: 242823)
+[PASS] test_challengeOnExpiredDealRevertsDealExpired() (gas: 170973)
+[PASS] test_challengeOnSettledDealReverts() (gas: 226614)
+[PASS] test_challengeOnUnknownDealRevertsNoDeal() (gas: 35415)
+[PASS] test_challengeOpenedEventCarriesFields() (gas: 177308)
+[PASS] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 206999)
+[PASS] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 1682666)
+[PASS] test_onlyDealOwnerCanChallenge() (gas: 153947)
+[PASS] test_onlyProviderCanAnswer() (gas: 906628)
+[PASS] test_openChallengeStaysResolvableAfterEndBlock() (gas: 276594)
+[PASS] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 322780)
+[PASS] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 211523)
+[PASS] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 207513)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 271861)
+[PASS] test_strangerResolvePaysOwnerNotCaller() (gas: 284781)
+[PASS] test_validAnswerBeforeDeadlinePasses() (gas: 983113)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 1.94s (54.57ms CPU time)
+
+Ran 2 tests for test/tier0/SizeProbe.t.sol:SizeProbeTest
+[PASS] testDeploysExactlyRequestedSize(uint16) (runs: 1000, μ: 4813, ~: 4813)
+[PASS] testSmallLadder() (gas: 8903)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.93s (1.93s CPU time)
+
+Ran 4 tests for test/makhzan/invariant/MakhzanInvariant.t.sol:MakhzanInvariantTest
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noSettledDealHasOpenChallenge
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+ MakhzanInvariantTest invariants (runs: 256, calls: 12800, reverts: 5661)
+
+╭-------------------+------------------+-------+---------+----------╮
+| Contract          | Selector         | Calls | Reverts | Discards |
++===================================================================+
+| MaliciousReceiver | addBond          | 684   | 684     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | challenge        | 745   | 743     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | claim            | 680   | 680     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | configure        | 707   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | createDeal       | 736   | 736     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | registerProvider | 721   | 721     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | resolve          | 742   | 742     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | settle           | 707   | 707     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | withdrawBond     | 691   | 648     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | addBond          | 705   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | answerDeal       | 763   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | challengeDeal    | 697   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | claimDeal        | 702   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | createDeal       | 686   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | register         | 724   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | resolveDeal      | 720   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | settleDeal       | 729   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | withdrawBond     | 661   | 0       | 0        |
+╰-------------------+------------------+-------+---------+----------╯
+
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1562727)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2868146)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 682727)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 4.36s (4.37s CPU time)
+
+Ran 31 test suites in 4.36s (15.72s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+
+== forge snapshot --check ==
+No files changed, compilation skipped
+
+Ran 3 tests for test/tier0/HashProbe.t.sol:HashProbeTest
+[PASS] testHashMatchesKeccak() (gas: 27628)
+[PASS] testReferenceEventShape() (gas: 33793)
+[PASS] testWriteSlotStores() (gas: 51587)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 445.50µs (121.00µs CPU time)
+
+Ran 8 tests for test/makhzan/MerkleLib.t.sol:MerkleLibTest
+[PASS] test_everyValidPathVerifies() (gas: 129605)
+[PASS] test_proofForOneIndexIsRejectedAtEveryOtherIndex() (gas: 210240)
+[PASS] test_sevenLeafRootAndPathLengths() (gas: 21027)
+[PASS] test_shortenedReorderedAndExtendedPathsAreRejected() (gas: 33608)
+[PASS] test_singleLeafRootIsTheLeafHash() (gas: 2519)
+[PASS] test_threeLeafRootPromotesTheOddNode() (gas: 9648)
+[PASS] test_wrongBytesAreRejected() (gas: 13278)
+[PASS] test_zeroLeafCountAndOutOfRangeIndexAreRejected() (gas: 6863)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.56ms (2.32ms CPU time)
+
+Ran 2 tests for test/makhzan/AfterSlash.t.sol:AfterSlashTest
+[PASS] test_dealContinuesAfterASlashAndHealthReturnsToTwoOnTheNextChallenge() (gas: 302393)
+[PASS] test_slashIsInvisibleToHealthAndToTheGuard() (gas: 369680)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 3.33ms (459.20µs CPU time)
+
+Ran 5 tests for test/makhzan/HealthSemantics.t.sol:HealthSemanticsTest
+[PASS] test_a_endPassedUnsettledIsOne() (gas: 157381)
+[PASS] test_b_neverChallengedIsOne() (gas: 140642)
+[PASS] test_c_settledIsZero() (gas: 199084)
+[PASS] test_d_openChallengePastDeadlineIsThree() (gas: 213520)
+[PASS] test_e_unknownDealIsZero() (gas: 14137)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 3.01ms (439.20µs CPU time)
+
+Ran 10 tests for test/makhzan/StorageGateRelease.t.sol:StorageGateReleaseTest
+[PASS] test_onlyThePayeeCanRelease() (gas: 275185)
+[PASS] test_reentrantPayeeCannotReleaseTwice() (gas: 538062)
+[PASS] test_releaseAtTheEndBlockRevertsExpired() (gas: 278585)
+[PASS] test_releaseEmitsTheAmount() (gas: 275453)
+[PASS] test_releaseInDefaultRevertsDefault() (gas: 313759)
+[PASS] test_releaseOnSettledDealRevertsSettledOrNone() (gas: 329335)
+[PASS] test_releasePaysThePayeeExactlyOnce() (gas: 282230)
+[PASS] test_releaseWithPendingChallengeRevertsPending() (gas: 313471)
+[PASS] test_releaseWithoutALockReverts() (gas: 158140)
+[PASS] test_secondReleaseReverts() (gas: 299233)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 4.34ms (1.56ms CPU time)
+
+Ran 17 tests for test/makhzan/Payments.t.sol:PaymentsTest
+[PASS] test_accrualAtMidpointIsFlooredLinearShare() (gas: 149854)
+[PASS] test_accrualCapsAtPriceAfterEndBlock() (gas: 149721)
+[PASS] test_accrualIsZeroAtStartBlock() (gas: 132712)
+[PASS] test_claimAfterSettleRevertsAlreadySettled() (gas: 230636)
+[PASS] test_claimByStrangerRevertsNotProvider() (gas: 174948)
+[PASS] test_claimOnUnknownDealRevertsNoDeal() (gas: 34661)
+[PASS] test_claimWithNoAccrualRevertsZeroClaim() (gas: 160378)
+[PASS] test_cumulativeClaimsNeverExceedPrice() (gas: 316219)
+[PASS] test_midDealClaimPaysAccruedAndUpdatesClaimed() (gas: 226217)
+[PASS] test_secondImmediateClaimRevertsZeroClaim() (gas: 221444)
+[PASS] test_secondSettleRevertsAlreadySettled() (gas: 223817)
+[PASS] test_settleBeforeEndRevertsBeforeEnd() (gas: 153877)
+[PASS] test_settleMarksDealSettledAndDropsActiveDealCount() (gas: 237178)
+[PASS] test_settlePaysProviderUnpaidAccrued() (gas: 306638)
+[PASS] test_settleSetsClaimedToPriceBeforePaying() (gas: 219438)
+[PASS] test_settleWithOpenChallengeRevertsChallengeOpen() (gas: 221421)
+[PASS] test_strangerSettleMatchesOwnerSettle() (gas: 388984)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 5.02ms (2.19ms CPU time)
+
+Ran 5 tests for test/makhzan/StorageLayout.t.sol:StorageLayoutTest
+[PASS] test_challengeUsesOnlyTheExistingDealSlots() (gas: 51815)
+[PASS] test_configPacksIntoOneSlot() (gas: 7114)
+[PASS] test_dealUsesThreeSlots() (gas: 13374)
+[PASS] test_providerUsesTwoSlots() (gas: 10580)
+[PASS] test_twoChallengeRoundsAddNoStorage() (gas: 156058)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 720.60µs (284.20µs CPU time)
+
+Ran 9 tests for test/makhzan/Registry.t.sol:RegistryTest
+[PASS] test_addBondByStrangerRevertsNotRegistered() (gas: 41961)
+[PASS] test_nonMultipleValueRevertsBadParams() (gas: 181734)
+[PASS] test_registerBelowMinimumRevertsBondTooSmall() (gas: 44230)
+[PASS] test_registerEventCarriesDocumentedFields() (gas: 116872)
+[PASS] test_registerStoresBondAndStableId() (gas: 240558)
+[PASS] test_secondRegistrationRevertsAlreadyRegistered() (gas: 145987)
+[PASS] test_topUpUpdatesBondReadBack() (gas: 165197)
+[PASS] test_unitsAboveUint64CapRevertBadParams() (gas: 233125)
+[PASS] test_withdrawBondClearsRegistrationAndPaysFullBond() (gas: 156254)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 997.40µs (647.20µs CPU time)
+
+Ran 3 tests for test/makhzan/Interface.t.sol:InterfaceTest
+[PASS] test_abiIsExactlyTheDocumentedSurface() (gas: 579172)
+[PASS] test_peekReturnsRawSlotsInRequestOrder() (gas: 23248)
+[PASS] test_unknownIdsReadAsZero() (gas: 36423)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.58ms (3.42ms CPU time)
+
+Ran 2 tests for test/makhzan/ChallengeSeed.t.sol:ChallengeSeedTest
+[PASS] test_dealsAcrossFortyBlocksKeepVaryingIndices() (gas: 6918561)
+[PASS] test_manyDealsInOneBlockDoNotShareOneIndex() (gas: 2761618)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.86ms (5.07ms CPU time)
+
+Ran 6 tests for test/makhzan/HealthOf.t.sol:HealthOfTest
+[PASS] test_answeredChallengeIsHealthyAgain() (gas: 926438)
+[PASS] test_dealWithoutChallengeIsHealthy() (gas: 129448)
+[PASS] test_openChallengeInsideWindowIsTwoIncludingTheDeadlineBlock() (gas: 216124)
+[PASS] test_resolvedChallengeIsHealthy() (gas: 251750)
+[PASS] test_settledDealIsZero() (gas: 201936)
+[PASS] test_unknownDealIsZero() (gas: 14302)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 7.50ms (4.81ms CPU time)
+
+Ran 2 tests for test/makhzan/MerklePositionBinding.t.sol:MerklePositionBindingTest
+[PASS] test_distinctBlocksNeverShareAProof() (gas: 770829)
+[PASS] test_identicalAdjacentBlocksShareAProof() (gas: 569887)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 5.52ms (5.40ms CPU time)
+
+Ran 9 tests for test/makhzan/Verifier.t.sol:VerifierTest
+[PASS] test_correctAnswerIsAccepted() (gas: 121928)
+[PASS] test_emptyPayloadIsRejected() (gas: 118731)
+[PASS] test_hashUsedAsPayloadIsRejected() (gas: 119016)
+[PASS] test_pathForAnotherIndexIsRejected() (gas: 121932)
+[PASS] test_pathOneElementShortAndLongIsRejected() (gas: 131018)
+[PASS] test_payloadOneByteShortAndLongIsRejected() (gas: 124933)
+[PASS] test_reorderedPathIsRejected() (gas: 122005)
+[PASS] test_sevenLeafShortLastBlockVerifiesWithRemainderLength() (gas: 197815)
+[PASS] test_threeLeafShortLastBlockVerifiesWithRemainderLength() (gas: 98538)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 2.70ms (2.47ms CPU time)
+
+Ran 1 test for test/makhzan/Rounds.t.sol:RoundsTest
+[PASS] test_onePassedAndOneFailedRoundOnTheSameDealThenSettle() (gas: 1325230)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 6.44ms (3.87ms CPU time)
+
+Ran 9 tests for test/makhzan/StorageGateBond.t.sol:StorageGateBondTest
+[PASS] test_floorDoesNotOverrideHealth() (gas: 313187)
+[PASS] test_lockStoresTheBondFloor() (gas: 232866)
+[PASS] test_nonProviderPayeeCannotMeetAFloor() (gas: 265629)
+[PASS] test_refundAfterResolveStillRefusesInsideTheTerm() (gas: 397762)
+[PASS] test_refundInDefaultIsUnchangedByTheFloor() (gas: 342617)
+[PASS] test_releaseAtExactlyTheFloorPasses() (gas: 283632)
+[PASS] test_releaseBelowTheFloorAfterASlashRevertsBondTooLow() (gas: 424935)
+[PASS] test_releasePassesAgainAfterTheBondIsToppedUp() (gas: 513241)
+[PASS] test_zeroFloorIgnoresTheSlash() (gas: 409115)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 9.17ms (6.32ms CPU time)
+
+Ran 13 tests for test/makhzan/Guards.t.sol:GuardsTest
+[PASS] test_belowMinimumBondProviderRefusedNewDealButExistingDealSurvives() (gas: 400341)
+[PASS] test_challengeErrorsAreReachable() (gas: 1264766)
+[PASS] test_combinedModeFiveReentryPaysEachPathOnce() (gas: 738536)
+[PASS] test_dealErrorsAreReachable() (gas: 240793)
+[PASS] test_failedTransferRevertsTheWholeCall() (gas: 225476)
+[PASS] test_paymentErrorsAreReachable() (gas: 343544)
+[PASS] test_reentrantClaimCannotDoublePay() (gas: 372451)
+[PASS] test_reentrantResolveCannotDoublePay() (gas: 436978)
+[PASS] test_reentrantSettleCannotDoublePay() (gas: 381753)
+[PASS] test_reentrantWithdrawBondCannotDoublePay() (gas: 196601)
+[PASS] test_registryErrorsAreReachable() (gas: 331082)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 271817)
+[PASS] test_withdrawBondBlockedWhileDealOpenAndAllowedAfterSettle() (gas: 291771)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 10.92ms (8.12ms CPU time)
+
+Ran 5 tests for test/makhzan/InvariantEdges.t.sol:InvariantEdgesTest
+[PASS] test_claimAtExactEndBlockPaysTheWholePrice() (gas: 289629)
+[PASS] test_settleInTheSameBlockAChallengeFails() (gas: 324118)
+[PASS] test_slashAtMinimumBondLeavesEightyPercent() (gas: 281612)
+[PASS] test_slashAtUint64BondCapDoesNotOverflow() (gas: 367432)
+[PASS] test_twoDealsOneProviderConserveValue() (gas: 1316212)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 7.84ms (4.95ms CPU time)
+
+Ran 14 tests for test/makhzan/Deals.t.sol:DealsTest
+[PASS] test_durationOutOfRangeRejected() (gas: 76519)
+[PASS] test_escrowAndActiveDealCount() (gas: 134850)
+[PASS] test_eventCarriesDocumentedFields() (gas: 127189)
+[PASS] test_idsAreUniqueAndMonotone() (gas: 278564)
+[PASS] test_leafCountMustMatchSizeAndBlockSize() (gas: 86189)
+[PASS] test_nonMultipleValueRejected() (gas: 47962)
+[PASS] test_producedPathVerifiesAgainstStoredRoot() (gas: 3236697)
+[PASS] test_providerBelowMinimumBondRejected() (gas: 77170)
+[PASS] test_unknownProviderRejected() (gas: 43032)
+[PASS] test_validDealStoresEveryField() (gas: 137879)
+[PASS] test_valueAboveUnitCapRejected() (gas: 48813)
+[PASS] test_valueMustEqualPriceTimesUnit() (gas: 124729)
+[PASS] test_zeroRootRejected() (gas: 40755)
+[PASS] test_zeroSizeRejected() (gas: 40907)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 15.56ms (15.24ms CPU time)
+
+Ran 8 tests for test/makhzan/MakhzanGuard.t.sol:MakhzanGuardTest
+[PASS] test_answeredChallengeBecomesHealthyAgain() (gas: 960633)
+[PASS] test_defaultIsNotHealthyAndNamesDefault() (gas: 218942)
+[PASS] test_expiredHealthyDealNamesExpired() (gas: 265458)
+[PASS] test_guardReadsTheEndBlockFromDealOf() (gas: 173623)
+[PASS] test_healthyInsideTheTermIsTrue() (gas: 158258)
+[PASS] test_pendingChallengeIsNotHealthyAndNamesPending() (gas: 252287)
+[PASS] test_settledDealIsNotHealthyAndNamesSettledOrNone() (gas: 221939)
+[PASS] test_unknownDealIsNotHealthyAndNamesSettledOrNone() (gas: 30650)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 7.90ms (4.91ms CPU time)
+
+Ran 8 tests for test/tier0/BehaviorProbe.t.sol:BehaviorProbeTest
+[PASS] testBlockNumberIsMonotonic() (gas: 162052)
+[PASS] testBoomRevertsWithReason() (gas: 9349)
+[PASS] testCustomRevertReasonIsPropagated() (gas: 9307)
+[PASS] testEventHasIndexedSenderAndValue() (gas: 129405)
+[PASS] testFuzzStoredValueAndPayment(uint256,uint96) (runs: 1000, μ: 135982, ~: 136598)
+[PASS] testPayableValueIsAccepted() (gas: 124494)
+[PASS] testStorageWriteThenRead() (gas: 133421)
+[PASS] testTimestampIsMonotonic() (gas: 161985)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 42.56ms (42.25ms CPU time)
+
+Ran 4 tests for test/tier0/ValueEcho.t.sol:ValueEchoTest
+[PASS] testEchoReturnsSentValueAndSender() (gas: 35639)
+[PASS] testFuzzValueIsEchoedExactly(uint96) (runs: 1000, μ: 159768, ~: 160601)
+[PASS] testRecordStoresValueAndEmits() (gas: 147730)
+[PASS] testRecordWithoutValueStoresZero() (gas: 99962)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 56.78ms (56.60ms CPU time)
+
+Ran 2 tests for test/tier0/SizeProbe.t.sol:SizeProbeTest
+[PASS] testDeploysExactlyRequestedSize(uint16) (runs: 1000, μ: 4813, ~: 4813)
+[PASS] testSmallLadder() (gas: 8903)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 102.93ms (102.84ms CPU time)
+
+Ran 9 tests for test/makhzan/StorageGateLock.t.sol:StorageGateLockTest
+[PASS] test_lockAfterTheEndBlockRevertsExpired() (gas: 191818)
+[PASS] test_lockInDefaultRevertsDefault() (gas: 226818)
+[PASS] test_lockOnHealthyDealStoresPayerPayeeAndAmount() (gas: 235783)
+[PASS] test_lockOnSettledDealRevertsSettledOrNone() (gas: 242971)
+[PASS] test_lockOnUnknownDealRevertsSettledOrNone() (gas: 49812)
+[PASS] test_lockWithPendingChallengeRevertsPending() (gas: 226161)
+[PASS] test_lockWithZeroPayeeReverts() (gas: 160899)
+[PASS] test_lockWithoutValueReverts() (gas: 156294)
+[PASS] test_secondLockForTheSameDealReverts() (gas: 256580)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 5.50ms (1.28ms CPU time)
+
+Ran 10 tests for test/makhzan/StorageGateRefund.t.sol:StorageGateRefundTest
+[PASS] test_onlyThePayerCanRefund() (gas: 298195)
+[PASS] test_refundAfterDefaultPaysThePayer() (gas: 351146)
+[PASS] test_refundAfterReleaseReverts() (gas: 317683)
+[PASS] test_refundAfterTheEndBlockWithoutAReleasePaysThePayer() (gas: 295527)
+[PASS] test_refundAtTheEndBlockIsAllowed() (gas: 294692)
+[PASS] test_refundEmitsTheAmount() (gas: 294174)
+[PASS] test_refundOnSettledDealStillReturnsThePayer() (gas: 352232)
+[PASS] test_refundWhileHealthyInsideTheTermReverts() (gas: 262186)
+[PASS] test_refundWithPendingChallengeReverts() (gas: 319729)
+[PASS] test_secondRefundReverts() (gas: 317825)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 6.19ms (2.43ms CPU time)
+
+Ran 1 test for test/makhzan/GoldenVectors.t.sol:GoldenVectorsTest
+[PASS] test_allSharedVectors() (gas: 179407632)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 793.43ms (793.20ms CPU time)
+
+Ran 19 tests for test/makhzan/Challenge.t.sol:ChallengeTest
+[PASS] test_answerAfterDeadlineRevertsWindowOpen() (gas: 927096)
+[PASS] test_answerAfterEndBlockButBeforeDeadlinePasses() (gas: 2612584)
+[PASS] test_answerWithoutChallengeRevertsNoChallenge() (gas: 859915)
+[PASS] test_challengeOnDealSettledAtTheEndBlockReverts() (gas: 242823)
+[PASS] test_challengeOnExpiredDealRevertsDealExpired() (gas: 170973)
+[PASS] test_challengeOnSettledDealReverts() (gas: 226614)
+[PASS] test_challengeOnUnknownDealRevertsNoDeal() (gas: 35415)
+[PASS] test_challengeOpenedEventCarriesFields() (gas: 177308)
+[PASS] test_challengeRecordsIndexDeadlineAndPathLength() (gas: 206999)
+[PASS] test_invalidAnswerRevertsAndLeavesChallengeOpenForRetry() (gas: 1682666)
+[PASS] test_onlyDealOwnerCanChallenge() (gas: 153947)
+[PASS] test_onlyProviderCanAnswer() (gas: 906628)
+[PASS] test_openChallengeStaysResolvableAfterEndBlock() (gas: 276594)
+[PASS] test_ownerResolveAfterDeadlineSlashesTwentyPercentToOwner() (gas: 322780)
+[PASS] test_resolveBeforeDeadlineRevertsWindowOpen() (gas: 211523)
+[PASS] test_secondChallengeWhileOpenRevertsChallengeOpen() (gas: 207513)
+[PASS] test_secondResolveRevertsNoChallenge() (gas: 271861)
+[PASS] test_strangerResolvePaysOwnerNotCaller() (gas: 284781)
+[PASS] test_validAnswerBeforeDeadlinePasses() (gas: 983113)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 988.16ms (30.19ms CPU time)
+
+Ran 4 tests for test/makhzan/ChallengeIndex.t.sol:ChallengeIndexTest
+[PASS] test_everyLeafIndexAcceptsItsOwnAnswer() (gas: 3823032)
+[PASS] test_lastLeafAcceptsOnlyTheExactByteLength() (gas: 924041)
+[PASS] test_selectorVariesAcrossBlocksAndPrevrandao() (gas: 30313970)
+[PASS] test_singleLeafDealAcceptsEmptyPath() (gas: 297505)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.07s (176.31ms CPU time)
+
+Ran 5 tests for test/tier0/CounterProbe.t.sol:CounterProbeTest
+[PASS] testBoomRevertsWithReason() (gas: 8838)
+[PASS] testFuzzSetGet(uint256) (runs: 1000, μ: 52477, ~: 52776)
+[PASS] testSetEmitsIndexedValue() (gas: 54282)
+[PASS] testSetThenGet() (gas: 52988)
+[PASS] testStartsAtZero() (gas: 7614)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.07s (1.07s CPU time)
+
+Ran 3 tests for test/makhzan/StorageGateFuzz.t.sol:StorageGateFuzzTest
+[PASS] testFuzz_closedLockNeverPaysAgain(uint8,uint32,uint32,bool) (runs: 1000, μ: 275555, ~: 143108)
+[PASS] testFuzz_refundOnlyOnDefaultOrAfterTheEnd(uint8,uint32,uint32) (runs: 1000, μ: 278415, ~: 148037)
+[PASS] testFuzz_releaseOnlyWhileHealthy(uint8,uint32,uint32) (runs: 1000, μ: 284023, ~: 136524)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.06s (1.84s CPU time)
+
+Ran 8 tests for test/makhzan/MerkleFuzz.t.sol:MerkleFuzzTest
+[PASS] testFuzz_correctProofVerifies(uint8,uint32,uint8) (runs: 1000, μ: 117603, ~: 80134)
+[PASS] testFuzz_differentRootIsRejected(uint8,uint32) (runs: 1000, μ: 168898, ~: 116359)
+[PASS] testFuzz_expectedLengthIsEnforced(uint8,uint32,uint8) (runs: 1000, μ: 128684, ~: 90672)
+[PASS] testFuzz_flippedByteIsRejected(uint8,uint32,uint8) (runs: 1000, μ: 168250, ~: 127034)
+[PASS] testFuzz_longPathIsRejected(uint8,uint32) (runs: 1000, μ: 170868, ~: 118407)
+[PASS] testFuzz_proofRejectedAtEveryOtherIndex(uint8,uint32,uint8) (runs: 1000, μ: 219172, ~: 124158)
+[PASS] testFuzz_shortPathIsRejected(uint8,uint32) (runs: 1000, μ: 197170, ~: 158847)
+[PASS] testFuzz_swappedPathElementsAreRejected(uint8,uint32,uint8) (runs: 1000, μ: 240326, ~: 232214)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.07s (8.23s CPU time)
+
+Ran 4 tests for test/makhzan/invariant/MakhzanInvariant.t.sol:MakhzanInvariantTest
+[PASS]
+MakhzanInvariantTest invariants:
+[PASS] invariant_accrualCapsAtPrice
+[PASS] invariant_balanceCoversLiabilities
+[PASS] invariant_challengeResolvesAtMostOnce
+[PASS] invariant_noSettledDealHasOpenChallenge
+[PASS] invariant_noTrappedValue
+[PASS] invariant_proofIsPositionBound
+[PASS] invariant_slashNeverExceedsBond
+ MakhzanInvariantTest invariants (runs: 256, calls: 12800, reverts: 5694)
+
+╭-------------------+------------------+-------+---------+----------╮
+| Contract          | Selector         | Calls | Reverts | Discards |
++===================================================================+
+| MaliciousReceiver | addBond          | 714   | 714     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | challenge        | 745   | 745     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | claim            | 710   | 710     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | configure        | 751   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | createDeal       | 696   | 696     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | registerProvider | 742   | 742     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | resolve          | 719   | 719     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | settle           | 728   | 728     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MaliciousReceiver | withdrawBond     | 685   | 640     | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | addBond          | 672   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | answerDeal       | 705   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | challengeDeal    | 672   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | claimDeal        | 745   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | createDeal       | 699   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | register         | 729   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | resolveDeal      | 686   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | settleDeal       | 740   | 0       | 0        |
+|-------------------+------------------+-------+---------+----------|
+| MakhzanHandler    | withdrawBond     | 662   | 0       | 0        |
+╰-------------------+------------------+-------+---------+----------╯
+
+[PASS] test_fixtureLeavesArePairwiseDistinct() (gas: 1562727)
+[PASS] test_handlerReachesEveryValuePath() (gas: 2868146)
+[PASS] test_handlerUsesTheMaliciousRecipient() (gas: 682727)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 3.18s (3.18s CPU time)
+
+Ran 31 test suites in 3.18s (9.54s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+
+== golden vectors ==
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/packages/merkle-vectors/vectors.json
+ok /home/mohammed_soliman/hackathons/portaldot-tier1/contracts/test/fixtures/vectors.json
+golden vector check passed
+
+== with-live-env tests ==
+✔ owner role loads only OWNER_KEY and sets the live network without printing any value (36.5187ms)
+✔ provider-1 role loads PROVIDER_1_KEY, not the owner key (28.151101ms)
+✔ the wrapper writes nothing: the fixture directory holds only the fake .env (30.0592ms)
+✔ an unknown role is refused without echoing file contents (2.4812ms)
+✔ a missing key, a missing file and a malformed key are refused (5.0479ms)
+✔ the -- separator is required (1.6045ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 158.864001
+
+== docs-hygiene tests ==
+✔ an address, a hash and a block number are extracted from one line (1.443ms)
+✔ a bond in tPOT is accepted as tPOT, native units or wei in the evidence (1.0247ms)
+✔ a changed bond figure is reported with its doc line (0.2185ms)
+✔ a tx hash that differs by one character is reported (0.1369ms)
+✔ a block number is matched only as its own token (0.2434ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 54.0994
+
+== docs hygiene ==
+docs hygiene: 100 facts in README.md, docs/CHECKIN.md all match evidence/
+
+== secret-scanner tests ==
+✔ the documented tier0 path-fragment entry is allowlisted and the gate passes (29.393ms)
+✔ the canary still catches a PEM block, a literal key and a mnemonic (25.5992ms)
+✔ the allowlist is narrow: a key-shaped line elsewhere is still a finding (25.8931ms)
+✔ scanText returns rule and line for each shape, without the tree walk (1.5155ms)
+✔ scanText reports a literal key assignment on its own (0.2249ms)
+✔ scanText keeps the test-file exemption used by the tree scan (0.1565ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 135.9732
+
+== secret scan (tree) ==
+secret scan PASS — 0 findings in 3698 files (3771 paths)
+
+== secret scan (history) ==
+# secret scan — whole git history
+# utc: 2026-10-27T09:51:53Z
+# HEAD: d60a10e
+# rules: scripts/secret-scan.mjs (imported, so the two scans cannot drift)
+# no secret values are printed, only paths, lines and rule names
+refs scanned: 15
+objects reachable from refs: 3393
+unique blobs: 2777
+text blobs scanned: 1054
+non-text blobs skipped: 125
+sensitive paths ever committed: 0
+findings: 4
+  evidence/raw/t1/55-secret-scan.txt:20 A/pem blob b1cf6eac [known/closed SEC-001]
+  evidence/raw/t1/55-secret-scan.txt:21 B/key-literal blob b1cf6eac [known/closed SEC-001]
+  evidence/raw/t1/55-secret-scan.txt:21 C/hex-key-shape blob b1cf6eac [known/closed SEC-001]
+  evidence/raw/t1/55-secret-scan.txt:22 D/mnemonic blob b1cf6eac [known/closed SEC-001]
+RESULT: PASS — no new findings; the only 4 matches are in the closed SEC-001 canary blob
+
+== makhzan typecheck ==
+
+> makhzan@0.1.0 typecheck
+> tsc --noEmit
+
+
+== makhzan tests ==
+
+> makhzan@0.1.0 test
+> node --test test/*.test.ts
+
+✔ 1 MiB with 1 KiB blocks yields 1024 leaves (16.4969ms)
+✔ every block except the last is exactly blockSize and the last is the remainder (1.5007ms)
+✔ a file smaller than one block yields one leaf with the whole file (0.2668ms)
+✔ an exact multiple of the block size has no empty last block (0.208ms)
+✔ a zero-length file is rejected (0.6676ms)
+✔ the block size must be an integer inside 1..65535 (0.4305ms)
+✔ the input is copied, not aliased (0.3741ms)
+✔ each command parses its documented arguments (4.4633ms)
+✔ missing, extra and unknown arguments are rejected (1.8842ms)
+✔ invalid values are rejected before any transaction is built (1.4752ms)
+✔ a key on argv is refused and never echoed (0.5984ms)
+✔ create applies the documented fee policy and waits for finality before reading (4.6672ms)
+✔ a reverted receipt is reported with the mapped reason and takes no read-back (1.9209ms)
+✔ an RPC failure is surfaced verbatim, never treated as success (1.0078ms)
+✔ the CLI persists the submitted hash before waiting, and a receipt timeout keeps it (1.2531ms)
+✔ upload reports the acknowledgement and report names the report file (0.9702ms)
+✔ watch polls the deal until it resolves, then reads it back (1.71ms)
+✔ register parses a tPOT bond into exact units and wei (0.4363ms)
+✔ register refuses a missing, malformed or unit-inexact bond (0.5104ms)
+✔ register sends the bond, waits for finality and claims no deal read-back (1.0607ms)
+✔ resolve sends resolve(dealId) and returns a five-state record (5.8526ms)
+✔ a key on argv is refused before anything is built (1.313ms)
+✔ an unknown command is refused with the documented list (0.9679ms)
+✔ watch polls the deal and reports the read-back (0.8ms)
+✔ a poll cycle reads challengeStateOf and never queries logs (25.9378ms)
+✔ a closed challenge submits nothing and records nothing (6.0695ms)
+✔ a failed answer attempt stays pending and is retried on the next poll (8.8828ms)
+✔ a reverted answer is never labelled passed (1.892ms)
+✔ one failing deal does not stop the next deal (2.8864ms)
+✔ a late answer ends as unanswered without sending (2.7273ms)
+✔ drill mode answers with the wrong bytes, records submitted, and only then failed on a slash (2.7796ms)
+✔ drill mode can skip the answer and still ends failed after the slash (1.8485ms)
+✔ a challenge on an unknown deal is reported unanswerable (1.1298ms)
+✔ a restart resumes without re-answering an already handled round (1.4193ms)
+✔ a submitted round is re-read after a restart, never re-sent (1.9725ms)
+✔ a 40 s delayed receipt stays submitted and is labelled passed on a later poll (2.2254ms)
+✔ a lost receipt response keeps the hash submitted, then the next poll labels passed (2.0505ms)
+✔ a closed challenge after a receipt timeout is labelled from the read-back, never unanswered (2.1864ms)
+✔ a submitted round past the deadline stays submitted, not unanswered (1.3794ms)
+✔ a timed-out answer that was slashed becomes failed from the read-back (2.1365ms)
+✔ an unanswered no-send round still becomes failed after the slash read-back (1.9889ms)
+✔ a missing block is reported, never guessed (1.381ms)
+✔ the loop logs the five-state outcome of every cycle (1.2622ms)
+✔ an abort stops the loop after the in-flight cycle (0.2877ms)
+✔ a cycle error is reported and the loop keeps going (0.3089ms)
+✔ fixture deal 1: a passed challenge, a claim and a settle verify as PASS (2.9683ms)
+✔ fixture deal 2: two challenges, answered then slashed, each paired in order (0.9651ms)
+✔ logs unavailable is reported as UNKNOWN, never as a pass (0.7088ms)
+✔ a challenge with no outcome past its deadline fails (0.5846ms)
+✔ a challenge inside its window is PENDING, not PASS or FAIL (0.4676ms)
+✔ claimed must equal accrued after settle (0.6553ms)
+✔ a health value that contradicts the state fails (0.387ms)
+✔ a leaf count that does not match ceil(size/blockSize) fails (0.3738ms)
+✔ an unregistered provider fails (1.1398ms)
+✔ a DealCreated log with a different root fails and names the field (1.0629ms)
+✔ without a calibration file the dry-run says it is not verified (1.9225ms)
+✔ a measured ratio is printed with its source (1.4755ms)
+✔ a calibration file without a positive ratio is not trusted (1.2693ms)
+✔ a ratio of exactly 1 is accepted (0.4126ms)
+✔ the Tier 0 calibration shape is read from makhzan_projection.measured_ratio (0.39ms)
+✔ without the projection, the last measured deploy entry is used (0.3943ms)
+✔ a Tier 0 file with a non-positive or missing measured ratio is still not verified (0.6934ms)
+✔ the default reserve is 100 tPOT, not 500 (1.2979ms)
+✔ owner 800 tPOT with a 517 tPOT estimate passes a 100 tPOT reserve (0.4378ms)
+✔ owner 600 tPOT with a 517 tPOT estimate refuses a 100 tPOT reserve (0.7599ms)
+✔ a balance exactly at cost plus reserve passes (0.1985ms)
+✔ the receipt wait times out once and recovers, then removes the pending record (79.557ms)
+✔ an exhausted wait keeps the pending record and a second run refuses to send (5.6742ms)
+✔ a send that throws after the node accepted it leaves a sending record and blocks a re-run (2.9464ms)
+✔ --resume waits for the recorded tx and writes the final record without sending (4.9094ms)
+✔ --force-new overrides a pending record and sends exactly once (4.1874ms)
+✔ the receipt wait is bounded (1.6515ms)
+✔ --resume and --dry-run cannot be combined (0.4053ms)
+✔ the network must be explicit: no default (178.2042ms)
+✔ live needs an RPC URL and a chain id (0.6244ms)
+✔ the key is required and must be key-shaped (0.4068ms)
+✔ a minBond that is not a whole protocol unit is refused (0.7371ms)
+✔ an out-of-bound constructor value is refused (0.5128ms)
+✔ a missing artifact is refused before any transaction (1.5054ms)
+✔ dry-run prints a tPOT estimate and sends nothing (62.6323ms)
+✔ a dry run that would leave the owner below the reserve is refused (13.2981ms)
+✔ a deploy on anvil writes a correct record (60.9556ms)
+✔ a custom artifact is measured, not assumed (1.505ms)
+✔ a healthy account passes every check (2.9841ms)
+✔ a wrong chain id prints the exact fix (0.5947ms)
+✔ a balance shortfall is exact, in wei and tPOT (0.3572ms)
+✔ an unregistered account prints the register command with the network (0.4949ms)
+✔ a missing contract prints the deploy command, not a generic failure (0.3474ms)
+✔ all 17 custom errors map to their documented message (1.7186ms)
+✔ a revert string in either shape resolves to the documented message (2.2839ms)
+✔ WindowOpen says it covers both directions of the window (0.6194ms)
+✔ an unknown error string is surfaced verbatim, never swallowed (1.5357ms)
+✔ the feature 003 fixture is accepted as makhzan.evidence/v0 (5.4118ms)
+✔ the schema rejects every documented failure case (10.0185ms)
+✔ a raw receipt is written as soon as it arrives, under receipts/<network>/<hash>.json (1.7143ms)
+✔ addresses.json and txs.json are derived views over the raw receipts (1.5806ms)
+✔ publishing a bundle is additive and the index carries the sha256 of the exact bytes (2.801ms)
+✔ builder matches every shared vector (59.1134ms)
+✔ building from leaf hashes gives the same root, levels and paths (64.7702ms)
+✔ every shared path is reproduced and verifies (170.7235ms)
+✔ a path replayed at another index is rejected (370.2289ms)
+✔ wrong bytes, wrong depth, reordered path and empty bytes are rejected (0.5272ms)
+✔ a refused eth_call is decoded to its custom error, never to a revert string (7.507ms)
+✔ an unexpected revert is recorded as unknown, not dropped (0.4036ms)
+✔ a call that unexpectedly succeeds is a refusal-test failure, not a recorded success (0.6297ms)
+✔ buildFilePayload returns every block with its Merkle path (6.3555ms)
+✔ verifyFile accepts the provider payload and returns the exact bytes and sha256 (4.3006ms)
+✔ verifyFile rejects one flipped data byte with ProofRejected (2.6935ms)
+✔ verifyFile rejects a flipped path hash with ProofRejected (1.933ms)
+✔ verifyFile rejects an inconsistent on-chain size/block-size/leaf-count expectation (1.4556ms)
+✔ verifyFile rejects a payload whose root differs from the on-chain deal root (1.3803ms)
+✔ the loopback endpoint serves a stored root and rejects an unknown root (38.8482ms)
+✔ the network is explicit and has no default (2.3091ms)
+✔ live needs an RPC URL and a chain id (0.3927ms)
+✔ the contract and key are required and shaped (0.7578ms)
+✔ local defaults are explicit values, not a hidden network (0.3784ms)
+✔ the receipt wait cannot be configured below 120 s (0.9354ms)
+✔ live rejects a chain id that is not an integer (0.2685ms)
+✔ state dir, port and poll interval are configurable (0.3926ms)
+✔ an atomic write leaves no partial file and round-trips (3.8361ms)
+✔ a failed write leaves the previous file intact (1.0691ms)
+✔ a corrupt state file is reported and never replaced (1.3601ms)
+✔ a missing file is an empty state that can be rebuilt (0.4222ms)
+✔ a restart re-derives block paths from the stored tree (1.0506ms)
+✔ the five state slots fill in order (3.4165ms)
+✔ a record refuses to act before executed (1.1209ms)
+✔ finalized requires an observed finality and cannot precede execution (0.4013ms)
+✔ a reverted transaction keeps the verbatim reason and takes no read-back (0.3899ms)
+✔ stages cannot be skipped or rewritten (0.8782ms)
+✔ 10 tPOT is 1e15 native units (1.6281ms)
+✔ one tPOT is 1e14 units and the smallest unit is 1e-14 tPOT (0.3534ms)
+✔ fractions use integer math only (0.6291ms)
+✔ more than 14 decimals is rejected, never rounded (0.7336ms)
+✔ negative, empty and exponent inputs are rejected (0.3989ms)
+✔ the uint64 unit cap is enforced (0.342ms)
+✔ units to wei multiplies by WEI_PER_UNIT exactly (0.4697ms)
+✔ a complete valid file is acknowledged with (root, size, leafCount) (5.8996ms)
+✔ an extra field is rejected (0.7325ms)
+✔ a missing field is rejected (0.4561ms)
+✔ a wrong block size is rejected (0.4818ms)
+✔ an out-of-range index is rejected (0.8244ms)
+✔ a wrong data length is rejected (0.7342ms)
+✔ a block out of order is rejected (0.4931ms)
+✔ a declared root that does not match the recomputed root is rejected (1.7263ms)
+✔ size and leaf count must agree with ceil(size/blockSize) (0.8706ms)
+✔ a malformed value type is rejected with a verbatim reason (0.5294ms)
+✔ the loopback endpoint acknowledges through the receiver (36.4788ms)
+✔ matching runtime code is accepted byte for byte (1.1436ms)
+✔ case and a missing 0x prefix are normalised, not treated as a mismatch (0.2584ms)
+✔ one tampered byte is refused and its offset is reported (0.2405ms)
+✔ a shorter runtime is refused as a byte-length mismatch (0.1692ms)
+✔ an artifact without deployedBytecode is refused, never guessed (0.1233ms)
+✔ verification writes code, artifact, deployer mapping and the block it read (1.3108ms)
+✔ without a reachable helper the deployer mapping is explicitly not checked (0.4921ms)
+✔ verify takes exactly one positive uint32 deal id and refuses a key on argv (1.2886ms)
+✔ logs decode by selector and keep only the requested deal (3.612ms)
+✔ a log from a different deal is ignored even with the same selector (0.9558ms)
+ℹ tests 157
+ℹ suites 0
+ℹ pass 157
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5068.574095
+
+== local e2e ==
+
+> makhzan@0.1.0 e2e:local
+> node scripts/e2e-local.mjs
+
+chain id 420420777 on http://127.0.0.1:8549 (local anvil)
+
+== deploy ==
+Makhzan deployed at 0x5fbdb2315678afecb367f032d93f642f64180aa3 (tx 0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2)
+
+== register provider ==
+provider 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 id=1 bond=10000000000000000 units (tx 0xa1e081c14b4bed8888bdab3dded310754e86279c69c17a44a0c52b0206eef952)
+
+== chunk, build and upload 1 MiB ==
+root 0x3bb74aa75b7de7d472983940cc20bf821a9b222b8d2dd58dfce541928a36f7b8 size 1048576 leafCount 1024 acknowledged
+
+== create deal ==
+deal 1 created, owner 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, end block 53 (tx 0x7c27979ce6a9bd0ac840ff20acb7a2560dad19411b1201dcb18de669d53be45e)
+
+== challenge 1 - answered (expected pass) ==
+index 57, path length 10, answer 0x079446d31a3a4ac25551b20f19e877abdf4a624901f3def0b7e9aa66a67e7987, bond unchanged
+
+== challenge 2 - skipped on purpose (expected slash) ==
+daemon re-read the round: failed
+index 606, slash 2000000000000000 units, owner credited 20000000000000000000 wei
+
+== settle ==
+settle tx 0x28dbc2b3f492a6d89e792d98af610f9a0d29f39726cdd80df5b85ae60cbd9c35; provider +10000000000000000000 wei; claimed 1000000000000000
+
+== summary ==
+{
+  "tier1LocalRun": {
+    "settle": {
+      "tx": "0x28dbc2b3f492a6d89e792d98af610f9a0d29f39726cdd80df5b85ae60cbd9c35",
+      "block": "55",
+      "status": "success",
+      "providerBalanceBeforeWei": "9899999695513612703551",
+      "providerBalanceAfterWei": "9909999695513612703551",
+      "providerCreditWei": "10000000000000000000",
+      "claimed": "1000000000000000",
+      "claimableAfter": "0",
+      "settledFlag": 1
+    },
+    "chainId": 420420777,
+    "rpc": "http://127.0.0.1:8549",
+    "makhzan": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+    "dealId": 1,
+    "providerId": 1,
+    "root": "0x3bb74aa75b7de7d472983940cc20bf821a9b222b8d2dd58dfce541928a36f7b8",
+    "size": 1048576,
+    "leafCount": 1024,
+    "blockSize": 1024,
+    "priceUnits": "1000000000000000",
+    "minBondUnits": "10000000000000000",
+    "slashBps": "2000",
+    "rounds": [
+      {
+        "outcome": "passed",
+        "dealId": 1,
+        "index": 57,
+        "pathLength": 10,
+        "challengeTx": "0xce44fbdf06fca292ceb1fecba17eaeed3e090e1b396c35dcbe394cce95acd247",
+        "challengeBlock": "4",
+        "challengeStatus": "success",
+        "answerTx": "0x079446d31a3a4ac25551b20f19e877abdf4a624901f3def0b7e9aa66a67e7987",
+        "answerBlock": "5",
+        "answerStatus": "success",
+        "challengeOpenAfter": false,
+        "bondBefore": "10000000000000000",
+        "bondAfter": "10000000000000000"
+      },
+      {
+        "outcome": "slashed",
+        "dealId": 1,
+        "index": 606,
+        "skipped": true,
+        "challengeTx": "0x71c18a930391d3a52e109a229e60c463a38020cd7d4de78359175f389a625dba",
+        "challengeBlock": "6",
+        "challengeStatus": "success",
+        "resolveTx": "0x90110f03b85a7b04f799e2d4404b664036ca8983c91078b456c7f66ce2360db5",
+        "resolveBlock": "18",
+        "resolveStatus": "success",
+        "daemonStatusAfterResolve": "failed",
+        "bondBefore": "10000000000000000",
+        "bondAfter": "8000000000000000",
+        "slashed": "2000000000000000",
+        "ownerBalanceBeforeWei": "9989996685959329019492",
+        "ownerBalanceAfterWei": "10009996685959329019492",
+        "ownerCreditWei": "20000000000000000000"
+      }
+    ]
+  }
+}
+
+PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil
+
+== gates tests ==
+
+> makhzan-gates@0.1.0 test
+> node --test test/*.test.ts
+
+✔ DR-011 caps reject a single deposit above 60 tPOT (1.0156ms)
+✔ DR-011 caps reject a total above 100 tPOT (0.1577ms)
+✔ planck and wei formatting uses 14 and 18 decimals (0.1476ms)
+✔ nativeToEthRatio 10000 maps one tPOT to 1e18 wei (0.1017ms)
+✔ a tick records exactly one outcome per endpoint (1.7591ms)
+✔ a tick with both ok and error is rejected (0.7162ms)
+✔ timestamps are ISO-8601 UTC at second precision (0.2668ms)
+✔ the day file rotates on the UTC date (0.5113ms)
+✔ EVM is attempted first when allowEVMBytecode is true (1.0529ms)
+✔ PVM is attempted first when the caller asks for it (0.131ms)
+✔ a record without runState is rejected (2.4049ms)
+✔ done without a verdict is rejected (1.1764ms)
+✔ blocked with a verdict is rejected (0.3648ms)
+✔ blocked without a reason is rejected (0.3147ms)
+✔ not_run without a reason is rejected (0.3433ms)
+✔ PASS with a classification is rejected (0.1926ms)
+✔ DESIGN-CHANGE without an adaptation is rejected (0.2796ms)
+✔ FALLBACK-TRIGGER without a named condition is rejected (0.6313ms)
+✔ a loaded secret value is rejected (0.6328ms)
+✔ a recorded --private-key flag is rejected (0.5555ms)
+✔ a missing evidenceFiles path is rejected (0.4138ms)
+✔ timestamps out of order are rejected (0.3322ms)
+✔ a valid blocked record is accepted (0.258ms)
+✔ isFunded is false when both balances are zero (1.4576ms)
+✔ isFunded is true when native free is non-zero (0.2963ms)
+✔ isFunded is true when the EVM balance is non-zero (0.1955ms)
+✔ isFunded rejects a malformed value instead of guessing (0.408ms)
+✔ fundingFlagText records public values only (0.7209ms)
+✔ implied factor is the smallest-unit ratio derived from both balances (1.6773ms)
+✔ implied factor agrees with nativeToEvm at the metadata ratio (0.2116ms)
+✔ a zero native balance cannot produce a factor (0.4705ms)
+✔ native to EVM scaling applies the observed factor (0.1183ms)
+✔ a zero EVM balance after mapping attempts is a FAIL (0.1228ms)
+✔ a run that never reached the chain is blocked, never FAIL (0.1354ms)
+✔ a funded and spendable EVM balance passes (0.1383ms)
+✔ the worked example keeps native and EVM amounts distinct (0.1813ms)
+✔ candidate A is the 20 EVM bytes followed by twelve 0xEE bytes (0.8179ms)
+✔ candidate A rejects a non-address (0.43ms)
+✔ keygen produces six distinct keys (30.9672ms)
+✔ the env file is mode 600 and is never overwritten (14.3064ms)
+✔ method is always recorded (1.2934ms)
+✔ a missing method throws (0.5963ms)
+✔ receipt method requires a txRef (0.2282ms)
+✔ differential requires two labelled samples (0.2053ms)
+✔ differential records both labels (0.7168ms)
+✔ isPvmBlob accepts the PVM magic 0x50564d00 (1.1643ms)
+✔ isPvmBlob rejects EVM bytecode (0.2519ms)
+✔ isPvmBlob rejects odd-length and non-hex input (0.1688ms)
+✔ pvmBlobHex encodes bytes with a 0x prefix (0.2195ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1360.916898
+
+GATE RESULT: PASS
