@@ -1,0 +1,76 @@
+# T009 — StorageGate + MakhzanGuard: new suites, size and gas
+# utc: 2026-10-27T09:36:39Z
+# branch: 004-storage-gate at 7349bea
+# mode: local Foundry only. No RPC, no key, no deploy. Runs against the real MakhzanHarness.
+
+## red first (exact compiler errors that started each task)
+
+T005, before src/makhzan/MakhzanGuard.sol existed:
+  Error (6275): Source "src/makhzan/MakhzanGuard.sol" not found: File not found.
+  ParserError: Source "src/makhzan/MakhzanGuard.sol" not found: File not found.
+
+T006/T007/T008, before each function existed:
+  T006: Error (9582): Member "lock" not found or not visible after argument-dependent lookup in contract StorageGate.
+  T007: Error (9582): Member "release" not found or not visible after argument-dependent lookup in contract StorageGate.
+  T008: Error (9582): Member "refund" not found or not visible after argument-dependent lookup in contract StorageGate.
+
+T005 also had one behavioural red: the first guard run failed with
+  [FAIL: next call did not revert as expected] (5 tests)
+  because internal library calls are inlined and vm.expectRevert needs an external frame;
+  the tests now call through the tiny GuardProbe and all eight pass.
+
+## new suites
+
+$ forge test --match-path "test/makhzan/{MakhzanGuard,StorageGateLock,StorageGateRelease,StorageGateRefund,StorageGateFuzz}.t.sol" -vv
+[PASS] test_onlyThePayeeCanRelease() (gas: 274783)
+[PASS] test_reentrantPayeeCannotReleaseTwice() (gas: 537437)
+[PASS] test_releaseAtTheEndBlockRevertsExpired() (gas: 278068)
+[PASS] test_releaseEmitsTheAmount() (gas: 274834)
+[PASS] test_releaseInDefaultRevertsDefault() (gas: 313393)
+[PASS] test_releaseOnSettledDealRevertsSettledOrNone() (gas: 328969)
+[PASS] test_releasePaysThePayeeExactlyOnce() (gas: 281485)
+[PASS] test_releaseWithPendingChallengeRevertsPending() (gas: 313105)
+[PASS] test_releaseWithoutALockReverts() (gas: 158134)
+[PASS] test_secondReleaseReverts() (gas: 298608)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 2.87ms (2.65ms CPU time)
+[PASS] test_onlyThePayerCanRefund() (gas: 297785)
+[PASS] test_refundAfterDefaultPaysThePayer() (gas: 350632)
+[PASS] test_refundAfterReleaseReverts() (gas: 317042)
+[PASS] test_refundAfterTheEndBlockWithoutAReleasePaysThePayer() (gas: 294988)
+[PASS] test_refundAtTheEndBlockIsAllowed() (gas: 294153)
+[PASS] test_refundEmitsTheAmount() (gas: 293635)
+[PASS] test_refundOnSettledDealStillReturnsThePayer() (gas: 351693)
+[PASS] test_refundWhileHealthyInsideTheTermReverts() (gas: 261647)
+[PASS] test_refundWithPendingChallengeReverts() (gas: 319190)
+[PASS] test_secondRefundReverts() (gas: 317264)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 246.02ms (2.12ms CPU time)
+[PASS] test_lockAfterTheEndBlockRevertsExpired() (gas: 191579)
+[PASS] test_lockInDefaultRevertsDefault() (gas: 226730)
+[PASS] test_lockOnHealthyDealStoresPayerPayeeAndAmount() (gas: 235163)
+[PASS] test_lockOnSettledDealRevertsSettledOrNone() (gas: 242886)
+[PASS] test_lockOnUnknownDealRevertsSettledOrNone() (gas: 49655)
+[PASS] test_lockWithPendingChallengeRevertsPending() (gas: 226073)
+[PASS] test_lockWithZeroPayeeReverts() (gas: 160745)
+[PASS] test_lockWithoutValueReverts() (gas: 156209)
+[PASS] test_secondLockForTheSameDealReverts() (gas: 256192)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 248.42ms (1.03ms CPU time)
+[PASS] test_answeredChallengeBecomesHealthyAgain() (gas: 960633)
+[PASS] test_defaultIsNotHealthyAndNamesDefault() (gas: 218942)
+[PASS] test_expiredHealthyDealNamesExpired() (gas: 265458)
+[PASS] test_guardReadsTheEndBlockFromDealOf() (gas: 173623)
+[PASS] test_healthyInsideTheTermIsTrue() (gas: 158258)
+[PASS] test_pendingChallengeIsNotHealthyAndNamesPending() (gas: 252287)
+[PASS] test_settledDealIsNotHealthyAndNamesSettledOrNone() (gas: 221939)
+[PASS] test_unknownDealIsNotHealthyAndNamesSettledOrNone() (gas: 30650)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 248.75ms (4.79ms CPU time)
+[PASS] testFuzz_closedLockNeverPaysAgain(uint8,uint32,uint32,bool) (runs: 1000, μ: 301190, ~: 142827)
+[PASS] testFuzz_refundOnlyOnDefaultOrAfterTheEnd(uint8,uint32,uint32) (runs: 1000, μ: 300437, ~: 147737)
+[PASS] testFuzz_releaseOnlyWhileHealthy(uint8,uint32,uint32) (runs: 1000, μ: 307230, ~: 136398)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 248.85ms (738.68ms CPU time)
+Ran 5 test suites in 249.61ms (994.92ms CPU time): 40 tests passed, 0 failed, 0 skipped (40 total tests)
+
+## whole contract suite
+
+$ forge test
+
+Ran 29 test suites in 3.50s (9.11s CPU time): 197 tests passed, 0 failed, 0 skipped (197 total tests)

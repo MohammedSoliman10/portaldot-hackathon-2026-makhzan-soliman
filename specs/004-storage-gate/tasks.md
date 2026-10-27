@@ -34,7 +34,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
 
 ## Phase 4 — Evidence (SC-003, SC-004)
 
-- [ ] **T009** `StorageGateFuzz.t.sol`: release and refund invariants over block offset and role;
+- [x] **T009** `StorageGateFuzz.t.sol`: release and refund invariants over block offset and role;
       update `contracts/.gas-snapshot`; record `forge build --sizes`, runtime bytes and a gas table
       in `evidence/raw/t1/90-*`.
 
