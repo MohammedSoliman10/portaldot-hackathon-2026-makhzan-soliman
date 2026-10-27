@@ -1,0 +1,26 @@
+# LIVE-3 gate deploy DRY-RUN only — no transaction, no key printed
+# utc_before: 2026-10-27T12:08:32Z
+# command: scripts/with-live-env.sh owner -- node scripts/deploy.mjs --contract gate --makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44 --dry-run
+# chain: portaldot-v3 id 420420777 | rpc: https://test-evm-rpc-v3.portaldot.dev
+
+gate deploy: makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+calibration: measured ratio 0.984608251872 (source: /home/mohammed_soliman/hackathons/portaldot-hackathon/evidence/calibration.json)
+estimated deploy cost 213.866263 tPOT; owner balance 172.229122 tPOT; reserve 100 tPOT
+deploy failed: refusing: balance 172.229122 tPOT - estimate 213.866263 tPOT leaves 0.000000 tPOT, below the DR-012 reserve of 100 tPOT
+exit=1
+# utc_after: 2026-10-27T12:08:34Z
+
+== independent read-only estimate (same RPC, owner address only, no key) ==
+{
+ "utc": "2026-10-27T12:08:34.986Z",
+ "chainId": 420420777,
+ "block": 217395,
+ "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+ "gas": "7365808976947231",
+ "gasPriceWei": "29035",
+ "costWei": "213866263645662852085",
+ "costTpot": 213.86626364566283,
+ "balanceWei": "172229122908433355700",
+ "balanceTpot": 172.22912290843334,
+ "covers": false
+}
