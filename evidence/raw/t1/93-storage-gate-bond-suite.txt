@@ -1,0 +1,87 @@
+# T011/T012 — after a slash, and the gate's optional bond floor
+# utc: 2026-10-27T09:49:54Z
+# branch: 004-storage-gate at d9cf1ad
+# mode: local Foundry only. No RPC, no key, no deploy. Runs against the real MakhzanHarness.
+
+## red first (exact compiler errors that started the tasks)
+
+T011 (AfterSlash.t.sol) compiled first and ran green on the first try: it only reads views, so
+there was nothing to implement. That is the point of the task.
+
+T012, before the implementation:
+  Error (6160): Wrong argument count for function call: 3 arguments given but expected 2.
+    --> test/makhzan/StorageGateBond.t.sol:23:9
+  Error (7364): Different number of components on the left hand side (5) than on the right hand side (4).
+    --> test/makhzan/StorageGateBond.t.sol:39:9
+  Error (9582): Member "BondTooLow" not found or not visible after argument-dependent lookup in type(contract StorageGate).
+    --> test/makhzan/StorageGateBond.t.sol:66:25
+
+## T011 — what a consumer can still see after a slash
+
+$ forge test --match-path test/makhzan/AfterSlash.t.sol -vv
+Ran 2 tests for test/makhzan/AfterSlash.t.sol:AfterSlashTest
+[PASS] test_dealContinuesAfterASlashAndHealthReturnsToTwoOnTheNextChallenge() (gas: 302393)
+[PASS] test_slashIsInvisibleToHealthAndToTheGuard() (gas: 369680)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 2.22ms (547.70µs CPU time)
+
+measured on the real Makhzan, deal 1, 1e15 planck bond:
+  healthOf inside the challenge window                 2   (guard refuses, Pending)
+  healthOf past the deadline, before resolve           3   (guard refuses, Default)
+  providerOf(provider).bond, 20% slash applied         8e14 (1e15 -> 8e14)
+  healthOf immediately after resolve                   1   (guard says healthy)
+  healthOf ten blocks later                            1   (still healthy)
+  providerOf(provider).bond ten blocks later           8e14 (the slash stays)
+
+conclusion: `healthOf` and `MakhzanGuard.isHealthy` cannot see a past default. The only public view
+that remembers it is the provider bond: `providerOf(address who) -> (uint16 id, uint64 bond,
+uint24 activeDeals, bool registered)`. Makhzan exposes no providerId -> address view, so a consumer
+holding only a dealId cannot look the bond up directly; it has to go through an address.
+
+## T012 — the bond floor
+
+$ forge test --match-path "test/makhzan/StorageGate*.t.sol" -vv
+Ran 9 tests for test/makhzan/StorageGateBond.t.sol:StorageGateBondTest
+[PASS] test_floorDoesNotOverrideHealth() (gas: 313187)
+[PASS] test_lockStoresTheBondFloor() (gas: 232866)
+[PASS] test_nonProviderPayeeCannotMeetAFloor() (gas: 265629)
+[PASS] test_refundAfterResolveStillRefusesInsideTheTerm() (gas: 397762)
+[PASS] test_refundInDefaultIsUnchangedByTheFloor() (gas: 342617)
+[PASS] test_releaseAtExactlyTheFloorPasses() (gas: 283632)
+[PASS] test_releaseBelowTheFloorAfterASlashRevertsBondTooLow() (gas: 424935)
+[PASS] test_releasePassesAgainAfterTheBondIsToppedUp() (gas: 513241)
+[PASS] test_zeroFloorIgnoresTheSlash() (gas: 409115)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 2.76ms (3.17µs CPU time)
+
+plus the unchanged suites (lock 9, release 10, refund 10, fuzz 3):
+Ran 5 test suites in 225.01ms: 41 tests passed, 0 failed, 0 skipped (41 total tests)
+
+what the nine tests pin:
+  - lock stores the floor; 0 is the default and keeps the old behaviour (release still pays after
+    a slash when minBond == 0)
+  - bond == floor passes (>=, not >)
+  - slash 1e15 -> 8e14 drops the bond under a 9e14 floor: release reverts BondTooLow, value stays
+    in the gate, status stays 1 (locked)
+  - the floor is read at release time, not lock time: a 2e14 top-up (back to 1e15) re-opens release
+  - a payee that is not the deal's provider reads as a zero bond, so any floor > 0 refuses
+  - refund is untouched by the floor: default pays the payer; after resolve the deal is healthy
+    again, so an in-term refund is still refused
+  - health still wins: a pending challenge refuses with Pending even with a high bond
+
+deviation, recorded: Makhzan has no providerId -> address view, so the gate resolves the provider
+through the payee and requires `providerOf(payee).id == dealOf(dealId).providerId`. Payee is
+therefore expected to be the deal's provider. Any other payee has no bond to prove and cannot
+satisfy a floor > 0. This is documented in the storage-layout comment and the README, and it is
+the one simplification in this round. The `registered` flag is not checked separately: an
+unregistered payee has id 0 and a real deal's providerId is never 0.
+
+## size
+
+$ forge build --sizes
+| Contract          | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
+| Makhzan           | 6,566            | 7,154             | 18,010             | 41,998              |
+| StorageGate       | 2,528            | 2,682             | 22,048             | 46,470              |
+
+2,528 B runtime, up 473 B from 2,055 B: two external view calls (dealOf, providerOf) plus the
+error selector and the extra storage field. The stop condition was 2,600 B runtime; the first
+build was 2,616 B, and dropping the redundant `registered` check brought it to 2,528 B. No feature
+was cut. Makhzan is unchanged at 6,566 B.

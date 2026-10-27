@@ -52,7 +52,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
       `BondTooLow` when the deal provider's current bond is below the floor. Tests first: slash
       drops the bond, `minBond == 0` unchanged, boundary at equality, non-provider payee, refund
       unchanged; existing fuzz still holds.
-- [ ] **T013** README example and honest note, size and gas evidence, snapshot, full gate.
+- [x] **T013** README example and honest note, size and gas evidence, snapshot, full gate.
 - [ ] **T014** Merge `origin/main` (`6585f04`) into the branch, then merge into `main`, run the
       full gate on `main`, push.
 - [ ] **T015** Branch `005-docs-refresh`: fix the stale live-run labels, the 6,378 B figure and the
