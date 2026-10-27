@@ -1,0 +1,24 @@
+# T018 — CI size budget: StorageGate <= 2600 B runtime next to Makhzan's 10240 B
+# utc: 2026-10-27T11:31:09Z
+# branch: 005-docs-refresh at d1b90a4 + T018 working tree
+
+== node scripts/check-size.mjs ==
+Makhzan runtime 6566 B <= budget 10240 B (margin 3674 B)
+StorageGate runtime 2528 B <= budget 2600 B (margin 72 B)
+exit=0
+
+== node --test scripts/check-size.test.mjs ==
+✔ both contracts are inside their budgets (0.9187ms)
+✔ one byte of gate overrun fails and names StorageGate (0.2666ms)
+✔ the Makhzan overrun still fails and names Makhzan (0.1893ms)
+✔ the budget boundary itself passes (0.1584ms)
+✔ a missing or nonsensical gate budget is a failure, not a pass (0.2499ms)
+✔ the real artifacts are the sizes the budget was set against (0.8215ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.3873

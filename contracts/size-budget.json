@@ -1,8 +1,9 @@
 {
   "runtimeBytes": 10240,
+  "gateRuntimeBytes": 2600,
   "dealSlots": 3,
   "providerSlots": 2,
   "activeChallengeExtraSlots": 1,
   "challengeRoundGrowthSlots": 0,
-  "source": "spec FR-036; re-set from G05 before the [LIVE] phase"
+  "source": "spec FR-036 (Makhzan); StorageGate 2600 B from measured 2528 B (T018); re-set from G05 before the [LIVE] phase"
 }
