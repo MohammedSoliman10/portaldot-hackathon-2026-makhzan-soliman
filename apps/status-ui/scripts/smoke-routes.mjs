@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(appRoot, "dist");
-const routes = ["/", "/deal/2", "/verify", "/proof", "/judges", "/replay"];
+const routes = ["/", "/deal/2", "/verify", "/proof", "/judges", "/replay", "/receipt/1", "/receipt/2"];
 
 if (!existsSync(join(dist, "index.html"))) {
   console.error("FAIL dist/index.html is missing; run `npm run build` first");
