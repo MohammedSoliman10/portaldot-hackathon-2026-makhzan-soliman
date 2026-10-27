@@ -313,6 +313,8 @@ rather than a certification.
    partner; until then this criterion stays unvalidated.
 
 `docs/JUDGING.md` maps these claims to evidence and lists the weak spots criterion by criterion.
+`docs/BUSINESS.md` is the business case: who would pay, the measured cost of a deal, the honesty
+limits that bound the price, and what we have not validated.
 
 ## Quick start
 
@@ -375,7 +377,7 @@ apps/gates/                Tier-0 read-only network gates and shared chain helpe
 scripts/                   deploy.mjs, check-size.mjs, secret-scan.mjs, secret-scan-history.mjs, docs-hygiene.mjs, with-live-env.sh
 specs/002-core-storage-proofs/   spec, plan, tasks, quickstart, research
 docs/                      architecture, live runbook, decisions, evidence schema, threat model,
-                           demo, check-in, explainer, demo checklist, judging, reproduce
+                           demo, check-in, explainer, demo checklist, judging, reproduce, business
 evidence/                  raw command output, deployment records, receipts, verification, calibrations
 ```
 
