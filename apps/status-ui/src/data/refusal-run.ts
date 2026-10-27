@@ -45,14 +45,24 @@ const HEX_DATA = /^0x[0-9a-fA-F]{8,}$/;
 /**
  * Finds the revert data in whatever viem wrapped it in: `.data` on the error or a cause, the node's
  * `info.error.data`, or a message that carries the hex. Returns null when there is none.
+ *
+ * Structured fields are searched across the whole chain before any message is read, and a message is
+ * only read up to its `Raw Call Arguments:` / `Request body:` block. viem prints the caller address
+ * and the calldata there, so reading the whole message would "find" `0x…dEaD` and call it a selector.
  */
 export function revertDataOf(error: unknown): Hex | null {
+  const chain: Record<string, unknown>[] = [];
   const seen = new Set<unknown>();
   let cursor: unknown = error;
   for (let depth = 0; depth < 8 && cursor !== null && typeof cursor === "object"; depth += 1) {
     if (seen.has(cursor)) break;
     seen.add(cursor);
     const record = cursor as Record<string, unknown>;
+    chain.push(record);
+    cursor = record.cause;
+  }
+
+  for (const record of chain) {
     for (const key of ["data", "revertData", "returnData"]) {
       const value = record[key];
       if (typeof value === "string" && HEX_DATA.test(value)) return value as Hex;
@@ -65,11 +75,13 @@ export function revertDataOf(error: unknown): Hex | null {
         if (typeof data === "string" && HEX_DATA.test(data)) return data as Hex;
       }
     }
-    if (typeof record.message === "string") {
-      const match = /0x[0-9a-fA-F]{8,}/.exec(record.message);
-      if (match !== null) return match[0] as Hex;
-    }
-    cursor = record.cause;
+  }
+
+  for (const record of chain) {
+    if (typeof record.message !== "string") continue;
+    const head = record.message.split(/Raw Call Arguments:|Request body:/)[0] ?? "";
+    const match = /0x[0-9a-fA-F]{8,}/.exec(head);
+    if (match !== null) return match[0] as Hex;
   }
   return null;
 }

@@ -84,4 +84,34 @@ describe("running one refusal", () => {
     if (outcome.status !== "reverted") throw new Error("unreachable");
     expect(outcome.name).toBe("BadParams");
   });
+
+  it("does not mistake the caller address in viem's message for revert data", async () => {
+    const call = vi.fn(async () => {
+      const inner = Object.assign(new Error("execution reverted"), { data: "0x30cd7471" });
+      const rpc = Object.assign(new Error("RPC Request failed."), { data: "0x30cd7471", cause: inner });
+      throw Object.assign(
+        new Error(
+          `Execution reverted for an unknown reason.\n\nRaw Call Arguments:\n  from:  ${REFUSAL_CALLER}\n  to:    0x60481DFcFCA34A8F095939D9675eC715127B2e44\n  data:  0xf3c72faa0000000000000000000000000000000000000000000000000000000000000001\n\nDetails: execution reverted`,
+        ),
+        { cause: rpc },
+      );
+    });
+    const outcome = await runRefusal(clientWith(call), ADDRESS, challenge);
+    expect(outcome.status).toBe("reverted");
+    if (outcome.status !== "reverted") throw new Error("unreachable");
+    expect(outcome.raw).toBe("0x30cd7471");
+    expect(outcome.name).toBe("NotOwner");
+  });
+
+  it("refuses to read a selector out of the raw call arguments", async () => {
+    const call = vi.fn(async () => {
+      throw new Error(
+        `Execution reverted.\n\nRaw Call Arguments:\n  from:  ${REFUSAL_CALLER}\n  data:  0xf3c72faa0000000000000000000000000000000000000000000000000000000000000001\n\nDetails: execution reverted`,
+      );
+    });
+    const outcome = await runRefusal(clientWith(call), ADDRESS, challenge);
+    expect(outcome.status).toBe("error");
+    if (outcome.status !== "error") throw new Error("unreachable");
+    expect(outcome.message).toMatch(/Execution reverted/);
+  });
 });
