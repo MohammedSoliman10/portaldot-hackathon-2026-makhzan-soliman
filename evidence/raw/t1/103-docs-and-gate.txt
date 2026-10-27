@@ -1,0 +1,13 @@
+# T019 — docs: the gate, minBond and the honest limits; the front-end line corrected
+# utc: 2026-10-27T11:33:47Z
+# branch: 005-docs-refresh at 237a066 + T019 working tree
+# files: docs/EXPLAIN.md, docs/JUDGING.md, docs/THREAT_MODEL.md, README.md
+# note: the full gate for this tree is evidence/raw/t1/104-gate3-full.txt
+
+== node scripts/docs-hygiene.mjs ==
+docs hygiene: 100 facts in README.md, docs/CHECKIN.md all match evidence/
+exit=0
+
+== node scripts/secret-scan.mjs (the new text only) ==
+secret scan PASS — 0 findings in 3714 files (3787 paths)
+exit=0

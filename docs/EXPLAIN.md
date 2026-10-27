@@ -58,6 +58,40 @@ It does **not** prove:
 These limits are the honest core of the product. The economics work because a provider that cannot
 answer loses 20% of its bond, and the client can challenge as often as the window allows.
 
+## The consumer gate, and what `minBond` buys
+
+`StorageGate` (`contracts/src/makhzan/StorageGate.sol`) is the smallest honest consumer of Makhzan: no
+admin, no upgrade path, one payment per deal.
+
+1. `lock(dealId, payee, minBond)` — the payer deposits the payment and names who may take it. The lock
+   opens only while `MakhzanGuard.requireHealthy` passes (no open challenge, still inside the term).
+2. `release(dealId)` — only the named payee, once, and only while the guard still says healthy. When
+   `minBond != 0` it also reads the payee's provider record and refuses with `BondTooLow` if the bond
+   is below that floor.
+3. `refund(dealId)` — only the payer, and only when `healthOf == 3` (defaulted) or at/after the deal's
+   end block. Otherwise `RefundNotAllowed`.
+
+The whole flow is measured locally in `evidence/raw/t1/101-gate-demo-local.txt`: lock with a
+900,000,000,000,000-unit floor, release while healthy, challenge, let it expire, resolve (the 20%
+slash), then a second deal whose release is refused `BondTooLow`, whose in-term refund is refused
+`RefundNotAllowed`, and which is refunded at its end block. The gate's balance ends at zero. The gate
+deploys through the same tooling, dry run and pending record as Makhzan
+(`evidence/raw/t1/100-gate-deploy.txt`) at 2,528 B runtime against a 2,600 B budget
+(`evidence/raw/t1/102-size-check-gate.txt`).
+
+`minBond` is a floor, not a proof, and these are its limits:
+
+- **The bond is read in the same transaction as the payment.** `release` reads `healthOf` and
+  `providerOf(payee)` while it runs. A slash that lands afterwards — even later in the same block —
+  does not undo a release that already succeeded. The gate is not atomic with Makhzan's state.
+- **`minBond = 0` sees nothing after a slash.** Zero disables the check by design, so the gate pays
+  whenever the deal reads healthy. After `resolve`, `healthOf` is back to `1` and the default that just
+  happened is invisible to it: only a non-zero floor catches a bond that the slash pushed down.
+- **The payee must be the provider.** The bond is read with `providerOf(payee)` and counts only when
+  that record's provider id matches the deal's `providerId`. Lock to any other address and the bond
+  reads as `0`: with a floor above zero every release is refused `BondTooLow`, and with a floor of zero
+  that payee is simply paid. The gate cannot check a provider it is not told about.
+
 ## What it costs
 
 - **Gas**: local Foundry numbers — challenge ≈ 207k, answer ≈ 983k before the deadline (≈ 2.57M at
@@ -89,7 +123,9 @@ to `77-verify-deal2.txt`, summarised in `72-live-summary.txt`), and live block t
 - No live evidence-bundle CLI run `[pending live run]`; the bundle schema and its validator exist
   and are tested locally.
 - No randomness beacon beyond the D5 fallback (blocked on G03).
-- No front-end, agent client, indexed history or pull-payment escrow contract (Tier 2+).
+- No agent client, indexed history or pull-payment escrow contract (Tier 2+). The read-only status app
+  *is* built and live (feature 003, <https://status-ui-one.vercel.app/>): it reads the deployment and
+  falls back to the recorded run, but it is a viewer, not a client that signs or pays.
 - No continuous-storage proof, no per-deal bond, no proof that the provider holds a distinct copy of
   every block.
 - No PolkaVM deployment: the resolc probe is a Tier 0 compiler test, not a deployed Makhzan.

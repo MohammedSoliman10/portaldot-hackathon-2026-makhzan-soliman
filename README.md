@@ -231,7 +231,8 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Daemon receipt-timeout fix (T1-002) | **implemented, red then green**; hash persisted before wait, 120 s minimum, later poll labels from receipt/read-back | `61-t1002-red.txt`, `61-t1002-green.txt` |
 | Status web app (feature 003) | **merged and live**; Overview, Deals, Proof, Verify, Replay (`/replay`) and Judges read the deployment live and fall back to the recorded run | <https://status-ui-one.vercel.app/> |
 | Consumer example: `MakhzanGuard` (health + term) and `StorageGate` (lock / release / refund, optional bond floor) | implemented, local; never deployed | `contracts/src/makhzan/MakhzanGuard.sol`, `contracts/src/makhzan/StorageGate.sol`, `evidence/raw/t1/93-storage-gate-bond-suite.txt`, `94-storage-gate-size-gas.txt` |
-| Front-end, agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
+| Consumer demo: `gate-demo` (deploy, lock, release, expire, slash, `BondTooLow`, refund) and the gate's size budget | implemented, local; `2,528 B` against a `2,600 B` budget | `evidence/raw/t1/100-gate-deploy.txt`, `101-gate-demo-local.txt`, `102-size-check-gate.txt` |
+| Agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
 | Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
 | PolkaVM (`resolc`) deployment path | simulated only (compiler probe) | `evidence/raw/t1/` Tier-0 gates |
 
