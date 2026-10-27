@@ -1,0 +1,5 @@
+CounterProbe bytes=2532 sha256=1e02a9435e84df15f9a0b95650445a5e40b014c17630e6049dc592c9118840e6 magic=0x50564d00 resolc=Solidity frontend for the revive compiler version 1.4.0+commit.ca3c770.llvm-22.1.5
+BehaviorProbe bytes=8361 sha256=8d549c0228fcca4a3bde50742077ba54d58aa96e012d27abf824c0c7303a3f5e magic=0x50564d00 resolc=Solidity frontend for the revive compiler version 1.4.0+commit.ca3c770.llvm-22.1.5
+HashProbe bytes=4057 sha256=25d3813011279501a64ace97898040254b1492afeb8941f746134f93a80de60a magic=0x50564d00 resolc=Solidity frontend for the revive compiler version 1.4.0+commit.ca3c770.llvm-22.1.5
+SizeProbe bytes=742 sha256=e7127373be20fcaadfdd347c648ace8875c58e3882c18100c55f1bce9728f313 magic=0x50564d00 resolc=Solidity frontend for the revive compiler version 1.4.0+commit.ca3c770.llvm-22.1.5
+ValueEcho bytes=7686 sha256=5258ca8350ca5536785ea882a85c254566a21d1ef36586ff99ba27dbf2909cbd magic=0x50564d00 resolc=Solidity frontend for the revive compiler version 1.4.0+commit.ca3c770.llvm-22.1.5
