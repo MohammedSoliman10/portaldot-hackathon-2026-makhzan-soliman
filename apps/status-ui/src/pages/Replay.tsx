@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, type Label } from "../data/labels";
 import { replayFor, type ReplayStep } from "../data/replay";
@@ -34,7 +35,9 @@ function Step({
       <dl className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-ash">Block</dt>
-          <dd className="numeral">{formatCount(step.block)}</dd>
+          <dd className="numeral">
+            <BlockLink block={step.block} />
+          </dd>
         </div>
         <div>
           <dt className="text-ash">Transaction</dt>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { BlockLink } from "../components/BlockLink";
 import { CopyText } from "../components/CopyText";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, formatWei, type Label } from "../data/labels";
@@ -172,7 +173,7 @@ export function Receipt() {
         <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
           {hasExplorer
             ? "Each hash opens in the configured explorer."
-            : `No explorer is configured for this network, so each hash opens the evidence file that records it (${source}). The hash itself is the receipt.`}
+            : `No EVM explorer is configured for this network, so each hash opens the evidence file that records it (${source}). The hash itself is the receipt; block numbers open in the Portaldot node console.`}
         </p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full table-auto sm:table-fixed">
@@ -198,7 +199,9 @@ export function Receipt() {
                 <tr key={tx.id} data-testid={`receipt-tx-${tx.id}`}>
                   <td className="mono break-words text-xs text-ash">{tx.id}</td>
                   <td className="hidden break-words sm:table-cell">{tx.label}</td>
-                  <td className="numeral">{tx.block === null ? "not recorded" : formatCount(tx.block)}</td>
+                  <td className="numeral">
+                    <BlockLink block={tx.block} />
+                  </td>
                   <td className="mono break-all text-xs">
                     {tx.hash === null ? (
                       <span className="text-ash">no hash recorded</span>

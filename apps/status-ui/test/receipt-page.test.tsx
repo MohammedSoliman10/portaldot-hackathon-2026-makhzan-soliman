@@ -43,7 +43,7 @@ describe("the receipt page", () => {
     expect(container.textContent).toMatch(/no slash/i);
   });
 
-  it("links every hash to the evidence file and says there is no explorer", () => {
+  it("links every hash to the evidence file and says where a block does open", () => {
     const { container } = renderApp(<AppRoutes />, { route: "/receipt/2", evidence: evidenceState() });
 
     const links = [...container.querySelectorAll<HTMLAnchorElement>(
@@ -52,7 +52,8 @@ describe("the receipt page", () => {
     const link = links.find((item) => (item.textContent ?? "").includes(SLASH_TX));
     expect(link).toBeDefined();
     expect(links.length).toBeGreaterThanOrEqual(7);
-    expect(container.textContent).toMatch(/no explorer is configured/i);
+    expect(container.textContent).toMatch(/no EVM explorer is configured/i);
+    expect(container.textContent).toMatch(/block numbers open in the Portaldot node console/i);
   });
 
   it("copies a hash link that works without a server rewrite", async () => {
