@@ -1,7 +1,9 @@
 # THREAT MODEL — Makhzan
 
 Scope: the Makhzan contract (`contracts/src/makhzan/`), the CLI/daemon (`apps/makhzan/`), and the
-evidence writer. Local anvil is the reference network; live behaviour is `[pending live run]`.
+evidence writer. Local anvil is the reference network; live behaviour on Portaldot was run and is
+recorded in `evidence/raw/t1/` (`59-live-deploy.txt` .. `77-verify-deal2.txt`), so anything not
+covered there is `[pending live run]`.
 
 ## Assets
 
@@ -45,8 +47,11 @@ evidence writer. Local anvil is the reference network; live behaviour is `[pendi
 - **Evidence is REPORTED**: values come from the run's own records; only a reader that queries the
   chain may add MEASURED. `null` health means "not recorded", never healthy.
 - **Pruned receipts**: a missing raw receipt is `unavailable-pruned`, not evidence of a failed run.
-- **Live unknowns**: gas, fee, block time and finality on Portaldot are `[pending live run]`; local
-  finality is a one-confirmation heuristic, never the `finalized` tag.
+- **Live numbers**: fees and gas were measured on the live deployment
+  (`evidence/raw/t1/60-live-pass.txt`, `69-live-resolve-b.txt`, `72-live-summary.txt`) and block
+  time is 6 s over 100 blocks (`evidence/raw/g02/11-block-time.txt`), but finality is not measured:
+  local finality is a one-confirmation heuristic, never the `finalized` tag, and any other live
+  unknown stays `[pending live run]`.
 - **Operator key**: any process that reads `MAKHZAN_PRIVATE_KEY` can spend the owner's funds; the
   evidence writer never reads or copies it.
 

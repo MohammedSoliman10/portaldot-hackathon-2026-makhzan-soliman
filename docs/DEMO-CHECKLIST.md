@@ -1,6 +1,7 @@
 # DEMO CHECKLIST — Makhzan
 
-Local demo is the default. Nothing on this list claims a live run; live rows are `[pending live run]`.
+Local demo is the default. Nothing on this list claims a live run; the live run itself is already
+recorded (`evidence/raw/t1/72-live-summary.txt`), so do not re-run it on stage.
 
 ## Ten minutes before
 
@@ -25,7 +26,7 @@ Local demo is the default. Nothing on this list claims a live run; live rows are
 | slash number looks off | read the bond before/after and the owner balance delta; expect exactly 20% |
 | evidence file missing | `doctor` and re-run the producer; a missing file is a notice, not a pass |
 | RPC dies mid-demo | switch to the recorded evidence bundle and the backup recording |
-| live RPC unavailable | do not improvise a live claim; state `[pending live run]` and show local evidence |
+| live RPC unavailable | do not improvise a live claim; point at the recorded live run in `evidence/raw/t1/72-live-summary.txt` and show local evidence |
 
 ## Backup-video plan
 
@@ -39,7 +40,8 @@ Local demo is the default. Nothing on this list claims a live run; live rows are
 
 ## During the demo
 
-- [ ] Say "local only" once at the start; every live row is `[pending live run]`.
+- [ ] Say "local only" once at the start; the live run is already recorded, so quote its file rather
+      than claiming a new one.
 - [ ] Show the slash math from the command output, not from a slide.
 - [ ] Show `healthOf` values 1 → 2 → 3 → 0 at the window boundaries.
 - [ ] Show `evidence/refusals.json` (decoded errors, eth_call only).

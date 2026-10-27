@@ -1,7 +1,8 @@
 # Tier 1 explained — bonded, challenged storage
 
 **Feature**: `002-core-storage-proofs`. Plain English; no marketing claims. Every statement here is
-backed by `evidence/tier1-results.md` (local) or marked `[pending live run]`.
+backed by `evidence/tier1-results.md` (local) or by the live run in `evidence/raw/t1/`
+(`59-live-deploy.txt` to `77-verify-deal2.txt`, summarised in `72-live-summary.txt`).
 
 ## What a deal is
 
@@ -60,21 +61,33 @@ answer loses 20% of its bond, and the client can challenge as often as the windo
 ## What it costs
 
 - **Gas**: local Foundry numbers — challenge ≈ 207k, answer ≈ 983k before the deadline (≈ 2.57M at
-  the end block), resolve with a slash ≈ 323k, settle ≈ 219k–307k. These are local gas, not a live
-  fee estimate `[pending live run]`.
+  the end block), resolve with a slash ≈ 323k, settle ≈ 219k–307k. These stay the per-call
+  reference because Portaldot's `gasUsed` is reported in its own native scale and, on the
+  storage-writing transactions, carries the storage deposit inside it. The live run recorded the
+  fee actually paid instead: `createDeal` 11.557016609978156 tPOT on top of its 5 tPOT value,
+  `resolve` with a slash 0.015316960078034360 tPOT (`evidence/raw/t1/60-live-pass.txt`,
+  `69-live-resolve-b.txt`, `72-live-summary.txt`).
 - **The bond**: 10,000,000,000,000,000 units in the local run; 20% (2,000,000,000,000,000 units) is
   at risk per failed round. One bond covers all the provider's deals.
 - **The price**: 1,000,000,000,000,000 units in the local run, escrowed at creation and paid at
   settle.
-- **Units to wei**: the local run uses `WEI_PER_UNIT = 10,000` wei `[assumption]`. At 1 POT =
-  10^18 wei that prices the local deal at 10 POT and the bond at 100 POT. G05/G07 must confirm the
-  live fee schedule and the unit before any live number is quoted.
-- **Size**: the deployed contract is 6,378 bytes against a 10,240-byte budget (with `via_ir`). The
+- **Units to wei**: `WEI_PER_UNIT = 10,000`, confirmed on the live chain (G07 closed, see
+  `docs/decisions.md`), so 1 unit is 10,000 wei and 1 tPOT is 10^14 units. The local run prices its
+  deal at 10 POT and its bond at 100 POT on that basis.
+- **Size**: the deployed contract is 6,566 bytes against a 10,240-byte budget (with `via_ir`),
+  matching the on-chain `code` length read back at deploy (`evidence/raw/t1/59-live-deploy.txt`). The
   owner's planning formula put the deployment at roughly 517 tPOT, an estimate, not a measurement.
 
 ## What was not built
 
-- No live deployment, no live round, no live fee or block-time measurement. All `[pending live run]`.
+The live run exists (contract `0x60481DFcFCA34A8F095939D9675eC715127B2e44` on chain `420420777`,
+registered, challenged, answered, slashed, claimed, settled, verified; `evidence/raw/t1/59-live-deploy.txt`
+to `77-verify-deal2.txt`, summarised in `72-live-summary.txt`), and live block time is a measured
+6 s (`evidence/raw/g02/11-block-time.txt`). What is still missing:
+
+- No finality rule beyond the one-confirmation heuristic.
+- No live evidence-bundle CLI run `[pending live run]`; the bundle schema and its validator exist
+  and are tested locally.
 - No randomness beacon beyond the D5 fallback (blocked on G03).
 - No front-end, agent client, indexed history or pull-payment escrow contract (Tier 2+).
 - No continuous-storage proof, no per-deal bond, no proof that the provider holds a distinct copy of
