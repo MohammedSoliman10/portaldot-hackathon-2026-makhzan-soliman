@@ -40,7 +40,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
 
 ## Phase 5 — Docs and close-out
 
-- [ ] **T010** README "Using Makhzan from your contract": 10-line example, the honest note that
+- [x] **T010** README "Using Makhzan from your contract": 10-line example, the honest note that
       `healthOf == 1` means "no open challenge", not "the file is stored", and links to the guard.
       Run the full local gate, commit, then write `CHECKPOINT-GATE.md` to the sync folder.
 

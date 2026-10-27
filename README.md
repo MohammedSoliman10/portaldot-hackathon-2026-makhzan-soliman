@@ -230,9 +230,47 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Live retrieval from a fresh client | **implemented [live run]**; 1,024 blocks verified against the deal root, sha256 `7f2fd6d5...e21e` matches the upload, tampered copy rejected with `ProofRejected` | `75-live-retrieval.txt` |
 | Daemon receipt-timeout fix (T1-002) | **implemented, red then green**; hash persisted before wait, 120 s minimum, later poll labels from receipt/read-back | `61-t1002-red.txt`, `61-t1002-green.txt` |
 | Status web app (feature 003) | **merged and live**; Overview, Deals, Proof, Verify and Judges read the deployment live and fall back to the recorded run | <https://status-ui-one.vercel.app/> |
+| Consumer example: `MakhzanGuard` (health + term) and `StorageGate` (lock / release / refund) | implemented, local; never deployed | `contracts/src/makhzan/MakhzanGuard.sol`, `contracts/src/makhzan/StorageGate.sol`, `evidence/raw/t1/90-storage-gate-suite.txt`, `91-storage-gate-size-gas.txt` |
 | Front-end, agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
 | Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
 | PolkaVM (`resolc`) deployment path | simulated only (compiler probe) | `evidence/raw/t1/` Tier-0 gates |
+
+## Using Makhzan from your contract
+
+`healthOf` is a challenge check, not a storage proof and not an expiry check. **`healthOf == 1`
+means "no open challenge" — it does not mean "the file is stored".** It also stays `1` after the
+deal's end block and for a deal that was never challenged. A consumer that pays on `healthOf == 1`
+alone can pay for an expired deal. Add the term check, or use `MakhzanGuard`:
+
+```solidity
+import {IMakhzan} from "./IMakhzan.sol";
+import {MakhzanGuard} from "./MakhzanGuard.sol";
+
+contract PayOnServe {
+    IMakhzan public immutable makhzan;
+    constructor(IMakhzan m) { makhzan = m; }
+    function pay(uint32 dealId, address payee) external payable {
+        MakhzanGuard.requireHealthy(makhzan, dealId); // Pending / Default / SettledOrNone / Expired
+        (bool ok,) = payee.call{value: msg.value}("");
+        require(ok, "transfer failed");
+    }
+}
+```
+
+- `MakhzanGuard.isHealthy(makhzan, dealId)` is the boolean form: `healthOf == 1` **and**
+  `block.number < endBlock` (the third field of `dealOf`).
+- `MakhzanGuard.requireHealthy` reverts with `Pending()` (code 2), `Default()` (3),
+  `SettledOrNone()` (0, which covers both settled and never existed) or `Expired()` (1, but at or
+  past `endBlock`). The library is internal-only, so it adds no deployment and no address to trust.
+- `StorageGate` is the ready-made version of the same idea: one `lock(dealId, payee)` per deal,
+  payee-only `release` while healthy, payer-only `refund` on default or from `endBlock` on, state
+  written before every transfer. It has no admin, owner or upgrade path.
+- Limits: this is a local-only example, never deployed; the guard reads two views per check
+  (`healthOf`, `dealOf`), so it inherits whatever the Makhzan deployment says at that block. The
+  gate's runtime is 2,055 B, measured — over the 1,500 B target, because the inlined guard costs
+  about 285 B per entry point (`evidence/raw/t1/91-storage-gate-size-gas.txt`). Tests: 40 in the
+  guard and gate suites, including a fuzz invariant that no release happens unless `healthOf == 1`
+  and `block.number < endBlock` (`evidence/raw/t1/90-storage-gate-suite.txt`).
 
 ## Who would pay and why (hypothesis, not validated)
 
