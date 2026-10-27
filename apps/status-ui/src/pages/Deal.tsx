@@ -1,5 +1,7 @@
+import type { ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { useMode } from "../app/app-context";
+import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, type Label } from "../data/labels";
 import type { DealInfo } from "../data/schema";
@@ -31,7 +33,7 @@ function Field({
   source,
 }: {
   name: string;
-  value: string;
+  value: ReactNode;
   unit?: string;
   detail?: string;
   label: Label;
@@ -107,13 +109,13 @@ function DealCard({
         />
         <Field
           name="Start block"
-          value={formatCount(read?.startBlock ?? deal.startBlock)}
+          value={<BlockLink block={read?.startBlock ?? deal.startBlock} />}
           label={label}
           source={source}
         />
         <Field
           name="End block"
-          value={formatCount(read?.endBlock ?? deal.endBlock)}
+          value={<BlockLink block={read?.endBlock ?? deal.endBlock} />}
           label={label}
           source={source}
         />

@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import { useMode } from "../app/app-context";
+import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, formatWeiAsNative, type Label } from "../data/labels";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
@@ -39,7 +41,7 @@ function Row({
   source,
 }: {
   field: string;
-  value: string;
+  value: ReactNode;
   unit?: string;
   detail?: string;
   label: Label;
@@ -115,7 +117,7 @@ export function Overview(options: LiveOptions) {
       <Row
         key={id}
         field={field}
-        value={tx?.block === null || tx?.block === undefined ? "not recorded" : formatCount(tx.block)}
+        value={<BlockLink block={tx?.block} />}
         detail={tx?.hash ?? undefined}
         label="REPORTED"
         source={tx?.evidence ?? recordedSource}
@@ -197,7 +199,7 @@ export function Overview(options: LiveOptions) {
             <tbody>
               <Row
                 field="Block"
-                value={deployment ? formatCount(deployment.block ?? 0) : "not recorded"}
+                value={<BlockLink block={deployment?.block} />}
                 label="REPORTED"
                 source={recordedSource}
               />
