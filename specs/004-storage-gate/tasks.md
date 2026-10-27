@@ -55,7 +55,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
 - [x] **T013** README example and honest note, size and gas evidence, snapshot, full gate.
 - [x] **T014** Merge `origin/main` (`6585f04`) into the branch, then merge into `main`, run the
       full gate on `main`, push.
-- [ ] **T015** Branch `005-docs-refresh`: fix the stale live-run labels, the 6,378 B figure and the
+- [x] **T015** Branch `005-docs-refresh`: fix the stale live-run labels, the 6,378 B figure and the
       missing `/replay` route; run docs-hygiene; merge when green.
 
 ## Status vocabulary

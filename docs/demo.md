@@ -22,12 +22,12 @@ derived at run time and never printed.
 | Time | Say | Run |
 | --- | --- | --- |
 | 0:00 | "One contract, one provider, one 1 MiB file. The contract enforces the bond; the daemon does the work." | — |
-| 0:10 | "The deployed bytecode is 6,378 bytes against a 10,240-byte budget, checked from the artifact, not from a log line." | `node scripts/check-size.mjs` |
+| 0:10 | "The deployed bytecode is 6,566 bytes against a 10,240-byte budget, checked from the artifact, not from a log line." | `node scripts/check-size.mjs` |
 | 0:25 | "The suite is green: contract, fuzz, invariants, TypeScript." | `cd apps/makhzan && npm test` |
 | 0:45 | "Now the whole product path on a local chain: upload, create, challenge, answer, challenge again, skip, resolve, settle." | `node scripts/e2e-local.mjs` |
 | 1:25 | "Round one passed — the bond did not move. Round two was deliberately skipped and slashed 20%: 10,000,000,000,000,000 → 8,000,000,000,000,000 units, and the owner was credited 20 POT worth of wei. The daemon only labelled it `failed` after reading the slash back." | point at the two round objects in the JSON |
 | 1:50 | "Settle paid the provider the price, set `claimed` to the whole price, and left nothing claimable." | point at `settle` in the JSON |
-| 2:10 | "This is local evidence. Live deployment and live rounds are `[pending live run]` — the runbook is `docs/live-runbook.md`." | — |
+| 2:10 | "This is local evidence. A live deployment and live rounds are already recorded too: one contract, one challenge answered, one slashed, claim and settle, in `evidence/raw/t1/72-live-summary.txt`." | — |
 | 2:30 | Questions. | — |
 
 Expected last line:
@@ -79,11 +79,13 @@ hashes.
 | `anvil` missing | Path A needs it; install Foundry 1.8.5. Do not substitute a public RPC. |
 | Port 8549 busy | `E2E_PORT=8550 node scripts/e2e-local.mjs` (the script reads `E2E_PORT`). |
 | `check-size.mjs` says "run forge build first" | Run `cd contracts && forge build` once. |
-| Any live question | Answer with the tier-1 status: local only, `[pending live run]`, and point at `docs/live-runbook.md`. Never quote a live number. |
+| Any live question | Quote the recorded run, not a new number: contract `0x60481DFcFCA34A8F095939D9675eC715127B2e44`, chain `420420777`, fees and slash in `evidence/raw/t1/72-live-summary.txt`. Anything not in that file is `[pending live run]`. |
 
 ## What not to claim on stage
 
-- Do not say "deployed", "live", or quote a live fee, block time or address.
+- Do not claim more than the recorded live run: the deployment, the rounds, the fees and the slash
+  are in `evidence/raw/t1/72-live-summary.txt`. Do not invent a live fee, block time or address
+  that is not in that file, and do not claim finality beyond one confirmation.
 - Do not present the local gas snapshot as a live cost.
 - Do not claim continuous storage or per-deal bonds: the limits section of the README is the honest
   statement.

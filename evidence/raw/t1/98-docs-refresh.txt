@@ -1,0 +1,38 @@
+# T015 — docs refresh: stale live-run labels, size figure, /replay route
+# utc: 2026-10-27T09:58:07Z
+# branch: 005-docs-refresh at baba095
+# mode: docs only. No contract, test, script or evidence file changed.
+
+## statements changed, and the evidence that contradicts the old wording
+
+docs/EXPLAIN.md:4  'backed by tier1-results.md or [pending live run]' -> live run in evidence/raw/t1/
+docs/EXPLAIN.md:62 gas  'not a live fee estimate [pending live run]' -> live fees quoted from 60/69/72
+docs/EXPLAIN.md:69 unit 'G05/G07 must confirm ... [assumption]' -> G07 closed, factor 10,000
+docs/EXPLAIN.md:72 '6,378 bytes' -> 6,566 bytes (59-live-deploy.txt reads code 6566 B)
+docs/EXPLAIN.md:77 'No live deployment, no live round ...' -> live run exists; only finality and the
+                     live evidence-bundle CLI run stay [pending live run]
+docs/demo.md:25      '6,378 bytes' -> 6,566 bytes
+docs/demo.md:30      'Live deployment and rounds are [pending live run]' -> 72-live-summary.txt
+docs/demo.md:82      'local only, [pending live run], never quote a live number' -> quote the recorded run
+docs/demo.md:86      'Do not say deployed, live, or quote a live fee ...' -> do not go beyond the record
+docs/DEMO-CHECKLIST.md:3   'live rows are [pending live run]' -> live run is recorded
+docs/DEMO-CHECKLIST.md:29  '[pending live run]' on live-RPC failure -> point at 72-live-summary.txt
+docs/DEMO-CHECKLIST.md:43  'every live row is [pending live run]' -> same
+docs/THREAT_MODEL.md:4     'live behaviour is [pending live run]' -> live behaviour is recorded
+docs/THREAT_MODEL.md:48    'gas, fee, block time and finality [pending live run]' -> fees/gas measured live,
+                            block time 6 s (g02/11-block-time.txt), finality still unmeasured
+README.md:232          status-web row now names the /replay route (apps/status-ui/src/app/routes.tsx)
+
+## deliberately not changed
+
+docs/decisions.md, docs/lean-build.md and evidence/tier1-results.md still say 6,378 B and still list
+the live run as pending. Those are dated records of the batch that measured 6,378 B, not claims about
+the current contract; rewriting them would falsify the record. evidence/tier1-results.md is evidence.
+
+## gate
+
+$ bash /tmp/opencode/gate.sh
+Ran 31 test suites in 4.01s (13.45s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+Ran 31 test suites in 3.15s (9.44s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+docs hygiene: 100 facts in README.md, docs/CHECKIN.md all match evidence/
+GATE RESULT: PASS
