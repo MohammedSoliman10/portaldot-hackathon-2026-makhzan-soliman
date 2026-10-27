@@ -1,0 +1,48 @@
+# T009 — StorageGate runtime size and gas table
+# utc: 2026-10-27T09:36:57Z
+# branch: 004-storage-gate at 7349bea
+
+$ forge build --sizes
+| Contract          | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
+| Makhzan           | 6,566            | 7,154             | 18,010             | 41,998              |
+| StorageGate       | 2,055            | 2,209             | 22,521             | 46,943              |
+
+target: StorageGate runtime under 1,500 B (spec FR-007, 'if possible').
+measured: 2,055 B runtime, 2,209 B initcode -> 555 B over the target.
+
+where the bytes go (each variant built with the same foundry flags, then reverted):
+  3 entry points, no guard calls, no events                                 1,201 B
+  + the inlined guard (healthOf + dealOf at every call site)                2,055 B
+    => the guard costs 854 B, about 285 B per inlined copy.
+  no events, one NotHealthy() error instead of the four named guard errors  1,861 B
+    => even the stripped floor is over 1,500 B.
+
+why it is left at 2,055 B: the only way below 1,500 B is to stop inlining the guard
+(a linked external library, which adds a second deployment and a trust address) or to
+collapse the three entry points. Neither is worth it for a showcase whose point is the
+named refusal and a reusable internal library. Reported, not hidden.
+
+## gas (forge test --gas-report over the gate suites)
+note: the report below prints 'Deployment Cost 0'; contracts/foundry.toml does not price
+the test-time deploy. Use forge build --sizes for size (2,055 / 2,209 B) and the function
+rows here for call gas.
+
+$ forge test --gas-report --match-path "test/makhzan/StorageGate*.t.sol"
+| src/makhzan/StorageGate.sol:StorageGate Contract |                 |       |        |       |         |
++=======================================================================================================+
+| Deployment Cost                                  | Deployment Size |       |        |       |         |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                0 |            2241 |       |        |       |         |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                  |                 |       |        |       |         |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                                    | Min             | Avg   | Median | Max   | # Calls |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| lock                                             |           21711 | 67969 |  80965 | 81181 |      32 |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| lockOf                                           |            4597 |  4597 |   4597 |  4597 |     515 |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| refund                                           |           23686 | 38910 |  38010 | 49710 |     446 |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| release                                          |           23727 | 37304 |  33965 | 49749 |     432 |
+╰--------------------------------------------------+-----------------+-------+--------+-------+---------╯

@@ -1,0 +1,64 @@
+# T013 — StorageGate size and gas after the bond floor
+# utc: 2026-10-27T09:52:00Z
+# branch: 004-storage-gate at d9cf1ad
+# mode: local Foundry only. No RPC, no key, no deploy.
+
+$ forge build --sizes
+| Contract          | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
+| Makhzan           | 6,566            | 7,154             | 18,010             | 41,998              |
+| StorageGate       | 2,528            | 2,682             | 22,048             | 46,470              |
+
+target: StorageGate runtime under 1,500 B (spec FR-007, 'if possible').
+stop condition set for this round: 2,600 B runtime.
+measured: 2,528 B runtime, 2,682 B initcode -> 473 B over the previous 2,055 B, 72 B under the stop.
+Makhzan is unchanged at 6,566 B (unmodified by this feature).
+
+where the 473 B went:
+  + lock now takes and stores minBond (uint64 packed into slot 1 of Lock, no new slot) and a
+    docs-visible @param; the struct zero-init is unchanged in shape.
+  + release gained a floor check that calls dealOf and providerOf before paying.
+  + one new custom error (BondTooLow).
+first build with the floor: 2,616 B, i.e. 16 B over the stop. The redundant `registered` bool in
+the payee check was dropped (an unregistered payee has id 0 and a real deal's providerId is never
+0), which is a bytecode tightening, not a removed feature: 2,616 -> 2,528 B.
+
+## gas (forge test --gas-report over the gate suites)
+note: the report below prints 'Deployment Cost 0'; contracts/foundry.toml does not price the
+test-time deploy. Use forge build --sizes for size (2,528 / 2,682 B) and the function rows here
+for call gas.
+
+$ forge test --gas-report --match-path "test/makhzan/StorageGate*.t.sol"
+| src/makhzan/StorageGate.sol:StorageGate Contract |                 |       |        |       |         |
++=======================================================================================================+
+| Deployment Cost                                  | Deployment Size |       |        |       |         |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                0 |            2714 |       |        |       |         |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                  |                 |       |        |       |         |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                                    | Min             | Avg   | Median | Max   | # Calls |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| lock                                             |           21850 | 71161 |  81331 | 81547 |      41 |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| lockOf                                           |            4639 |  4639 |   4639 |  4639 |     517 |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| refund                                           |           23708 | 38873 |  38183 | 52195 |     449 |
+|--------------------------------------------------+-----------------+-------+--------+-------+---------|
+| release                                          |           23733 | 37462 |  33965 | 60243 |     462 |
+╰--------------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+how to read the release row, measured not estimated: most of the 462 calls run with minBond == 0,
+so the median stays at 33,965, the same as the pre-floor run (evidence 91-storage-gate-size-gas.txt).
+The calls that do read the floor are what raise the max from 49,749 to 60,243: the release path
+now makes two extra external view calls (dealOf for the providerId, providerOf for the current
+bond) before it pays. The min (23,733) is a refusal that never reaches the bond read.
+
+## suite size
+
+$ forge test --match-path "test/makhzan/StorageGate*.t.sol"
+Ran 5 test suites in 225.01ms (895.12ms CPU time): 41 tests passed, 0 failed, 0 skipped (41 total tests)
+
+$ forge snapshot
+Ran 31 test suites in 3.30s (7.98s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+
+208 Forge tests total: 197 from the earlier rounds, +2 AfterSlash (T011), +9 StorageGateBond (T012).
