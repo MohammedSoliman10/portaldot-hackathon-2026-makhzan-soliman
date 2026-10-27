@@ -1,0 +1,35 @@
+# status-ui verify test timeout — observed once in a full-gate run on main 6f2835e
+# utc: 2026-10-27T12:17:03Z
+# what happened: the full gate failed at "status-ui tests". One test timed out waiting 1 s for
+# [data-testid="verify-result"] while hashing a 1 MiB sample in jsdom under gate load.
+# The same test passed in the branch gate minutes earlier and in the two runs below.
+# Known flake, not a product defect; recorded here rather than hidden.
+
+== failing excerpt from the full gate (main, 6f2835e) ==
+ ❯ test/verify.test.tsx (6 tests | 1 failed) 3821ms
+     × hashes the sample and passes against the root read live from deal 2 1700ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/verify.test.tsx > Verify, the sample file > hashes the sample and passes against the root read live from deal 2
+TestingLibraryElementError: Unable to find an element by: [data-testid="verify-result"]
+ ❯ test/verify.test.tsx:87:11
+     85|
+     86|     getByRole("button", { name: /use the sample file/i }).click();
+     87|     await findByTestId("verify-result");
+       |           ^
+
+== status-ui npm test, run immediately after the failure ==
+
+> status-ui@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/status-ui
+
+
+ Test Files  28 passed (28)
+      Tests  222 passed (222)
+   Start at  15:17:03
+   Duration  4.15s (transform 2.90s, setup 4.79s, import 10.25s, tests 12.15s, environment 19.76s)
+
