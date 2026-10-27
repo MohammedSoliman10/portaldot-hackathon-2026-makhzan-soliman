@@ -1,0 +1,105 @@
+# T017 — the gate-demo: local anvil run plus the live-mode refusals
+# utc: 2026-10-27T11:29:57Z
+# branch: 005-docs-refresh at 5f16f8f + T017 working tree
+# mode: LOCAL anvil only (chain id 420420777). No live RPC, no funded key, no deploy to Portaldot.
+# keys: anvil's documented default mnemonic; derived into env vars inside the runner, never printed,
+#       never on the demo's argv, never in a record or marker.
+# script: /tmp/opencode/gate-demo-evidence.sh
+
+# what to look for
+#  - step 4/5: lock deal A with a 900e12-unit floor, release while healthOf == 1, provider paid
+#  - step 6/7: challenge, nobody answers, mine past the deadline, resolve slashes 20% of the bond
+#  - step 7 also shows the honest limit: healthOf reads 1 again after resolve, so a same-block
+#    consumer sees only the bond floor, not the default that just happened
+#  - step 9: release refused with BondTooLow (bond 8e14 < floor 9e14)
+#  - step 10/11: refund refused with RefundNotAllowed inside the term, then paid at the end block
+#  - section 3/4: live mode refuses without --live and without a dry run of the same plan
+#  - section 5: the live dry run leaves a marker and sends nothing (nonce unchanged)
+
+== 1. local demo (deploy, lock, release, expire, slash, BondTooLow, refund) ==
+== 1. deploy Makhzan and the gate (local) ==
+estimated deploy cost 0.003008 tPOT; owner balance 10000.000000 tPOT; reserve 100 tPOT
+sending deploy tx (nonce 0); pending record /tmp/opencode/gate-demo-run/records/pending-makhzan.json
+tx sent 0x191cfaaf10d0c7288103fba79d80575b5f281424822070f4b2014a4f14b61be9 (nonce 0); pending record /tmp/opencode/gate-demo-run/records/pending-makhzan.json
+deployed 0x5FbDB2315678afecb367f032d93F642f64180aa3 [local run] tx 0x191cfaaf10d0c7288103fba79d80575b5f281424822070f4b2014a4f14b61be9 block 1
+code 6566 B, codeHash 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98, config read back
+record /tmp/opencode/gate-demo-run/records/makhzan-deployment.json
+gate deploy: makhzan 0x5FbDB2315678afecb367f032d93F642f64180aa3
+estimated deploy cost 0.001133 tPOT; owner balance 9999.996991 tPOT; reserve 100 tPOT
+sending deploy tx (nonce 1); pending record /tmp/opencode/gate-demo-run/records/pending-gate.json
+tx sent 0xeb08b98fed479cfcbf07ec3427db595fc5e3ce0c62313fcef3d1673a1b3040cc (nonce 1); pending record /tmp/opencode/gate-demo-run/records/pending-gate.json
+deployed 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 [local run] tx 0xeb08b98fed479cfcbf07ec3427db595fc5e3ce0c62313fcef3d1673a1b3040cc block 2
+code 2528 B, codeHash 0x4da2309fc607b580c8f6f3fce60055a4ab405ef7ffb3d683579f4273eaa90e62, config read back
+record /tmp/opencode/gate-demo-run/records/gate-deployment.json
+makhzan 0x5FbDB2315678afecb367f032d93F642f64180aa3
+gate 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+== 2. provider ==
+registered provider 0x70997970C51812dc3A010C7d01b50e0d17dc79C8: id 1, bond 1000000000000000 units
+== 3. create deal A and deal B ==
+deal A = #1, end block 84, price 500000000000000 units, tx 0x2daa91f491c92656d639075fbb68c0683d1580b5cd31901365a2d62dd58ddc3e
+deal B = #2, end block 85, price 500000000000000 units, tx 0x2e83a23afab8714ffa16ebb97624d3a3ecc7790263eded948083d200af642fdf
+== 4. lock deal A with a bond floor ==
+balances: payer 9989.995509 tPOT | provider 9989.999827 tPOT | gate 0.000000 tPOT | bond 1000000000000000 units
+locked 1.000000 tPOT on deal A, payee 0x70997970C51812dc3A010C7d01b50e0d17dc79C8, minBond 900000000000000 units, status 1
+balances: payer 9988.995384 tPOT | provider 9989.999827 tPOT | gate 1.000000 tPOT | bond 1000000000000000 units
+== 5. release deal A while healthy ==
+healthOf(1) = 1 (1 = no open challenge)
+release 1: paid the provider, no revert
+balances: payer 9988.995384 tPOT | provider 9990.999740 tPOT | gate 0.000000 tPOT | bond 1000000000000000 units
+== 6. challenge deal A and let it expire ==
+challenge open on index 756, deadline block 18; nobody answers
+mined 12 blocks to 19
+healthOf(1) = 3 past the deadline (3 = default, unresolved)
+== 7. resolve: the slash ==
+slash 200000000000000 units: bond 1000000000000000 -> 800000000000000
+healthOf(1) = 1 after resolve: the health check can no longer see the default
+balances: payer 9990.995333 tPOT | provider 9990.999740 tPOT | gate 0.000000 tPOT | bond 800000000000000 units
+== 8. lock deal B with the same bond floor ==
+locked 1.000000 tPOT on deal B; healthOf is 1, so the lock passes
+== 9. release deal B is refused: the bond is under the floor ==
+release 2 would revert BondTooLow (bond 800000000000000 < floor 900000000000000)
+balances: payer 9989.995247 tPOT | provider 9990.999740 tPOT | gate 1.000000 tPOT | bond 800000000000000 units
+== 10. refund deal B is refused inside the term ==
+refund 2 would revert RefundNotAllowed (healthOf 1, block below the end block)
+== 11. at the end block the payer refunds ==
+mined 64 blocks to 85
+refund 2: payer made whole, gate balance 0.000000 tPOT
+balances: payer 9990.995197 tPOT | provider 9990.999740 tPOT | gate 0.000000 tPOT | bond 800000000000000 units
+== summary ==
+deal A: lock -> release while healthy (paid), then the provider was slashed 200000000000000 units
+deal B: lock -> release refused BondTooLow -> refund refused in term -> refunded at the end block
+accounted for this run (gas excluded): provider +1.000000 tPOT from deal A, payer -9.000000 tPOT (one deal paid, one refunded, two prices, slash back)
+gate balance at the end: 0.000000 tPOT
+demo exit=0
+records: makhzan 0x5FbDB2315678afecb367f032d93F642f64180aa3 gate 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+
+== 2. a local dry run plans the steps and sends nothing ==
+dry run: chain 420420777, block 87, local
+plan: lock 1.000000 tPOT with minBond 900000000000000 units, price 500000000000000 units, duration 80 blocks, window 10
+plan: release while healthy -> challenge -> wait -> resolve (slash) -> lock again -> release (expect BondTooLow) -> refund (expect RefundNotAllowed in term, then paid at the end block)
+dry run: no transaction sent
+dry-run exit=0
+
+== 3. live mode refuses without --live, even with a live env ==
+gate-demo refused: MAKHZAN_NETWORK=live needs the explicit --live flag
+exit=1 (expected 1)
+
+== 4. --live without a dry run of the same plan is refused ==
+gate-demo refused: a live run needs --dry-run first: run the same command with --dry-run (/tmp/opencode/gate-demo-run/markers/dry-run-live-420420777.json)
+exit=1 (expected 1)
+
+== 5. the live dry run reads the chain, writes the marker, sends nothing ==
+dry run: chain 420420777, block 87, LIVE
+plan: lock 1.000000 tPOT with minBond 900000000000000 units, price 500000000000000 units, duration 80 blocks, window 10
+plan: release while healthy -> challenge -> wait -> resolve (slash) -> lock again -> release (expect BondTooLow) -> refund (expect RefundNotAllowed in term, then paid at the end block)
+makhzan 0x5FbDB2315678afecb367f032d93F642f64180aa3: code 6566 B
+gate 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512: code 2528 B
+dry-run marker written to /tmp/opencode/gate-demo-run/markers/dry-run-live-420420777.json
+dry run: no transaction sent
+exit=0 (expected 0)
+provider nonce before/after the dry run: 2 / 2
+marker file:
+dry-run-live-420420777.json
+
+RESULT: local demo ran the full flow; live mode refused without --live and without a dry run;
+        the live dry run sent no transaction.

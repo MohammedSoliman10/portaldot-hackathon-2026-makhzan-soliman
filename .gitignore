@@ -26,6 +26,8 @@ __pycache__/
 
 # Evidence scratch
 evidence/rpc-log/*.tmp
+# gate-demo dry-run markers: per-machine consent records, not evidence
+evidence/gate-demo/
 
 # OS / editor
 .DS_Store
