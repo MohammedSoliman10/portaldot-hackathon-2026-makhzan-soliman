@@ -1,0 +1,51 @@
+# T016 — scripted local deploy of StorageGate, reusing the deploy tooling and its pending record
+# utc: 2026-10-27T11:23:11Z
+# branch: 005-docs-refresh at 82195d4 (working tree)
+# mode: LOCAL anvil only (chain id 420420777). No live RPC, no funded key, no deploy to Portaldot.
+# keys: anvil's documented default mnemonic, derived into an env var; never printed, never on argv.
+# escript: /tmp/opencode/gate-deploy-evidence.sh (anvil -> deploy Makhzan -> deploy-gate -> read-only read-back)
+
+# what to look for
+#  - deploy-gate.mjs defaults to --contract gate and the StorageGate artifact
+#  - it writes pending-gate-local-420420777.json before sending, and removes it on success
+#  - the record has contract=gate, no Makhzan constructor block, and gate.makhzan read back
+#  - code 2528 B and codeHash match the artifact's deployedBytecode length
+
+== deploy Makhzan (local) ==
+estimated deploy cost 0.003008 tPOT; owner balance 10000.000000 tPOT; reserve 100 tPOT
+sending deploy tx (nonce 0); pending record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/pending-local-420420777.json
+tx sent 0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2 (nonce 0); pending record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/pending-local-420420777.json
+deployed 0x5FbDB2315678afecb367f032d93F642f64180aa3 [local run] tx 0xc64eb00add8705bfc73238fef584584b3e9938796c2bfc518cacacd6f1fb66f2 block 1
+code 6566 B, codeHash 0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98, config read back
+record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/local-420420777-20261027-112257Z.json
+makhzan record -> 0x5FbDB2315678afecb367f032d93F642f64180aa3
+
+== deploy-gate.mjs --dry-run ==
+gate deploy: makhzan 0x5FbDB2315678afecb367f032d93F642f64180aa3
+calibration: measured ratio 0.984608251872 (source: /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/calibration.json)
+estimated deploy cost 0.001133 tPOT; owner balance 9999.996991 tPOT; reserve 100 tPOT
+dry run: no transaction sent
+
+== deploy-gate.mjs (local) ==
+gate deploy: makhzan 0x5FbDB2315678afecb367f032d93F642f64180aa3
+estimated deploy cost 0.001133 tPOT; owner balance 9999.996991 tPOT; reserve 100 tPOT
+sending deploy tx (nonce 1); pending record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/pending-gate-local-420420777.json
+tx sent 0x49d0a94308dc4d271a427eef73cfbd805f335d3197db7820c8f52102506fc4c6 (nonce 1); pending record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/pending-gate-local-420420777.json
+deployed 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 [local run] tx 0x49d0a94308dc4d271a427eef73cfbd805f335d3197db7820c8f52102506fc4c6 block 2
+code 2528 B, codeHash 0x4da2309fc607b580c8f6f3fce60055a4ab405ef7ffb3d683579f4273eaa90e62, config read back
+record /home/mohammed_soliman/hackathons/portaldot-tier1/evidence/deployments/gate-local-420420777-20261027-112302Z.json
+gate record -> evidence/deployments/gate-local-420420777-20261027-112302Z.json
+gate address -> 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+
+== read-only read-back: code length, code hash, makhzan() ==
+gate code 2528 B, codeHash 0x4da2309fc607b580c8f6f3fce60055a4ab405ef7ffb3d683579f4273eaa90e62
+artifact runtime 2528 B
+makhzan() -> 0x5FbDB2315678afecb367f032d93F642f64180aa3
+matches the deploy argument: true
+
+== note: verify-deployment.mjs refuses this artifact on purpose ==
+MISMATCH: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 block 2, 2528 B runtime, artifact 2528 B
+refused: runtime code differs at byte 191: chain 5f artifact 00
+record /tmp/opencode/gate-deploy-evidence/verify-deployment.json
+
+RESULT: gate deployed locally, makhzan() read back, code length and hash recorded

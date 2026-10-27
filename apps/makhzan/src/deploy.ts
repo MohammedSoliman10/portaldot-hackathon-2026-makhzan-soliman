@@ -33,6 +33,10 @@ export const RECEIPT_ATTEMPTS = 5;
 
 const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const DEFAULT_ARTIFACT = "contracts/out/Makhzan.sol/Makhzan.json";
+const GATE_ARTIFACT = "contracts/out/StorageGate.sol/StorageGate.json";
+
+/** Which contract this run deploys. The gate takes one constructor argument: the Makhzan address. */
+export type DeployContract = "makhzan" | "gate";
 
 export class DeployError extends Error {
   constructor(message: string) {
@@ -49,6 +53,9 @@ export interface DeploySettings {
 }
 
 export interface DeployArgs {
+  contract: DeployContract;
+  /** The Makhzan address the gate points at. Required for `gate`, refused for `makhzan`. */
+  makhzan?: Hex;
   dryRun: boolean;
   resume?: Hex;
   forceNew: boolean;
@@ -74,6 +81,8 @@ export interface DeployDeps {
   receipt(hash: Hex): Promise<{ status: "success" | "reverted"; contractAddress?: Hex | null; blockNumber: bigint }>;
   code(address: Hex): Promise<Hex | undefined>;
   peek(address: Hex): Promise<Hex[]>;
+  /** `makhzan()` read-back for a gate deploy; unused by the Makhzan path. */
+  makhzanOf?(address: Hex): Promise<Hex>;
   /** Optional raw transaction fetch so the evidence receipt keeps the full request. */
   transaction?(hash: Hex): Promise<unknown>;
   sleep(ms: number): Promise<void>;
@@ -90,6 +99,7 @@ export interface DeployRuntime {
 }
 
 export interface DeploymentRecord {
+  contract: DeployContract;
   network: "local" | "live";
   evidenceLabel: "[local run]" | "[live run]";
   chainId: number;
@@ -101,7 +111,8 @@ export interface DeploymentRecord {
   codeHash: string;
   runtimeBytes: number;
   artifact: string;
-  constructor: {
+  /** Makhzan only: the constructor configuration, read back from slot 0. */
+  constructor?: {
     challengeWindowBlocks: number;
     challengeBlockSize: number;
     slashBps: number;
@@ -110,6 +121,8 @@ export interface DeploymentRecord {
     minDurationBlocks: number;
     maxDurationBlocks: number;
   };
+  /** Gate only: the Makhzan address, read back from `makhzan()`. */
+  gate?: { makhzan: string };
   estimatedCostTpot: string;
   utc: string;
 }
@@ -182,10 +195,38 @@ export function parseDeployArgs(argv: string[], env: NodeJS.ProcessEnv = process
     "--max-duration",
     "--reserve-tpot",
     "--resume",
+    "--contract",
+    "--makhzan",
   ]);
   for (const key of options.keys()) {
     if (!known.has(key)) throw new DeployError(`unknown option ${key}`);
   }
+  const contractText = options.get("--contract") ?? "makhzan";
+  if (contractText !== "makhzan" && contractText !== "gate") {
+    throw new DeployError(`--contract must be "makhzan" or "gate" (got ${JSON.stringify(contractText)})`);
+  }
+  const contract = contractText as DeployContract;
+  const makhzanText = options.get("--makhzan");
+  if (contract === "gate") {
+    if (!makhzanText) throw new DeployError("--contract gate needs --makhzan <address>");
+    if (!/^0x[0-9a-fA-F]{40}$/.test(makhzanText)) {
+      throw new DeployError("--makhzan must be a 40 hex character address");
+    }
+    const makhzanOnly = [
+      "--min-bond",
+      "--window",
+      "--block-size",
+      "--slash-bps",
+      "--min-duration",
+      "--max-duration",
+    ];
+    for (const flag of makhzanOnly) {
+      if (options.has(flag)) throw new DeployError(`${flag} is not a gate option (the gate has no constructor config)`);
+    }
+  } else if (makhzanText !== undefined) {
+    throw new DeployError("--makhzan only applies to --contract gate");
+  }
+  const makhzan = makhzanText as Hex | undefined;
   const minBondWei = bigint(options.get("--min-bond") ?? DEFAULT_MIN_BOND_WEI.toString(), "--min-bond");
   if (minBondWei <= 0n) throw new DeployError("--min-bond must be positive");
   if (minBondWei % WEI_PER_UNIT !== 0n) {
@@ -211,10 +252,12 @@ export function parseDeployArgs(argv: string[], env: NodeJS.ProcessEnv = process
     throw new DeployError("--resume must be a 32-byte transaction hash");
   }
   return {
+    contract,
+    makhzan,
     dryRun,
     resume: resume as Hex | undefined,
     forceNew,
-    artifact: options.get("--artifact") ?? DEFAULT_ARTIFACT,
+    artifact: options.get("--artifact") ?? (contract === "gate" ? GATE_ARTIFACT : DEFAULT_ARTIFACT),
     out: options.get("--out"),
     minBondWei,
     challengeWindow,
@@ -337,6 +380,30 @@ export interface RunResult {
   estimateTpot?: string;
 }
 
+/** UTC stamp in the deploy's record format (seconds, no milliseconds). */
+export function utcStamp(date: Date = new Date()): string {
+  return date.toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+/**
+ * The two paths a deploy touches: the pending record it writes before sending, and the record it
+ * writes on success. The gate gets its own names so a Makhzan pending record never blocks it (and
+ * a gate record never overwrites a Makhzan one).
+ */
+export function deployPaths(
+  args: DeployArgs,
+  network: "local" | "live",
+  chainId: number,
+  utc: string = utcStamp(),
+): { pending: string; out: string } {
+  const prefix = args.contract === "gate" ? "gate-" : "";
+  const stamp = utc.replace(/[-:]/g, "").replace("T", "-");
+  return {
+    pending: repoPath(`evidence/deployments/pending-${prefix}${network}-${chainId}.json`),
+    out: repoPath(args.out ?? `evidence/deployments/${prefix}${network}-${chainId}-${stamp}.json`),
+  };
+}
+
 /** Runs a deploy (or a dry run) and returns what it did. Throws DeployError on refusal. */
 export async function runDeploy(
   args: DeployArgs,
@@ -351,13 +418,14 @@ export async function runDeploy(
   const account = privateKeyToAccount(settings.privateKey);
   const deps = runtime.deps ?? makeDeps(settings, account, artifact.abi);
   const pendingFile =
-    runtime.pendingFile ?? repoPath(`evidence/deployments/pending-${settings.network}-${settings.chainId}.json`);
+    runtime.pendingFile ?? deployPaths(args, settings.network, settings.chainId).pending;
 
   const observedChain = await deps.chainId();
   if (observedChain !== settings.chainId) {
     throw new DeployError(`refusing: the RPC is chain ${observedChain}, settings say ${settings.chainId}`);
   }
   const deployData = encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode, args: argsTuple(args) });
+  if (args.contract === "gate") log(`gate deploy: makhzan ${getAddress(args.makhzan!)}`);
 
   if (args.dryRun) {
     log(calibrationLine(runtime.calibrationFile));
@@ -449,21 +517,42 @@ export async function runDeploy(
       `refusing: deployed code is ${runtimeBytes} B, artifact says ${artifact.runtimeBytes} B`,
     );
   }
-  const peeked = await deps.peek(address);
-  const config = decodeConfig(peeked[0]);
-  const mismatches: string[] = [];
-  if (config.challengeWindow !== args.challengeWindow) mismatches.push("challengeWindow");
-  if (config.challengeBlockSize !== args.challengeBlockSize) mismatches.push("challengeBlockSize");
-  if (config.slashBps !== args.slashBps) mismatches.push("slashBps");
-  if (config.minBond !== args.minBondWei / WEI_PER_UNIT) mismatches.push("minBond");
-  if (config.minDurationBlocks !== args.minDurationBlocks) mismatches.push("minDurationBlocks");
-  if (config.maxDurationBlocks !== args.maxDurationBlocks) mismatches.push("maxDurationBlocks");
-  if (mismatches.length > 0) {
-    throw new DeployError(`refusing: config read-back differs on ${mismatches.join(", ")}`);
+  let constructor: DeploymentRecord["constructor"];
+  if (args.contract === "gate") {
+    if (!deps.makhzanOf) throw new DeployError("refusing: the deploy deps cannot read makhzan()");
+    const pointedAt = await deps.makhzanOf(address);
+    if (getAddress(pointedAt) !== getAddress(args.makhzan!)) {
+      throw new DeployError(
+        `refusing: read-back differs: makhzan is ${getAddress(pointedAt)}, asked for ${getAddress(args.makhzan!)}`,
+      );
+    }
+  } else {
+    const peeked = await deps.peek(address);
+    const config = decodeConfig(peeked[0]);
+    const mismatches: string[] = [];
+    if (config.challengeWindow !== args.challengeWindow) mismatches.push("challengeWindow");
+    if (config.challengeBlockSize !== args.challengeBlockSize) mismatches.push("challengeBlockSize");
+    if (config.slashBps !== args.slashBps) mismatches.push("slashBps");
+    if (config.minBond !== args.minBondWei / WEI_PER_UNIT) mismatches.push("minBond");
+    if (config.minDurationBlocks !== args.minDurationBlocks) mismatches.push("minDurationBlocks");
+    if (config.maxDurationBlocks !== args.maxDurationBlocks) mismatches.push("maxDurationBlocks");
+    if (mismatches.length > 0) {
+      throw new DeployError(`refusing: config read-back differs on ${mismatches.join(", ")}`);
+    }
+    constructor = {
+      challengeWindowBlocks: args.challengeWindow,
+      challengeBlockSize: args.challengeBlockSize,
+      slashBps: args.slashBps,
+      minBondUnits: (args.minBondWei / WEI_PER_UNIT).toString(),
+      minBondWei: args.minBondWei.toString(),
+      minDurationBlocks: args.minDurationBlocks,
+      maxDurationBlocks: args.maxDurationBlocks,
+    };
   }
 
-  const utc = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const utc = utcStamp();
   const record: DeploymentRecord = {
+    contract: args.contract,
     network: settings.network,
     evidenceLabel: settings.network === "local" ? "[local run]" : "[live run]",
     chainId: settings.chainId,
@@ -475,20 +564,12 @@ export async function runDeploy(
     codeHash: keccak256(code),
     runtimeBytes,
     artifact: repoPath(args.artifact),
-    constructor: {
-      challengeWindowBlocks: args.challengeWindow,
-      challengeBlockSize: args.challengeBlockSize,
-      slashBps: args.slashBps,
-      minBondUnits: (args.minBondWei / WEI_PER_UNIT).toString(),
-      minBondWei: args.minBondWei.toString(),
-      minDurationBlocks: args.minDurationBlocks,
-      maxDurationBlocks: args.maxDurationBlocks,
-    },
+    ...(constructor ? { constructor } : {}),
+    ...(args.contract === "gate" ? { gate: { makhzan: getAddress(args.makhzan!) } } : {}),
     estimatedCostTpot: estimateTpot,
     utc,
   };
-  const stamp = utc.replace(/[-:]/g, "").replace("T", "-");
-  const out = repoPath(args.out ?? `evidence/deployments/${settings.network}-${settings.chainId}-${stamp}.json`);
+  const out = deployPaths(args, settings.network, settings.chainId, utc).out;
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`, "utf8");
   if (runtime.evidenceDir) {
@@ -573,11 +654,14 @@ function makeDeps(
         functionName: "peek",
         args: [[SLOT0]],
       })) as unknown as Hex[],
+    makhzanOf: async (address) =>
+      (await publicClient.readContract({ address, abi, functionName: "makhzan" })) as Hex,
     sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   };
 }
 
-function argsTuple(args: DeployArgs): readonly [number, number, number, bigint, number, number] {
+function argsTuple(args: DeployArgs): readonly unknown[] {
+  if (args.contract === "gate") return [args.makhzan!];
   return [
     args.challengeWindow,
     args.challengeBlockSize,
