@@ -9,7 +9,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const DOC_FILES = ["README.md", "docs/CHECKIN.md"];
+export const DOC_FILES = ["README.md", "docs/CHECKIN.md", "docs/BUSINESS.md"];
 export const EVIDENCE_DIR = "evidence";
 
 const EVIDENCE_EXTENSIONS = new Set([".json", ".txt", ".md", ".log"]);

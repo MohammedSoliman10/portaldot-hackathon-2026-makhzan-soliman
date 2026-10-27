@@ -1,0 +1,23 @@
+# BUSINESS arithmetic — the derived figures in docs/BUSINESS.md, recomputed from measured inputs
+# utc: 2026-10-27T14:41:48Z
+# commands: REPRODUCE.md sections 7 and 8 (verbatim, no network, no key)
+# label: DERIVED — every input below is a measured fee from evidence/raw/t1/
+
+== REPRODUCE.md section 7 ==
+create/price    2.3114
+round cost      0.030630370989014361
+22 answers      3.584145274437585000 71.68% of price
+per file     1 11.557016609978157500
+per file   100 0.115570166099781575
+per file 10000 0.001155701660997816
+register covered after 65 deals
+margin at 5 tPOT 96.4%
+
+== REPRODUCE.md section 8 ==
+n(50%)=7 n(90%)=22 n(99%)=44
+rounds per day = 288
+rounds in a 300-block deal = 6
+22 rounds = 1.83 h
+caught in 6 rounds = 46.9%
+bond after 1 and 3 catches = 24.000 / 15.360
+bond deterrence at q=1: 0.2 * 30 = 6.000 tPOT

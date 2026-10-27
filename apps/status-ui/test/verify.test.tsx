@@ -17,6 +17,14 @@ const DEAL_ROOT = "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113
 const SAMPLE_SHA256 = "0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e";
 const SAMPLE = new Uint8Array(readFileSync(join(process.cwd(), "public/samples/demo-1mib.bin")));
 
+/**
+ * Hashing 1 MiB is real work — 1,024 keccak leaves plus ten tree levels, and most tests hash the
+ * sample more than once. One full-gate run on a loaded machine took longer than the 1 s default
+ * `findBy*` wait and failed a test whose assertions were all correct. This is only a longer wait:
+ * every expectation below is unchanged, and a hashing bug still fails on the assertion.
+ */
+const HASH_WAIT = { timeout: 10_000 };
+
 const evidence = (): EvidenceBundle => run2 as unknown as EvidenceBundle;
 const evidenceState = () => ({ bundle: evidence(), verified: true, error: null, loading: false });
 const liveMode = () =>
@@ -84,7 +92,7 @@ describe("Verify, the sample file", () => {
     );
 
     getByRole("button", { name: /use the sample file/i }).click();
-    await findByTestId("verify-result");
+    await findByTestId("verify-result", {}, HASH_WAIT);
 
     const text = container.textContent ?? "";
     expect(container.querySelector("[data-testid='verify-verdict']")?.textContent).toMatch(/PASS/);
@@ -102,10 +110,10 @@ describe("Verify, the sample file", () => {
     );
 
     getByRole("button", { name: /use the sample file/i }).click();
-    await findByTestId("verify-result");
+    await findByTestId("verify-result", {}, HASH_WAIT);
 
     getByRole("button", { name: /flip one byte/i }).click();
-    await findByTestId("tamper-result");
+    await findByTestId("tamper-result", {}, HASH_WAIT);
 
     const text = container.textContent ?? "";
     expect(text).toMatch(/tampered/i);
@@ -135,13 +143,13 @@ describe("Verify, a dropped file", () => {
     const file = new File([SAMPLE.subarray(0, 4096)], "four-blocks.bin");
     await user.upload(input, file);
 
-    const progress = await findByTestId("verify-progress");
+    const progress = await findByTestId("verify-progress", {}, HASH_WAIT);
     expect(progress.textContent).toMatch(/hashing/i);
 
     await act(async () => {
       release();
     });
-    await findByTestId("verify-result");
+    await findByTestId("verify-result", {}, HASH_WAIT);
   });
 
   it("fails a file whose size is not the deal size, and says so", async () => {
@@ -153,7 +161,7 @@ describe("Verify, a dropped file", () => {
     const input = container.querySelector("input[type=file]") as HTMLInputElement;
     const file = new File([new Uint8Array(2048)], "too-small.bin");
     await user.upload(input, file);
-    await findByTestId("verify-result");
+    await findByTestId("verify-result", {}, HASH_WAIT);
 
     expect(container.querySelector("[data-testid='verify-verdict']")?.textContent).toMatch(/FAIL/);
     expect(container.textContent).toMatch(/size/i);
@@ -166,7 +174,7 @@ describe("Verify, a dropped file", () => {
     });
 
     getByRole("button", { name: /use the sample file/i }).click();
-    await findByTestId("verify-result");
+    await findByTestId("verify-result", {}, HASH_WAIT);
 
     expect(container.querySelector("[data-testid='verify-verdict']")?.textContent).toMatch(/PENDING/);
     expect(container.textContent).toMatch(/no deal root/i);

@@ -85,10 +85,12 @@ cd ../..    # repository root
 node scripts/docs-hygiene.mjs
 ```
 
-Expected: `docs hygiene: 100 facts in README.md, docs/CHECKIN.md all match evidence/`, exit code `0`.
+Expected: `docs hygiene: 133 facts in README.md, docs/CHECKIN.md, docs/BUSINESS.md all match evidence/`, exit code `0`.
 The check extracts every address, tx/block hash, SS58 address, block number and tPOT/bond figure from
-`README.md` and `docs/CHECKIN.md` and requires each one to exist in `evidence/`, with tPOT converted
-to native units and wei where needed. Put a wrong digit in a hash and it fails.
+`README.md`, `docs/CHECKIN.md` and `docs/BUSINESS.md` and requires each one to exist in `evidence/`, with
+tPOT converted to native units and wei where needed. Put a wrong digit in a hash and it fails. The
+derived figures in `BUSINESS.md` are backed by `evidence/raw/t1/118-business-arithmetic.txt`, which is
+the output of sections 7 and 8 below.
 
 ## Reproducing the BUSINESS.md numbers
 

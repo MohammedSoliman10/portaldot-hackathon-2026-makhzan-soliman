@@ -1,0 +1,31 @@
+# status-ui suite run five times after the verify-test wait fix
+# utc: 2026-10-27T14:42:40Z
+# command: npm test  (vitest, 28 files, jsdom)
+# why: evidence 117 shows one verify test timing out on the 1 s default findBy wait under gate load.
+# what changed: a 10 s wait at the point where 1 MiB is really hashed. No assertion changed.
+
+== run 1 ==
+ Test Files  28 passed (28)
+      Tests  222 passed (222)
+   Duration  4.00s (transform 3.02s, setup 4.59s, import 10.13s, tests 11.83s, environment 18.86s)
+
+== run 2 ==
+ Test Files  28 passed (28)
+      Tests  222 passed (222)
+   Duration  4.08s (transform 2.92s, setup 4.63s, import 10.61s, tests 12.15s, environment 19.75s)
+
+== run 3 ==
+ Test Files  28 passed (28)
+      Tests  222 passed (222)
+   Duration  4.32s (transform 3.28s, setup 4.97s, import 10.70s, tests 12.78s, environment 21.44s)
+
+== run 4 ==
+ Test Files  28 passed (28)
+      Tests  222 passed (222)
+   Duration  4.23s (transform 3.03s, setup 4.81s, import 10.95s, tests 12.22s, environment 20.45s)
+
+== run 5 ==
+ Test Files  28 passed (28)
+      Tests  222 passed (222)
+   Duration  4.28s (transform 2.94s, setup 5.08s, import 10.42s, tests 12.98s, environment 20.56s)
+

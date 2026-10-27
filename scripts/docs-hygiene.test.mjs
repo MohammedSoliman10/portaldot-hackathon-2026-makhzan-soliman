@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { checkDocs, extractFacts } from "./docs-hygiene.mjs";
+import { DOC_FILES, checkDocs, extractFacts } from "./docs-hygiene.mjs";
 
 test("an address, a hash and a block number are extracted from one line", () => {
   const facts = extractFacts(
@@ -45,4 +45,14 @@ test("a block number is matched only as its own token", () => {
   const doc = { path: "README.md", text: "block 171308" };
   assert.deepEqual(checkDocs([doc], "finalized at block 171308").missing, []);
   assert.equal(checkDocs([doc], "block 1713080").missing.length, 1);
+});
+
+test("docs/BUSINESS.md is in the checked list, so its figures cannot drift silently", () => {
+  assert.ok(DOC_FILES.includes("docs/BUSINESS.md"));
+});
+
+test("the business figures in BUSINESS.md are backed by the arithmetic evidence", () => {
+  const doc = { path: "docs/BUSINESS.md", text: "answer gas 3.584145274437585000 tPOT" };
+  assert.deepEqual(checkDocs([doc], "22 answers 3.584145274437585000").missing, []);
+  assert.equal(checkDocs([doc], "22 answers 3.584145274437585001").missing.length, 1);
 });
