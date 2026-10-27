@@ -11,8 +11,12 @@ import {MakhzanGuard} from "./MakhzanGuard.sol";
 contract StorageGate {
     error BadLock();
     error AlreadyLocked();
+    error NotLocked();
+    error NotPayee();
+    error TransferFailed();
 
     event Locked(uint32 indexed dealId, address indexed payer, address indexed payee, uint96 amount);
+    event Released(uint32 indexed dealId, address indexed payee, uint96 amount);
 
     struct Lock {
         address payer; // slot 0: 20 bytes
@@ -36,5 +40,20 @@ contract StorageGate {
 
         lockOf[dealId] = Lock(msg.sender, uint96(msg.value), payee, 1);
         emit Locked(dealId, msg.sender, payee, uint96(msg.value));
+    }
+
+    /// @notice The recorded payee takes the payment, once, while the guard says healthy.
+    function release(uint32 dealId) external {
+        Lock storage l = lockOf[dealId];
+        if (l.status != 1) revert NotLocked();
+        if (msg.sender != l.payee) revert NotPayee();
+        MakhzanGuard.requireHealthy(makhzan, dealId);
+
+        uint96 amount = l.amount;
+        l.status = 2;
+        emit Released(dealId, msg.sender, amount);
+
+        (bool ok,) = msg.sender.call{value: amount}("");
+        if (!ok) revert TransferFailed();
     }
 }

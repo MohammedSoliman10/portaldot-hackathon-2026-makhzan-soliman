@@ -27,7 +27,7 @@ each commit; `Makhzan.sol` untouched; local only (no deploy, no key, no RPC).
 
 - [x] **T006** `StorageGateLock.t.sol` first, then `lock` in `contracts/src/makhzan/StorageGate.sol`:
       one lock per deal, zero payee/value refused, not-healthy refused.
-- [ ] **T007** `StorageGateRelease.t.sol` first, then `release`: payee-only, healthy-only, state
+- [x] **T007** `StorageGateRelease.t.sol` first, then `release`: payee-only, healthy-only, state
       before send, one payment, double release refused.
 - [ ] **T008** `StorageGateRefund.t.sol` first, then `refund`: payer-only, `healthOf == 3` or
       `block.number >= endBlock` with no release, one payment, double refund refused.
