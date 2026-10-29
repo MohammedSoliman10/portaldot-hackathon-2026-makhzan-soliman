@@ -1,0 +1,30 @@
+# LIVE StorageGate deployment verification — read-only
+# utc: 2026-10-29T20:01:04Z
+# chain: Portaldot EVM Testnet V3 (chain id 420420777)
+# rpc: https://test-evm-rpc-v3.portaldot.dev
+# gate address: 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA
+# makhzan target: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# deploy tx: 0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7
+# block: 240956
+# measured deploy cost: 210.575612711692978125 tPOT
+
+== cast code read-back: length and keccak256 ==
+gate bytecode length: 2528 B (5058 hex chars)
+gate codeHash: 0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5
+
+== cast call read-back: makhzan() ==
+makhzan() -> 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+matches expected target: true
+
+== viem read-back: code length, code hash, makhzan() ==
+gate code 2528 B, codeHash 0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5
+artifact runtime 2528 B
+makhzan() -> 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+matches the deploy argument: true
+
+== note: verify-deployment.mjs refuses this artifact on purpose (immutable makhzan address) ==
+MISMATCH: 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA block 242726, 2528 B runtime, artifact 2528 B
+refused: runtime code differs at byte 191: chain 60 artifact 00
+record /tmp/gate-live-verify/verify-deployment.json
+
+RESULT: gate verified on-chain, length 2528 B, hash 0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5, makhzan() 0x60481DFcFCA34A8F095939D9675eC715127B2e44

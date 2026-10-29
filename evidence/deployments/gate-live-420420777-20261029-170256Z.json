@@ -1,0 +1,19 @@
+{
+  "contract": "gate",
+  "network": "live",
+  "evidenceLabel": "[live run]",
+  "chainId": 420420777,
+  "rpcUrl": "https://test-evm-rpc-v3.portaldot.dev",
+  "deployer": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+  "address": "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA",
+  "txHash": "0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7",
+  "blockNumber": "240956",
+  "codeHash": "0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5",
+  "runtimeBytes": 2528,
+  "artifact": "/home/mohammed_soliman/hackathons/portaldot-hackathon/contracts/out/StorageGate.sol/StorageGate.json",
+  "gate": {
+    "makhzan": "0x60481DFcFCA34A8F095939D9675eC715127B2e44"
+  },
+  "estimatedCostTpot": "213.866262",
+  "utc": "2026-10-29T17:02:56Z"
+}
