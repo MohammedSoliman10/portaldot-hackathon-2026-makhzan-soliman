@@ -1,5 +1,14 @@
 # BUSINESS — who pays, what it costs, and what would have to be true
 
+## In one screen
+
+- **The problem:** Off-chain storage offers promises and invoices, but buyers have no way to audit custody or penalise missing data on-chain.
+- **What we built:** Makhzan, an accountable storage protocol on Portaldot EVM where providers bond tPOT and are challenged on random blocks with a 20% slash on failure.
+- **What is measured live:** Two deals, one provider, one pass, one slash, linear accrual, settlement, and keyless verification on the Portaldot V3 testnet.
+- **The biggest honest limit:** One provider and operator (all ours), with challenge randomness relying on a blockhash/prevrandao fallback rather than a VRF.
+- **What we need:** Foundation support for redeployment budget, an independent provider, day-scale deal runs, and clarity on V3 randomness.
+- **Where to verify:** Complete reproduction commands in `docs/REPRODUCE.md`, receipts in `evidence/`, and a read-only status UI and MCP server.
+
 This page is the business case for a sceptical judge. It uses only numbers measured on Portaldot V3
 (`chain id 420420777`) or arithmetic on those numbers. Nothing here is a projection that pretends to
 be a measurement, and nothing is an interview we did not do.
@@ -91,7 +100,7 @@ It is the first thing we would build with funding, and it is a contract change, 
 
 ## 5. Cost facts
 
-All per-transaction figures below are Portaldot V3 mainnet-priced testnet runs at an effective gas
+All per-transaction figures below are measured on the Portaldot V3 testnet at an effective gas
 price of `32,450 – 32,580 wei` `[measured]`. A gas-price change moves every tPOT figure linearly
 (A6).
 
@@ -207,7 +216,7 @@ rule is clean: one round needs `B ≥ 5S` for a saving `S` `[derived]`.
 **The selector is a fallback, and its randomness is unproven.** The index is
 `keccak256(blockhash, prevrandao, dealId) % leafCount`. It is not a VRF. Every detection number above
 assumes the index is uniform (A1), and a provider with block control can do better than these odds.
-We asked the Portaldot team about randomness on V3 and did not get an answer; we make no claim about
+We have not yet received a statement from the Portaldot team on randomness on V3; we make no claim about
 it in either direction. A v2 would use a VRF or a native randomness source `[design note]`.
 
 **What a pass does not prove**, in the same words as `docs/EXPLAIN.md`: one block, at one time, from a
@@ -229,20 +238,21 @@ risk on retrieval.
 
 | Closest peer | What it is | Where we compare |
 | --- | --- | --- |
-| **ReviveCheck** | Release-attestation middleware: registry contracts, a guard library, a reference consumer, 13 read-only tools over MCP/REST/CLI, reports stored via `remark.store`, several deployed registry versions | **Our main rival in the track.** They have the middleware-plus-consumer story and an MCP surface we do not have. We have an economic guarantee they do not: a slash for data that is not there |
+| **ReviveCheck** | Release-attestation middleware: registry contracts, a guard library, a reference consumer, 13 read-only tools over MCP/REST/CLI, reports stored via `remark.store`, several deployed registry versions | Middleware-plus-consumer architecture with an MCP and CLI surface. Makhzan provides a read-only MCP server and an economic guarantee: an on-chain slash for data that is not produced |
 | **SEAM** | "Execution layer": manifest in, verified receipt out; policy and approval gates; documented finalized V3 transactions | Polished, honest, process-strong. No on-chain primitive to bond against |
-| **Plumbline** | Checks Portaldot's documented calls against the runtime, verdict per call, V3-vs-mainnet diffs, ~263 tests | Better ecosystem contribution than us — it finds bugs in Portaldot's own docs, which the Portaldot judges may value more than our guarantee |
+| **Plumbline** | Checks Portaldot's documented calls against the runtime, verdict per call, V3-vs-mainnet diffs, ~263 tests | Developer tooling that validates Portaldot runtime behaviour against documentation. Different focus from bonded storage verification |
 | **PortalKit** | `create-portalkit-app` scaffolder, doctor command, plus an ERC-4626 RWA vault with simulated KYC | Broader developer-experience play; shallower at the chain level |
 | **PortalOps / Pindex / PalletDock** | Event/webhook layer with MCP; metadata-driven indexer with REST+GraphQL; contract workspace with hosted API | Infrastructure we would *use*, not compete with. None of them can punish a provider |
-| **Reachpot** | Uses `TransactionStorage` for a hash-pinned snapshot, plus native-asset and DEX precompiles, full lifecycle on testnet | The strongest "uses Portaldot-native features" story, and the closest to our anchoring idea. Complementary: they anchor a snapshot, we hold a provider accountable |
-| **Kaizen / Katalyst / AirLock** | Node-ops resilience drills with on-chain anchors; GenLayer-decided vaults; a payout firewall with a recorded 4 tPOT attack stopped | Each is stronger than us on breadth, integrations or polish; none is a storage-proof market |
+| **Reachpot** | Uses `TransactionStorage` for a hash-pinned snapshot, plus native-asset and DEX precompiles, full lifecycle on testnet | Anchors snapshots using `TransactionStorage`; complementary focus to holding active storage providers accountable |
+| **Kaizen / Katalyst / AirLock** | Node-ops resilience drills with on-chain anchors; GenLayer-decided vaults; a payout firewall with a recorded 4 tPOT attack stopped | Projects covering node resilience, AI-evaluated vaults, and transaction firewalls. Different problem domains; none provides a bonded storage-proof mechanism |
 
 **What we do not do, stated plainly.** We are not a bridge, an indexer, an event/webhook layer, a
-runtime-vs-docs checker, a scaffolder or an agent-payments rail. We have no MCP server yet. We use no
-Portaldot-native module in the live path — the `TransactionStorage` anchor is a plan, not a shipped
-feature. We do not promise refunds of the storage reserve (refundability is unmeasured and contested).
-We do not verify continuous storage, bandwidth or availability. We have one provider, one operator and
-two deals, and no consumer beyond the local `StorageGate` demo.
+runtime-vs-docs checker, a scaffolder or an agent-payments rail. A read-only MCP server exists
+(`apps/makhzan-mcp`, keyless and safe). We use no Portaldot-native module in the live path — the
+`TransactionStorage` anchor is a plan, not a shipped feature. We do not promise refunds of the storage
+reserve (refundability is unmeasured and contested). We do not verify continuous storage, bandwidth
+or availability. We have one provider, one operator and two deals, and no consumer beyond the local
+`StorageGate` demo <!-- [update after live gate] -->.
 
 ## 9. 30 / 60 / 90 days
 
