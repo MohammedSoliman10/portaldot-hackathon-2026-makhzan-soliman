@@ -6,6 +6,7 @@
  * is as important as what is: no private key, no signer, no write path. If a key variable is present
  * in the environment the server refuses to start and names the variable only, never its value.
  */
+import { resolve } from "node:path";
 import type { Hex } from "viem";
 
 export const DEFAULT_BLOCK_SIZE = 1024;
@@ -48,6 +49,8 @@ export interface McpConfig {
   gate: Hex | null;
   blockSize: number;
   timeoutMs: number;
+  /** The only folder `verify_file` may read; `MAKHZAN_VERIFY_DIR`, default the working directory. */
+  verifyDir: string;
 }
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
@@ -106,6 +109,11 @@ export function loadConfig(env: Record<string, string | undefined>): McpConfig {
     ? positiveInt(env.MAKHZAN_RPC_TIMEOUT_MS, "MAKHZAN_RPC_TIMEOUT_MS")
     : DEFAULT_TIMEOUT_MS;
 
+  // An empty value means "not set", so a blank line in a config file cannot widen the scope to "/".
+  const verifyDir = env.MAKHZAN_VERIFY_DIR?.trim()
+    ? resolve(env.MAKHZAN_VERIFY_DIR.trim())
+    : process.cwd();
+
   return {
     rpcUrl,
     chainId,
@@ -113,5 +121,6 @@ export function loadConfig(env: Record<string, string | undefined>): McpConfig {
     gate: (gateRaw ? gateRaw : null) as Hex | null,
     blockSize,
     timeoutMs,
+    verifyDir,
   };
 }

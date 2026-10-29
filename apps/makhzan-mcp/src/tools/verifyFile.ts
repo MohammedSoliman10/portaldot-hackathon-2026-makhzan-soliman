@@ -12,7 +12,8 @@
  * (`referencePath`), the first differing block is named: that comparison is local and exact.
  */
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, realpath, stat } from "node:fs/promises";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import type { Hex } from "viem";
 import { chunkFile } from "../../../makhzan/src/chunk.ts";
 import { buildTree } from "../../../makhzan/src/merkle.ts";
@@ -22,6 +23,62 @@ import type { ToolResult } from "../result.ts";
 
 function sha256(bytes: Uint8Array): Hex {
   return `0x${createHash("sha256").update(bytes).digest("hex")}` as Hex;
+}
+
+/** The folder `MAKHZAN_VERIFY_DIR` names, both as written and with symlinks followed. */
+interface Scope {
+  lexical: string;
+  real: string;
+}
+
+function isInside(root: string, candidate: string): boolean {
+  const rel = relative(root, candidate);
+  return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
+}
+
+function outside(label: string, raw: string, root: string): Error {
+  return new Error(
+    `${label} "${raw}" is outside the folder this server may read (MAKHZAN_VERIFY_DIR = ${root}). ` +
+      "The path is resolved and symlinks are followed before the check, so \"..\", an absolute path outside " +
+      "that folder and a symlink that points outside are all refused. Move the file into the folder, or set " +
+      "MAKHZAN_VERIFY_DIR to a folder that contains it.",
+  );
+}
+
+async function resolveScope(dir: string): Promise<Scope> {
+  const lexical = resolve(dir);
+  let real: string;
+  try {
+    real = await realpath(lexical);
+  } catch (error) {
+    throw new Error(
+      `MAKHZAN_VERIFY_DIR (${lexical}) is not a folder this server can read: ${(error as Error).message}`,
+    );
+  }
+  if (!(await stat(real)).isDirectory()) {
+    throw new Error(`MAKHZAN_VERIFY_DIR (${lexical}) is not a folder, so verify_file has nothing it may read`);
+  }
+  return { lexical, real };
+}
+
+/**
+ * Resolve one argument the same way for `path` and `referencePath`: a relative path is relative to
+ * MAKHZAN_VERIFY_DIR, the lexical result must be inside the folder (so `../` is refused even when the
+ * target does not exist), and the real path — symlinks followed — must be inside too.
+ */
+async function within(scope: Scope, raw: string, label: string): Promise<string> {
+  const lexical = resolve(scope.lexical, raw);
+  if (!isInside(scope.lexical, lexical)) throw outside(label, raw, scope.lexical);
+
+  let real: string;
+  try {
+    real = await realpath(lexical);
+  } catch (error) {
+    const prefix = label === "referencePath" ? "cannot read reference" : "cannot read";
+    throw new Error(`${prefix} ${raw}: ${(error as Error).message}`);
+  }
+  if (!isInside(scope.real, real)) throw outside(label, raw, scope.lexical);
+  return real;
 }
 
 /** Lowest index whose leaf hash differs, or null when the two lists agree. */
@@ -36,14 +93,17 @@ function firstMismatchingBlock(left: readonly Hex[], right: readonly Hex[]): num
 export async function verifyFileTool(
   reads: Reads,
   args: { dealId: number; path: string; referencePath?: string },
-  ctx: { contract: Hex; blockSize: number },
+  ctx: { contract: Hex; blockSize: number; verifyDir: string },
 ): Promise<ToolResult> {
   const { dealId, path } = args;
+  // Scope first: a refused path must not cost an RPC call or a byte read.
+  const scope = await resolveScope(ctx.verifyDir);
+  const file = await within(scope, path, "path");
   const deal = await reads.deal(dealId);
 
   let bytes: Uint8Array;
   try {
-    bytes = new Uint8Array(await readFile(path));
+    bytes = new Uint8Array(await readFile(file));
   } catch (error) {
     throw new Error(`cannot read ${path}: ${(error as Error).message}`);
   }
@@ -79,9 +139,10 @@ export async function verifyFileTool(
   let firstBadBlock: number | null = null;
   let localised: string | null = null;
   if (!match && args.referencePath) {
+    const referenceFile = await within(scope, args.referencePath, "referencePath");
     let referenceBytes: Uint8Array;
     try {
-      referenceBytes = new Uint8Array(await readFile(args.referencePath));
+      referenceBytes = new Uint8Array(await readFile(referenceFile));
     } catch (error) {
       throw new Error(`cannot read reference ${args.referencePath}: ${(error as Error).message}`);
     }

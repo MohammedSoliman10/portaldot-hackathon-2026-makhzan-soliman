@@ -44,11 +44,13 @@ async function main(): Promise<void> {
     contract: config.contract,
     gate: config.gate,
     blockSize: config.blockSize,
+    verifyDir: config.verifyDir,
   });
 
   process.stderr.write(
     `makhzan-mcp ${SERVER_VERSION}: read-only, chain ${config.chainId}, Makhzan ${config.contract}, ` +
-      `gate ${config.gate ?? "not configured"}, ${config.blockSize} B blocks, ${config.timeoutMs} ms per attempt\n`,
+      `gate ${config.gate ?? "not configured"}, ${config.blockSize} B blocks, ${config.timeoutMs} ms per attempt, ` +
+      `files under ${config.verifyDir}\n`,
   );
   await server.connect(new StdioServerTransport());
 }

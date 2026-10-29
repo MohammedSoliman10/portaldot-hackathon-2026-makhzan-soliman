@@ -42,10 +42,13 @@ export interface ServerDeps {
   contract: Hex;
   gate: Hex | null;
   blockSize?: number;
+  /** Folder `verify_file` may read; defaults to the working directory, like `loadConfig`. */
+  verifyDir?: string;
 }
 
 export function createServer(deps: ServerDeps): McpServer {
   const blockSize = deps.blockSize ?? 1024;
+  const verifyDir = deps.verifyDir ?? process.cwd();
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     {
@@ -85,10 +88,17 @@ export function createServer(deps: ServerDeps): McpServer {
       description:
         "Read-only. Hashes a local file into the deal's 1 KiB blocks, rebuilds the Merkle root and " +
         "compares it with the root the chain holds. Says MATCH or MISMATCH; the file is never uploaded " +
-        "and no transaction is built.",
+        "and no transaction is built. Only files under MAKHZAN_VERIFY_DIR can be read, and a relative " +
+        "path is relative to that folder.",
       inputSchema: {
         dealId,
-        path: z.string().min(1).describe("Absolute or relative path to the file on this machine"),
+        path: z
+          .string()
+          .min(1)
+          .describe(
+            "Path to the file, under MAKHZAN_VERIFY_DIR (a relative path is relative to that folder). " +
+              "Anything outside it is refused, including ../ and symlinks that point out.",
+          ),
         referencePath: z
           .string()
           .min(1)
@@ -104,7 +114,7 @@ export function createServer(deps: ServerDeps): McpServer {
       const result = await verifyFileTool(
         deps.reads,
         { dealId: id, path, referencePath },
-        { contract: deps.contract, blockSize },
+        { contract: deps.contract, blockSize, verifyDir },
       );
       return reply(result.text, result.facts);
     },
