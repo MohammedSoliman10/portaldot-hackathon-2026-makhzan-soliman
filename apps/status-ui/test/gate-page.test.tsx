@@ -11,6 +11,7 @@ import { renderApp } from "../src/test/render";
 
 const MAKHZAN = "0x60481DFcFCA34A8F095939D9675eC715127B2e44";
 const GATE = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const LIVE_GATE = "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA";
 const RPC = "https://test-evm-rpc-v3.portaldot.dev";
 const PAYER = "0x0948EBD7637D1C32858a6FC5D947E85A6600205C";
 const PAYEE = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
@@ -173,6 +174,25 @@ describe("the gate page with an address", () => {
   it("names NotLocked when the payment was already released", async () => {
     const { findByTestId } = live(gateClient({ status: 2 }));
     expect(await findByTestId("gate-verdict")).toHaveTextContent("release would revert: NotLocked");
+  });
+
+  it("names NotLocked when nothing is locked yet (status 0)", async () => {
+    const { findByTestId } = live(gateClient({ status: 0 }));
+    expect(await findByTestId("gate-verdict")).toHaveTextContent("release would revert: NotLocked");
+  });
+
+  it("renders the makhzan address as a link to the overview page", async () => {
+    const { findByTestId, container } = live(gateClient());
+    await findByTestId("gate-live");
+    const makhzanLink = container.querySelector(`a[href="/"]`);
+    expect(makhzanLink).not.toBeNull();
+    expect(makhzanLink?.textContent).toContain(MAKHZAN);
+  });
+
+  it("displays the live gate address when configured", async () => {
+    const { findByTestId, container } = live(gateClient(), LIVE_GATE);
+    await findByTestId("gate-live");
+    expect(container.textContent).toContain(LIVE_GATE);
   });
 
   it("counts no bond when the payee is not the deal's provider", async () => {
