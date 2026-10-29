@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { test } from "node:test";
 import { chunkFile } from "../../makhzan/src/chunk.ts";
 import { buildTree } from "../../makhzan/src/merkle.ts";
@@ -50,7 +50,7 @@ test("verify_file matches a file whose Merkle root equals the on-chain root", as
     const result = await verifyFileTool(
       readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
       { dealId: 2, path },
-      { contract: CONTRACT, blockSize: BLOCK },
+      { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
     );
     assert.match(result.text, /^\[MEASURED\] makhzan_verify_file — deal 2/);
     assert.match(result.text, /MATCH/);
@@ -78,7 +78,7 @@ test("verify_file names the first bad block when a reference copy localises it",
     const result = await verifyFileTool(
       readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
       { dealId: 2, path, referencePath: reference },
-      { contract: CONTRACT, blockSize: BLOCK },
+      { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
     );
     assert.equal(result.facts.match, false);
     assert.equal(result.facts.firstBadBlock, 1);
@@ -99,7 +99,7 @@ test("verify_file refuses to guess a block from the chain root alone, and says w
     const result = await verifyFileTool(
       readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
       { dealId: 2, path },
-      { contract: CONTRACT, blockSize: BLOCK },
+      { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
     );
     assert.equal(result.facts.match, false);
     assert.equal(result.facts.firstBadBlock, null);
@@ -124,7 +124,7 @@ test("verify_file refuses a reference file that does not hash to the committed r
       verifyFileTool(
         readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
         { dealId: 2, path, referencePath: other },
-        { contract: CONTRACT, blockSize: BLOCK },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
       ),
       /cannot be used to locate the difference/,
     );
@@ -140,7 +140,7 @@ test("verify_file refuses a file whose size is not the deal size", async () => {
       verifyFileTool(
         readsWith(dealFor(tree, 9_999, tree.leaves.length)),
         { dealId: 2, path },
-        { contract: CONTRACT, blockSize: BLOCK },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
       ),
       /size/,
     );
@@ -156,7 +156,7 @@ test("verify_file refuses when the block size does not reproduce the deal leaf c
       verifyFileTool(
         readsWith(dealFor(tree, bytes.length, tree.leaves.length + 1)),
         { dealId: 2, path },
-        { contract: CONTRACT, blockSize: BLOCK },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
       ),
       /leaf count/,
     );
@@ -172,11 +172,151 @@ test("verify_file refuses a missing path instead of returning a verdict", async 
       verifyFileTool(
         readsWith(dealFor(tree, 100, 1)),
         { dealId: 2, path: join(dir, "nope.bin") },
-        { contract: CONTRACT, blockSize: BLOCK },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
       ),
       /cannot read/,
     );
   } finally {
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("verify_file accepts a path relative to MAKHZAN_VERIFY_DIR", async () => {
+  const { dir, bytes, tree } = fixture();
+  try {
+    const result = await verifyFileTool(
+      readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
+      { dealId: 2, path: "fixture.bin" },
+      { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
+    );
+    assert.equal(result.facts.match, true);
+    assert.match(result.text, /MATCH/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("verify_file accepts a symlink that stays inside MAKHZAN_VERIFY_DIR", async () => {
+  const { dir, path, bytes, tree } = fixture();
+  try {
+    const alias = join(dir, "alias.bin");
+    symlinkSync(path, alias);
+    const result = await verifyFileTool(
+      readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
+      { dealId: 2, path: alias },
+      { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
+    );
+    assert.equal(result.facts.match, true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("verify_file refuses ../ that escapes MAKHZAN_VERIFY_DIR", async () => {
+  const { dir, bytes, tree } = fixture();
+  const outside = mkdtempSync(join(tmpdir(), "makhzan-outside-"));
+  try {
+    const escaped = join(outside, "escape.bin");
+    writeFileSync(escaped, bytes);
+    const escape = relative(dir, escaped);
+    assert.match(escape, /^\.\.\//, "the fixture must really leave the folder");
+    for (const candidate of [escape, escaped]) {
+      await assert.rejects(
+        verifyFileTool(
+          readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
+          { dealId: 2, path: candidate },
+          { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
+        ),
+        /outside/,
+      );
+    }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("verify_file refuses an absolute path outside MAKHZAN_VERIFY_DIR and names the setting", async () => {
+  const { dir, bytes, tree } = fixture();
+  const outside = mkdtempSync(join(tmpdir(), "makhzan-outside-"));
+  try {
+    const escaped = join(outside, "escape.bin");
+    writeFileSync(escaped, bytes);
+    await assert.rejects(
+      verifyFileTool(
+        readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
+        { dealId: 2, path: escaped },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
+      ),
+      /MAKHZAN_VERIFY_DIR/,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("verify_file refuses a symlink inside the folder that points outside it", async () => {
+  const { dir, bytes, tree } = fixture();
+  const outside = mkdtempSync(join(tmpdir(), "makhzan-outside-"));
+  try {
+    const escaped = join(outside, "escape.bin");
+    writeFileSync(escaped, bytes);
+    const link = join(dir, "link.bin");
+    symlinkSync(escaped, link);
+    await assert.rejects(
+      verifyFileTool(
+        readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
+        { dealId: 2, path: link },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
+      ),
+      /outside/,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("verify_file refuses a symlinked folder that leads outside", async () => {
+  const { dir, bytes, tree } = fixture();
+  const outside = mkdtempSync(join(tmpdir(), "makhzan-outside-"));
+  try {
+    writeFileSync(join(outside, "escape.bin"), bytes);
+    symlinkSync(outside, join(dir, "outdir"));
+    await assert.rejects(
+      verifyFileTool(
+        readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
+        { dealId: 2, path: join("outdir", "escape.bin") },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
+      ),
+      /outside/,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("verify_file applies the same rule to referencePath", async () => {
+  const { dir, path, bytes, tree } = fixture();
+  const outside = mkdtempSync(join(tmpdir(), "makhzan-outside-"));
+  try {
+    const reference = join(outside, "original.bin");
+    writeFileSync(reference, bytes);
+    const tampered = Uint8Array.from(bytes);
+    tampered[BLOCK + 7] ^= 0x01;
+    writeFileSync(path, tampered);
+    await assert.rejects(
+      verifyFileTool(
+        readsWith(dealFor(tree, bytes.length, tree.leaves.length)),
+        { dealId: 2, path, referencePath: reference },
+        { contract: CONTRACT, blockSize: BLOCK, verifyDir: dir },
+      ),
+      /referencePath/,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
   }
 });

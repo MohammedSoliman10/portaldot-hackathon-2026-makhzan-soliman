@@ -1,4 +1,5 @@
 import { strict as assert } from "node:assert";
+import { resolve } from "node:path";
 import { test } from "node:test";
 import { ConfigError, loadConfig } from "../src/config.ts";
 
@@ -57,4 +58,18 @@ test("loadConfig rejects a timeout that is not a positive integer", () => {
   assert.throws(() => loadConfig({ ...LIVE, MAKHZAN_RPC_TIMEOUT_MS: "0" }), ConfigError);
   assert.throws(() => loadConfig({ ...LIVE, MAKHZAN_RPC_TIMEOUT_MS: "soon" }), ConfigError);
   assert.throws(() => loadConfig({ ...LIVE, MAKHZAN_BLOCK_SIZE: "70000" }), /block size/);
+});
+
+test("loadConfig keeps verify_file inside the current directory by default", () => {
+  assert.equal(loadConfig(LIVE).verifyDir, process.cwd());
+});
+
+test("loadConfig resolves MAKHZAN_VERIFY_DIR to an absolute folder", () => {
+  assert.equal(loadConfig({ ...LIVE, MAKHZAN_VERIFY_DIR: "/srv/makhzan-files" }).verifyDir, "/srv/makhzan-files");
+  assert.equal(
+    loadConfig({ ...LIVE, MAKHZAN_VERIFY_DIR: "fixtures/pdfs" }).verifyDir,
+    resolve(process.cwd(), "fixtures/pdfs"),
+  );
+  // An empty value is the same as not setting it.
+  assert.equal(loadConfig({ ...LIVE, MAKHZAN_VERIFY_DIR: "  " }).verifyDir, process.cwd());
 });

@@ -1,0 +1,69 @@
+# makhzan-mcp — the MAKHZAN_VERIFY_DIR tests before the feature exists
+# utc: 2026-10-29T17:01:43Z
+# command: npm test (in apps/makhzan-mcp), tests written first
+# what it shows: 9 of 46 fail for the right reason — nothing reads MAKHZAN_VERIFY_DIR yet.
+#   - the two config tests fail because loadConfig returns no verifyDir at all;
+#   - the relative-path test fails because a relative path is resolved against the cwd;
+#   - every escape test fails because nothing checks containment (the escape file is read and
+#     even matches, which is the unsafe behaviour the feature must remove).
+
+✔ loadConfig needs an explicit RPC, chain id and contract (1.806899ms)
+✔ loadConfig defaults to 1024-byte blocks, an 8 s timeout and no gate (0.3201ms)
+✔ loadConfig accepts a gate and an explicit timeout (0.1877ms)
+✔ loadConfig refuses to start with a key in the environment, and never echoes it (0.5379ms)
+✔ loadConfig rejects a timeout that is not a positive integer (0.2935ms)
+✖ loadConfig keeps verify_file inside the current directory by default (1.0931ms)
+✖ loadConfig resolves MAKHZAN_VERIFY_DIR to an absolute folder (0.4015ms)
+✔ gate_status says the gate is not deployed when no address is configured (2.4371ms)
+✔ gate_status reports lock, payee, amount, floor and bond, and that release would pass (1.1096ms)
+✔ gate_status says NO when the provider bond is under the floor (0.6377ms)
+✔ gate_status says NO and names the guard state when a challenge is open (0.513ms)
+✔ gate_status reports a released or refunded lock instead of pretending it is locked (0.4657ms)
+✔ gate_status refuses a gate that points at a different Makhzan (0.808799ms)
+✔ guardDecision maps healthOf and the term exactly as MakhzanGuard does (1.0717ms)
+✔ healthTool reports the measured block, end block and the guard decision (0.9952ms)
+✔ healthTool says the term is over instead of pretending the deal is healthy (19.724599ms)
+✔ healthTool refuses an unknown deal rather than inventing state (1.0188ms)
+✔ withRetry returns the first success and does not retry it (1.1068ms)
+✔ withRetry retries exactly once after a failure (0.3473ms)
+✔ withRetry gives up after two attempts and keeps both messages (0.7124ms)
+✔ withRetry times an attempt out at the configured budget and retries it (50.948697ms)
+✔ the server exposes exactly four read-only tools and no write tool (22.452099ms)
+✔ makhzan_health answers over JSON-RPC with a MEASURED block (4.8667ms)
+✔ makhzan_gate_status says gate not deployed with no address configured (2.5296ms)
+✔ makhzan_gate_status uses the configured gate when there is one (2.2072ms)
+✔ makhzan_verify_file verifies a real file over JSON-RPC and names a mismatch (23.597199ms)
+✔ a failing read is returned as an MCP error, not as a fabricated verdict (2.351699ms)
+✔ an unknown tool is refused, and the refusal is not a verdict (1.5618ms)
+✖ makhzan_verify_file refuses a file outside MAKHZAN_VERIFY_DIR over JSON-RPC (3.1224ms)
+✔ deal_story rebuilds the history from events and reports the verify result (3.0169ms)
+✔ deal_story is INCOMPLETE, never PASS, when the node refuses the log range (0.4524ms)
+✔ deal_story surfaces a failed fetch instead of inventing a history (0.6207ms)
+✔ verify_file matches a file whose Merkle root equals the on-chain root (21.522099ms)
+✔ verify_file names the first bad block when a reference copy localises it (3.2606ms)
+✔ verify_file refuses to guess a block from the chain root alone, and says why (1.9416ms)
+✔ verify_file refuses a reference file that does not hash to the committed root (2.696199ms)
+✔ verify_file refuses a file whose size is not the deal size (1.7096ms)
+✔ verify_file refuses when the block size does not reproduce the deal leaf count (1.4986ms)
+✔ verify_file refuses a missing path instead of returning a verdict (1.7279ms)
+✖ verify_file accepts a path relative to MAKHZAN_VERIFY_DIR (1.1893ms)
+✔ verify_file accepts a symlink that stays inside MAKHZAN_VERIFY_DIR (2.5739ms)
+✖ verify_file refuses ../ that escapes MAKHZAN_VERIFY_DIR (2.3598ms)
+✖ verify_file refuses an absolute path outside MAKHZAN_VERIFY_DIR and names the setting (1.8344ms)
+✖ verify_file refuses a symlink inside the folder that points outside it (1.7651ms)
+✖ verify_file refuses a symlinked folder that leads outside (1.7841ms)
+✖ verify_file applies the same rule to referencePath (2.699899ms)
+ℹ tests 46
+ℹ pass 37
+ℹ fail 9
+✖ failing tests:
+✖ loadConfig keeps verify_file inside the current directory by default (1.0931ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+✖ loadConfig resolves MAKHZAN_VERIFY_DIR to an absolute folder (0.4015ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+✖ makhzan_verify_file refuses a file outside MAKHZAN_VERIFY_DIR over JSON-RPC (3.1224ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /outside/. Input:
+✖ verify_file accepts a path relative to MAKHZAN_VERIFY_DIR (1.1893ms)
+  Error: cannot read fixture.bin: ENOENT: no such file or directory, open 'fixture.bin'
+✖ verify_file refuses ../ that escapes MAKHZAN_VERIFY_DIR (2.3598ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.

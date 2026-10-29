@@ -18,6 +18,8 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
 const SAMPLE = join(ROOT, "..", "status-ui", "public", "samples", "demo-1mib.bin");
+/** verify_file may only read this folder, so the scripted client names it explicitly. */
+const VERIFY_DIR = join(ROOT, "..", "status-ui", "public", "samples");
 
 const RPC = process.env.MAKHZAN_RPC_URL ?? "https://test-evm-rpc-v3.portaldot.dev";
 const CHAIN = process.env.MAKHZAN_CHAIN_ID ?? "420420777";
@@ -33,6 +35,7 @@ const CHILD_ENV = {
   MAKHZAN_RPC_URL: RPC,
   MAKHZAN_CHAIN_ID: CHAIN,
   MAKHZAN_CONTRACT: CONTRACT,
+  MAKHZAN_VERIFY_DIR: VERIFY_DIR,
 };
 
 const failures = [];
@@ -109,6 +112,15 @@ say("[request]  tools/call makhzan_health {\"dealId\":999}");
 const missing = await client.callTool({ name: "makhzan_health", arguments: { dealId: 999 } });
 say(`[response] isError=${missing.isError}: ${textOf(missing).split("\n")[0]}`);
 if (missing.isError !== true) failures.push("deal 999 should not exist and should be an error");
+say();
+say("[request]  tools/call makhzan_verify_file {dealId:1, path:'/etc/hostname'}");
+const outside = await client.callTool({
+  name: "makhzan_verify_file",
+  arguments: { dealId: 1, path: "/etc/hostname" },
+});
+say(`[response] isError=${outside.isError}: ${textOf(outside).split("\n")[0]}`);
+if (outside.isError !== true) failures.push("a path outside MAKHZAN_VERIFY_DIR must be refused");
+if (!/outside/.test(textOf(outside))) failures.push("the refusal must say the path is outside the folder");
 say();
 say("[request]  tools/call makhzan_write_deal {}");
 const unwrite = await client.callTool({ name: "makhzan_write_deal", arguments: {} });

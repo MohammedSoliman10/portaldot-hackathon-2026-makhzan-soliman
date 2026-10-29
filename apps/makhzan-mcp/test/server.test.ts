@@ -12,12 +12,13 @@ import { CONTRACT, GATE, fakeReads, storyInput } from "./helpers.ts";
 
 const NAMES = ["makhzan_deal_story", "makhzan_gate_status", "makhzan_health", "makhzan_verify_file"];
 
-async function connect(reads = fakeReads(), gate: string | null = null) {
+async function connect(reads = fakeReads(), gate: string | null = null, verifyDir = process.cwd()) {
   const server = createServer({
     reads,
     story: { input: async () => storyInput() },
     contract: CONTRACT,
     gate: gate as `0x${string}` | null,
+    verifyDir,
   });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "test-client", version: "0.0.0" });
@@ -94,7 +95,7 @@ test("makhzan_verify_file verifies a real file over JSON-RPC and names a mismatc
         claimed: 0n,
       }),
     });
-    const { client } = await connect(reads);
+    const { client } = await connect(reads, null, dir);
     const good = textOf(await client.callTool({ name: "makhzan_verify_file", arguments: { dealId: 1, path } }));
     assert.match(good, /MATCH/);
 
@@ -138,4 +139,27 @@ test("an unknown tool is refused, and the refusal is not a verdict", async () =>
   assert.equal(result.isError, true);
   assert.match(result.content.map((part) => part.text).join("\n"), /not found|unknown|invalid/i);
   await client.close();
+});
+
+test("makhzan_verify_file refuses a file outside MAKHZAN_VERIFY_DIR over JSON-RPC", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "makhzan-mcp-scope-"));
+  const outside = mkdtempSync(join(tmpdir(), "makhzan-outside-"));
+  try {
+    const escaped = join(outside, "escape.bin");
+    writeFileSync(escaped, new Uint8Array(2048));
+    const { client } = await connect(fakeReads(), null, dir);
+    const result = (await client.callTool({
+      name: "makhzan_verify_file",
+      arguments: { dealId: 1, path: escaped },
+    })) as { isError?: boolean; content: { text?: string }[] };
+    assert.equal(result.isError, true);
+    const text = result.content.map((part) => part.text ?? "").join("\n");
+    assert.match(text, /outside/);
+    assert.match(text, /MAKHZAN_VERIFY_DIR/);
+    assert.doesNotMatch(text, /\[MEASURED\]/);
+    await client.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
+  }
 });
