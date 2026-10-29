@@ -4,6 +4,7 @@ import { parseConfig } from "../src/config/env";
 import { resolveMode } from "../src/config/modes";
 
 const ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const GATE = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const RPC = "http://127.0.0.1:8564";
 
 const raw = (values: Record<string, string | undefined> = {}) => ({
@@ -11,6 +12,7 @@ const raw = (values: Record<string, string | undefined> = {}) => ({
   VITE_MAKHZAN_RPC_URL: values.VITE_MAKHZAN_RPC_URL,
   VITE_MAKHZAN_CHAIN_ID: values.VITE_MAKHZAN_CHAIN_ID,
   VITE_MAKHZAN_CONTRACT_ADDRESS: values.VITE_MAKHZAN_CONTRACT_ADDRESS,
+  VITE_GATE_ADDRESS: values.VITE_GATE_ADDRESS,
 });
 
 const config = (values: Record<string, string | undefined> = {}): AppConfig =>
@@ -73,14 +75,55 @@ describe("parseConfig", () => {
       VITE_MAKHZAN_RPC_URL: "",
       VITE_MAKHZAN_CHAIN_ID: "",
       VITE_MAKHZAN_CONTRACT_ADDRESS: "",
+      VITE_GATE_ADDRESS: "",
     });
     expect(parsed).toMatchObject({
       requestedMode: null,
       rpcUrl: null,
       address: null,
+      gateAddress: null,
       chainId: 420420777,
       errors: [],
     });
+  });
+});
+
+describe("the gate address", () => {
+  it("is null when VITE_GATE_ADDRESS is unset, and invents no address", () => {
+    const parsed = config();
+    expect(parsed.gateAddress).toBeNull();
+    expect(parsed.gateAddressError).toBeNull();
+  });
+
+  it("accepts an address that is 0x and forty hex characters", () => {
+    const parsed = config({ VITE_GATE_ADDRESS: GATE });
+    expect(parsed.gateAddress).toBe(GATE);
+    expect(parsed.gateAddressError).toBeNull();
+  });
+
+  it("treats a whitespace-only value as unset", () => {
+    const parsed = config({ VITE_GATE_ADDRESS: "   " });
+    expect(parsed.gateAddress).toBeNull();
+    expect(parsed.gateAddressError).toBeNull();
+  });
+
+  it("records a malformed value without taking the rest of the app down", () => {
+    const parsed = config({
+      VITE_MAKHZAN_MODE: "LIVE",
+      VITE_MAKHZAN_RPC_URL: RPC,
+      VITE_MAKHZAN_CONTRACT_ADDRESS: ADDRESS,
+      VITE_GATE_ADDRESS: "0x1234",
+    });
+    expect(parsed.gateAddress).toBeNull();
+    expect(parsed.gateAddressError).toMatch(/VITE_GATE_ADDRESS/);
+    expect(parsed.errors).toEqual([]);
+    expect(resolveMode(parsed).clientEnabled).toBe(true);
+  });
+
+  it("carries the address and its error into the mode state", () => {
+    expect(resolveMode(config({ VITE_GATE_ADDRESS: GATE })).gateAddress).toBe(GATE);
+    expect(resolveMode(config()).gateAddress).toBeNull();
+    expect(resolveMode(config({ VITE_GATE_ADDRESS: "0xzz" })).gateAddressError).toMatch(/VITE_GATE_ADDRESS/);
   });
 });
 

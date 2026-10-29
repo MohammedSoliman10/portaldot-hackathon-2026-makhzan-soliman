@@ -15,6 +15,8 @@ export interface ModeState {
   observedChainId: number | null;
   clientEnabled: boolean;
   blocking: BlockingCondition | null;
+  gateAddress: Hex | null;
+  gateAddressError: string | null;
 }
 
 /**
@@ -30,6 +32,8 @@ export function resolveMode(config: AppConfig): ModeState {
     rpcUrl: config.rpcUrl,
     expectedChainId: config.chainId,
     observedChainId: null,
+    gateAddress: config.gateAddress,
+    gateAddressError: config.gateAddressError,
   };
 
   if (config.errors.length > 0) {
