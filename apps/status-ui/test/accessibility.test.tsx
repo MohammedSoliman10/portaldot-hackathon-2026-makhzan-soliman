@@ -38,9 +38,9 @@ describe("accessibility pass", () => {
       const css = readFileSync(tokensPath, "utf8");
 
       // Extract colors
-      const extract = (name: string) => {
+      const extract = (name: string): string => {
         const match = css.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`));
-        if (!match) throw new Error(`Missing token ${name}`);
+        if (!match || !match[1]) throw new Error(`Missing token ${name}`);
         return match[1];
       };
 
@@ -115,13 +115,13 @@ describe("accessibility pass", () => {
           VITE_GATE_ADDRESS: GATE,
         })
       );
-      const { container, getByLabelText } = renderApp(<App mode={gateMode} evidence={evidenceState()} />, {
+      const { getByRole } = renderApp(<App mode={gateMode} evidence={evidenceState()} />, {
         route: "/gate",
         evidence: evidenceState(),
       });
-      const input = container.querySelector('input[type="number"]');
+      const input = getByRole("spinbutton", { name: /deal id/i });
       expect(input).toBeInTheDocument();
-      expect(getByLabelText(/deal id/i)).toBe(input);
+      expect(input).toHaveAttribute("id", "gate-deal-id");
     });
   });
 

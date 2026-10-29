@@ -151,6 +151,7 @@ export function Gate({ client }: { client?: ReadClient }) {
                   key={id}
                   type="button"
                   aria-pressed={dealId === id}
+                  aria-label={`Select deal ${id}`}
                   onClick={() => {
                     setDealId(id);
                     setTyped(String(id));

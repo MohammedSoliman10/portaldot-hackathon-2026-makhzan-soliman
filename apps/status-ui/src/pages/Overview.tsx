@@ -164,6 +164,7 @@ export function Overview(options: LiveOptions) {
         {mode.clientEnabled ? (
           <button
             type="button"
+            aria-label="Re-read deployment status from RPC"
             onClick={live.refresh}
             className="mt-4 border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre"
           >
