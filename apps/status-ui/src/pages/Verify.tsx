@@ -300,6 +300,7 @@ export function Verify(options: VerifyOptions) {
               Choose a file
               <input
                 type="file"
+                aria-label="Choose a file to verify"
                 className="sr-only"
                 onChange={(event) => {
                   void dropFile(event.target.files?.[0]);
@@ -309,6 +310,7 @@ export function Verify(options: VerifyOptions) {
             </label>
             <button
               type="button"
+              aria-label="Use the sample file"
               onClick={() => void useSample()}
               disabled={work !== null}
               className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre disabled:opacity-50"
@@ -318,6 +320,7 @@ export function Verify(options: VerifyOptions) {
             {mode.clientEnabled ? (
               <button
                 type="button"
+                aria-label="Re-read the deal root from the chain"
                 onClick={live.refresh}
                 className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre"
               >
@@ -519,6 +522,7 @@ export function Verify(options: VerifyOptions) {
 
           <button
             type="button"
+            aria-label="Flip one byte in memory copy to test tamper rejection"
             onClick={() => void flipOneByte()}
             disabled={work !== null}
             className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre disabled:opacity-50"

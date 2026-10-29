@@ -202,6 +202,7 @@ export function Deal(options: LiveOptions) {
         {mode.clientEnabled ? (
           <button
             type="button"
+            aria-label="Re-read deal status from RPC"
             onClick={live.refresh}
             className="mt-3 border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre"
           >

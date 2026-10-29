@@ -6,6 +6,7 @@ import { EvidenceNotice } from "../EvidenceNotice";
 import { ModeBanner } from "../ModeBanner";
 import { ErrorBoundary } from "../../app/ErrorBoundary";
 import { Footer } from "./Footer";
+import { MobileNav } from "./MobileNav";
 import { SideIndex } from "./SideIndex";
 
 function Wordmark() {
@@ -44,8 +45,9 @@ export function Shell({
           <SideIndex />
         </div>
         <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-          <div className="mb-4 md:hidden">
+          <div className="mb-4 flex items-center justify-between gap-4 md:hidden">
             <Wordmark />
+            <MobileNav />
           </div>
           <EvidenceNotice evidence={evidence} />
           <ErrorBoundary>{children}</ErrorBoundary>

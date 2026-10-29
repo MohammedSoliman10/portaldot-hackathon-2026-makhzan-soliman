@@ -14,6 +14,7 @@ export function CopyText({ text, label = "Copy link" }: { text: string; label?: 
   return (
     <button
       type="button"
+      aria-label={state === "copied" ? "Copied" : label}
       onClick={() => void onCopy()}
       className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre"
     >

@@ -140,6 +140,7 @@ export function Replay() {
               key={id}
               type="button"
               aria-pressed={dealId === id}
+              aria-label={`Select deal ${id} run`}
               onClick={() => choose(id)}
               className={`border px-3 py-1 font-mono text-xs ${
                 dealId === id
@@ -190,6 +191,7 @@ export function Replay() {
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button
             type="button"
+            aria-label="Previous step"
             onClick={() => setIndex((current) => Math.max(0, current - 1))}
             disabled={index === 0}
             className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre disabled:opacity-50"
@@ -198,6 +200,7 @@ export function Replay() {
           </button>
           <button
             type="button"
+            aria-label="Next step"
             onClick={() => setIndex((current) => Math.min(total - 1, current + 1))}
             disabled={index === total - 1}
             className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre disabled:opacity-50"
@@ -221,6 +224,7 @@ export function Replay() {
                 type="button"
                 onClick={() => setIndex(position)}
                 aria-current={position === index ? "step" : undefined}
+                aria-label={`Go to step ${position + 1}: ${item.title}`}
                 className={`w-full break-words border-l-2 px-3 py-1 text-left ${
                   position === index
                     ? "border-ochre text-paper"
