@@ -1,0 +1,30 @@
+# Deployed check on https://status-ui-one.vercel.app — 2026-10-29T20:19:51.730Z
+Deployment: https://status-ui-one.vercel.app
+Target Gate Address: 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA
+Target Makhzan Address: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+
+[1280] /gate gate address: true
+[1280] /gate makhzan link: true (0x60481DFcFCA34A8F095939D9675eC715127B2e44)
+[1280] /gate deal 2 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,910. This page cannot send it, and it does not know who will." (NotLocked=true)
+[1280] /gate deal 1 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,910. This page cannot send it, and it does not know who will." (NotLocked=true)
+[1280] /gate overflow: 0px
+[1280] /replay h1: "The recorded run, step by step" (true)
+[1280] /replay overflow: 0px
+[1280] /verify h1: "Verify a file" (true)
+[1280] /verify overflow: 0px
+[390] /gate gate address: true
+[390] /gate makhzan link: true (0x60481DFcFCA34A8F095939D9675eC715127B2e44)
+[390] /gate deal 2 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,912. This page cannot send it, and it does not know who will." (NotLocked=true)
+[390] /gate deal 1 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,912. This page cannot send it, and it does not know who will." (NotLocked=true)
+[390] /gate overflow: 0px
+[390] /replay h1: "The recorded run, step by step" (true)
+[390] /replay overflow: 0px
+[390] /verify h1: "Verify a file" (true)
+[390] /verify overflow: 0px
+[390] mobile menu button present: true, initial expanded: false
+[390] mobile menu opened: true
+[390] mobile menu routes count: 9 (/, /deal/1, /verify, /proof, /gate, /judges, /replay, /receipt/1, /receipt/2)
+[390] mobile menu overflow: 0px
+[390] mobile menu closed with Escape: true
+
+CONSOLE ERRORS: none
