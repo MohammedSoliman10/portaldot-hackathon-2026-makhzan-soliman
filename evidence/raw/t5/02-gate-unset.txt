@@ -1,0 +1,8 @@
+# /gate, VITE_GATE_ADDRESS unset — local preview of the LIVE build — 2026-10-29T16:21Z
+# build: VITE_MAKHZAN_MODE=LIVE, test-evm-rpc-v3, 0x60481D…2e44, chain 420420777, no gate address
+
+[gate unset] [1280] /gate h1="The gate that pays on a healthy deal" unset=true noContract=false designNote=true addressShown=false
+[gate unset] [1280] nav gate link=1 overflow=0px
+[gate unset] [390] /gate h1="The gate that pays on a healthy deal" unset=true noContract=false designNote=true addressShown=false
+[gate unset] [390] nav gate link=1 overflow=0px
+[gate unset] CONSOLE/NETWORK ERRORS: none

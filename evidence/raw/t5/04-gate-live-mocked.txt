@@ -1,0 +1,14 @@
+# /gate live state, RPC stubbed in the browser — 2026-10-29T16:21Z
+# NOT a live gate deployment: Playwright answers eth_chainId/eth_getCode/eth_blockNumber/eth_call with ABI-encoded
+# values (lock 5 tPOT, minBond 24 tPOT, status locked, health 1, end block 172,878, block 172,700, bond 24 tPOT).
+# This checks the rendering path and the 390 px layout, not a chain.
+
+[mocked live] [1280] decision=healthyMEASURED bond="24 tPOTMEASURED"
+[mocked live] [1280] verdict="release would pass now Assuming the recorded payee sends the transaction, at block 172,700. This page cannot send it, and it does not know who will."
+[mocked live] [1280] payer=true payee=true amount5=true minBond24=true locked=true endBlock=true
+[mocked live] [1280] MEASURED=10 REPORTED=2 overflow=0px
+[mocked live] [390] decision=healthyMEASURED bond="24 tPOTMEASURED"
+[mocked live] [390] verdict="release would pass now Assuming the recorded payee sends the transaction, at block 172,700. This page cannot send it, and it does not know who will."
+[mocked live] [390] payer=true payee=true amount5=true minBond24=true locked=true endBlock=true
+[mocked live] [390] MEASURED=10 REPORTED=2 overflow=0px
+[mocked live] CONSOLE/NETWORK ERRORS: none

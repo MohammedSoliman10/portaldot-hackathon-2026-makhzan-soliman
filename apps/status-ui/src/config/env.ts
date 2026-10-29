@@ -6,7 +6,8 @@ export type ConfigField =
   | "VITE_MAKHZAN_MODE"
   | "VITE_MAKHZAN_RPC_URL"
   | "VITE_MAKHZAN_CHAIN_ID"
-  | "VITE_MAKHZAN_CONTRACT_ADDRESS";
+  | "VITE_MAKHZAN_CONTRACT_ADDRESS"
+  | "VITE_GATE_ADDRESS";
 
 export interface ConfigError {
   field: ConfigField;
@@ -18,6 +19,10 @@ export interface AppConfig {
   address: Hex | null;
   rpcUrl: string | null;
   chainId: number;
+  /** The StorageGate consumer, when the build points at one. Unset means "not deployed here". */
+  gateAddress: Hex | null;
+  /** Why a configured gate address is unusable. It never blocks the Makhzan reads. */
+  gateAddressError: string | null;
   errors: ConfigError[];
 }
 
@@ -91,5 +96,18 @@ export function parseConfig(source: Record<string, string | undefined>): AppConf
     }
   }
 
-  return { requestedMode, address, rpcUrl, chainId, errors };
+  // The gate is optional and separate from the Makhzan config: a bad gate address must not stop the
+  // rest of the page, so it is reported on its own rather than in `errors`.
+  const rawGate = read(source, "VITE_GATE_ADDRESS");
+  let gateAddress: Hex | null = null;
+  let gateAddressError: string | null = null;
+  if (rawGate !== null) {
+    if (ADDRESS_PATTERN.test(rawGate)) gateAddress = rawGate as Hex;
+    else {
+      gateAddressError =
+        "VITE_GATE_ADDRESS must be 0x followed by 40 hex characters; no gate address is shown";
+    }
+  }
+
+  return { requestedMode, address, rpcUrl, chainId, gateAddress, gateAddressError, errors };
 }

@@ -5,6 +5,7 @@ const ROUTES = [
   { to: "/deal/1", label: "Deal" },
   { to: "/verify", label: "Verify" },
   { to: "/proof", label: "Proof" },
+  { to: "/gate", label: "Gate" },
   { to: "/judges", label: "Judges" },
   { to: "/replay", label: "Replay" },
 ];

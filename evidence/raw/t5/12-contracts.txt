@@ -1,0 +1,15 @@
+# contracts gate (unchanged by 008) — 2026-10-29T16:22Z — tree 63800e7
+
+$ git diff --stat origin/main HEAD -- contracts/
+(empty = contracts untouched)
+
+$ forge fmt --check
+exit=0
+$ node scripts/check-size.mjs
+Makhzan runtime 6566 B <= budget 10240 B (margin 3674 B)
+StorageGate runtime 2528 B <= budget 2600 B (margin 72 B)
+$ forge test
+
+Ran 31 test suites in 3.41s (9.00s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+$ forge snapshot --check
+exit=0 (0 = the regenerated snapshot on main is current)
