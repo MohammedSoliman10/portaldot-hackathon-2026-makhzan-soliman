@@ -15,6 +15,11 @@ export const MAX_BLOCK_SIZE = 65_535;
 /** Every attempt, not every tool call, is bounded by this; one retry follows a failure. */
 export const DEFAULT_TIMEOUT_MS = 8_000;
 
+/** Default StorageGate addresses by chain id. */
+export const DEFAULT_GATES: Record<number, Hex> = {
+  420420777: "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA",
+};
+
 export class ConfigError extends Error {
   constructor(message: string) {
     super(message);
@@ -93,9 +98,22 @@ export function loadConfig(env: Record<string, string | undefined>): McpConfig {
     throw new ConfigError("MAKHZAN_CONTRACT must be a 20 bytes hex address (0x + 40 hex digits)");
   }
 
-  const gateRaw = env.MAKHZAN_GATE?.trim();
-  if (gateRaw && !ADDRESS.test(gateRaw)) {
-    throw new ConfigError("MAKHZAN_GATE must be a 20 bytes hex address (0x + 40 hex digits)");
+  const gateEnvVar = env.MAKHZAN_GATE_ADDRESS !== undefined ? "MAKHZAN_GATE_ADDRESS" : "MAKHZAN_GATE";
+  const gateRaw = env.MAKHZAN_GATE_ADDRESS !== undefined ? env.MAKHZAN_GATE_ADDRESS : env.MAKHZAN_GATE;
+
+  let gate: Hex | null;
+  if (gateRaw !== undefined) {
+    const trimmed = gateRaw.trim();
+    if (trimmed === "") {
+      gate = null;
+    } else {
+      if (!ADDRESS.test(trimmed)) {
+        throw new ConfigError(`${gateEnvVar} must be a 20 bytes hex address (0x + 40 hex digits)`);
+      }
+      gate = trimmed as Hex;
+    }
+  } else {
+    gate = DEFAULT_GATES[chainId] ?? null;
   }
 
   const blockSize = env.MAKHZAN_BLOCK_SIZE
@@ -118,7 +136,7 @@ export function loadConfig(env: Record<string, string | undefined>): McpConfig {
     rpcUrl,
     chainId,
     contract: contract as Hex,
-    gate: (gateRaw ? gateRaw : null) as Hex | null,
+    gate,
     blockSize,
     timeoutMs,
     verifyDir,
