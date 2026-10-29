@@ -1,0 +1,15 @@
+{
+  "contract": "gate",
+  "network": "live",
+  "evidenceLabel": "[live run]",
+  "chainId": 420420777,
+  "rpcUrl": "https://test-evm-rpc-v3.portaldot.dev",
+  "address": "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA",
+  "codeHash": "0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5",
+  "runtimeBytes": 2528,
+  "artifact": "contracts/out/StorageGate.sol/StorageGate.json",
+  "gate": {
+    "makhzan": "0x60481DFcFCA34A8F095939D9675eC715127B2e44"
+  },
+  "utc": "2026-10-29T20:00:00Z"
+}

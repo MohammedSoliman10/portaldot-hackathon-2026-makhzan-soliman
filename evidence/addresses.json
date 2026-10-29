@@ -17,6 +17,15 @@
         "resolve",
         "settle"
       ]
+    },
+    {
+      "address": "0x5ee99e8ae165d0c33677c812d70b0b07820c1dca",
+      "contract": "StorageGate",
+      "actions": [
+        "lock",
+        "release",
+        "refund"
+      ]
     }
   ]
 }
