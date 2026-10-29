@@ -114,7 +114,8 @@ Three things follow, and each one is a design constraint rather than a marketing
    the provider, is the largest line item for a small deal. This is why §6 exists.
 2. **A challenge is cheap for the buyer and expensive for the provider.** The buyer spends `0.0306`
    per round; the provider spends `0.1629` to answer the same round. A buyer who used the 22 rounds
-   needed for 90 % confidence would cost the provider `22 × 0.1629 = 3.585 tPOT` in answer gas alone —
+   needed for 90 % confidence would cost the provider
+   `22 × 0.162915694292617500 = 3.584145274437585000 tPOT` in answer gas alone —
    **71.7 % of a 5 tPOT price** `[derived]`. The 96 % margin in the next table holds for roughly one
    challenge per deal, not for a determined hunter. Any real price has to be set against expected
    challenge frequency, not against zero.
@@ -281,7 +282,7 @@ Not "more marketing". Four specific things, in order of what unblocks what:
 | Support | What it unblocks | Why it is not optional |
 | --- | --- | --- |
 | **Redeploy budget** (~530 tPOT EVM, or ~131 tPOT deposit plus fees on the native path) | Per-deal bonds, parameterised window/slash, challenger reward | The current contract cannot be re-parameterised. Every fix in §9 is behind that one cost |
-| **A funded independent provider** (bond 30 tPOT, register 11.54 tPOT, plus that provider's own gas) | A third-party deal, a real track record, multi-provider health | One-operator evidence is the weakest part of the technical story |
+| **A funded independent provider** (bond 30 tPOT, register 11.537715357304598880 tPOT, plus that provider's own gas) | A third-party deal, a real track record, multi-provider health | One-operator evidence is the weakest part of the technical story |
 | **Budget for a day-scale deal** (22 hunting rounds = 0.674 tPOT of client gas; the provider pays 0.1629 per answer) | 288 rounds, so §7 stops being a caveat | Detection maths only becomes honest at that duration |
 | **An answer on randomness, and on native deposit refundability** | Whether the selector can ship, and whether we may promise a refund | Both are currently "unmeasured and contested"; both decide what a v2 can claim |
 

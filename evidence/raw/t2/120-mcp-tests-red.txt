@@ -1,0 +1,26 @@
+# makhzan-mcp red state — the test suite with no src/ yet
+# utc: 2026-10-29T16:00:08Z
+# command: mv src aside; npm test; mv src back
+# what it shows: the tools did not exist when the tests were written, so every failure is a
+#   missing module or a missing export, not an assertion that happened to pass.
+
+    throw new ERR_MODULE_NOT_FOUND(
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/src/config.ts' imported from /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/test/config.test.ts
+  code: 'ERR_MODULE_NOT_FOUND',
+✖ test/config.test.ts (90.7869ms)
+    throw new ERR_MODULE_NOT_FOUND(
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/src/tools/gate.ts' imported from /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/test/gate.test.ts
+  code: 'ERR_MODULE_NOT_FOUND',
+✖ test/gate.test.ts (90.8363ms)
+    throw new ERR_MODULE_NOT_FOUND(
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/src/tools/health.ts' imported from /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/test/health.test.ts
+  code: 'ERR_MODULE_NOT_FOUND',
+✖ test/health.test.ts (87.3689ms)
+    throw new ERR_MODULE_NOT_FOUND(
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/src/retry.ts' imported from /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/test/retry.test.ts
+  code: 'ERR_MODULE_NOT_FOUND',
+✖ test/retry.test.ts (88.326ms)
+    throw new ERR_MODULE_NOT_FOUND(
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/src/server.ts' imported from /home/mohammed_soliman/hackathons/portaldot-hackathon/apps/makhzan-mcp/test/server.test.ts
+  code: 'ERR_MODULE_NOT_FOUND',
+✖ test/server.test.ts (277.169499ms)
