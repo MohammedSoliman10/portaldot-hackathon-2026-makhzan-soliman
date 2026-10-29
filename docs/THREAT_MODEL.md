@@ -95,3 +95,4 @@ covered there is `[pending live run]`.
 | A release races a slash | documented same-transaction limit; a later slash does not reverse a release |
 | Payee is not the provider | a non-zero `minBond` refuses every release (`BondTooLow`); a floor of `0` pays that address, so the payer must name the provider |
 | Gate immutables defeat byte comparison | check code length, code hash and `makhzan()` on deploy; recorded as a limitation rather than "verified" |
+| MCP verify_file used as hash oracle | path and symlinks confined strictly to `MAKHZAN_VERIFY_DIR` before reading or hashing |

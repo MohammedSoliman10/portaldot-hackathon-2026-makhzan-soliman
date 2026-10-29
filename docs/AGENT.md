@@ -37,7 +37,7 @@ rest of this repo, so there is no build step.
 | Tool | Arguments | Returns |
 | --- | --- | --- |
 | `makhzan_health` | `dealId` | `healthOf` code and name, `endBlock`, blocks left (negative = term over), and the MakhzanGuard decision: `healthy`, `pending`, `default`, `settled-or-none`, `expired` |
-| `makhzan_verify_file` | `dealId`, `path`, optional `referencePath` | sha256 and size of the local file, the rebuilt Merkle root, the on-chain root, and `MATCH` or `MISMATCH` |
+| `makhzan_verify_file` | `dealId`, `path`, optional `referencePath` | sha256 and size of the local file, the rebuilt Merkle root, the on-chain root, and `MATCH` or `MISMATCH`. Scoped to `MAKHZAN_VERIFY_DIR`. |
 | `makhzan_deal_story` | `dealId` | the deal's events in block order (created, opened, passed, failed, claimed, settled) and the same PASS/FAIL check list the CLI's `verify` prints, ending in `RESULT: PASS`, `FAIL` or `INCOMPLETE` |
 | `makhzan_gate_status` | `dealId` | gate address, lock status, payer, payee, amount, `minBond` floor, the payee provider's bond, and whether `release` would pass now |
 
@@ -60,6 +60,10 @@ The chunker and the tree are imported from `apps/makhzan/src/{chunk,merkle}.ts`,
 browser verifier and the contract tests use, so the hashing rule cannot drift. A size or leaf-count
 mismatch is an error, never a verdict.
 
+File paths for both `path` and `referencePath` are strictly confined to `MAKHZAN_VERIFY_DIR`
+(defaulting to `process.cwd()`). Traversal attempts (`../`), absolute paths outside the folder,
+and symlinks that point outside are rejected before any file is opened or hashed.
+
 ### The gate verdict
 
 With no gate address configured the answer is `gate not deployed` — the live Portaldot deployment has
@@ -76,6 +80,7 @@ names the one that fails (`NotLocked`, `Pending`, `BondTooLow`, …). It never b
 | `MAKHZAN_CHAIN_ID` | yes | chain id, `420420777` on the Portaldot V3 testnet |
 | `MAKHZAN_CONTRACT` | yes | Makhzan address, `0x60481DFcFCA34A8F095939D9675eC715127B2e44` live |
 | `MAKHZAN_GATE` | no | StorageGate address; unset means "gate not deployed" |
+| `MAKHZAN_VERIFY_DIR` | no | the only directory `verify_file` may read, default current working directory (`process.cwd()`); path escapes (`../`), outside absolute paths, and outward-pointing symlinks are refused |
 | `MAKHZAN_BLOCK_SIZE` | no | challenge block size, default `1024`; it must reproduce the deal's leaf count or `verify_file` refuses |
 | `MAKHZAN_RPC_TIMEOUT_MS` | no | per-attempt budget, default `8000`; one retry follows a failure |
 
@@ -212,6 +217,7 @@ node scripts/live-client.mjs
   does not release.
 - **No autonomous spending.** The tools cannot spend, and the server has no funds. Connecting it to an
   agent does not give that agent a budget.
+- **Scoped filesystem access (MAKHZAN_VERIFY_DIR).** `verify_file` only reads files inside `MAKHZAN_VERIFY_DIR` (defaulting to the process working directory). Traversal (`../`), outside absolute paths, and outward-pointing symlinks are rejected before opening or hashing. The previous open risk of the tool serving as an unbounded hash oracle over the host filesystem is mitigated.
 - **Root, not bytes.** `verify_file` proves a file matches the committed root. It cannot prove where
   the file came from, and on a mismatch it cannot name a bad block without a reference copy.
 - **Not continuous storage.** A MATCH proves the local file equals what was committed. It says nothing
@@ -228,7 +234,7 @@ node scripts/live-client.mjs
 ```bash
 cd apps/makhzan-mcp
 npm run typecheck
-npm test          # 36 tests, no network: a fake Read surface and an in-memory MCP transport
+npm test          # 46 tests, no network: a fake Read surface and an in-memory MCP transport
 node scripts/live-client.mjs   # the live transcript above, read-only
 ```
 
