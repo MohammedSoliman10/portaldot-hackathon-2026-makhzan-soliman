@@ -1,0 +1,17 @@
+# Live StorageGate verification against real chain 420420777 — 2026-10-29T20:10:19.974Z
+RPC: https://test-evm-rpc-v3.portaldot.dev
+Gate Address: 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA
+Makhzan Address: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+
+[1280] gate address displayed: true
+[1280] makhzan link: true (0x60481DFcFCA34A8F095939D9675eC715127B2e44)
+[1280] deal 2 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,816. This page cannot send it, and it does not know who will." (NotLocked=true)
+[1280] deal 1 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,816. This page cannot send it, and it does not know who will." (NotLocked=true)
+[1280] horizontal overflow: 0px
+[390] gate address displayed: true
+[390] makhzan link: true (0x60481DFcFCA34A8F095939D9675eC715127B2e44)
+[390] deal 2 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,817. This page cannot send it, and it does not know who will." (NotLocked=true)
+[390] deal 1 verdict: "release would revert: NotLocked Assuming the recorded payee sends the transaction, at block 242,817. This page cannot send it, and it does not know who will." (NotLocked=true)
+[390] horizontal overflow: 0px
+
+CONSOLE ERRORS: none
