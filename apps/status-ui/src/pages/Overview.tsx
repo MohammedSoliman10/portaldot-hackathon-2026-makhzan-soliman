@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { useMode } from "../app/app-context";
 import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
@@ -172,6 +173,39 @@ export function Overview(options: LiveOptions) {
           </button>
         ) : null}
       </header>
+
+      <section
+        aria-labelledby="judges-strip-heading"
+        data-testid="judges-strip"
+        className="border border-rule-strong bg-ink-2 p-4"
+      >
+        <h2 id="judges-strip-heading" className="eyebrow">
+          Start here for judges
+        </h2>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Link
+            to="/verify"
+            className="flex min-h-[44px] items-center justify-between border border-rule px-4 py-2 font-mono text-xs text-paper no-underline transition-colors hover:border-ochre hover:text-ochre"
+          >
+            <span>Verify a file</span>
+            <span aria-hidden="true" className="text-ash">→</span>
+          </Link>
+          <Link
+            to="/replay"
+            className="flex min-h-[44px] items-center justify-between border border-rule px-4 py-2 font-mono text-xs text-paper no-underline transition-colors hover:border-ochre hover:text-ochre"
+          >
+            <span>Watch the slash replay</span>
+            <span aria-hidden="true" className="text-ash">→</span>
+          </Link>
+          <Link
+            to="/gate"
+            className="flex min-h-[44px] items-center justify-between border border-rule px-4 py-2 font-mono text-xs text-paper no-underline transition-colors hover:border-ochre hover:text-ochre"
+          >
+            <span>See the gate</span>
+            <span aria-hidden="true" className="text-ash">→</span>
+          </Link>
+        </div>
+      </section>
 
       <section aria-labelledby="deployment-heading">
         <h2 id="deployment-heading" className="eyebrow">

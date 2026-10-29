@@ -13,7 +13,7 @@ const render = (route = "/") =>
 
 describe("Start here for judges strip", () => {
   it("renders the 'Start here for judges' strip at the top of the Overview", () => {
-    const { getByTestId, getByRole } = render("/");
+    const { getByTestId } = render("/");
     const strip = getByTestId("judges-strip");
     expect(strip).toBeInTheDocument();
     expect(within(strip).getByRole("heading", { name: /start here for judges/i })).toBeInTheDocument();
