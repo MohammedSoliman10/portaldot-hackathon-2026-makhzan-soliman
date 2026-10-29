@@ -9,7 +9,7 @@ no write tool, and no way to spend anything.
 - Answers come from the chain the operator names in the environment, and nothing else.
 - Every answer's first line is `[MEASURED]`, and the line above the signature says which parts are
   derived (blocks left, the guard decision, the release verdict) so a reader can tell them apart.
-- Live transcript: `evidence/raw/t2/121-mcp-live-transcript.txt`. Unit tests: `evidence/raw/t2/120-*`.
+- Live transcript: `evidence/raw/t2/126-mcp-gate-live-transcript.txt`. Unit tests: `evidence/raw/t2/126-mcp-gate-tests-green.txt` (earlier baseline: `120-*`, `121-*`, `124-*`).
 
 ## What it is not
 
@@ -66,8 +66,9 @@ and symlinks that point outside are rejected before any file is opened or hashed
 
 ### The gate verdict
 
-With no gate address configured the answer is `gate not deployed` — the live Portaldot deployment has
-no StorageGate, and an invented address would be worse than no answer. With a gate configured, the
+With no gate address configured (on an unconfigured chain, or when `MAKHZAN_GATE_ADDRESS=""`), the answer
+is `gate not deployed` — nothing about a lock, a payee or a bond is inferred. On chain 420420777 the
+deployed StorageGate (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`) is used by default. With a gate configured, the
 tool first checks `gate.makhzan()` equals the Makhzan it was pointed at, then evaluates exactly the
 conditions `StorageGate.release` evaluates (lock open, guard healthy, `minBond` floor satisfied) and
 names the one that fails (`NotLocked`, `Pending`, `BondTooLow`, …). It never builds that transaction.
@@ -79,7 +80,8 @@ names the one that fails (`NotLocked`, `Pending`, `BondTooLow`, …). It never b
 | `MAKHZAN_RPC_URL` | yes | JSON-RPC endpoint, for example `https://test-evm-rpc-v3.portaldot.dev` |
 | `MAKHZAN_CHAIN_ID` | yes | chain id, `420420777` on the Portaldot V3 testnet |
 | `MAKHZAN_CONTRACT` | yes | Makhzan address, `0x60481DFcFCA34A8F095939D9675eC715127B2e44` live |
-| `MAKHZAN_GATE` | no | StorageGate address; unset means "gate not deployed" |
+| `MAKHZAN_GATE_ADDRESS` | no | StorageGate address; overrides the default (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` on chain 420420777); empty value (`""`) means "no gate" |
+| `MAKHZAN_GATE` | no | alias for `MAKHZAN_GATE_ADDRESS` |
 | `MAKHZAN_VERIFY_DIR` | no | the only directory `verify_file` may read, default current working directory (`process.cwd()`); path escapes (`../`), outside absolute paths, and outward-pointing symlinks are refused |
 | `MAKHZAN_BLOCK_SIZE` | no | challenge block size, default `1024`; it must reproduce the deal's leaf count or `verify_file` refuses |
 | `MAKHZAN_RPC_TIMEOUT_MS` | no | per-attempt budget, default `8000`; one retry follows a failure |
@@ -153,8 +155,8 @@ from the project root; the Claude Desktop snippet must be absolute.
 ## An example run
 
 This is the transcript the scripted client produced on 2026-10-29 against the live testnet
-(`evidence/raw/t2/121-mcp-live-transcript.txt`), trimmed to one deal. The agent asked; the server
-answered; nothing was signed.
+(`evidence/raw/t2/126-mcp-gate-live-transcript.txt`), trimmed to deal 2. The agent asked; the server
+answered from the live StorageGate `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`; nothing was signed.
 
 ```text
 tools (4):
@@ -166,18 +168,27 @@ tools (4):
 [request]  tools/call makhzan_health {"dealId":2}
 [response]
   [MEASURED] makhzan_health — deal 2
-  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 240397
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 242723
   healthOf 0 (settled-or-none)
-  term over by 67,519 blocks (head 240397, endBlock 172878)
+  term over by 69,845 blocks (head 242723, endBlock 172878)
   MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
   label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
 
 [request]  tools/call makhzan_gate_status {"dealId":2}
 [response]
   [MEASURED] makhzan_gate_status — deal 2
-  gate not deployed: MAKHZAN_GATE is unset, so there is no StorageGate address to read.
-  Nothing about a lock, a payee or a bond is inferred. Set MAKHZAN_GATE to a deployed gate and ask again.
-  label: MEASURED — the absence of configuration is the measured fact here.
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA, read at block 242723
+  gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)
+  lock: status 0 (none)
+  payer 0x0000000000000000000000000000000000000000
+  payee 0x0000000000000000000000000000000000000000
+  amount 0.00000000000000 tPOT (0 planck)
+  minBond floor 0.00000000000000 tPOT (0 planck)
+  provider 1 bond 0.00000000000000 tPOT (0 active deal(s), payee id 0)
+  MakhzanGuard decision: settled-or-none
+  release would pass now: NO — status 0 (none): no lock is open, so there is nothing to release or refund
+  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.
+  note: no transaction was built or sent. This is a read-only prediction, not a payment.
 
 [request]  tools/call makhzan_verify_file {"dealId":2,"path":".../public/samples/demo-1mib.bin"}
 [response]
@@ -198,9 +209,9 @@ tools (4):
 [response] isError=true: MCP error -32602: Tool makhzan_write_deal not found
 ```
 
-A model reading this can say: deal 2 is settled and its term is over; the gate is not deployed, so
-there is nothing to release; the 1 MiB sample is exactly the file deal 2 committed. It cannot say
-anything about a payment, because there is no tool that could make one.
+A model reading this can say: deal 2 is settled and its term is over; the live gate has no lock open
+for deal 2 (status 0 none), so there is nothing to release; the 1 MiB sample is exactly the file deal 2
+committed. It cannot say anything about a payment, because there is no tool that could make one.
 
 To reproduce the whole transcript (about 40 s on the live node):
 
@@ -234,7 +245,7 @@ node scripts/live-client.mjs
 ```bash
 cd apps/makhzan-mcp
 npm run typecheck
-npm test          # 46 tests, no network: a fake Read surface and an in-memory MCP transport
+npm test          # 49 tests, no network: a fake Read surface and an in-memory MCP transport
 node scripts/live-client.mjs   # the live transcript above, read-only
 ```
 
