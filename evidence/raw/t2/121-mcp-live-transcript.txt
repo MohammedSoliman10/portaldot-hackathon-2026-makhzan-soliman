@@ -1,5 +1,5 @@
 # live MCP transcript — a scripted JSON-RPC client over stdio against the real server, read-only
-# utc: 2026-10-29T16:04:06Z
+# utc: 2026-10-29T16:06:03Z
 # chain: RPC https://test-evm-rpc-v3.portaldot.dev, chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
 # gate: MAKHZAN_GATE unset — this is the honest "gate not deployed" case
 # key: none was present; the script starts the server with a whitelisted env and no key of any kind
@@ -21,9 +21,9 @@ tools (4):
 [request]  tools/call makhzan_health {"dealId":1}
 [response]
   [MEASURED] makhzan_health — deal 1
-  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 240374
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 240394
   healthOf 0 (settled-or-none)
-  term over by 67,958 blocks (head 240374, endBlock 172416)
+  term over by 67,978 blocks (head 240394, endBlock 172416)
   MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
   label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
 
@@ -37,8 +37,8 @@ tools (4):
 [request]  tools/call makhzan_deal_story {"dealId":1}
 [response]
   [MEASURED] makhzan_deal_story — deal 1
-  chain state read at block 240374, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
-  history (5 events, blocks 172266..172564, head 240374):
+  chain state read at block 240394, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+  history (5 events, blocks 172266..172564, head 240394):
     block 172266  created  root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 endBlock 172416 price 5.00000000000000 tPOT
     block 172281  opened  index 451, deadline 172331
     block 172295  passed
@@ -70,9 +70,9 @@ tools (4):
 [request]  tools/call makhzan_health {"dealId":2}
 [response]
   [MEASURED] makhzan_health — deal 2
-  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 240376
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 240397
   healthOf 0 (settled-or-none)
-  term over by 67,498 blocks (head 240376, endBlock 172878)
+  term over by 67,519 blocks (head 240397, endBlock 172878)
   MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
   label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
 
@@ -86,8 +86,8 @@ tools (4):
 [request]  tools/call makhzan_deal_story {"dealId":2}
 [response]
   [MEASURED] makhzan_deal_story — deal 2
-  chain state read at block 240376, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
-  history (7 events, blocks 172578..172887, head 240376):
+  chain state read at block 240397, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+  history (7 events, blocks 172578..172887, head 240397):
     block 172578  created  root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 endBlock 172878 price 5.00000000000000 tPOT
     block 172584  opened  index 29, deadline 172634
     block 172585  passed
