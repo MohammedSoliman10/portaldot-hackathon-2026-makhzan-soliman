@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { BlockLink } from "../components/BlockLink";
 import { useMode } from "../app/app-context";
 import { useEvidence } from "../data/evidence-context";
@@ -136,7 +137,19 @@ export function Gate({ client }: { client?: ReadClient }) {
               </div>
               <div className="border-t border-rule py-2 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4">
                 <dt className="text-xs text-ash">Makhzan address</dt>
-                <dd className="mono break-all text-xs">{mode.address ?? "not configured"}</dd>
+                <dd className="mono break-all text-xs">
+                  {mode.address ? (
+                    <Link
+                      to="/"
+                      className="underline hover:text-ochre"
+                      aria-label="Makhzan deployment overview"
+                    >
+                      {mode.address}
+                    </Link>
+                  ) : (
+                    "not configured"
+                  )}
+                </dd>
               </div>
             </dl>
           </section>
