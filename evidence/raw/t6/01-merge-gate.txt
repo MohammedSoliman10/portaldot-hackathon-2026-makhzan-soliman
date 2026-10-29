@@ -1,0 +1,52 @@
+# merge gate — 008 into main — 2026-10-29T17:00Z — tree c408818
+
+$ git diff --stat origin/main HEAD -- contracts/
+(empty = no contract change)
+
+$ forge fmt --check
+exit=0
+$ node scripts/check-size.mjs
+Makhzan runtime 6566 B <= budget 10240 B (margin 3674 B)
+StorageGate runtime 2528 B <= budget 2600 B (margin 72 B)
+$ forge build --sizes (tail)
+| Makhzan           | 6,566            | 7,154             | 18,010             | 41,998              |
+| MakhzanHarness    | 6,728            | 7,316             | 17,848             | 41,836              |
+| StorageGate       | 2,528            | 2,682             | 22,048             | 46,470              |
+   ╭▸ src/makhzan/MakhzanGuard.sol:42:9
+$ forge test
+
+Ran 31 test suites in 3.29s (9.41s CPU time): 208 tests passed, 0 failed, 0 skipped (208 total tests)
+$ forge snapshot --check
+exit=0
+
+$ node packages/merkle-vectors/generate.ts --check
+golden vector check passed
+exit=0
+$ npm --prefix apps/makhzan run typecheck
+
+exit=0
+$ npm --prefix apps/makhzan test
+ℹ pass 171
+ℹ fail 0
+$ npm --prefix apps/status-ui run typecheck
+
+exit=0
+$ npm --prefix apps/status-ui test
+ Test Files  30 passed (30)
+      Tests  255 passed (255)
+$ npm --prefix apps/status-ui run build (LIVE env, gate unset)
+✓ built in 2.78s
+exit=0
+$ check:evidence / check:sample / check:readonly / smoke
+evidence OK: portaldot-live-run2 (sha256 0x12feb5e6c9ebcd98105df763828bd369f22bd741a3590599a2bc64108a190cf9)
+sample OK: 8192 bytes, 8 blocks, root 0xd6bcfc4d0c933f0680ec2e7b1c0ea8aecba797de45bf726ae0ca4c8c286325b7; deal sample OK: 1048576 bytes, 1024 blocks, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e, root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+
+smoke OK: 9 routes served the shell directly
+$ node scripts/secret-scan.mjs
+secret scan PASS — 0 findings in 713 files (809 paths)
+$ node scripts/docs-hygiene.mjs
+docs hygiene: 133 facts in README.md, docs/CHECKIN.md, docs/BUSINESS.md all match evidence/
+exit=0
+
+$ npm --prefix apps/status-ui run check:readonly (exit code only, the run is inside the suite)
+check:readonly exit=0 — 7 readonly-guard tests pass (recorded separately at 17:01Z)
