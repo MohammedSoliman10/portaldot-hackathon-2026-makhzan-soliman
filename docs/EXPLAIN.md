@@ -112,6 +112,30 @@ deploys through the same tooling, dry run and pending record as Makhzan
   matching the on-chain `code` length read back at deploy (`evidence/raw/t1/59-live-deploy.txt`). The
   owner's planning formula put the deployment at roughly 517 tPOT, an estimate, not a measurement.
 
+## The agent, read-only
+
+`apps/makhzan-mcp` is an MCP server: four tools an AI agent can call to **look** at a deal, and nothing
+else.
+
+| Tool | The question it answers |
+| --- | --- |
+| `makhzan_health` | Is the deal healthy, inside its term, and would the guard let a consumer pay? |
+| `makhzan_verify_file` | Does this local file hash to the root the deal commits? |
+| `makhzan_deal_story` | What happened to this deal, block by block, and do the state and the events agree? |
+| `makhzan_gate_status` | Is there a gate lock, and would `release` pass right now? |
+
+The point is what is absent. There is no signer in the process, no write tool, and the server refuses
+to start when a key variable is present in its environment. An agent holding these tools can tell a
+human "this file is the one deal 2 committed" or "the gate is not deployed, so there is nothing to
+release", and cannot do a single thing about it. `makhzan_gate_status` predicts what `release` would
+do; it does not release. That is the honest boundary: verification delegated to a model, authority
+kept with the person.
+
+One limit is worth repeating where an agent will read it. The deal commits a Merkle root and a leaf
+count, not the blocks, so `verify_file` can prove a file matches or does not. When it does not, the
+chain alone cannot say which block differs, and the tool says so rather than inventing an index; give
+it a second copy that does match and it names the first bad block exactly.
+
 ## What was not built
 
 The live run exists (contract `0x60481DFcFCA34A8F095939D9675eC715127B2e44` on chain `420420777`,
@@ -123,9 +147,11 @@ to `77-verify-deal2.txt`, summarised in `72-live-summary.txt`), and live block t
 - No live evidence-bundle CLI run `[pending live run]`; the bundle schema and its validator exist
   and are tested locally.
 - No randomness beacon beyond the D5 fallback (blocked on G03).
-- No agent client, indexed history or pull-payment escrow contract (Tier 2+). The read-only status app
-  *is* built and live (feature 003, <https://status-ui-one.vercel.app/>): it reads the deployment and
-  falls back to the recorded run, but it is a viewer, not a client that signs or pays.
+- No agent that can **act**: no indexed history, no pull-payment escrow, no agent with a budget
+  (Tier 2+). A read-only agent does exist (feature 007, [AGENT.md](AGENT.md)): it can verify a deal and
+  a file for a human, but it cannot sign, pay or release anything. The read-only status app is also
+  live (feature 003, <https://status-ui-one.vercel.app/>): it reads the deployment and falls back to
+  the recorded run, but it is a viewer, not a client that signs or pays.
 - No continuous-storage proof, no per-deal bond, no proof that the provider holds a distinct copy of
   every block.
 - No PolkaVM deployment: the resolc probe is a Tier 0 compiler test, not a deployed Makhzan.
