@@ -97,6 +97,24 @@ storage-deposit split and the absence of any answer/settle refund — are collec
 | `verify:deployment` | **match**, 6,566 B runtime = 6,566 B artifact, `firstDiff: null` |
 | Config read back | window `50`, block size `1024`, slash `2000 bps`, min bond `1e15 units` (`1e19` wei), duration `100…100800` |
 
+### StorageGate Deployment — Portaldot V3 testnet `[live run]`
+
+| Field | Value |
+| --- | --- |
+| Chain id | `420420777` |
+| RPC | `https://test-evm-rpc-v3.portaldot.dev` |
+| Contract | `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` |
+| Target Makhzan | `0x60481DFcFCA34A8F095939D9675eC715127B2e44` |
+| Deployer | `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` |
+| Deploy tx | `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7` |
+| Block | `240956` |
+| Status / gas | `success` / `7692259825084675` gas, effective price `27375` wei |
+| Measured cost | `210.575612711692978125 tPOT` |
+| Runtime bytes | `2,528 B` |
+| Runtime code hash | `0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5` |
+| `makhzan()` read-back | `0x60481DFcFCA34A8F095939D9675eC715127B2e44` (matches target) |
+| Evidence | `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/receipts/live/0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7.json`, `evidence/raw/t2/126-gate-live-verify.txt` |
+
 **Explorer.** Confirmed deep links:
 
 - Scanner block page: <https://scanner-testnet-v3.portaldot.dev/blocks/171308>. The route returns HTTP
@@ -230,8 +248,8 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Live retrieval from a fresh client | **implemented [live run]**; 1,024 blocks verified against the deal root, sha256 `7f2fd6d5...e21e` matches the upload, tampered copy rejected with `ProofRejected` | `75-live-retrieval.txt` |
 | Daemon receipt-timeout fix (T1-002) | **implemented, red then green**; hash persisted before wait, 120 s minimum, later poll labels from receipt/read-back | `61-t1002-red.txt`, `61-t1002-green.txt` |
 | Status web app (feature 003) | **merged and live**; Overview, Deals, Proof, Verify, Replay (`/replay`) and Judges read the deployment live and fall back to the recorded run | <https://status-ui-one.vercel.app/> |
-| Consumer example: `MakhzanGuard` (health + term) and `StorageGate` (lock / release / refund, optional bond floor) | implemented, local; never deployed | `contracts/src/makhzan/MakhzanGuard.sol`, `contracts/src/makhzan/StorageGate.sol`, `evidence/raw/t1/93-storage-gate-bond-suite.txt`, `94-storage-gate-size-gas.txt` |
-| Consumer demo: `gate-demo` (deploy, lock, release, expire, slash, `BondTooLow`, refund) and the gate's size budget | implemented, local; `2,528 B` against a `2,600 B` budget | `evidence/raw/t1/100-gate-deploy.txt`, `101-gate-demo-local.txt`, `102-size-check-gate.txt` |
+| Consumer example: `MakhzanGuard` (health + term) and `StorageGate` (lock / release / refund, optional bond floor) | **deployed live** (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`) | `contracts/src/makhzan/MakhzanGuard.sol`, `contracts/src/makhzan/StorageGate.sol`, `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt` |
+| Consumer demo: `gate-demo` (deploy, lock, release, expire, slash, `BondTooLow`, refund) and the gate's size budget | implemented, local demo deals (`2,528 B` against a `2,600 B` budget; live gate deployed, demo deals pending live run) | `evidence/raw/t1/100-gate-deploy.txt`, `101-gate-demo-local.txt`, `102-size-check-gate.txt` |
 | Agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
 | Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
 | PolkaVM (`resolc`) deployment path | simulated only (compiler probe) | `evidence/raw/t1/` Tier-0 gates |
@@ -366,7 +384,7 @@ node src/cliMain.ts verify 1
 
 Expected: Forge reports **208 tests passed**; `apps/makhzan` reports **171 tests passed**;
 `apps/makhzan-mcp` **36**; `apps/gates` **49**; `apps/status-ui` **222**; the secret scanner **6**; the
-docs-hygiene check **7** tests and **133 facts**; the e2e ends with
+docs-hygiene check **8** tests and **202 facts**; the e2e ends with
 `PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
 check prints **6,566 B ≤ 10,240 B**.
 
@@ -422,8 +440,7 @@ agent **read** Makhzan. Four tools, all `readOnlyHint`, all labelled `[MEASURED]
 
 It has **no key, no signer and no write tool**: it cannot create a deal, answer a challenge, claim,
 settle, lock or release a payment. `loadConfig` refuses to start if a key variable is present, and the
-read surface is nine view/client calls. `gate_status` predicts what `release` would do — and answers
-"gate not deployed" here, because no StorageGate exists on this chain — but it never builds that
+read surface is nine view/client calls. `gate_status` predicts what `release` would do — and reads live StorageGate `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` when configured (or answers "gate not deployed" when `MAKHZAN_GATE` is unset) — but it never builds that
 transaction. Verification is delegated to the model; authority stays with the person.
 
 Setup for Claude Desktop and Claude Code, the live transcript and the limits are in

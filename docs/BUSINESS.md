@@ -251,8 +251,7 @@ runtime-vs-docs checker, a scaffolder or an agent-payments rail. A read-only MCP
 (`apps/makhzan-mcp`, keyless and safe). We use no Portaldot-native module in the live path — the
 `TransactionStorage` anchor is a plan, not a shipped feature. We do not promise refunds of the storage
 reserve (refundability is unmeasured and contested). We do not verify continuous storage, bandwidth
-or availability. We have one provider, one operator and two deals, and no consumer beyond the local
-`StorageGate` demo <!-- [update after live gate] -->.
+or availability. We have one provider, one operator and two deals, and no consumer beyond `StorageGate` (deployed live at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost 210.575612711692978125 tPOT; gate demo deals are local/pending live execution).
 
 ## 9. 30 / 60 / 90 days
 

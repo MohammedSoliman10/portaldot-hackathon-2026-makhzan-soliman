@@ -77,7 +77,8 @@ slash), then a second deal whose release is refused `BondTooLow`, whose in-term 
 `RefundNotAllowed`, and which is refunded at its end block. The gate's balance ends at zero. The gate
 deploys through the same tooling, dry run and pending record as Makhzan
 (`evidence/raw/t1/100-gate-deploy.txt`) at 2,528 B runtime against a 2,600 B budget
-(`evidence/raw/t1/102-size-check-gate.txt`).
+(`evidence/raw/t1/102-size-check-gate.txt`). StorageGate is deployed live on Portaldot V3 testnet
+at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost `210.575612711692978125 tPOT`, runtime `2,528 B`, keccak `0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5`), pointing immutably at Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`). Gate demo deals remain locally verified.
 
 `minBond` is a floor, not a proof, and these are its limits:
 
@@ -98,7 +99,7 @@ deploys through the same tooling, dry run and pending record as Makhzan
   the end block), resolve with a slash ≈ 323k, settle ≈ 219k–307k. These stay the per-call
   reference because Portaldot's `gasUsed` is reported in its own native scale and, on the
   storage-writing transactions, carries the storage deposit inside it. The live run recorded the
-  fee actually paid instead: `createDeal` 11.557016609978156 tPOT on top of its 5 tPOT value,
+  fee actually paid instead: `createDeal` 11.5570166099781575 tPOT on top of its 5 tPOT value,
   `resolve` with a slash 0.015316960078034360 tPOT (`evidence/raw/t1/60-live-pass.txt`,
   `69-live-resolve-b.txt`, `72-live-summary.txt`).
 - **The bond**: 10,000,000,000,000,000 units in the local run; 20% (2,000,000,000,000,000 units) is
@@ -126,8 +127,7 @@ else.
 
 The point is what is absent. There is no signer in the process, no write tool, and the server refuses
 to start when a key variable is present in its environment. An agent holding these tools can tell a
-human "this file is the one deal 2 committed" or "the gate is not deployed, so there is nothing to
-release", and cannot do a single thing about it. `makhzan_gate_status` predicts what `release` would
+human "this file is the one deal 2 committed" or "StorageGate is live at 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA (or unset, so nothing to release)", and cannot do a single thing about it. `makhzan_gate_status` predicts what `release` would
 do; it does not release. That is the honest boundary: verification delegated to a model, authority
 kept with the person.
 

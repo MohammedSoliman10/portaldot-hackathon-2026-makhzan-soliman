@@ -13,7 +13,7 @@ Foundry/anvil; live numbers come from Portaldot V3 (`chain id 420420777`, spec `
 
 | Criterion | Weight | What we can defend | Honest verdict |
 | --- | --- | --- | --- |
-| Technical Feasibility | 30 | Deployed and exercised end-to-end on a public testnet; 208 contract tests (unit, fuzz, invariant), 171 client tests, keyless live audit, byte-for-byte deployment check, a consumer gate demo | **Strong**, with one-operator, fallback-randomness and local-gate caveats |
+| Technical Feasibility | 30 | Deployed and exercised end-to-end on a public testnet (Makhzan and StorageGate live); 208 contract tests (unit, fuzz, invariant), 171 client tests, keyless live audit, byte-for-byte deployment check, consumer gate live | **Strong**, with one-operator, fallback-randomness and unexercised live gate demo caveats |
 | Innovation | 30 | Merkle commitment + challenge/slash + evidence bundle + keyless verification in one small flow | **Modest**; the primitives are known, the packaging is the contribution |
 | Ecosystem Contribution | 20 | Measured Portaldot V3 gotchas, native dry-run and TransactionStorage facts, docs-vs-evidence check, reusable client patterns | **Useful but small**; no upstream PR, no SDK, no third-party adoption |
 | Business Potential | 20 | A clear payer hypothesis and a cost model that can be tested | **Unvalidated**; no interviews, no pricing test, no paying user |
@@ -36,6 +36,7 @@ non-answer, and release payment; a separate keyless client can audit every step 
 | `evidence/raw/t1/48-e2e-local.txt` | Local SC-001/SC-002 run from deploy to settle, one command |
 | `evidence/raw/t1/101-gate-demo-local.txt` | `gate-demo` on local anvil: deploy, lock with a bond floor, release while healthy, challenge/expire/resolve (slash), `BondTooLow`, `RefundNotAllowed`, refund at the end block, gate balance `0` |
 | `evidence/raw/t1/100-gate-deploy.txt`, `102-size-check-gate.txt` | StorageGate deploys through the same dry run and pending record as Makhzan, `2,528 B` runtime against a `2,600 B` budget enforced next to Makhzan's |
+| `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt` | StorageGate live deploy: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured cost `210.575612711692978125 tPOT`, runtime `2,528 B`, keccak `0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5` |
 | `evidence/raw/t1/78-chain-facts.txt`, `79-account-mapping-deposits.txt` | Chain constants, H160→AccountId32 mapping, deposit split reconciled against `system.account.reserved` |
 
 **Weak spots (discount these).**
@@ -52,7 +53,7 @@ non-answer, and release payment; a separate keyless client can audit every step 
 - The EVM deploy was expensive (`529.844316817465986480 tPOT` total); the native dry-run shows a
   different storage-deposit charge (`130.9395 tPOT`) and a fee estimate around `0.7467 tPOT`
   (`evidence/raw/t1/86-native-deploy-dryrun.txt`), but no native deploy was executed.
-- The consumer gate is **local only**: never deployed to Portaldot, no third party has used it, and its
+- The consumer gate is **deployed live** (at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost `210.575612711692978125 tPOT`), but its demo deals remain verified locally only (no live gate deals claimed yet); no third party has used it, and its
   bond floor is read in the same transaction as the payment. A floor of `0` disables the check, and the
   floor only works when the payee is the provider's registered address (`docs/EXPLAIN.md`,
   `docs/THREAT_MODEL.md`).

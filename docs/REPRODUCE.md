@@ -52,6 +52,37 @@ contains a slashed challenge (20% of the bond) and a later claim. Recorded run:
 > If the public RPC is down or has pruned the log range, the command prints `UNKNOWN … <node message>`
 > or `INCOMPLETE` and exits `1`. That is deliberate: it does not guess a pass.
 
+## 2b. Read back live StorageGate deployment (keyless) — about 5 s
+
+StorageGate is deployed live on Portaldot V3 testnet at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (block `240956`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, measured deploy cost `210.575612711692978125 tPOT`). Read back the runtime code length, keccak hash and immutable `makhzan()` pointer:
+
+```bash
+# Code length (2,528 B = 5,056 hex characters) and code hash
+cast code 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA --rpc-url https://test-evm-rpc-v3.portaldot.dev | wc -c
+cast keccak $(cast code 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA --rpc-url https://test-evm-rpc-v3.portaldot.dev)
+# Expected codeHash: 0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5
+
+# Immutable makhzan() pointer read-back
+cast call 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA "makhzan()(address)" --rpc-url https://test-evm-rpc-v3.portaldot.dev
+# Expected: 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+```
+
+Alternatively, from `apps/makhzan` using viem:
+```bash
+cd apps/makhzan
+node --input-type=module -e '
+import { createPublicClient, http, keccak256 } from "viem";
+import { readFileSync } from "node:fs";
+const c = createPublicClient({ transport: http("https://test-evm-rpc-v3.portaldot.dev") });
+const code = await c.getCode({ address: "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA" });
+const artifact = JSON.parse(readFileSync("../../contracts/out/StorageGate.sol/StorageGate.json", "utf8"));
+const makhzan = await c.readContract({ address: "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA", abi: artifact.abi, functionName: "makhzan" });
+console.log(`gate code: ${(code.length - 2) / 2} B, codeHash: ${keccak256(code)}, makhzan: ${makhzan}`);
+'
+```
+
+Recorded run: `evidence/raw/t2/126-gate-live-verify.txt`.
+
 ## 3. Fresh-client retrieval — under 1 s
 
 ```bash
@@ -185,7 +216,7 @@ block. This is the arithmetic behind the honesty section of `BUSINESS.md` §7, i
 ## What these five do not prove
 
 - They do not reproduce the deploy or the live rounds (those cost real testnet funds). Those are
-  evidenced, not re-run: `evidence/raw/t1/59-live-deploy.txt`, `60-live-pass.txt`, `64`–`72`.
+  evidenced, not re-run: Makhzan deploy 529.844316817465986480 tPOT (`evidence/raw/t1/59-live-deploy.txt`), StorageGate deploy 210.575612711692978125 tPOT (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`), live rounds `60-live-pass.txt`, `64`–`72`.
 - They do not prove the provider is independent: both live deals were run by this team.
 - They do not test the native deployment path. That was measured by an unsigned dry-run only:
   `evidence/raw/t1/86-native-deploy-dryrun.txt`.

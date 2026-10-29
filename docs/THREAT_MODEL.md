@@ -73,12 +73,14 @@ covered there is `[pending live run]`.
   record's provider id matches the deal's `providerId`. Any other payee reads bond `0` — refused with
   `BondTooLow` when the floor is non-zero, paid when it is zero. The gate cannot verify a provider it
   was not told about.
-- **The gate is local only**: implemented and tested, never deployed to Portaldot. It has no admin and
+- **The gate is deployed live, but deals are unexercised on chain**: StorageGate is live on Portaldot V3
+  at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured cost `210.575612711692978125 tPOT`), but gate demo deals have only run on local anvil. It has no admin and
   no upgrade path, so a bug cannot be fixed at the same address.
 - **The gate's deploy is not byte-for-byte verified**: `StorageGate` stores the Makhzan address as an
   immutable, so the artifact has zeros where the chain has the address (`verify:deployment` reports
-  `differs at byte 191: chain 5f artifact 00`). A gate deploy is checked by code length, code hash and
-  a `makhzan()` read-back instead (`evidence/raw/t1/100-gate-deploy.txt`).
+  `differs at byte 191: chain 60 artifact 00`). The gate deploy is checked by code length (2,528 B), code hash
+  (`0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5`), and a `makhzan()` read-back
+  (`0x60481DFcFCA34A8F095939D9675eC715127B2e44`) instead (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`).
 
 ## Residual risks and mitigations
 
