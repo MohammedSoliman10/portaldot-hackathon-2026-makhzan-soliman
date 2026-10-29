@@ -1,0 +1,80 @@
+# makhzan-mcp — StorageGate default and MAKHZAN_GATE_ADDRESS override tests before the feature exists
+# utc: 2026-10-29T19:57:33Z
+# command: npm test (in apps/makhzan-mcp), tests written first
+# what it shows: 2 of 49 fail for the right reason:
+#   - loadConfig defaults to live StorageGate on chain 420420777 fails because config.gate was null;
+#   - loadConfig allows MAKHZAN_GATE_ADDRESS to override the default fails because MAKHZAN_GATE_ADDRESS was not read.
+
+== npm test ==
+✔ loadConfig needs an explicit RPC, chain id and contract (2.6276ms)
+✖ loadConfig defaults to live StorageGate on chain 420420777 (3.3388ms)
+✔ loadConfig defaults to no gate on unconfigured chains (0.2124ms)
+✖ loadConfig allows MAKHZAN_GATE_ADDRESS to override the default (0.4113ms)
+✔ loadConfig treats empty MAKHZAN_GATE_ADDRESS as no gate (0.1843ms)
+✔ loadConfig accepts a gate and an explicit timeout (0.1932ms)
+✔ loadConfig refuses to start with a key in the environment, and never echoes it (0.392ms)
+✔ loadConfig rejects a timeout that is not a positive integer (0.3486ms)
+✔ loadConfig keeps verify_file inside the current directory by default (0.3855ms)
+✔ loadConfig resolves MAKHZAN_VERIFY_DIR to an absolute folder (0.4796ms)
+✔ gate_status says the gate is not deployed when no address is configured (1.6516ms)
+✔ gate_status reports lock, payee, amount, floor and bond, and that release would pass (0.4915ms)
+✔ gate_status says NO when the provider bond is under the floor (0.443ms)
+✔ gate_status says NO and names the guard state when a challenge is open (1.348ms)
+✔ gate_status reports a released or refunded lock instead of pretending it is locked (0.4314ms)
+✔ gate_status refuses a gate that points at a different Makhzan (0.8165ms)
+✔ guardDecision maps healthOf and the term exactly as MakhzanGuard does (1.3599ms)
+✔ healthTool reports the measured block, end block and the guard decision (1.1647ms)
+✔ healthTool says the term is over instead of pretending the deal is healthy (20.1387ms)
+✔ healthTool refuses an unknown deal rather than inventing state (0.6065ms)
+✔ withRetry returns the first success and does not retry it (1.5653ms)
+✔ withRetry retries exactly once after a failure (0.3934ms)
+✔ withRetry gives up after two attempts and keeps both messages (1.0412ms)
+✔ withRetry times an attempt out at the configured budget and retries it (51.603ms)
+✔ the server exposes exactly four read-only tools and no write tool (22.7269ms)
+✔ makhzan_health answers over JSON-RPC with a MEASURED block (4.494ms)
+✔ makhzan_gate_status says gate not deployed with no address configured (2.4413ms)
+✔ makhzan_gate_status uses the configured gate when there is one (1.9971ms)
+✔ makhzan_verify_file verifies a real file over JSON-RPC and names a mismatch (24.521201ms)
+✔ a failing read is returned as an MCP error, not as a fabricated verdict (2.1494ms)
+✔ an unknown tool is refused, and the refusal is not a verdict (1.4925ms)
+✔ makhzan_verify_file refuses a file outside MAKHZAN_VERIFY_DIR over JSON-RPC (2.3544ms)
+✔ deal_story rebuilds the history from events and reports the verify result (2.484ms)
+✔ deal_story is INCOMPLETE, never PASS, when the node refuses the log range (0.6306ms)
+✔ deal_story surfaces a failed fetch instead of inventing a history (1.0469ms)
+✔ verify_file matches a file whose Merkle root equals the on-chain root (21.8163ms)
+✔ verify_file names the first bad block when a reference copy localises it (4.5464ms)
+✔ verify_file refuses to guess a block from the chain root alone, and says why (2.4228ms)
+✔ verify_file refuses a reference file that does not hash to the committed root (3.5098ms)
+✔ verify_file refuses a file whose size is not the deal size (1.5224ms)
+✔ verify_file refuses when the block size does not reproduce the deal leaf count (1.6023ms)
+✔ verify_file refuses a missing path instead of returning a verdict (1.3398ms)
+✔ verify_file accepts a path relative to MAKHZAN_VERIFY_DIR (2.1324ms)
+✔ verify_file accepts a symlink that stays inside MAKHZAN_VERIFY_DIR (2.4747ms)
+✔ verify_file refuses ../ that escapes MAKHZAN_VERIFY_DIR (1.8003ms)
+✔ verify_file refuses an absolute path outside MAKHZAN_VERIFY_DIR and names the setting (1.1557ms)
+✔ verify_file refuses a symlink inside the folder that points outside it (1.4014ms)
+✔ verify_file refuses a symlinked folder that leads outside (1.2351ms)
+✔ verify_file applies the same rule to referencePath (2.2723ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 47
+ℹ fail 2
+ℹ duration_ms 544.032903
+
+✖ failing tests:
+
+test at test/config.test.ts:23:1
+✖ loadConfig defaults to live StorageGate on chain 420420777 (3.3388ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + null
+  - '0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA'
+
+test at test/config.test.ts:37:1
+✖ loadConfig allows MAKHZAN_GATE_ADDRESS to override the default (0.4113ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + null
+  - '0x1111111111111111111111111111111111111111'
