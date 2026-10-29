@@ -1,0 +1,23 @@
+# 008 gate page — local gate — 2026-10-29T16:20Z — tree c30f191
+
+$ npm --prefix apps/status-ui run typecheck
+> tsc --noEmit
+
+exit=0
+
+$ npm --prefix apps/status-ui test
+ Test Files  30 passed (30)
+      Tests  255 passed (255)
+
+$ npm --prefix apps/status-ui run build (LIVE env, VITE_GATE_ADDRESS unset)
+✓ built in 2.05s
+exit=0
+
+$ npm --prefix apps/status-ui run smoke
+smoke OK: 9 routes served the shell directly
+
+$ npm --prefix apps/status-ui run check:evidence
+evidence OK: portaldot-live-run2 (sha256 0x12feb5e6c9ebcd98105df763828bd369f22bd741a3590599a2bc64108a190cf9)
+
+$ node scripts/secret-scan.mjs
+secret scan PASS — 0 findings in 676 files (766 paths)

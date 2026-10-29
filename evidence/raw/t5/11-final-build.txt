@@ -1,0 +1,18 @@
+# final build after the evidence captures — 2026-10-29T16:21Z — tree 114fe16
+# VITE_GATE_ADDRESS unset: the shipped build must show the honest 'not deployed yet' state
+
+$ npm --prefix apps/status-ui run build
+✓ built in 1.99s
+exit=0
+
+$ grep -c VITE_GATE_ADDRESS dist/assets/*.js
+apps/status-ui/dist/assets/index-D4fQ1oYT.js
+(the variable name appears only in the not-deployed copy)
+
+$ npm --prefix apps/status-ui run smoke
+smoke OK: 9 routes served the shell directly
+
+$ grep -c "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512" apps/status-ui/dist/assets/*.js
+apps/status-ui/dist/assets/ccip-CHvMEBJa.js:0
+apps/status-ui/dist/assets/index-D4fQ1oYT.js:0
+0 occurrences — no gate address is baked into the shipped bundle

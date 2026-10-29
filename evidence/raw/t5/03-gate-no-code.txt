@@ -1,0 +1,8 @@
+# /gate with VITE_GATE_ADDRESS set to the recorded local deploy 0xe7f1…0512, against the live test RPC — 2026-10-29T16:21Z
+# that address holds no code on chain 420420777, so the honest state is 'no contract at this address'
+
+[gate set] [1280] /gate h1="The gate that pays on a healthy deal" unset=false noContract=true designNote=false addressShown=true
+[gate set] [1280] nav gate link=1 overflow=0px
+[gate set] [390] /gate h1="The gate that pays on a healthy deal" unset=false noContract=true designNote=false addressShown=true
+[gate set] [390] nav gate link=1 overflow=0px
+[gate set] CONSOLE/NETWORK ERRORS: none
