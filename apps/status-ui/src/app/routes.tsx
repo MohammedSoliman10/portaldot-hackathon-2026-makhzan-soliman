@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { Deal } from "../pages/Deal";
+import { Gate } from "../pages/Gate";
 import { Judges } from "../pages/Judges";
 import { NotFound } from "../pages/NotFound";
 import { Overview } from "../pages/Overview";
@@ -16,6 +17,7 @@ export function AppRoutes() {
       <Route path="/verify" element={<Verify />} />
       <Route path="/verify/:dealId" element={<Verify />} />
       <Route path="/proof" element={<Proof />} />
+      <Route path="/gate" element={<Gate />} />
       <Route path="/receipt/:id" element={<Receipt />} />
       <Route path="/judges" element={<Judges />} />
       <Route path="/replay" element={<Replay />} />
