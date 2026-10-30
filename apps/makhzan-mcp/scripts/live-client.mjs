@@ -14,6 +14,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseDealIds } from "../src/dealIds.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -24,6 +25,7 @@ const VERIFY_DIR = join(ROOT, "..", "status-ui", "public", "samples");
 const RPC = process.env.MAKHZAN_RPC_URL ?? "https://test-evm-rpc-v3.portaldot.dev";
 const CHAIN = process.env.MAKHZAN_CHAIN_ID ?? "420420777";
 const CONTRACT = process.env.MAKHZAN_CONTRACT ?? "0x60481DFcFCA34A8F095939D9675eC715127B2e44";
+const dealIds = parseDealIds(process.argv.slice(2), process.env);
 
 /**
  * The child gets PATH and HOME plus the three public settings. It does not inherit the caller's
@@ -81,6 +83,7 @@ const serverInfo = client.getServerVersion();
 say(`[server]   ${serverInfo?.name ?? "?"} ${serverInfo?.version ?? ""} over stdio JSON-RPC`);
 say(`[client]   ${RPC} chain ${CHAIN} contract ${CONTRACT}`);
 say(`[client]   sample file ${SAMPLE}`);
+say(`[client]   deals: ${dealIds.join(", ")}`);
 say();
 
 const { tools } = await client.listTools();
@@ -99,7 +102,7 @@ for (const tool of tools) {
 }
 say();
 
-for (const dealId of [1, 2]) {
+for (const dealId of dealIds) {
   say(`=== deal ${dealId} ===`);
   await call(client, "makhzan_health", { dealId });
   await call(client, "makhzan_gate_status", { dealId });
