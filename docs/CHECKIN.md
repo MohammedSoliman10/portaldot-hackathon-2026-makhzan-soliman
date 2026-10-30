@@ -126,7 +126,7 @@ Status:       success [live run]
 Measured:     529.844316817465986480 tPOT (estimate 538.123540; ratio 0.9846146412530473)
 Code:         6,566 B runtime, verify:deployment match, code hash 0x1150...6a98
 Config:       window 50, block size 1024, slash 2000 bps, min bond 1e15 units, duration 100...100800
-Explorer:     https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44
+Community address lookup (third-party): https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44
               (address lookup works; search block 171308 for the deploy; no confirmed tx-hash route)
 Evidence:    evidence/raw/t1/59-live-deploy.txt,
               evidence/deployments/live-420420777-20261024-065714Z.json,

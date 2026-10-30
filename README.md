@@ -119,19 +119,19 @@ storage-deposit split and the absence of any answer/settle refund — are collec
 | `makhzan()` read-back | `0x60481DFcFCA34A8F095939D9675eC715127B2e44` (matches target) |
 | Evidence | `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/receipts/live/0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7.json`, `evidence/raw/t2/126-gate-live-verify.txt` |
 
-**Explorer.** Confirmed deep links:
+**Live contracts.** Confirmed deep links:
 
 - Scanner block page: <https://scanner-testnet-v3.portaldot.dev/blocks/171308>. The route returns HTTP
   `200`, and its backend (`https://scanner-testnet-v3-api.portaldot.dev/blocks/171308`) returns height
   `171308` with hash `0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98`, identical
   to `chain.getBlockHash(171308)`. The page is a client-rendered SPA, so the route and its data are
   confirmed, not a screenshot (`evidence/raw/t1/78-chain-facts.txt`).
-- Pindex address route:
+- Community address lookup (third-party):
   <https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44> (the page performs
   the lookup client-side; the API returns the mapped account).
 
 Pindex **does not have a confirmed transaction-hash route** — its 64-hex search treats the value as a
-block hash — so search the address above or block **`171308`**. The official node console
+block hash — so search the address above or block **`171308`**. The official Portaldot node console (Polkadot.js explorer)
 <https://node-console.portaldot.dev/> has no confirmed deep-link format; open it and search the same
 address or block. The tx hash is shown as plain text above; no URL pattern is invented.
 
@@ -371,6 +371,11 @@ Prerequisites: Node 24, Foundry 1.8.5 (`forge`, `anvil`, `cast`), git.
 git clone https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman.git
 cd portaldot-hackathon-2026-makhzan-soliman
 
+# Submodules: online, Foundry 1.8.5 detects missing forge-std during `forge build`
+# and auto-clones it. In offline or network-isolated environments, initialize
+# submodules first or `forge build` fails with missing dependency errors:
+git submodule update --init --recursive
+
 # Contracts
 cd contracts
 forge build --sizes
@@ -411,9 +416,9 @@ MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
 node src/cliMain.ts verify 1
 ```
 
-Expected: Forge reports **208 tests passed**; `apps/makhzan` reports **171 tests passed**;
-`apps/makhzan-mcp` **36**; `apps/gates` **49**; `apps/status-ui` **222**; the secret scanner **6**; the
-docs-hygiene check **8** tests and **202 facts**; the e2e ends with
+Expected: Forge reports **208 tests passed**; `apps/makhzan` reports **181 tests passed**;
+`apps/makhzan-mcp` **49**; `apps/gates` **49**; `apps/status-ui` **280**; the secret scanner **6**; the
+docs-hygiene check **8** tests and **205 facts**; the e2e ends with
 `PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
 check prints **6,566 B ≤ 10,240 B**.
 

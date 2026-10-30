@@ -1,6 +1,6 @@
 # StorageGate CLI Commands
 
-The Makhzan CLI (`apps/makhzan`) provides standalone guarded commands for interacting with [`StorageGate`](file:///home/mohammed_soliman/hackathons/portaldot-hackathon/contracts/src/makhzan/StorageGate.sol). These commands reuse the same five-state transaction pipeline, preflight gas estimation, receipt timeouts, and finality guarantees as core deal operations (`create`, `claim`, `settle`).
+The Makhzan CLI (`apps/makhzan`) provides standalone guarded commands for interacting with [`StorageGate`](../contracts/src/makhzan/StorageGate.sol). These commands reuse the same five-state transaction pipeline, preflight gas estimation, receipt timeouts, and finality guarantees as core deal operations (`create`, `claim`, `settle`).
 
 ---
 
@@ -57,7 +57,7 @@ Output:
 ---
 
 ### `gate lock <dealId>`
-Deposits payment into [`StorageGate`](file:///home/mohammed_soliman/hackathons/portaldot-hackathon/contracts/src/makhzan/StorageGate.sol) locked on an active, healthy deal. Signed by the deal owner.
+Deposits payment into [`StorageGate`](../contracts/src/makhzan/StorageGate.sol) locked on an active, healthy deal. Signed by the deal owner.
 
 ```bash
 # Options:
@@ -77,7 +77,7 @@ node apps/makhzan/src/cliMain.ts gate lock <dealId> \
 ---
 
 ### `gate release <dealId>`
-Claims payment from [`StorageGate`](file:///home/mohammed_soliman/hackathons/portaldot-hackathon/contracts/src/makhzan/StorageGate.sol) to the payee. Signed by the recorded payee (Provider-1).
+Claims payment from [`StorageGate`](../contracts/src/makhzan/StorageGate.sol) to the payee. Signed by the recorded payee (Provider-1).
 
 ```bash
 # Must be executed by the payee while deal is healthy and provider bond >= minBond
