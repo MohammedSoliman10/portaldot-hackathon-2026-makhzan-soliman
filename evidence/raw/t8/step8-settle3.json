@@ -1,0 +1,39 @@
+{
+  "label": "settle",
+  "submitted": {
+    "hash": "0x57d35092a6f16989ae26a59fa35acec60179aac043bbf247f2ecf54c32d8e064",
+    "nonce": 18
+  },
+  "included": {
+    "blockNumber": "258844",
+    "blockHash": "0x675e8191a9c787d608c06e37b51b9a95672e5770377ece4b726e7858708d7ad1"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 3,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 250092,
+    "endBlock": 250692,
+    "flags": 1,
+    "providerId": 1,
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "500000000000000",
+    "accrued": "500000000000000",
+    "claimable": "0",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}

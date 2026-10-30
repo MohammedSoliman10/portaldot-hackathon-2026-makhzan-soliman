@@ -1,0 +1,39 @@
+{
+  "label": "claim",
+  "submitted": {
+    "hash": "0x9c8ec1c10b2f57ffa90ed22c09db49b019e26b7656825df3bd764bad46505441",
+    "nonce": 7
+  },
+  "included": {
+    "blockNumber": "258836",
+    "blockHash": "0x8fbdb1148a4c43e809fe8a281b40e61218f4789c4031cbd5012e28348f17f3af"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 3,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "startBlock": 250092,
+    "endBlock": 250692,
+    "flags": 0,
+    "providerId": 1,
+    "leafCount": 1024,
+    "size": 1048576,
+    "price": "500000000000000",
+    "claimed": "500000000000000",
+    "accrued": "500000000000000",
+    "claimable": "0",
+    "challenge": {
+      "open": false,
+      "index": 0,
+      "start": 0,
+      "deadline": 0,
+      "expectedPathLength": 0
+    }
+  }
+}
