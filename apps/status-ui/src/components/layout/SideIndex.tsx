@@ -15,7 +15,7 @@ export function SideIndex() {
 
   return (
     <nav aria-label="Sections" className="hidden md:block">
-      <ol className="sticky top-16 space-y-2 font-mono text-xs">
+      <ol className="sticky top-16 space-y-1 font-mono text-xs">
         {ROUTES.map((route, index) => {
           const active =
             route.to === "/"
@@ -26,9 +26,15 @@ export function SideIndex() {
               <Link
                 to={route.to}
                 aria-current={active ? "page" : undefined}
-                className={`link-quiet flex gap-2 ${active ? "text-ochre" : ""}`}
+                className={`flex items-center gap-2.5 rounded-full px-3.5 py-2 transition-all no-underline ${
+                  active
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 font-medium"
+                }`}
               >
-                <span className="text-ash-2">{String(index + 1).padStart(2, "0")}</span>
+                <span className={active ? "text-amber-400 font-bold" : "text-slate-400"}>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
                 <span>{route.label}</span>
               </Link>
             </li>

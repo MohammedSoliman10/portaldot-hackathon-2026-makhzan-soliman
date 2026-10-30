@@ -12,8 +12,8 @@ import { SideIndex } from "./SideIndex";
 function Wordmark() {
   return (
     <Link to="/" className="group inline-flex items-baseline gap-2 no-underline" aria-label="Makhzan, home">
-      <span className="text-sm font-semibold tracking-[0.28em] text-paper group-hover:text-ochre">MAKHZAN</span>
-      <span className="text-xs text-ash">مخزن</span>
+      <span className="text-sm font-bold tracking-[0.28em] text-slate-900 group-hover:text-amber-600 transition-colors">MAKHZAN</span>
+      <span className="text-xs text-slate-400 font-medium">مخزن</span>
     </Link>
   );
 }
@@ -29,15 +29,15 @@ export function Shell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-ink text-paper">
+    <div className="min-h-screen bg-[var(--canvas)] text-slate-900">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-ochre focus:px-3 focus:py-2 focus:text-ink"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-ochre focus:px-3 focus:py-2 focus:text-ink focus:rounded-full font-mono text-xs font-semibold shadow-md"
       >
         Skip to content
       </a>
       <ModeBanner mode={mode} evidence={evidence} />
-      <div className="mx-auto grid max-w-[var(--measure)] gap-8 px-4 py-6 sm:px-6 md:grid-cols-[var(--rail)_1fr]">
+      <div className="mx-auto grid max-w-[var(--measure)] gap-8 px-4 py-8 sm:px-6 md:grid-cols-[var(--rail)_1fr]">
         <div>
           <div className="mb-6 hidden md:block">
             <Wordmark />
@@ -45,7 +45,7 @@ export function Shell({
           <SideIndex />
         </div>
         <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-          <div className="mb-4 flex items-center justify-between gap-4 md:hidden">
+          <div className="mb-6 flex items-center justify-between gap-4 md:hidden">
             <Wordmark />
             <MobileNav />
           </div>

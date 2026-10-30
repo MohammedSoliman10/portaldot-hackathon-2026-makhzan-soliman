@@ -41,7 +41,7 @@ export function MobileNav() {
         aria-expanded={isOpen}
         aria-controls="mobile-navigation-menu"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-rule px-3 py-2 font-mono text-xs uppercase tracking-wider text-paper hover:border-ochre hover:text-ochre focus-visible:outline-2 focus-visible:outline-ochre"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-200 bg-white px-3.5 py-2 font-mono text-xs uppercase tracking-wider text-slate-800 shadow-xs hover:border-ochre hover:text-ochre focus-visible:outline-2 focus-visible:outline-ochre"
       >
         <span className="sr-only">{isOpen ? "Close" : "Open"}</span>
         <span className="flex items-center gap-1.5">
@@ -59,7 +59,7 @@ export function MobileNav() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             )}
           </svg>
-          <span>Menu</span>
+          <span className="font-medium">Menu</span>
         </span>
       </button>
 
@@ -67,7 +67,7 @@ export function MobileNav() {
         <nav
           id="mobile-navigation-menu"
           aria-label="Mobile navigation"
-          className="mt-3 w-full border border-rule-strong bg-ink-2 p-2 shadow-lg"
+          className="mt-3 w-full rounded-2xl border border-slate-200 bg-white p-2.5 shadow-xl text-slate-800"
         >
           <ul className="space-y-1">
             {MOBILE_ROUTES.map((route, index) => {
@@ -81,13 +81,15 @@ export function MobileNav() {
                     to={route.to}
                     aria-current={active ? "page" : undefined}
                     onClick={() => setIsOpen(false)}
-                    className={`flex min-h-[44px] items-center gap-3 px-3 py-2 font-mono text-xs no-underline transition-colors ${
+                    className={`flex min-h-[44px] items-center gap-3 rounded-xl px-3.5 py-2 font-mono text-xs no-underline transition-colors ${
                       active
-                        ? "border-l-2 border-ochre bg-ink text-ochre font-semibold"
-                        : "text-paper-dim hover:bg-ink hover:text-paper"
+                        ? "bg-slate-900 text-white font-semibold shadow-xs"
+                        : "text-slate-700 hover:bg-slate-100 font-medium"
                     }`}
                   >
-                    <span className="text-ash">{String(index + 1).padStart(2, "0")}</span>
+                    <span className={active ? "text-amber-400 font-bold" : "text-slate-400"}>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                     <span>{route.label}</span>
                   </Link>
                 </li>

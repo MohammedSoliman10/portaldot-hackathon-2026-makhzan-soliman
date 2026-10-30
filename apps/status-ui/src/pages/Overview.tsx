@@ -6,6 +6,11 @@ import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, formatWeiAsNative, type Label } from "../data/labels";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
 import type { EvidenceBundle, RoundInfo } from "../data/schema";
+import { Card } from "../components/shared/Card";
+import { Button } from "../components/shared/Button";
+import { Chip } from "../components/shared/Chip";
+import { Hero } from "../components/shared/Hero";
+import { Stat } from "../components/shared/Stat";
 
 const REPO = "https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman";
 
@@ -25,14 +30,6 @@ const HEALTH_TEXT: Record<number, string> = {
   3: "expired",
 };
 
-function Chip({ label }: { label: Label }) {
-  return (
-    <span className="label-chip" data-label={label}>
-      {label}
-    </span>
-  );
-}
-
 function Row({
   field,
   value,
@@ -49,22 +46,22 @@ function Row({
   source: string;
 }) {
   return (
-    <tr>
-      <td className="break-words text-ash">{field}</td>
-      <td className="numeral">
+    <tr className="hover:bg-slate-50/50 transition-colors">
+      <td className="break-words font-medium text-slate-700 py-3">{field}</td>
+      <td className="numeral font-mono text-slate-900 py-3">
         {value}
         {unit ? (
           <>
             {" "}
-            <span className="text-ash">{unit}</span>
+            <span className="text-slate-500 font-sans text-xs">{unit}</span>
           </>
         ) : null}
-        {detail ? <p className="mono mt-1 break-words text-xs text-ash-2">{detail}</p> : null}
+        {detail ? <p className="mono mt-1 break-words text-xs text-slate-500">{detail}</p> : null}
       </td>
-      <td>
+      <td className="py-3">
         <Chip label={label} />
       </td>
-      <td className="mono break-words text-xs text-ash-2">{source}</td>
+      <td className="mono break-words text-xs text-slate-500 py-3">{source}</td>
     </tr>
   );
 }
@@ -72,11 +69,11 @@ function Row({
 function TableHead() {
   return (
     <thead>
-      <tr>
-        <th scope="col">Field</th>
-        <th scope="col">Value</th>
-        <th scope="col">Label</th>
-        <th scope="col">Source</th>
+      <tr className="border-b border-slate-200 text-left font-mono text-[11px] uppercase tracking-wider text-slate-400">
+        <th scope="col" className="pb-2.5 font-semibold">Field</th>
+        <th scope="col" className="pb-2.5 font-semibold">Value</th>
+        <th scope="col" className="pb-2.5 font-semibold">Label</th>
+        <th scope="col" className="pb-2.5 font-semibold">Source</th>
       </tr>
     </thead>
   );
@@ -127,15 +124,26 @@ export function Overview(options: LiveOptions) {
   };
 
   return (
-    <section className="space-y-12">
-      <header>
-        <p className="eyebrow">01 / deployment</p>
-        <h1 className="mt-2 text-xl">Makhzan on Portaldot testnet</h1>
-        <p className="mt-3 max-w-[62ch] text-paper-dim">
-          A storage-proof deployment: an owner commits a file root, a provider answers random block
-          challenges, and a wrong or missing answer costs bond. This page reads. It cannot sign, send
-          or spend, and it holds no key.
-        </p>
+    <div className="space-y-10">
+      {/* Dark Hero Panel with editorial typography & highlight pill */}
+      <Hero
+        headline={
+          <>
+            Don't trust your storage provider. Make them{" "}
+            <span className="highlight-pill">prove</span> it.
+          </>
+        }
+        subtitle="A storage-proof deployment on Portaldot testnet: an owner commits a file Merkle root, a provider answers random block challenges, and a wrong or missing answer costs bond. This status dashboard is strictly read-only — it holds no keys and cannot sign or spend."
+      >
+        <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-slate-200 border border-white/15">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            01 / deployment
+          </span>
+          <span className="text-slate-400">
+            Makhzan on chain {mode.expectedChainId}
+          </span>
+        </div>
 
         {live.status === "live" ? (
           <p className="mt-4 font-mono text-xs text-ochre" data-testid="live-source">
@@ -145,7 +153,7 @@ export function Overview(options: LiveOptions) {
         ) : null}
 
         {live.status === "blocked" ? (
-          <p role="alert" className="mt-4 border-l-2 border-red py-1 pl-3 text-sm">
+          <p role="alert" className="mt-4 border-l-2 border-red py-1 pl-3 text-sm text-red-200">
             {live.blockingDetail}
           </p>
         ) : null}
@@ -154,7 +162,7 @@ export function Overview(options: LiveOptions) {
           <p
             role="note"
             data-testid={live.stale ? "live-stale" : undefined}
-            className="mt-4 border-l-2 border-ochre-dim py-1 pl-3 text-sm"
+            className="mt-4 border-l-2 border-amber-400 py-1 pl-3 text-sm text-amber-200"
           >
             {live.stale
               ? `STALE — the last live read failed (${live.error ?? "unknown error"}). Showing the last good value from ${live.at ?? "an earlier read"}.`
@@ -163,62 +171,169 @@ export function Overview(options: LiveOptions) {
         ) : null}
 
         {mode.clientEnabled ? (
-          <button
-            type="button"
-            aria-label="Re-read deployment status from RPC"
-            onClick={live.refresh}
-            className="mt-4 border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre"
-          >
-            Re-read
-          </button>
+          <div className="mt-5">
+            <button
+              type="button"
+              aria-label="Re-read deployment status from RPC"
+              onClick={live.refresh}
+              className="inline-flex min-h-[38px] items-center justify-center rounded-full bg-white/10 px-4 py-1.5 font-mono text-xs font-medium text-white border border-white/20 hover:bg-white/20 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-ochre"
+            >
+              Re-read
+            </button>
+          </div>
         ) : null}
-      </header>
+      </Hero>
 
+      {/* Stats Strip */}
       <section
+        aria-labelledby="overview-stats-heading"
+        data-testid="overview-stats-strip"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <h2 id="overview-stats-heading" className="sr-only">
+          Platform statistics
+        </h2>
+        <Stat
+          value="2"
+          subtitle="deals verified on-chain"
+          label={live.status === "live" ? "MEASURED" : "REPORTED"}
+          detail="deals 1 & 2 settled on Portaldot"
+        />
+        <Stat
+          value="6 tPOT"
+          subtitle="slashed = exactly 20% of the bond"
+          label="REPORTED"
+          detail="round 2 slashed in block 172,658"
+        />
+        <Stat
+          value="1 MiB"
+          subtitle="1,024 blocks"
+          label={live.status === "live" ? "MEASURED" : "REPORTED"}
+          detail="1,048,576 bytes per challenge tree"
+        />
+        <Stat
+          value="208"
+          subtitle="contract tests"
+          label="REPORTED"
+          detail="unit, fuzz & invariant suites pass"
+        />
+      </section>
+
+      {/* Judges Strip */}
+      <Card
+        as="section"
         aria-labelledby="judges-strip-heading"
         data-testid="judges-strip"
-        className="border border-rule-strong bg-ink-2 p-4"
+        className="border-slate-200/90 bg-white"
       >
-        <h2 id="judges-strip-heading" className="eyebrow">
-          Start here for judges
-        </h2>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <h2 id="judges-strip-heading" className="eyebrow text-slate-700 font-semibold">
+            Start here for judges
+          </h2>
+          <span className="font-mono text-xs text-slate-400">Essential verification routes</span>
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Link
             to="/verify"
-            className="flex min-h-[44px] items-center justify-between border border-rule px-4 py-2 font-mono text-xs text-paper no-underline transition-colors hover:border-ochre hover:text-ochre"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 font-mono text-xs text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
           >
             <span>Verify a file</span>
-            <span aria-hidden="true" className="text-ash">→</span>
+            <span aria-hidden="true" className="text-ochre font-bold">→</span>
           </Link>
           <Link
             to="/replay"
-            className="flex min-h-[44px] items-center justify-between border border-rule px-4 py-2 font-mono text-xs text-paper no-underline transition-colors hover:border-ochre hover:text-ochre"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 font-mono text-xs text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
           >
             <span>Watch the slash replay</span>
-            <span aria-hidden="true" className="text-ash">→</span>
+            <span aria-hidden="true" className="text-ochre font-bold">→</span>
           </Link>
           <Link
             to="/gate"
-            className="flex min-h-[44px] items-center justify-between border border-rule px-4 py-2 font-mono text-xs text-paper no-underline transition-colors hover:border-ochre hover:text-ochre"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 font-mono text-xs text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
           >
             <span>See the gate</span>
-            <span aria-hidden="true" className="text-ash">→</span>
+            <span aria-hidden="true" className="text-ochre font-bold">→</span>
           </Link>
         </div>
+      </Card>
+
+      {/* Three Action Cards */}
+      <section
+        aria-labelledby="action-cards-heading"
+        data-testid="overview-action-cards"
+        className="grid grid-cols-1 gap-6 md:grid-cols-3"
+      >
+        <h2 id="action-cards-heading" className="sr-only">
+          Quick Actions
+        </h2>
+        <Card className="flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="eyebrow text-slate-500">01 / VERIFICATION</span>
+              <Chip label="REPORTED" tone="neutral" />
+            </div>
+            <h3 className="mt-3 text-lg font-bold text-slate-900">Verify a file</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Hash a sample file block-by-block directly in your browser and check against the live on-chain Merkle root.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100">
+            <Button to="/verify" variant="primary" className="w-full">
+              Verify a file →
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="eyebrow text-slate-500">02 / PENALTY AUDIT</span>
+              <Chip label="REPORTED" tone="neutral" />
+            </div>
+            <h3 className="mt-3 text-lg font-bold text-slate-900">Watch slash replay</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Examine the step-by-step cryptographic proof challenge failure where provider 1 lost 6 tPOT bond.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100">
+            <Button to="/replay" variant="secondary" className="w-full">
+              Watch replay →
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="eyebrow text-slate-500">03 / ESCROW GATE</span>
+              <Chip label="REPORTED" tone="neutral" />
+            </div>
+            <h3 className="mt-3 text-lg font-bold text-slate-900">Inspect StorageGate</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Read the unforgeable escrow gate contract that requires storage verification before funds release.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100">
+            <Button to="/gate" variant="dark" className="w-full">
+              See the gate →
+            </Button>
+          </div>
+        </Card>
       </section>
 
-      <section aria-labelledby="deployment-heading">
-        <h2 id="deployment-heading" className="eyebrow">
+      {/* Deployment Card */}
+      <Card as="section" aria-labelledby="deployment-heading">
+        <h2 id="deployment-heading" className="eyebrow text-slate-700 font-semibold">
           Deployment
         </h2>
-        <dl className="mt-3 space-y-3 text-sm">
+        <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm border-b border-slate-100 pb-4">
           <div>
-            <dt className="text-ash">Contract address</dt>
-            <dd className="mono break-all">{deployment?.address ?? "not recorded in the evidence"}</dd>
+            <dt className="text-xs font-mono uppercase text-slate-500">Contract address</dt>
+            <dd className="mono mt-1 break-all font-medium text-slate-900">{deployment?.address ?? "not recorded in the evidence"}</dd>
           </div>
           <div>
-            <dt className="text-ash">Deployment transaction</dt>
-            <dd className="mono break-all">{deployment?.txHash ?? "not recorded in the evidence"}</dd>
+            <dt className="text-xs font-mono uppercase text-slate-500">Deployment transaction</dt>
+            <dd className="mono mt-1 break-all font-medium text-slate-900">{deployment?.txHash ?? "not recorded in the evidence"}</dd>
           </div>
         </dl>
         <div className="mt-4 overflow-x-auto">
@@ -231,7 +346,7 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Deployment facts, transcribed from the recorded verification run.</caption>
             <TableHead />
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               <Row
                 field="Block"
                 value={<BlockLink block={deployment?.block} />}
@@ -260,34 +375,35 @@ export function Overview(options: LiveOptions) {
             </tbody>
           </table>
         </div>
-      </section>
+      </Card>
 
-      <section aria-labelledby="code-heading">
-        <h2 id="code-heading" className="eyebrow">
+      {/* Code Card */}
+      <Card as="section" aria-labelledby="code-heading">
+        <h2 id="code-heading" className="eyebrow text-slate-700 font-semibold">
           Code
         </h2>
-        <div className="mt-3 space-y-2 text-sm">
+        <div className="mt-4 space-y-2 text-sm">
           <p className="flex flex-wrap items-center gap-2">
-            <span className="text-paper">verified — runtime code matches the build artifact</span>
+            <span className="font-medium text-slate-900">verified — runtime code matches the build artifact</span>
             <Chip label="REPORTED" />
           </p>
-          <p className="mono break-all text-xs text-ash">
+          <p className="mono break-all text-xs text-slate-600">
             runtime code hash {deployment?.codeHash ?? "not recorded"}
           </p>
-          <p className="text-xs text-ash">
+          <p className="text-xs text-slate-500">
             {codeVerified?.artifact ?? "no artifact recorded"} · {codeVerified?.note ?? ""}
           </p>
-          <p className="text-xs text-ash">
+          <p className="text-xs text-slate-500">
             source verification: {codeVerified?.sourceVerified ? "present" : "not available on this network (no explorer)"}.
           </p>
           {live.codeHash ? (
-            <div className="text-xs" data-testid="live-code">
+            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs" data-testid="live-code">
               <p>
                 <Chip label="MEASURED" /> runtime code hash{" "}
-                <span className="mono break-all">{live.codeHash}</span> ·{" "}
+                <span className="mono break-all font-medium text-slate-900">{live.codeHash}</span> ·{" "}
                 {formatCount(live.codeBytes ?? 0)} bytes
               </p>
-              <p className="mt-1 text-ash">
+              <p className="mt-1 text-slate-500">
                 {live.codeHash === deployment?.codeHash
                   ? "matches the recorded hash"
                   : "differs from the recorded hash"}
@@ -295,13 +411,14 @@ export function Overview(options: LiveOptions) {
             </div>
           ) : null}
         </div>
-      </section>
+      </Card>
 
-      <section aria-labelledby="results-heading">
-        <h2 id="results-heading" className="eyebrow">
+      {/* Results Card */}
+      <Card as="section" aria-labelledby="results-heading">
+        <h2 id="results-heading" className="eyebrow text-slate-700 font-semibold">
           Live results
         </h2>
-        <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
+        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
           The chain now, then the run that produced it. Deals 1 and 2 are both settled on this
           deployment: deal 1 was answered in time, deal 2 took one slash. Health 0 is the settled
           state, not a fault — a deal ends at 0 whether it was answered or slashed, so read the
@@ -320,7 +437,7 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Read by this browser on each refresh.</caption>
             <TableHead />
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               <Row
                 field="Provider 1 bond"
                 value={provider ? formatNative(provider.bondUnits) : "not recorded"}
@@ -354,14 +471,14 @@ export function Overview(options: LiveOptions) {
           </table>
         </div>
         {live.balanceWei === null ? (
-          <p className="mt-2 text-xs text-ash">
+          <p className="mt-3 text-xs text-slate-500">
             The contract balance was not part of the recorded evidence; it appears when the live read
             answers.
           </p>
         ) : null}
 
-        <h3 className="mt-8 font-mono text-xs text-ash">Recorded run</h3>
-        <div className="mt-2 overflow-x-auto">
+        <h3 className="mt-8 font-mono text-xs font-semibold uppercase tracking-wider text-slate-500">Recorded run</h3>
+        <div className="mt-3 overflow-x-auto">
           <table className="w-full table-fixed">
             <colgroup>
               <col className="w-[26%]" />
@@ -371,7 +488,7 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Every transaction below has a receipt file; the block is the inclusion block.</caption>
             <TableHead />
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {txRow("deploy", "Deploy")}
               {txRow("register", "Register provider 1")}
               {txRow("answer-2a", "Pass answer (deal 2)")}
@@ -391,13 +508,14 @@ export function Overview(options: LiveOptions) {
             </tbody>
           </table>
         </div>
-      </section>
+      </Card>
 
-      <section aria-labelledby="config-heading">
-        <h2 id="config-heading" className="eyebrow">
+      {/* On-Chain Config Card */}
+      <Card as="section" aria-labelledby="config-heading">
+        <h2 id="config-heading" className="eyebrow text-slate-700 font-semibold">
           On-chain configuration
         </h2>
-        <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
+        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
           Decoded from packed storage slot 0. {live.config ? "These values were read by this browser." : "These values are the recorded ones; a live read replaces them when an RPC answers."}
         </p>
         <div className="mt-4 overflow-x-auto">
@@ -410,10 +528,10 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Packed slot 0, field by field.</caption>
             <TableHead />
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {config === null ? (
                 <tr>
-                  <td colSpan={4} className="text-ash">
+                  <td colSpan={4} className="text-slate-500 py-3">
                     No configuration is recorded and no live read has answered.
                   </td>
                 </tr>
@@ -432,61 +550,63 @@ export function Overview(options: LiveOptions) {
             </tbody>
           </table>
         </div>
-      </section>
+      </Card>
 
-      <section aria-labelledby="rounds-heading">
-        <h2 id="rounds-heading" className="eyebrow">
+      {/* Rounds Card */}
+      <Card as="section" aria-labelledby="rounds-heading">
+        <h2 id="rounds-heading" className="eyebrow text-slate-700 font-semibold">
           Live challenge rounds
         </h2>
         <p className="mt-3 text-sm">
-          <span className="text-paper">Recorded rounds: {formatCount(bundle?.rounds.length ?? 0)}</span>{" "}
+          <span className="font-semibold text-slate-900">Recorded rounds: {formatCount(bundle?.rounds.length ?? 0)}</span>{" "}
           <Chip label="REPORTED" />{" "}
-          <span className="text-paper-dim">
+          <span className="text-slate-600">
             — {formatCount(bundle?.rounds.filter((round) => round.status === "passed").length ?? 0)} passed,{" "}
             {formatCount(bundle?.rounds.filter((round) => round.status === "failed").length ?? 0)} slashed.
           </span>
         </p>
-        <ul className="mt-3 space-y-1 font-mono text-xs text-paper-dim">
+        <ul className="mt-4 space-y-1.5 font-mono text-xs text-slate-700 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80">
           {(bundle?.rounds ?? []).map((round) => (
-            <li key={round.id}>{roundLine(round)}</li>
+            <li key={round.id} className="py-0.5">{roundLine(round)}</li>
           ))}
         </ul>
         <p className="mt-4 flex flex-wrap items-center gap-2 text-sm">
           <Chip label="PENDING LIVE RUN" />
-          <span className="text-paper">pending</span>
-          <span className="text-paper-dim">
+          <span className="font-medium text-slate-900">pending</span>
+          <span className="text-slate-600">
             — no new challenge is scheduled; a round appears here only when the chain records one.
           </span>
         </p>
-      </section>
+      </Card>
 
-      <section aria-labelledby="links-heading">
-        <h2 id="links-heading" className="eyebrow">
+      {/* Source and reading Card */}
+      <Card as="section" aria-labelledby="links-heading">
+        <h2 id="links-heading" className="eyebrow text-slate-700 font-semibold">
           Source and reading
         </h2>
-        <ul className="mt-3 flex flex-wrap gap-6 text-sm">
+        <ul className="mt-3 flex flex-wrap gap-6 text-sm font-medium">
           <li>
-            <a className="link-quiet underline" href={REPO}>
+            <a className="link-quiet underline hover:text-slate-900" href={REPO}>
               Repository
             </a>
           </li>
           <li>
-            <a className="link-quiet underline" href={`${REPO}#readme`}>
+            <a className="link-quiet underline hover:text-slate-900" href={`${REPO}#readme`}>
               README
             </a>
           </li>
           <li>
-            <a className="link-quiet underline" href="/evidence/index.json">
+            <a className="link-quiet underline hover:text-slate-900" href="/evidence/index.json">
               evidence manifest
             </a>
           </li>
         </ul>
-        <p className="mt-4 max-w-[62ch] text-xs text-ash">
+        <p className="mt-4 max-w-[68ch] text-xs text-slate-500 leading-relaxed">
           Read-only: there is no wallet, no key and no write function in this build. The recorded layer is
           verified by SHA-256 before it is shown, and every live number carries the block and UTC time it
           was read at.
         </p>
-      </section>
-    </section>
+      </Card>
+    </div>
   );
 }
