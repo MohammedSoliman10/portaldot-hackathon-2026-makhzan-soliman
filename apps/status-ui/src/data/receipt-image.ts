@@ -64,41 +64,41 @@ export function drawReceipt(
 ): { width: number; height: number } {
   const { width, height } = RECEIPT_IMAGE;
   const text = receiptImageText(receipt);
-  const ink = "#0f1115";
-  const paper = "#f4f1ea";
-  const dim = "#9a9a93";
+  const ink = "#0c0d10";
+  const white = "#ffffff";
+  const dim = "#8e94a0";
+  const gold = "#d9a441";
 
   ctx.fillStyle = ink;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = paper;
 
   ctx.textAlign = "left";
-  ctx.font = "500 44px 'IBM Plex Mono', monospace";
+  ctx.font = "600 44px 'JetBrains Mono', 'IBM Plex Mono', monospace";
+  ctx.fillStyle = gold;
   ctx.fillText(text.heading, 80, 120);
 
-  ctx.font = "400 28px 'Space Grotesk', sans-serif";
+  ctx.font = "400 28px 'Instrument Sans', 'Space Grotesk', sans-serif";
   ctx.fillStyle = dim;
   ctx.fillText(text.subheading, 80, 170);
 
-  ctx.fillStyle = paper;
   let y = 260;
   for (const [field, value] of text.rows) {
-    ctx.font = "400 26px 'Space Grotesk', sans-serif";
+    ctx.font = "400 26px 'Instrument Sans', 'Space Grotesk', sans-serif";
     ctx.fillStyle = dim;
     ctx.fillText(field, 80, y);
-    ctx.font = "500 30px 'IBM Plex Mono', monospace";
-    ctx.fillStyle = paper;
+    ctx.font = "500 30px 'JetBrains Mono', 'IBM Plex Mono', monospace";
+    ctx.fillStyle = white;
     ctx.fillText(value, 460, y);
     y += 70;
   }
 
   ctx.fillStyle = dim;
-  ctx.font = "400 22px 'Space Grotesk', sans-serif";
+  ctx.font = "400 22px 'Instrument Sans', 'Space Grotesk', sans-serif";
   if (text.resolveHash !== null) {
-    ctx.font = "400 20px 'IBM Plex Mono', monospace";
+    ctx.font = "400 20px 'JetBrains Mono', 'IBM Plex Mono', monospace";
     ctx.fillText(`resolve ${text.resolveHash}`, 80, height - 130);
   }
-  ctx.font = "400 22px 'Space Grotesk', sans-serif";
+  ctx.font = "400 22px 'Instrument Sans', 'Space Grotesk', sans-serif";
   ctx.fillText(text.footer, 80, height - 90);
 
   return { width, height };
