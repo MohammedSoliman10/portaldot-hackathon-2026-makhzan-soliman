@@ -3,15 +3,15 @@
 
 @layer base {
   html {
-    background: var(--ink);
-    color-scheme: dark;
+    background: var(--canvas);
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--canvas);
+    color: var(--ink);
     font-family: var(--font-sans);
     font-size: var(--step-0);
     line-height: 1.55;
@@ -122,30 +122,59 @@
     );
   }
 
-  .label-chip {
+  .highlight-pill {
     display: inline-block;
+    background-color: var(--ochre);
+    color: var(--ink);
+    padding: 0.08em 0.45em;
+    border-radius: 9999px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .label-chip {
+    display: inline-flex;
+    align-items: center;
     font-family: var(--font-mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.14em;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 0.12rem 0.36rem;
+    padding: 0.12rem 0.45rem;
+    border-radius: 9999px;
     border: var(--hairline) solid var(--rule-strong);
     color: var(--ash);
+    background: #ffffff;
     white-space: nowrap;
   }
 
   .label-chip[data-label="MEASURED"] {
-    color: var(--ochre);
-    border-color: var(--ochre-dim);
+    background: #fef7ea;
+    color: var(--ink);
+    border-color: #f3d289;
+  }
+
+  .label-chip[data-label="REPORTED"] {
+    background: #f8fafc;
+    color: var(--ash);
+    border-color: var(--rule-strong);
   }
 
   .label-chip[data-label="SIMULATED"] {
+    background: #f8fafc;
+    color: var(--ash-2);
     border-style: dashed;
   }
 
   .label-chip[data-label="PENDING LIVE RUN"] {
-    border-color: var(--ash-2);
-    color: var(--ash-2);
+    background: #fef3c7;
+    border-color: #fde68a;
+    color: #92400e;
+  }
+
+  .label-chip[data-label="DESIGN NOTE"] {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e40af;
   }
 
   .numeral {
@@ -155,12 +184,12 @@
   }
 
   .link-quiet {
-    color: var(--paper-dim);
+    color: var(--ash);
     text-decoration: none;
   }
 
   .link-quiet:hover {
-    color: var(--paper);
+    color: var(--ink);
     text-decoration: underline;
   }
 }

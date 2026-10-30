@@ -1,21 +1,25 @@
 /*
- * Makhzan design tokens — a ledger, not a dashboard.
- * Ink page, paper text, one ochre accent, one semantic red. No gradients, no shadows.
+ * Makhzan design tokens — Voltline Analytics skin (Gold & Black brand).
+ * Light platinum canvas, white rounded cards, mono numerics, dark hero panel.
  */
 :root {
-  --ink: #0b0c0b;
-  --ink-2: #121310;
-  --ink-3: #191a16;
-  --paper: #ede7da;
-  --paper-dim: #d8d1c2;
-  --ash: #8c877c;
-  --ash-2: #868176;
+  --canvas: #f0f2f5;
+  --canvas-card: #ffffff;
+
+  --ink: #0c0d10;
+  --ink-2: #181a1f;
+  --ink-3: #22252a;
+  --paper: #ffffff;
+  --paper-dim: #2c3038;
+  --ash: #475467;
+  --ash-2: #535d6e;
+
   --ochre: #d9a441;
-  --ochre-dim: #8a6a2a;
-  --red: #ec5358;
-  --rule: rgb(237 231 218 / 14%);
-  --rule-strong: rgb(237 231 218 / 30%);
-  --focus: #f0c065;
+  --ochre-dim: #94691c;
+  --red: #b91c1c;
+  --rule: #e5e7eb;
+  --rule-strong: #d1d5db;
+  --focus: #d9a441;
 
   --step--1: 0.78rem;
   --step-0: 0.95rem;
@@ -33,6 +37,8 @@
 }
 
 @theme inline {
+  --color-canvas: var(--canvas);
+  --color-canvas-card: var(--canvas-card);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
@@ -46,8 +52,8 @@
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
 
-  --font-sans: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-sans: "Instrument Sans", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
   --text-xs: var(--step--1);
   --text-sm: var(--step-0);

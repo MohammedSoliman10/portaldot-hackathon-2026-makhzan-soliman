@@ -33,7 +33,7 @@ function contrastRatio(hex1: string, hex2: string): number {
 
 describe("accessibility pass", () => {
   describe("color contrast", () => {
-    it("ensures all text tokens have at least 4.5:1 contrast against ink backgrounds", () => {
+    it("ensures all text tokens have at least 4.5:1 contrast across light surfaces and dark hero panel", () => {
       const tokensPath = resolve(__dirname, "../src/styles/tokens.css");
       const css = readFileSync(tokensPath, "utf8");
 
@@ -44,38 +44,50 @@ describe("accessibility pass", () => {
         return match[1];
       };
 
-      const ink = extract("--ink"); // #0b0c0b
-      const ink3 = extract("--ink-3"); // #191a16
-      const paper = extract("--paper");
-      const paperDim = extract("--paper-dim");
-      const ash = extract("--ash");
-      const ash2 = extract("--ash-2");
-      const ochre = extract("--ochre");
-      const red = extract("--red");
+      const canvas = extract("--canvas"); // #f0f2f5
+      const paper = extract("--paper"); // #ffffff
+      const ink = extract("--ink"); // #0c0d10
+      const ash = extract("--ash"); // #475467
+      const ash2 = extract("--ash-2"); // #535d6e
+      const ochre = extract("--ochre"); // #d9a441
+      const red = extract("--red"); // #b91c1c
 
-      const textTokens = [
-        { name: "--paper", color: paper },
-        { name: "--paper-dim", color: paperDim },
+      // Primary & secondary text tokens against light surfaces (canvas and paper cards)
+      const lightSurfaceTextTokens = [
+        { name: "--ink", color: ink },
         { name: "--ash", color: ash },
         { name: "--ash-2", color: ash2 },
-        { name: "--ochre", color: ochre },
         { name: "--red", color: red },
       ];
 
-      for (const token of textTokens) {
-        const ratioInk = contrastRatio(token.color, ink);
-        const ratioInk3 = contrastRatio(token.color, ink3);
+      for (const token of lightSurfaceTextTokens) {
+        const ratioCanvas = contrastRatio(token.color, canvas);
+        const ratioPaper = contrastRatio(token.color, paper);
 
         expect(
-          ratioInk,
-          `Token ${token.name} (${token.color}) vs ink (${ink}) contrast is ${ratioInk.toFixed(2)}, expected >= 4.5:1`
+          ratioCanvas,
+          `Token ${token.name} (${token.color}) vs canvas (${canvas}) contrast is ${ratioCanvas.toFixed(2)}, expected >= 4.5:1`
         ).toBeGreaterThanOrEqual(4.5);
 
         expect(
-          ratioInk3,
-          `Token ${token.name} (${token.color}) vs ink-3 (${ink3}) contrast is ${ratioInk3.toFixed(2)}, expected >= 4.5:1`
+          ratioPaper,
+          `Token ${token.name} (${token.color}) vs paper (${paper}) contrast is ${ratioPaper.toFixed(2)}, expected >= 4.5:1`
         ).toBeGreaterThanOrEqual(4.5);
       }
+
+      // Voltline brand rule: black text on gold, >= 4.5:1
+      const ratioBlackOnGold = contrastRatio(ink, ochre);
+      expect(
+        ratioBlackOnGold,
+        `Black text on gold contrast is ${ratioBlackOnGold.toFixed(2)}, expected >= 4.5:1`
+      ).toBeGreaterThanOrEqual(4.5);
+
+      // Light text on dark hero panel
+      const ratioWhiteOnDark = contrastRatio(paper, ink);
+      expect(
+        ratioWhiteOnDark,
+        `White text on dark hero contrast is ${ratioWhiteOnDark.toFixed(2)}, expected >= 4.5:1`
+      ).toBeGreaterThanOrEqual(4.5);
     });
   });
 

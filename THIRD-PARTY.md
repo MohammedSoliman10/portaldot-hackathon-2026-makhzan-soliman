@@ -60,6 +60,9 @@ Defined in [`apps/status-ui/package.json`](apps/status-ui/package.json):
 | **@tailwindcss/vite** | ^4.1.14 | MIT | Vite plugin for Tailwind CSS v4 |
 | **@fontsource-variable/space-grotesk** | ^5.2.8 | OFL-1.1 | Space Grotesk open font typography |
 | **@fontsource/ibm-plex-mono** | ^5.2.6 | OFL-1.1 | IBM Plex Mono open font typography |
+| **@fontsource/instrument-sans** | ^5.3.0 | OFL-1.1 | Instrument Sans open font typography (Voltline editorial headlines) |
+| **@fontsource/inter** | ^5.3.0 | OFL-1.1 | Inter open font typography (body and UI text) |
+| **@fontsource/jetbrains-mono** | ^5.3.0 | OFL-1.1 | JetBrains Mono open font typography (mono numerals and contract hashes) |
 | **vite** | ^7.3.7 | MIT | Fast frontend build tool and dev server |
 | **vitest** | ^4.1.12 | MIT | Unit and component test runner |
 | **jsdom** | ^26.1.0 | MIT | DOM simulation for component tests |
