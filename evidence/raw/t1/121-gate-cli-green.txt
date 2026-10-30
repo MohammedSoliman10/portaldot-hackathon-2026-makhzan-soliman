@@ -1,0 +1,21 @@
+# T018: Gate CLI standalone guarded commands — GREEN tests
+# branch: 013-gate-cli
+# command: node --test apps/makhzan/test/gateCli.test.ts apps/makhzan/test/gateCliE2e.test.ts
+
+✔ parseGateCommand: parses gate status, lock, release, refund (1.664301ms)
+✔ parseGateCommand: rejects keys on argv (0.3911ms)
+✔ parseGateCommand: rejects invalid or missing arguments (0.6824ms)
+✔ executeGate: live mode refusal checks (1.039201ms)
+✔ executeGate: spend cap enforcement (2.209601ms)
+✔ executeGate: simulation captures decoded revert reason before send (0.7029ms)
+✔ executeGate: gate lock sends tx, records submitted, and returns 5-state record (1.029901ms)
+✔ executeGate: gate status returns full read-only report with release verdict (0.5572ms)
+✔ local anvil end-to-end through CLI: lock, release, refund, BondTooLow (472.725314ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4901.545241

@@ -66,3 +66,12 @@ test("watch polls the deal and reports the read-back", async () => {
   const record = JSON.parse(lines.join("\n"));
   assert.deepEqual(record.readBack, { dealId: 1, resolved: true });
 });
+
+test("main dispatches gate commands through runGate", async () => {
+  const { main } = await import("../src/cliMain.ts");
+  const lines: string[] = [];
+  // gate with key on argv must fail
+  const codeKey = await main(["gate", "status", "3", "--key", "0x" + "11".repeat(32)], {}, (l) => lines.push(l));
+  assert.equal(codeKey, 1);
+  assert.match(lines.join("\n"), /never pass a private key on argv/);
+});
