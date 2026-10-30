@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useMode } from "../app/app-context";
 import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, type Label } from "../data/labels";
 import type { DealInfo } from "../data/schema";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
+import { Card } from "../components/shared/Card";
+import { Chip } from "../components/shared/Chip";
 
 const HEALTH_TEXT: Record<number, string> = {
   0: "settled",
@@ -15,14 +17,6 @@ const HEALTH_TEXT: Record<number, string> = {
 };
 
 const short = (value: string): string => `${value.slice(0, 10)}…${value.slice(-6)}`;
-
-function Chip({ label }: { label: Label }) {
-  return (
-    <span className="label-chip" data-label={label}>
-      {label}
-    </span>
-  );
-}
 
 function Field({
   name,
@@ -40,14 +34,16 @@ function Field({
   source: string;
 }) {
   return (
-    <div className="border-t border-rule py-2 sm:grid sm:grid-cols-[10rem_1fr] sm:gap-4">
-      <dt className="text-xs text-ash">{name}</dt>
-      <dd className="text-sm">
-        <span className="numeral">{value}</span>
-        {unit ? <span className="text-ash"> {unit}</span> : null}
-        <Chip label={label} />
-        {detail ? <p className="mono mt-1 break-all text-xs text-ash-2">{detail}</p> : null}
-        <p className="mono mt-1 break-words text-[11px] text-ash-2">{source}</p>
+    <div className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[10rem_1fr] sm:gap-4 sm:items-start">
+      <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">{name}</dt>
+      <dd className="mt-1 text-sm sm:mt-0">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="numeral font-mono font-semibold text-slate-900">{value}</span>
+          {unit ? <span className="text-xs text-slate-500"> {unit}</span> : null}
+          <Chip label={label} />
+        </div>
+        {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
+        <p className="mono mt-1 break-words text-[11px] text-slate-400">{source}</p>
       </dd>
     </div>
   );
@@ -77,22 +73,37 @@ function DealCard({
   const healthText = healthValue === null ? "not read" : HEALTH_TEXT[healthValue];
 
   return (
-    <article
+    <Card
+      as="article"
       id={`deal-${deal.id}`}
       data-selected={selected ? "true" : undefined}
-      className={`border border-rule p-4 ${selected ? "border-ochre" : ""}`}
+      className={`transition-all ${selected ? "ring-2 ring-ochre border-ochre/80 shadow-md" : "hover:border-slate-300"}`}
     >
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-base">
-          Deal {deal.id}
-          {selected ? <span className="ml-2 font-mono text-xs text-ochre">selected</span> : null}
-        </h2>
-        <p className="font-mono text-xs text-paper-dim">
-          {deal.state} · {measured ? "read now" : "recorded"} · <Chip label={label} />
-        </p>
+      <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-100 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">
+              Deal {deal.id}
+            </h2>
+            {selected ? (
+              <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-amber-900 border border-amber-200">
+                selected
+              </span>
+            ) : null}
+          </div>
+          <p className="font-mono text-xs text-slate-500 mt-1">
+            Status: <span className="font-semibold text-slate-800">{deal.state}</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-slate-400">
+            {measured ? "read now" : "recorded"}
+          </span>
+          <Chip label={label} />
+        </div>
       </header>
 
-      <dl className="mt-3">
+      <dl className="mt-4">
         <Field
           name="Health"
           value={healthValue === null ? "not read" : String(healthValue)}
@@ -143,24 +154,33 @@ function DealCard({
         />
       </dl>
 
-      <ul className="mt-3 flex flex-wrap gap-4 text-xs">
+      <ul className="mt-6 flex flex-wrap gap-2.5 border-t border-slate-100 pt-4 text-xs font-mono">
         <li>
-          <a className="link-quiet underline" href={`/evidence/${evidenceId}.json`}>
+          <a
+            className="inline-flex min-h-[44px] items-center rounded-full border border-slate-200 bg-slate-50/80 px-4 py-2 text-slate-700 hover:border-ochre hover:bg-white hover:text-slate-900 transition-all no-underline shadow-xs"
+            href={`/evidence/${evidenceId}.json`}
+          >
             evidence
           </a>
         </li>
         <li>
-          <a className="link-quiet underline" href={`/verify/${deal.id}`}>
+          <Link
+            className="inline-flex min-h-[44px] items-center rounded-full border border-slate-200 bg-slate-50/80 px-4 py-2 text-slate-700 hover:border-ochre hover:bg-white hover:text-slate-900 transition-all no-underline shadow-xs"
+            to={`/verify/${deal.id}`}
+          >
             verify deal {deal.id}
-          </a>
+          </Link>
         </li>
         <li>
-          <a className="link-quiet underline" href={`/receipt/${deal.id}`}>
+          <Link
+            className="inline-flex min-h-[44px] items-center rounded-full border border-slate-200 bg-slate-50/80 px-4 py-2 text-slate-700 hover:border-ochre hover:bg-white hover:text-slate-900 transition-all no-underline shadow-xs"
+            to={`/receipt/${deal.id}`}
+          >
             receipt for deal {deal.id}
-          </a>
+          </Link>
         </li>
       </ul>
-    </article>
+    </Card>
   );
 }
 
@@ -179,40 +199,44 @@ export function Deal(options: LiveOptions) {
   });
 
   return (
-    <section className="space-y-8">
+    <div className="space-y-8">
       <header>
         <p className="eyebrow">02 / deals</p>
-        <h1 className="mt-2 text-xl">Deals</h1>
-        <p className="mt-3 max-w-[62ch] text-paper-dim">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Deals</h1>
+        <p className="mt-3 max-w-[68ch] text-slate-600 leading-relaxed">
           Two deals were created on this deployment, both against provider 1 and the same 1 MiB file.
           Each card shows the recorded facts and, when the RPC answers, the same fields read now.
         </p>
         {live.status === "live" ? (
-          <p className="mt-3 font-mono text-xs text-ochre" data-testid="deal-live">
+          <p className="mt-3 font-mono text-xs text-ochre font-semibold" data-testid="deal-live">
             Measured live — block {formatCount(live.block ?? 0)} · {live.at}
           </p>
         ) : null}
         {live.status === "error" ? (
-          <p role="note" className="mt-3 border-l-2 border-ochre-dim py-1 pl-3 text-sm">
+          <p role="note" className="mt-3 border-l-2 border-amber-500 bg-amber-50/50 py-2 pl-3 text-sm text-amber-900 rounded-r-lg">
             {live.stale ? "STALE — " : ""}
             live read failed ({live.error ?? "unknown error"}); showing the last good value or the
             recorded evidence.
           </p>
         ) : null}
         {mode.clientEnabled ? (
-          <button
-            type="button"
-            aria-label="Re-read deal status from RPC"
-            onClick={live.refresh}
-            className="mt-3 border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre"
-          >
-            Re-read
-          </button>
+          <div className="mt-4">
+            <button
+              type="button"
+              aria-label="Re-read deal status from RPC"
+              onClick={live.refresh}
+              className="inline-flex min-h-[38px] items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-1.5 font-mono text-xs font-medium text-slate-800 shadow-xs hover:border-ochre hover:text-ochre transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-ochre"
+            >
+              Re-read
+            </button>
+          </div>
         ) : null}
       </header>
 
       {deals.length === 0 ? (
-        <p className="text-sm text-ash">No deal is recorded in the evidence.</p>
+        <Card>
+          <p className="text-sm text-slate-500">No deal is recorded in the evidence.</p>
+        </Card>
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
           {deals.map((deal) => (
@@ -228,10 +252,10 @@ export function Deal(options: LiveOptions) {
         </div>
       )}
 
-      <p className="max-w-[62ch] text-xs text-ash">
+      <p className="max-w-[68ch] text-xs text-slate-500 leading-relaxed">
         Read-only: this page cannot create, claim or settle anything. A deal that reads settled here is
         only as good as the block and UTC time beside the value.
       </p>
-    </section>
+    </div>
   );
 }
