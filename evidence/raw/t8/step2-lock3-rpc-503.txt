@@ -1,0 +1,14 @@
+# Step 2 Gate Lock 3 RPC 503 Failure
+Timestamp: 2026-10-30T09:04:31Z (Local: 2026-10-30T11:04:31+02:00)
+Command: MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 scripts/with-live-env.sh owner -- node apps/makhzan/src/cliMain.ts gate lock 3 --payee 0xf4ec143c743FF57c0D32e829f50692551CBf6029 --min-bond 20 --amount 2 --live --cap 12
+Error:
+gate failed: HTTP request failed.
+
+Status: 503
+URL: https://test-evm-rpc-v3.portaldot.dev/
+Request body: {"method":"eth_sendRawTransaction","params":["0x02f8da84190f1ca90e8082686587013f9f87611e79945ee99e8ae165d0c33677c812d70b0b07820c1dca881bc16d674ec80000b86403aabf260000000000000000000000000000000000000000000000000000000000000003000000000000000000000000f4ec143c743ff57c0d32e829f50692551cbf602900000000000000000000000000000000000000000000000000071afd498d0000c001a04e9977a36e58a79f5091cf9970ba18b29cb20f9970eedcc6b1fe5d2ffd9b4534a0195054a0f63390ae3108d02de8f4bf38d97f2a22e610b56a533731173a913317"]}
+
+Details: "<html>\r\n<head><title>503 Service Temporarily Unavailable</title></head>\r\n<body>\r\n<center><h1>503 Service Temporarily Unavailable</h1></center>\r\n<hr><center>nginx/1.24.0 (Ubuntu)</center>\r\n</body>\r\n</html>\r\n"
+
+State Verification:
+Owner nonce remained 14; lockOf(3) uninitialized; no funds deducted.

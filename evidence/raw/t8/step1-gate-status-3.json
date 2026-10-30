@@ -1,0 +1,36 @@
+{
+  "label": "gate:status",
+  "readBack": {
+    "dealId": 3,
+    "gate": "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA",
+    "makhzan": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+    "currentBlock": 252505,
+    "lock": {
+      "payer": "0x0000000000000000000000000000000000000000",
+      "payee": "0x0000000000000000000000000000000000000000",
+      "amountWei": "0",
+      "amountTpot": "0.000000",
+      "minBondUnits": "0",
+      "minBondTpot": "0.000000",
+      "status": 0,
+      "statusName": "none"
+    },
+    "deal": {
+      "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "endBlock": 250692,
+      "providerId": 1,
+      "health": 1,
+      "guardDecision": "expired"
+    },
+    "provider": {
+      "id": 0,
+      "bondUnits": "0",
+      "bondTpot": "0.000000",
+      "registered": false
+    },
+    "verdict": {
+      "releaseWouldPass": false,
+      "reason": "not locked (status 0 = none)"
+    }
+  }
+}

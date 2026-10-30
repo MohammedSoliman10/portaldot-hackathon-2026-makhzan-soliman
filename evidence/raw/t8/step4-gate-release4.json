@@ -1,0 +1,32 @@
+{
+  "label": "gate:release",
+  "submitted": {
+    "hash": "0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f",
+    "nonce": 6
+  },
+  "included": {
+    "blockNumber": "252535",
+    "blockHash": "0xb567d6c671aa26cd017750d9685bae230022fc8b590dfc46b4affe4961c54175"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 4,
+    "gate": "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA",
+    "lock": {
+      "payer": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "payee": "0xf4ec143c743FF57c0D32e829f50692551CBf6029",
+      "amountWei": "2000000000000000000",
+      "amountTpot": "2.000000",
+      "minBondUnits": "2000000000000000",
+      "minBondTpot": "20.000000",
+      "status": 2,
+      "statusName": "released"
+    }
+  }
+}

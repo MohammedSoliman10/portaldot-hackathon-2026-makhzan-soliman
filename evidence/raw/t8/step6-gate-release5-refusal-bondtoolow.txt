@@ -1,0 +1,17 @@
+# Step 6 Gate Release 5 Refusal (BondTooLow)
+Timestamp: 2026-10-30T12:29:23Z (Local: 2026-10-30T14:29:23+02:00)
+Command: MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 scripts/with-live-env.sh provider-1 -- node apps/makhzan/src/cliMain.ts gate release 5 --live --cap 0.001
+Signer: Provider-1 (0xf4ec143c743FF57c0D32e829f50692551CBf6029)
+Current Block: 252560
+Deal 5 End Block: 255544
+Output:
+gate failed: refusing: call would revert with BondTooLow
+
+Reason:
+StorageGate.sol release(5) checks:
+  if (l.minBond != 0 && _dealProviderBond(dealId, l.payee) < l.minBond) revert BondTooLow();
+Provider-1 active bond is 24.0 tPOT (2,400,000,000,000,000 units), which is less than the floor of 30.0 tPOT (3,000,000,000,000,000 units).
+The guarded CLI simulation caught the revert selector (0x6e360f94) via eth_call and refused before broadcasting.
+Owner Nonce: 18 (unchanged)
+Provider-1 Nonce: 7 (unchanged)
+Gas spent: 0

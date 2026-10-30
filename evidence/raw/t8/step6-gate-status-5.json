@@ -1,0 +1,36 @@
+{
+  "label": "gate:status",
+  "readBack": {
+    "dealId": 5,
+    "gate": "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA",
+    "makhzan": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+    "currentBlock": 252557,
+    "lock": {
+      "payer": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "payee": "0xf4ec143c743FF57c0D32e829f50692551CBf6029",
+      "amountWei": "2000000000000000000",
+      "amountTpot": "2.000000",
+      "minBondUnits": "3000000000000000",
+      "minBondTpot": "30.000000",
+      "status": 1,
+      "statusName": "locked"
+    },
+    "deal": {
+      "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "endBlock": 255544,
+      "providerId": 1,
+      "health": 1,
+      "guardDecision": "healthy"
+    },
+    "provider": {
+      "id": 1,
+      "bondUnits": "2400000000000000",
+      "bondTpot": "24.000000",
+      "registered": true
+    },
+    "verdict": {
+      "releaseWouldPass": false,
+      "reason": "BondTooLow: payee provider bond 24.000000 tPOT < floor 30.000000 tPOT"
+    }
+  }
+}

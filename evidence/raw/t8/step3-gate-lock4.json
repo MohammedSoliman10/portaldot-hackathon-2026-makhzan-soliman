@@ -1,0 +1,32 @@
+{
+  "label": "gate:lock",
+  "submitted": {
+    "hash": "0x3719248237ec37c916b11e3d014aebba05d84cedcdcdc79cc1b9feaa18a62203",
+    "nonce": 15
+  },
+  "included": {
+    "blockNumber": "252523",
+    "blockHash": "0xcb10e7d79bb6a50cb983f5ee48cce6ae8380a0a55be9b2170292956bf7aa3382"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 4,
+    "gate": "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA",
+    "lock": {
+      "payer": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      "payee": "0xf4ec143c743FF57c0D32e829f50692551CBf6029",
+      "amountWei": "2000000000000000000",
+      "amountTpot": "2.000000",
+      "minBondUnits": "2000000000000000",
+      "minBondTpot": "20.000000",
+      "status": 1,
+      "statusName": "locked"
+    }
+  }
+}

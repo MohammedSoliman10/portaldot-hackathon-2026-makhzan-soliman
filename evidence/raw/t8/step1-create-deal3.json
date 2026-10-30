@@ -1,0 +1,27 @@
+{
+  "label": "create",
+  "submitted": {
+    "hash": "0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee",
+    "nonce": 13
+  },
+  "included": {
+    "blockNumber": "250092",
+    "blockHash": "0x8a63d55716163edad65eee6e45f8ab531e3533f4e56b1a7e3a0cdb387fad837c"
+  },
+  "executed": {
+    "status": "success"
+  },
+  "finalized": {
+    "kind": "tag",
+    "tag": "finalized"
+  },
+  "readBack": {
+    "dealId": 3,
+    "owner": "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+    "providerId": 1,
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "size": 1048576,
+    "endBlock": 250692,
+    "price": "500000000000000"
+  }
+}

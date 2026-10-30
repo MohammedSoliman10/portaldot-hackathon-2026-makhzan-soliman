@@ -1,0 +1,12 @@
+# Step 2 Gate Lock 3 Refusal (Expired)
+Timestamp: 2026-10-30T11:26:56Z (Local: 2026-10-30T13:26:56+02:00)
+Command: MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 scripts/with-live-env.sh owner -- node apps/makhzan/src/cliMain.ts gate lock 3 --payee 0xf4ec143c743FF57c0D32e829f50692551CBf6029 --min-bond 20 --amount 2 --live --cap 12
+Output:
+gate failed: refusing: call would revert with Expired
+
+Reason:
+Deal 3 was created at block 250092 with duration 600 blocks (endBlock = 250692).
+The live chain head at execution time was block 251940 (> 250692).
+StorageGate.sol calls MakhzanGuard.requireHealthy(makhzan, 3), which reverts with Expired() when block.number >= endBlock.
+The guarded CLI simulated the transaction via eth_call and aborted before broadcasting.
+Owner nonce remains 14. Zero gas was spent.
