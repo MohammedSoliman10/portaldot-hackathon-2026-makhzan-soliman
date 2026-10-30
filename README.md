@@ -1,11 +1,15 @@
 # Makhzan
 
+> **Start here:** [Live Web App](https://status-ui-one.vercel.app/) · Makhzan: [`0x60481DFcFCA34A8F095939D9675eC715127B2e44`](https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44) · StorageGate: [`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`](https://pindex.onrender.com/app/?q=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA) · **3 verify steps:** 1. [`/verify`](https://status-ui-one.vercel.app/verify) (hash sample in browser against live deal 2) → 2. [`/replay`](https://status-ui-one.vercel.app/replay) (watch live challenge & 20% slash timeline) → 3. [`/gate`](https://status-ui-one.vercel.app/gate) (inspect live StorageGate locks).
+
 **Bonded, challenge-verified storage on Portaldot: a provider stakes tPOT, and a client can prove a
 missing block and be paid from the bond.**
 
-- Repository: https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
-- Live contract (Portaldot V3 testnet, chain `420420777`): `0x60481DFcFCA34A8F095939D9675eC715127B2e44`
-- Status: **full live run complete [live run]**: contract deployed, provider-1 registered, deal A
+- **Team:** Mohammed Soliman (solo builder)
+- **Repository:** https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
+- **Live Makhzan contract (Portaldot V3 testnet, chain `420420777`):** `0x60481DFcFCA34A8F095939D9675eC715127B2e44`
+- **Live StorageGate contract (Portaldot V3 testnet, chain `420420777`):** `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`
+- **Status:** **full live run complete [live run]**: contract deployed, provider-1 registered, deal A
   passed and was claimed/settled, deal B passed with the fixed daemon, then a skipped second challenge
   was resolved with exactly 20% slashed to the owner, and deal B was claimed/settled. The first live
   pass exposed daemon defect T1-002 (a 15 s receipt wait mislabelled a landed answer); it is fixed and
@@ -196,29 +200,54 @@ Read-only chain facts gathered after the run — `TransactionStorage` metadata a
 ## Architecture
 
 ```mermaid
-flowchart LR
-  subgraph ClientSide["Client side"]
-    CLI["Client CLI<br/>apps/makhzan/src/cliMain.ts"]
-  end
-  subgraph ProviderSide["Provider side"]
-    DAEMON["Provider daemon<br/>apps/makhzan/src/daemonMain.ts"]
-    STORE[("File + 1 KiB blocks<br/>Merkle tree")]
-  end
-  subgraph Chain["Portaldot V3 testnet"]
-    MAKHZAN["Makhzan contract<br/>deals · bonds · challenges · payouts"]
-    VERIFIER["Verifier library<br/>keccak Merkle path"]
+flowchart TD
+  subgraph Clients["Clients & Interfaces"]
+    UI["Status Web App (React / Vite)<br/>status-ui-one.vercel.app"]
+    CLI["Makhzan CLI<br/>apps/makhzan"]
+    MCP["Read-Only MCP Agent Server<br/>apps/makhzan-mcp"]
+    AI["AI Agent (Claude / Cursor / IDE)"]
+    CONSUMER["Payer / Consumer Smart Contract"]
   end
 
-  CLI -->|"upload 1 KiB blocks"| DAEMON
+  subgraph Provider["Storage Provider Node"]
+    DAEMON["Provider Daemon<br/>apps/makhzan/daemonMain.ts"]
+    STORE[("1 KiB Blocks Store &<br/>Merkle Tree Vector Index")]
+  end
+
+  subgraph Chain["Portaldot V3 Testnet (Chain 420420777)"]
+    subgraph MakhzanCore["Core Storage Protocol"]
+      MAKHZAN["Makhzan.sol (0x60481DFc...2e44)<br/>Deals · Bonds · Challenges · Slashes · Payouts"]
+      MERKLE["MerkleLib.sol<br/>Keccak-256 Merkle Proof Verifier"]
+    end
+    subgraph EscrowGate["Conditional Payment Layer"]
+      GATE["StorageGate.sol (0x5ee99E8A...1DCA)<br/>Lock · Release · Refund · Bond Floor"]
+      GUARD["MakhzanGuard.sol<br/>HealthOf & Term Availability Guard"]
+    end
+  end
+
+  %% Interactions
+  CLI -->|"1. Upload 1 KiB blocks"| DAEMON
   DAEMON --> STORE
-  CLI -->|"createDeal(root, size, leafCount, price)"| MAKHZAN
-  CLI -->|"challenge(dealId)"| MAKHZAN
-  MAKHZAN -->|"ChallengeOpened(index, deadline)"| DAEMON
-  DAEMON -->|"answer(block, Merkle path)"| MAKHZAN
-  MAKHZAN --> VERIFIER
-  CLI -->|"resolve after deadline"| MAKHZAN
-  MAKHZAN -->|"20% slash to owner, events"| CLI
-  DAEMON -->|"read back challengeStateOf + bond"| MAKHZAN
+  CLI -->|"2. createDeal(root, size, price)"| MAKHZAN
+  CONSUMER -->|"3. lock(dealId, payee, minBond)"| GATE
+
+  CLI -->|"4. challenge(dealId)"| MAKHZAN
+  MAKHZAN -->|"ChallengeOpened(leafIndex, deadline)"| DAEMON
+  DAEMON -->|"5. answer(blockBytes, merklePath)"| MAKHZAN
+  MAKHZAN --> MERKLE
+
+  CLI -->|"6. resolve(dealId) if deadline missed"| MAKHZAN
+  MAKHZAN -->|"20% bond slash to owner"| CLI
+
+  GATE -->|"check health & term"| GUARD
+  GUARD -->|"healthOf(dealId)"| MAKHZAN
+  GATE -->|"conditional release or refund"| CONSUMER
+
+  AI -->|"stdio JSON-RPC"| MCP
+  MCP -->|"read-only eth_call"| MAKHZAN
+  MCP -->|"read-only gateLock"| GATE
+  UI -->|"read-only RPC queries"| MAKHZAN
+  UI -->|"read-only RPC queries"| GATE
 ```
 
 The full component and sequence views are in [docs/architecture.md](docs/architecture.md).
@@ -467,24 +496,23 @@ transport, plus a scripted client that calls every tool over stdio against the l
 - T1-002 is fixed: the daemon persisted the hash before waiting and labelled a passed and a slashed
   live round correctly. The receipt, not the label alone, remains the primary evidence.
 
-## AI-assisted code disclosure
+## Built with AI assistance
 
-This project is built with AI assistance; AI-assisted commits carry `[ai]` in the subject. The owner
-reviewed each batch checkpoint. AI-written parts include: the repo skeleton and CI, the Tier-0 gate
-harness and probe contracts, the Makhzan contract and verifier, the CLI/daemon/deploy/evidence/verify/
-doctor tooling, the read-only MCP server and its tests, the tests, the live runbook, this README, the
-architecture doc, `docs/AGENT.md` and the check-in text.
-Spec Kit scaffolding (`.specify/`, `.opencode/commands/speckit.*`) was generated by GitHub Spec Kit.
-Live deployment facts in this README come from the recorded command output in `evidence/`, not from
-memory.
+This project was built with AI assistance across all development stages, with human engineering direction, architecture specification, review, and verification. AI-assisted commits carry `[ai]` in their commit messages (over 380 commits).
+
+- **Tooling & Environments:** Initial specifications, scaffolding, and Tier-0/Tier-1 contract skeletons were generated using **opencode** paired with [GitHub Spec Kit](https://github.com/github/spec-kit) (`specify-cli`). Advanced agentic implementation, StorageGate escrow extensions, read-only MCP agent server (`apps/makhzan-mcp`), comprehensive test suites (unit, fuzz, invariant, live scripted clients), mobile accessibility polish, and live audit workflows were developed with **Google Antigravity** using **Claude and Gemini models**.
+- **Human Oversight:** The solo builder directed every architectural decision, established all invariant rules, verified live testnet deployments against Portaldot V3, and reviewed every batch checkpoint before merging.
+- **Evidence-Based Grounding:** Live deployment facts, gas metrics, and transaction receipts are recorded directly from live chain execution (`evidence/`), never synthesized from model memory.
 
 ## Third-party software
+
+See [THIRD-PARTY.md](THIRD-PARTY.md) for the complete directory of packages, dependencies, versions, and licences across contracts, client tools, agent server, and status web UI.
 
 | Component | Version | Licence |
 | --- | --- | --- |
 | [GitHub Spec Kit](https://github.com/github/spec-kit) (`specify-cli`) | v1.2.2 | MIT |
 | [Foundry](https://github.com/foundry-rs/foundry) (`forge`, `cast`, `anvil`) | 1.8.5 | MIT / Apache-2.0 |
-| [forge-std](https://github.com/foundry-rs/forge-std) | 1.17.0 | MIT |
+| [forge-std](https://github.com/foundry-rs/forge-std) | 1.17.0 | MIT OR Apache-2.0 |
 | [resolc](https://github.com/paritytech/revive) (PolkaVM compiler probe only) | 1.4.0 | Apache-2.0 |
 | [Node.js](https://nodejs.org/) | 24.20.0 | MIT |
 | [viem](https://viem.sh/) | 2.57.7 | MIT |
@@ -493,6 +521,9 @@ memory.
 | [@polkadot/api](https://github.com/polkadot-js/api) | 17.0.2 | Apache-2.0 |
 | [@polkadot/util](https://github.com/polkadot-js/common) | 14.0.3 | Apache-2.0 |
 | [@polkadot/util-crypto](https://github.com/polkadot-js/common) | 14.0.3 | Apache-2.0 |
+| [React](https://react.dev/) | 19.2.9 | MIT |
+| [Tailwind CSS](https://tailwindcss.com/) | 4.1.14 | MIT |
+| [Vite](https://vite.dev/) | 7.3.7 | MIT |
 | [TypeScript](https://www.typescriptlang.org/) | 5.9.3 | Apache-2.0 |
 | [@types/node](https://github.com/DefinitelyTyped/DefinitelyTyped) | 24.19.2 | MIT |
 
