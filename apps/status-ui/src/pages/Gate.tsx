@@ -4,17 +4,11 @@ import { BlockLink } from "../components/BlockLink";
 import { useMode } from "../app/app-context";
 import { useEvidence } from "../data/evidence-context";
 import { guardDecision, releaseVerdict } from "../data/gate";
-import { formatCount, formatNative, formatWei, type Label } from "../data/labels";
+import { formatCount, formatNative, formatWei } from "../data/labels";
 import type { ReadClient } from "../data/client";
 import { useGate } from "../data/use-gate";
-
-function Chip({ label }: { label: Label }) {
-  return (
-    <span className="label-chip" data-label={label}>
-      {label}
-    </span>
-  );
-}
+import { Card } from "../components/shared/Card";
+import { Chip } from "../components/shared/Chip";
 
 function Field({
   name,
@@ -30,13 +24,15 @@ function Field({
   testId?: string;
 }) {
   return (
-    <div className="border-t border-rule py-2 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4">
-      <dt className="text-xs text-ash">{name}</dt>
+    <div className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4 sm:items-start">
+      <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">{name}</dt>
       <dd className="min-w-0 text-sm" data-testid={testId}>
-        <span className="numeral break-words">{value}</span>
-        {unit ? <span className="text-ash"> {unit}</span> : null}
-        <Chip label="MEASURED" />
-        {detail ? <p className="mono mt-1 break-all text-[11px] text-ash-2">{detail}</p> : null}
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="numeral font-mono font-semibold text-slate-900 break-words">{value}</span>
+          {unit ? <span className="text-slate-500"> {unit}</span> : null}
+          <Chip label="MEASURED" />
+        </div>
+        {detail ? <p className="mono mt-1 break-all text-[11px] text-slate-500">{detail}</p> : null}
       </dd>
     </div>
   );
@@ -87,61 +83,89 @@ export function Gate({ client }: { client?: ReadClient }) {
   };
 
   return (
-    <section className="space-y-10">
+    <section className="space-y-8">
       <header>
         <p className="eyebrow">08 / gate</p>
-        <h1 className="mt-2 text-xl">The gate that pays on a healthy deal</h1>
-        <p className="mt-3 max-w-[62ch] text-paper-dim">
-          <span className="mono">StorageGate</span> is a consumer of Makhzan: it holds one payment per
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">The gate that pays on a healthy deal</h1>
+        <p className="mt-3 max-w-[68ch] text-slate-600 leading-relaxed">
+          <span className="mono font-mono font-semibold text-slate-900">StorageGate</span> is a consumer of Makhzan: it holds one payment per
           deal and lets the payee take it only while the deal is healthy and inside its term, or back to
           the payer after a default. This page reads it; it cannot lock, release or refund anything.
         </p>
       </header>
 
       {mode.gateAddressError !== null ? (
-        <section className="border border-rule-strong p-4">
-          <h2 className="text-lg">The gate address is not usable</h2>
-          <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">{mode.gateAddressError}</p>
-          <p className="mt-2 text-xs text-ash">
+        <Card as="section" className="border border-red-200 bg-white p-6">
+          <h2 className="text-lg font-bold text-slate-900">The gate address is not usable</h2>
+          <p className="mt-2 max-w-[62ch] text-sm text-slate-600">{mode.gateAddressError}</p>
+          <p className="mt-2 text-xs text-slate-500">
             No address is shown, because a guess here would be a lie about what was deployed.
           </p>
-          <p className="mt-2">
+          <p className="mt-3">
             <Chip label="MEASURED" />
           </p>
-        </section>
+        </Card>
       ) : gate === null ? (
-        <section className="border border-rule-strong p-4">
-          <h2 className="text-lg">StorageGate is not deployed yet</h2>
-          <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
-            This build sets no <span className="mono">VITE_GATE_ADDRESS</span>, so there is nothing to
-            read and no address is invented here. The contract and its tests live in{" "}
-            <span className="mono">contracts/src/makhzan/StorageGate.sol</span>; when a deployment sets
-            that variable, this page reads the lock, the guard decision and the payee's bond.
-          </p>
-          <p className="mt-2">
-            <span className="label-chip" data-label="DESIGN NOTE">
-              DESIGN NOTE
-            </span>
-          </p>
-        </section>
+        <>
+          <Card as="section" className="border border-slate-200 bg-white p-6">
+            <h2 className="text-lg font-bold text-slate-900">StorageGate is not deployed yet</h2>
+            <p className="mt-2 max-w-[62ch] text-sm text-slate-600">
+              This build sets no <span className="mono font-mono text-slate-900">VITE_GATE_ADDRESS</span>, so there is nothing to
+              read and no address is invented here. The contract and its tests live in{" "}
+              <span className="mono font-mono text-slate-900">contracts/src/makhzan/StorageGate.sol</span>; when a deployment sets
+              that variable, this page reads the lock, the guard decision and the payee's bond.
+            </p>
+            <p className="mt-3">
+              <span className="label-chip" data-label="DESIGN NOTE">
+                DESIGN NOTE
+              </span>
+            </p>
+          </Card>
+
+          <Card as="section" aria-labelledby="explain-heading" className="p-6">
+            <h2 id="explain-heading" className="eyebrow text-slate-700 font-semibold">
+              The limit worth knowing
+            </h2>
+            <p className="mt-2 max-w-[62ch] text-sm text-slate-600">
+              healthOf == 1 means no open challenge, not proof the file is stored; minBond is how a
+              consumer notices a past slash.
+            </p>
+            <ul className="mt-3 max-w-[62ch] list-disc space-y-2 pl-5 text-sm text-slate-600">
+              <li>
+                A deal that was slashed can still report health 1 afterwards. A lock with a non-zero{" "}
+                <span className="mono font-mono text-slate-900">minBond</span> is how a consumer notices: the payee's bond has
+                shrunk, so release reverts <span className="mono font-mono text-slate-900">BondTooLow</span>.
+              </li>
+              <li>
+                An expired deal still reports health 1, because <span className="mono font-mono text-slate-900">healthOf</span>{" "}
+                never reads the end block. The guard adds that check, and so does this page.
+              </li>
+              <li>
+                The gate counts the <em>payee's</em> provider record, and only when its id is the deal's
+                provider id. Any other payee has no bond to prove and reads as 0.
+              </li>
+              <li>Read-only: every value here is one <span className="mono font-mono text-slate-900">eth_call</span> at one block.</li>
+            </ul>
+          </Card>
+        </>
       ) : (
         <>
-          <section aria-labelledby="address-heading">
-            <h2 id="address-heading" className="eyebrow">
+          <Card as="section" aria-labelledby="address-heading" className="p-6">
+            <h2 id="address-heading" className="eyebrow text-slate-700 font-semibold">
               What it reads
             </h2>
             <dl className="mt-2 space-y-1 text-sm">
-              <div className="border-t border-rule py-2 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4">
-                <dt className="text-xs text-ash">Gate address</dt>
-                <dd className="mono break-all text-xs">{gate}</dd>
+              <div className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4">
+                <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Gate address</dt>
+                <dd className="mono break-all font-mono text-xs text-slate-900">{gate}</dd>
               </div>
-              <div className="border-t border-rule py-2 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4">
-                <dt className="text-xs text-ash">Makhzan address</dt>
-                <dd className="mono break-all text-xs">
+              <div className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4">
+                <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Makhzan address</dt>
+                <dd className="mono break-all font-mono text-xs">
                   {mode.address ? (
                     <Link
                       to="/"
-                      className="underline hover:text-ochre"
+                      className="underline text-slate-900 hover:text-amber-700"
                       aria-label="Makhzan deployment overview"
                     >
                       {mode.address}
@@ -152,13 +176,13 @@ export function Gate({ client }: { client?: ReadClient }) {
                 </dd>
               </div>
             </dl>
-          </section>
+          </Card>
 
-          <section aria-labelledby="deal-heading">
-            <h2 id="deal-heading" className="eyebrow">
+          <Card as="section" aria-labelledby="deal-heading" className="p-6">
+            <h2 id="deal-heading" className="eyebrow text-slate-700 font-semibold">
               Which deal
             </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               {[1, 2].map((id) => (
                 <button
                   key={id}
@@ -169,17 +193,17 @@ export function Gate({ client }: { client?: ReadClient }) {
                     setDealId(id);
                     setTyped(String(id));
                   }}
-                  className={`border px-3 py-1 font-mono text-xs ${
+                  className={`min-h-[44px] rounded-full px-4 py-2 font-mono text-xs font-semibold transition-colors ${
                     dealId === id
-                      ? "border-ochre text-ochre"
-                      : "border-rule-strong hover:border-ochre hover:text-ochre"
+                      ? "bg-slate-900 text-white shadow-xs"
+                      : "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   Deal {id}
                 </button>
               ))}
-              <form onSubmit={submit} className="flex flex-wrap items-center gap-2">
-                <label htmlFor="gate-deal-id" className="text-xs text-ash">
+              <form onSubmit={submit} className="flex flex-wrap items-center gap-3">
+                <label htmlFor="gate-deal-id" className="text-xs font-mono uppercase tracking-wider text-slate-500 font-medium">
                   Deal id
                 </label>
                 <input
@@ -189,42 +213,42 @@ export function Gate({ client }: { client?: ReadClient }) {
                   max={4_294_967_295}
                   value={typed}
                   onChange={(event) => setTyped(event.target.value)}
-                  className="w-24 border border-rule-strong bg-ink px-2 py-1 font-mono text-xs text-paper"
+                  className="min-h-[44px] w-24 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 shadow-xs focus:border-slate-400 focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="border border-rule-strong px-3 py-1 font-mono text-xs hover:border-ochre hover:text-ochre"
+                  className="min-h-[44px] rounded-full border border-slate-200 bg-white px-5 py-2 font-mono text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                 >
                   Read
                 </button>
               </form>
             </div>
-          </section>
+          </Card>
 
-          <section aria-labelledby="read-heading">
-            <h2 id="read-heading" className="eyebrow">
+          <Card as="section" aria-labelledby="read-heading" className="p-6">
+            <h2 id="read-heading" className="eyebrow text-slate-700 font-semibold">
               What the gate would see for deal {formatCount(dealId)}
             </h2>
 
             {live.status === "off" ? (
-              <p className="mt-3 max-w-[62ch] text-sm text-paper-dim">
+              <p className="mt-3 max-w-[62ch] text-sm text-slate-600">
                 This build makes no live read: the mode is {mode.mode}, so no client is open. Set a
                 live mode with an RPC URL to measure the gate.
               </p>
             ) : live.status === "blocked" ? (
-              <p className="mt-3 max-w-[62ch] text-sm text-paper-dim">{live.blockingDetail}</p>
+              <p className="mt-3 max-w-[62ch] text-sm text-slate-600">{live.blockingDetail}</p>
             ) : live.status === "no-code" ? (
-              <p data-testid="gate-no-code" className="mt-3 max-w-[62ch] text-sm text-paper-dim">
-                There is no contract at <span className="mono break-all">{gate}</span> on chain{" "}
+              <p data-testid="gate-no-code" className="mt-3 max-w-[62ch] text-sm text-slate-600">
+                There is no contract at <span className="mono break-all font-mono text-slate-900">{gate}</span> on chain{" "}
                 {mode.expectedChainId}. The address is configured, but nothing is deployed there — so
                 no lock is read and none is invented.
               </p>
             ) : live.status === "error" ? (
-              <p className="mt-3 max-w-[62ch] text-sm text-paper-dim">
+              <p className="mt-3 max-w-[62ch] text-sm text-slate-600">
                 The read failed: {live.error}. Nothing below is filled in from a guess.
               </p>
             ) : live.status === "checking" ? (
-              <p className="mt-3 text-sm text-ash">Reading the gate…</p>
+              <p className="mt-3 text-sm text-slate-500">Reading the gate…</p>
             ) : null}
 
             {live.status === "live" && live.lock !== null ? (
@@ -236,8 +260,8 @@ export function Gate({ client }: { client?: ReadClient }) {
                     testId="gate-lock-status"
                     detail={`lockOf(${dealId}).status = ${live.lock.statusCode}`}
                   />
-                  <Field name="Payer" value={<span className="mono text-xs">{live.lock.payer}</span>} />
-                  <Field name="Payee" value={<span className="mono text-xs">{live.lock.payee}</span>} />
+                  <Field name="Payer" value={<span className="mono text-xs font-mono">{live.lock.payer}</span>} />
+                  <Field name="Payee" value={<span className="mono text-xs font-mono">{live.lock.payee}</span>} />
                   <Field
                     name="Amount"
                     value={formatNative(live.lock.amountUnits)}
@@ -298,18 +322,20 @@ export function Gate({ client }: { client?: ReadClient }) {
 
                 <div
                   data-testid="gate-verdict"
-                  className={`mt-4 border-l-2 px-4 py-3 text-sm ${
-                    verdict?.kind === "pass" ? "border-ochre text-ochre" : "border-red text-red"
+                  className={`mt-6 rounded-2xl border p-4 text-sm ${
+                    verdict?.kind === "pass"
+                      ? "border-emerald-200 bg-emerald-50/80 text-emerald-900"
+                      : "border-red-200 bg-red-50/80 text-red-900"
                   }`}
                 >
-                  <p className="font-mono">
+                  <p className="font-mono font-semibold">
                     {verdict === null
                       ? "the verdict is not readable yet"
                       : verdict.kind === "pass"
                         ? "release would pass now"
                         : `release would revert: ${verdict.name}`}
                   </p>
-                  <p className="mt-2 text-xs text-ash">
+                  <p className="mt-2 text-xs text-slate-600">
                     Assuming the recorded payee sends the transaction, at block{" "}
                     {formatCount(live.block ?? 0)}. This page cannot send it, and it does not know who
                     will.
@@ -317,13 +343,13 @@ export function Gate({ client }: { client?: ReadClient }) {
                 </div>
               </div>
             ) : null}
-          </section>
+          </Card>
 
-          <section aria-labelledby="evidence-heading">
-            <h2 id="evidence-heading" className="eyebrow">
+          <Card as="section" aria-labelledby="evidence-heading" className="p-6">
+            <h2 id="evidence-heading" className="eyebrow text-slate-700 font-semibold">
               What the evidence recorded
             </h2>
-            <p data-testid="gate-evidence" className="mt-2 max-w-[62ch] text-sm text-paper-dim">
+            <p data-testid="gate-evidence" className="mt-2 max-w-[62ch] text-sm text-slate-600">
               {recorded === null ? (
                 <>
                   Deal {formatCount(dealId)} is not in the evidence bundle
@@ -338,33 +364,33 @@ export function Gate({ client }: { client?: ReadClient }) {
                 </>
               )}
             </p>
-          </section>
+          </Card>
 
-          <section aria-labelledby="explain-heading">
-            <h2 id="explain-heading" className="eyebrow">
+          <Card as="section" aria-labelledby="explain-heading" className="p-6">
+            <h2 id="explain-heading" className="eyebrow text-slate-700 font-semibold">
               The limit worth knowing
             </h2>
-            <p className="mt-2 max-w-[62ch] text-sm text-paper-dim">
+            <p className="mt-2 max-w-[62ch] text-sm text-slate-600">
               healthOf == 1 means no open challenge, not proof the file is stored; minBond is how a
               consumer notices a past slash.
             </p>
-            <ul className="mt-3 max-w-[62ch] list-disc space-y-2 pl-5 text-sm text-paper-dim">
+            <ul className="mt-3 max-w-[62ch] list-disc space-y-2 pl-5 text-sm text-slate-600">
               <li>
                 A deal that was slashed can still report health 1 afterwards. A lock with a non-zero{" "}
-                <span className="mono">minBond</span> is how a consumer notices: the payee's bond has
-                shrunk, so release reverts <span className="mono">BondTooLow</span>.
+                <span className="mono font-mono text-slate-900">minBond</span> is how a consumer notices: the payee's bond has
+                shrunk, so release reverts <span className="mono font-mono text-slate-900">BondTooLow</span>.
               </li>
               <li>
-                An expired deal still reports health 1, because <span className="mono">healthOf</span>{" "}
+                An expired deal still reports health 1, because <span className="mono font-mono text-slate-900">healthOf</span>{" "}
                 never reads the end block. The guard adds that check, and so does this page.
               </li>
               <li>
                 The gate counts the <em>payee's</em> provider record, and only when its id is the deal's
                 provider id. Any other payee has no bond to prove and reads as 0.
               </li>
-              <li>Read-only: every value here is one <span className="mono">eth_call</span> at one block.</li>
+              <li>Read-only: every value here is one <span className="mono font-mono text-slate-900">eth_call</span> at one block.</li>
             </ul>
-          </section>
+          </Card>
         </>
       )}
     </section>

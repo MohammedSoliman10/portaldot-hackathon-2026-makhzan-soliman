@@ -4,14 +4,8 @@ import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, formatWeiAsNative, type Label } from "../data/labels";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
-
-function Chip({ label }: { label: Label }) {
-  return (
-    <span className="label-chip" data-label={label}>
-      {label}
-    </span>
-  );
-}
+import { Card } from "../components/shared/Card";
+import { Chip } from "../components/shared/Chip";
 
 function Row({
   field,
@@ -29,17 +23,17 @@ function Row({
   source: string;
 }) {
   return (
-    <tr>
-      <td className="break-words text-ash">{field}</td>
-      <td className="numeral">
+    <tr className="hover:bg-slate-50/50 transition-colors">
+      <td className="break-words font-medium text-slate-700 py-3">{field}</td>
+      <td className="numeral font-mono text-slate-900 py-3">
         {value}
-        {unit ? <span className="text-ash"> {unit}</span> : null}
-        {detail ? <p className="mono mt-1 break-words text-xs text-ash-2">{detail}</p> : null}
+        {unit ? <span className="text-slate-500 font-sans text-xs"> {unit}</span> : null}
+        {detail ? <p className="mono mt-1 break-words text-xs text-slate-500">{detail}</p> : null}
       </td>
-      <td>
+      <td className="py-3">
         <Chip label={label} />
       </td>
-      <td className="mono break-words text-xs text-ash-2">{source}</td>
+      <td className="mono break-words text-xs text-slate-500 py-3">{source}</td>
     </tr>
   );
 }
@@ -68,19 +62,20 @@ export function Proof(options: LiveOptions) {
   const liveSource = `chain ${bundle?.chain.chainId ?? mode.expectedChainId} @ block ${formatCount(live.block ?? 0)} · ${live.at}`;
 
   return (
-    <section className="space-y-10">
+    <div className="space-y-8">
       <header>
         <p className="eyebrow">04 / proof</p>
-        <h1 className="mt-2 text-xl">The slash, in plain words</h1>
-        <p className="mt-3 max-w-[62ch] text-paper-dim">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">The slash, in plain words</h1>
+        <p className="mt-3 max-w-[68ch] text-slate-600 leading-relaxed">
           Provider 1 posted a 30 tPOT bond. One challenge on deal 2 was left unanswered. When the
           deadline passed, resolve cut the bond by exactly 20% and paid the owner the same amount. No
           other slash exists on this deployment.
         </p>
       </header>
 
-      <section aria-labelledby="before-after">
-        <h2 id="before-after" className="eyebrow">
+      {/* Before and after Card */}
+      <Card as="section" aria-labelledby="before-after">
+        <h2 id="before-after" className="eyebrow text-slate-700 font-semibold border-b border-slate-100 pb-3">
           Before and after
         </h2>
         <div className="mt-3 overflow-x-auto">
@@ -96,14 +91,14 @@ export function Proof(options: LiveOptions) {
               resolve.
             </caption>
             <thead>
-              <tr>
-                <th scope="col">Field</th>
-                <th scope="col">Value</th>
-                <th scope="col">Label</th>
-                <th scope="col">Source</th>
+              <tr className="border-b border-slate-200 text-left font-mono text-[11px] uppercase tracking-wider text-slate-400">
+                <th scope="col" className="pb-2.5 font-semibold">Field</th>
+                <th scope="col" className="pb-2.5 font-semibold">Value</th>
+                <th scope="col" className="pb-2.5 font-semibold">Label</th>
+                <th scope="col" className="pb-2.5 font-semibold">Source</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               <Row
                 field="Bond before"
                 value={before === null ? "not recorded" : formatNative(slash!.bondBeforeUnits)}
@@ -156,15 +151,16 @@ export function Proof(options: LiveOptions) {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 max-w-[62ch] text-sm text-paper-dim">
+        <p className="mt-4 max-w-[68ch] text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
           {before !== null && after !== null && cut !== null && percent !== null
             ? `The bond went from ${formatNative(slash!.bondBeforeUnits)} tPOT to ${formatNative(slash!.bondAfterUnits)} tPOT. That is exactly ${percent}% — ${formatNative(slash!.slashUnits)} tPOT — and the owner was credited exactly ${formatNative(slash!.slashUnits)} tPOT.`
             : "The recorded resolve is missing from the evidence; nothing is claimed here."}
         </p>
-      </section>
+      </Card>
 
-      <section aria-labelledby="proof-live-heading">
-        <h2 id="proof-live-heading" className="eyebrow">
+      {/* What the chain holds now Card */}
+      <Card as="section" aria-labelledby="proof-live-heading">
+        <h2 id="proof-live-heading" className="eyebrow text-slate-700 font-semibold border-b border-slate-100 pb-3">
           What the chain holds now
         </h2>
         <div
@@ -180,14 +176,14 @@ export function Proof(options: LiveOptions) {
             </colgroup>
             <caption>The bond is read from providerOf(provider 1) on every refresh.</caption>
             <thead>
-              <tr>
-                <th scope="col">Field</th>
-                <th scope="col">Value</th>
-                <th scope="col">Label</th>
-                <th scope="col">Source</th>
+              <tr className="border-b border-slate-200 text-left font-mono text-[11px] uppercase tracking-wider text-slate-400">
+                <th scope="col" className="pb-2.5 font-semibold">Field</th>
+                <th scope="col" className="pb-2.5 font-semibold">Value</th>
+                <th scope="col" className="pb-2.5 font-semibold">Label</th>
+                <th scope="col" className="pb-2.5 font-semibold">Source</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {live.provider ? (
                 <Row
                   field="Provider 1 bond now"
@@ -198,7 +194,7 @@ export function Proof(options: LiveOptions) {
                 />
               ) : (
                 <tr>
-                  <td colSpan={4} className="text-ash">
+                  <td colSpan={4} className="text-slate-500 py-3">
                     No live read has answered yet; the recorded bond is shown above and nothing here is
                     claimed.
                   </td>
@@ -207,13 +203,14 @@ export function Proof(options: LiveOptions) {
             </tbody>
           </table>
         </div>
-      </section>
+      </Card>
 
-      <section aria-labelledby="limits-heading">
-        <h2 id="limits-heading" className="eyebrow">
+      {/* What this proves, and what it does not Card */}
+      <Card as="section" aria-labelledby="limits-heading">
+        <h2 id="limits-heading" className="eyebrow text-slate-700 font-semibold">
           What this proves, and what it does not
         </h2>
-        <ul className="mt-3 max-w-[62ch] list-disc space-y-2 pl-5 text-sm text-paper-dim">
+        <ul className="mt-3 max-w-[68ch] list-disc space-y-2 pl-5 text-sm text-slate-600 leading-relaxed">
           <li>
             The slash is arithmetic the contract enforces: 20% of the bond, paid to the owner. The
             recorded resolve shows both the bond change and the owner credit.
@@ -228,10 +225,10 @@ export function Proof(options: LiveOptions) {
             to open, so it stays backed by its receipt file.
           </li>
         </ul>
-        <p className="mt-4 text-xs text-ash">
+        <p className="mt-4 text-xs text-slate-500 border-t border-slate-100 pt-3">
           Read-only: nothing on this page can move a bond or a balance.
         </p>
-      </section>
-    </section>
+      </Card>
+    </div>
   );
 }
