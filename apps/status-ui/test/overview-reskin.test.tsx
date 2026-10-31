@@ -29,21 +29,18 @@ describe("Overview Voltline Reskin", () => {
     expect(statsStrip).toBeInTheDocument();
     const scope = within(statsStrip);
 
-    // 1. 2 deals verified
-    expect(scope.getByText("2")).toBeInTheDocument();
-    expect(scope.getByText(/deals verified/i)).toBeInTheDocument();
+    // 1. deals created
+    expect(scope.getByText(/deals created/i)).toBeInTheDocument();
 
-    // 2. 6 tPOT slashed = exactly 20% of the bond
+    // 2. settled
+    expect(scope.getByText(/^settled$/i)).toBeInTheDocument();
+
+    // 3. healthy now
+    expect(scope.getByText(/healthy now/i)).toBeInTheDocument();
+
+    // 4. 6 tPOT slashed = exactly 20% of the bond
     expect(scope.getByText("6 tPOT")).toBeInTheDocument();
     expect(scope.getByText(/slashed = exactly 20% of the bond/i)).toBeInTheDocument();
-
-    // 3. 1 MiB = 1,024 blocks
-    expect(scope.getByText("1 MiB")).toBeInTheDocument();
-    expect(scope.getByText(/1,024 blocks/i)).toBeInTheDocument();
-
-    // 4. 208 contract tests
-    expect(scope.getByText("208")).toBeInTheDocument();
-    expect(scope.getByText(/contract tests/i)).toBeInTheDocument();
 
     // All labeled with explicit chip
     const chips = statsStrip.querySelectorAll(".label-chip");
