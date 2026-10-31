@@ -1,0 +1,321 @@
+# live MCP transcript — deals 1 to 5 units & verdicts verification
+# utc: 2026-10-31T08:36:47Z
+# chain: RPC https://test-evm-rpc-v3.portaldot.dev, chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+# gate: default live StorageGate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA
+# command: node scripts/live-client.mjs 1 2 3 4 5  (in apps/makhzan-mcp), exit 0
+# evaluation vs expectations:
+# - Deal 1: settled (healthOf 0, status 0 none). Release verdict: NO (status 0). MATCHES.
+# - Deal 2: settled (healthOf 0, status 0 none). Release verdict: NO (status 0). MATCHES.
+# - Deal 3: settled (healthOf 0, status 0 none). Release verdict: NO (status 0). MATCHES.
+# - Deal 4: lock status 2 (released), exact amount 2.00000000000000 tPOT (2000000000000000000 wei, 10,000x inflation fixed),
+#           minBond 20 tPOT. Release verdict: NO — released: 2 tPOT paid to the payee. MATCHES.
+# - Deal 5: lock status 3 (refunded), exact amount 2.00000000000000 tPOT (2000000000000000000 wei, 10,000x inflation fixed),
+#           minBond 30 tPOT, provider bond 24 tPOT. Release verdict: NO — refunded. MATCHES.
+
+[server]   makhzan-mcp 0.1.0: read-only, chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA, 1024 B blocks, 8000 ms per attempt, files under /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples
+[server]   makhzan 0.1.0 over stdio JSON-RPC
+[client]   https://test-evm-rpc-v3.portaldot.dev chain 420420777 contract 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+[client]   sample file /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin
+[client]   deals: 1, 2, 3, 4, 5
+
+tools (4):
+  makhzan_health  readOnlyHint=true destructiveHint=false  input=["dealId"]
+  makhzan_verify_file  readOnlyHint=true destructiveHint=false  input=["dealId","path","referencePath"]
+  makhzan_deal_story  readOnlyHint=true destructiveHint=false  input=["dealId"]
+  makhzan_gate_status  readOnlyHint=true destructiveHint=false  input=["dealId"]
+
+=== deal 1 ===
+[request]  tools/call makhzan_health {"dealId":1}
+[response]
+  [MEASURED] makhzan_health — deal 1
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 264557
+  healthOf 0 (settled-or-none)
+  term over by 92,141 blocks (head 264557, endBlock 172416)
+  MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
+  label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
+
+[request]  tools/call makhzan_gate_status {"dealId":1}
+[response]
+  [MEASURED] makhzan_gate_status — deal 1
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA, read at block 264557
+  gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)
+  lock: status 0 (none)
+  payer 0x0000000000000000000000000000000000000000
+  payee 0x0000000000000000000000000000000000000000
+  amount 0.00000000000000 tPOT (0 wei)
+  minBond floor 0.00000000000000 tPOT (0 planck)
+  provider 1 bond 0.00000000000000 tPOT (0 active deal(s), payee id 0)
+  MakhzanGuard decision: settled-or-none
+  release would pass now: NO — status 0 (none): no lock is open, so there is nothing to release or refund
+  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks (the guard checks expiry before the bond floor).
+  note: no transaction was built or sent. This is a read-only prediction, not a payment.
+
+[request]  tools/call makhzan_deal_story {"dealId":1}
+[response]
+  [MEASURED] makhzan_deal_story — deal 1
+  chain state read at block 264557, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+  history (5 events, blocks 172266..172564, head 264557):
+    block 172266  created  root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 endBlock 172416 price 5.00000000000000 tPOT
+    block 172281  opened  index 451, deadline 172331
+    block 172295  passed
+    block 172557  claimed  amount 5.00000000000000 tPOT
+    block 172564  settled  toProvider 0.00000000000000 tPOT, remainder 0.00000000000000 tPOT
+  checks:
+  PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+  PASS deal 1 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 172266..172416
+  PASS DealCreated at block 172266 (tx 0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1) matches root, size, endBlock and price
+  PASS challenge #1 issued at block 172281 index 451 deadline 172331 (tx 0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda)
+  PASS challenge #1 answered at block 172295 (tx 0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3); no bond movement in the event
+  PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+  PASS healthOf(1) = 0 matches the stored state
+  RESULT: PASS (7 pass, 0 fail, 0 unknown, 0 pending)
+  label: MEASURED — every line comes from chain state or a decoded event, never from this server's own memory.
+
+[request]  tools/call makhzan_verify_file {"dealId":1,"path":"/home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin"}
+[response]
+  [MEASURED] makhzan_verify_file — deal 1
+  file /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin
+  size 1,048,576 B, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
+  blocks 1,024 × 1,024 B (last block 1,024 B)
+  rebuilt root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  on-chain root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  MATCH: the file hashes to the root deal 1 commits.
+  label: MEASURED for the roots and the digest; the hashing rule is the contract's (0x00 leaf, 0x01 node).
+
+=== deal 2 ===
+[request]  tools/call makhzan_health {"dealId":2}
+[response]
+  [MEASURED] makhzan_health — deal 2
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 264558
+  healthOf 0 (settled-or-none)
+  term over by 91,680 blocks (head 264558, endBlock 172878)
+  MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
+  label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
+
+[request]  tools/call makhzan_gate_status {"dealId":2}
+[response]
+  [MEASURED] makhzan_gate_status — deal 2
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA, read at block 264558
+  gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)
+  lock: status 0 (none)
+  payer 0x0000000000000000000000000000000000000000
+  payee 0x0000000000000000000000000000000000000000
+  amount 0.00000000000000 tPOT (0 wei)
+  minBond floor 0.00000000000000 tPOT (0 planck)
+  provider 1 bond 0.00000000000000 tPOT (0 active deal(s), payee id 0)
+  MakhzanGuard decision: settled-or-none
+  release would pass now: NO — status 0 (none): no lock is open, so there is nothing to release or refund
+  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks (the guard checks expiry before the bond floor).
+  note: no transaction was built or sent. This is a read-only prediction, not a payment.
+
+[request]  tools/call makhzan_deal_story {"dealId":2}
+[response]
+  [MEASURED] makhzan_deal_story — deal 2
+  chain state read at block 264558, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+  history (7 events, blocks 172578..172887, head 264558):
+    block 172578  created  root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 endBlock 172878 price 5.00000000000000 tPOT
+    block 172584  opened  index 29, deadline 172634
+    block 172585  passed
+    block 172602  opened  index 623, deadline 172652
+    block 172658  failed  slash 6.00000000000000 tPOT
+    block 172881  claimed  amount 5.00000000000000 tPOT
+    block 172887  settled  toProvider 0.00000000000000 tPOT, remainder 0.00000000000000 tPOT
+  checks:
+  PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+  PASS deal 2 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 172578..172878
+  PASS DealCreated at block 172578 (tx 0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3) matches root, size, endBlock and price
+  PASS challenge #1 issued at block 172584 index 29 deadline 172634 (tx 0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb)
+  PASS challenge #1 answered at block 172585 (tx 0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210); no bond movement in the event
+  PASS challenge #2 issued at block 172602 index 623 deadline 172652 (tx 0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db)
+  PASS challenge #2 slashed at block 172658 (tx 0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3): 600000000000000 units moved from the bond to the owner
+  PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+  PASS healthOf(2) = 0 matches the stored state
+  RESULT: PASS (9 pass, 0 fail, 0 unknown, 0 pending)
+  label: MEASURED — every line comes from chain state or a decoded event, never from this server's own memory.
+
+[request]  tools/call makhzan_verify_file {"dealId":2,"path":"/home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin"}
+[response]
+  [MEASURED] makhzan_verify_file — deal 2
+  file /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin
+  size 1,048,576 B, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
+  blocks 1,024 × 1,024 B (last block 1,024 B)
+  rebuilt root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  on-chain root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  MATCH: the file hashes to the root deal 2 commits.
+  label: MEASURED for the roots and the digest; the hashing rule is the contract's (0x00 leaf, 0x01 node).
+
+=== deal 3 ===
+[request]  tools/call makhzan_health {"dealId":3}
+[response]
+  [MEASURED] makhzan_health — deal 3
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 264559
+  healthOf 0 (settled-or-none)
+  term over by 13,867 blocks (head 264559, endBlock 250692)
+  MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
+  label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
+
+[request]  tools/call makhzan_gate_status {"dealId":3}
+[response]
+  [MEASURED] makhzan_gate_status — deal 3
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA, read at block 264559
+  gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)
+  lock: status 0 (none)
+  payer 0x0000000000000000000000000000000000000000
+  payee 0x0000000000000000000000000000000000000000
+  amount 0.00000000000000 tPOT (0 wei)
+  minBond floor 0.00000000000000 tPOT (0 planck)
+  provider 1 bond 0.00000000000000 tPOT (0 active deal(s), payee id 0)
+  MakhzanGuard decision: settled-or-none
+  release would pass now: NO — status 0 (none): no lock is open, so there is nothing to release or refund
+  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks (the guard checks expiry before the bond floor).
+  note: no transaction was built or sent. This is a read-only prediction, not a payment.
+
+[request]  tools/call makhzan_deal_story {"dealId":3}
+[response]
+  [MEASURED] makhzan_deal_story — deal 3
+  chain state read at block 264560, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+  history (3 events, blocks 250092..258844, head 264560):
+    block 250092  created  root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 endBlock 250692 price 5.00000000000000 tPOT
+    block 258836  claimed  amount 5.00000000000000 tPOT
+    block 258844  settled  toProvider 0.00000000000000 tPOT, remainder 0.00000000000000 tPOT
+  checks:
+  PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+  PASS deal 3 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 250092..250692
+  PASS DealCreated at block 250092 (tx 0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee) matches root, size, endBlock and price
+  PASS no ChallengeOpened event: the client never challenged this deal
+  PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+  PASS healthOf(3) = 0 matches the stored state
+  RESULT: PASS (6 pass, 0 fail, 0 unknown, 0 pending)
+  label: MEASURED — every line comes from chain state or a decoded event, never from this server's own memory.
+
+[request]  tools/call makhzan_verify_file {"dealId":3,"path":"/home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin"}
+[response]
+  [MEASURED] makhzan_verify_file — deal 3
+  file /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin
+  size 1,048,576 B, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
+  blocks 1,024 × 1,024 B (last block 1,024 B)
+  rebuilt root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  on-chain root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  MATCH: the file hashes to the root deal 3 commits.
+  label: MEASURED for the roots and the digest; the hashing rule is the contract's (0x00 leaf, 0x01 node).
+
+=== deal 4 ===
+[request]  tools/call makhzan_health {"dealId":4}
+[response]
+  [MEASURED] makhzan_health — deal 4
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 264560
+  healthOf 0 (settled-or-none)
+  term over by 9,048 blocks (head 264560, endBlock 255512)
+  MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
+  label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
+
+[request]  tools/call makhzan_gate_status {"dealId":4}
+[response]
+  [MEASURED] makhzan_gate_status — deal 4
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA, read at block 264561
+  gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)
+  lock: status 2 (released)
+  payer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C
+  payee 0xf4ec143c743FF57c0D32e829f50692551CBf6029
+  amount 2.00000000000000 tPOT (2000000000000000000 wei)
+  minBond floor 20.00000000000000 tPOT (2000000000000000 planck)
+  provider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)
+  MakhzanGuard decision: settled-or-none
+  release would pass now: NO — released: 2 tPOT paid to the payee
+  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks (the guard checks expiry before the bond floor).
+  note: no transaction was built or sent. This is a read-only prediction, not a payment.
+
+[request]  tools/call makhzan_deal_story {"dealId":4}
+[response]
+  [MEASURED] makhzan_deal_story — deal 4
+  chain state read at block 264561, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+  history (3 events, blocks 252512..264469, head 264561):
+    block 252512  created  root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 endBlock 255512 price 5.00000000000000 tPOT
+    block 264450  claimed  amount 5.00000000000000 tPOT
+    block 264469  settled  toProvider 0.00000000000000 tPOT, remainder 0.00000000000000 tPOT
+  checks:
+  PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+  PASS deal 4 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 252512..255512
+  PASS DealCreated at block 252512 (tx 0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761) matches root, size, endBlock and price
+  PASS no ChallengeOpened event: the client never challenged this deal
+  PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+  PASS healthOf(4) = 0 matches the stored state
+  RESULT: PASS (6 pass, 0 fail, 0 unknown, 0 pending)
+  label: MEASURED — every line comes from chain state or a decoded event, never from this server's own memory.
+
+[request]  tools/call makhzan_verify_file {"dealId":4,"path":"/home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin"}
+[response]
+  [MEASURED] makhzan_verify_file — deal 4
+  file /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin
+  size 1,048,576 B, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
+  blocks 1,024 × 1,024 B (last block 1,024 B)
+  rebuilt root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  on-chain root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  MATCH: the file hashes to the root deal 4 commits.
+  label: MEASURED for the roots and the digest; the hashing rule is the contract's (0x00 leaf, 0x01 node).
+
+=== deal 5 ===
+[request]  tools/call makhzan_health {"dealId":5}
+[response]
+  [MEASURED] makhzan_health — deal 5
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, read at block 264562
+  healthOf 0 (settled-or-none)
+  term over by 9,018 blocks (head 264562, endBlock 255544)
+  MakhzanGuard decision: settled-or-none — the deal is settled or does not exist
+  label: MEASURED for healthOf and the block number; DERIVED for blocksLeft and the guard decision.
+
+[request]  tools/call makhzan_gate_status {"dealId":5}
+[response]
+  [MEASURED] makhzan_gate_status — deal 5
+  chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA, read at block 264562
+  gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)
+  lock: status 3 (refunded)
+  payer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C
+  payee 0xf4ec143c743FF57c0D32e829f50692551CBf6029
+  amount 2.00000000000000 tPOT (2000000000000000000 wei)
+  minBond floor 30.00000000000000 tPOT (3000000000000000 planck)
+  provider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)
+  MakhzanGuard decision: settled-or-none
+  release would pass now: NO — refunded
+  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks (the guard checks expiry before the bond floor).
+  note: no transaction was built or sent. This is a read-only prediction, not a payment.
+
+[request]  tools/call makhzan_deal_story {"dealId":5}
+[response]
+  [MEASURED] makhzan_deal_story — deal 5
+  chain state read at block 264562, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44
+  history (3 events, blocks 252544..264477, head 264562):
+    block 252544  created  root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7 size 1048576 endBlock 255544 price 5.00000000000000 tPOT
+    block 264458  claimed  amount 5.00000000000000 tPOT
+    block 264477  settled  toProvider 0.00000000000000 tPOT, remainder 0.00000000000000 tPOT
+  checks:
+  PASS provider 1 registered with bond 2400000000000000 units, 0 active deal(s)
+  PASS deal 5 opened with root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7, size 1048576 B, 1024 leaves, price 500000000000000 units, blocks 252544..255544
+  PASS DealCreated at block 252544 (tx 0x12557be0d42359a70cbb22acd05310efff94c1bd19223c7d524e8c59400662be) matches root, size, endBlock and price
+  PASS no ChallengeOpened event: the client never challenged this deal
+  PASS claimed 500000000000000 equals accrued 500000000000000; claimable is zero
+  PASS healthOf(5) = 0 matches the stored state
+  RESULT: PASS (6 pass, 0 fail, 0 unknown, 0 pending)
+  label: MEASURED — every line comes from chain state or a decoded event, never from this server's own memory.
+
+[request]  tools/call makhzan_verify_file {"dealId":5,"path":"/home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin"}
+[response]
+  [MEASURED] makhzan_verify_file — deal 5
+  file /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples/demo-1mib.bin
+  size 1,048,576 B, sha256 0x7f2fd6d50bfe106c35d95a8aaef403c4b2ca53df7cb4ef1bca9b9fa8cb89e21e
+  blocks 1,024 × 1,024 B (last block 1,024 B)
+  rebuilt root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  on-chain root 0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7
+  MATCH: the file hashes to the root deal 5 commits.
+  label: MEASURED for the roots and the digest; the hashing rule is the contract's (0x00 leaf, 0x01 node).
+
+=== negative checks ===
+[request]  tools/call makhzan_health {"dealId":999}
+[response] isError=true: deal 999 does not exist on 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (owner is the zero address)
+
+[request]  tools/call makhzan_verify_file {dealId:1, path:'/etc/hostname'}
+[response] isError=true: path "/etc/hostname" is outside the folder this server may read (MAKHZAN_VERIFY_DIR = /home/mohammed_soliman/hackathons/portaldot-tier1/apps/status-ui/public/samples). The path is resolved and symlinks are followed before the check, so "..", an absolute path outside that folder and a symlink that points outside are all refused. Move the file into the folder, or set MAKHZAN_VERIFY_DIR to a folder that contains it.
+
+[request]  tools/call makhzan_write_deal {}
+[response] isError=true: MCP error -32602: Tool makhzan_write_deal not found
+
