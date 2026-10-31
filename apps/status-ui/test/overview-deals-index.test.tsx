@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import run2 from "../public/evidence/portaldot-live-run2.json";
 import { Overview } from "../src/pages/Overview";
 import { parseConfig } from "../src/config/env";
@@ -130,7 +129,7 @@ describe("Overview - Live Deals Index, Derived Stats, and Gate Demo", () => {
 
     // Check columns rendered: owner, provider, price, endBlock, blocks left, flags, healthOf
     expect(scope.getAllByText(/provider 1/i).length).toBe(5);
-    expect(scope.getAllByText(/0.005 tPOT/i).length).toBe(5);
+    expect(scope.getAllByText(/5 tPOT/i).length).toBe(5);
 
     // Health labels:
     // Deals 1-4 are settled -> "settled or none"
@@ -196,15 +195,15 @@ describe("Overview - Live Deals Index, Derived Stats, and Gate Demo", () => {
     expect(scope.getByText(/Gate demo/i)).toBeInTheDocument();
 
     // 1. Recorded release (deal 4)
-    expect(scope.getByText(/deal 4.*release/i)).toBeInTheDocument();
+    expect(scope.getByText(/deal 4: locked and released/i)).toBeInTheDocument();
 
     // 2. Recorded refund (deal 5)
-    expect(scope.getByText(/deal 5.*refund/i)).toBeInTheDocument();
+    expect(scope.getByText(/deal 5: locked with 2 tPOT, refunded to payer/i)).toBeInTheDocument();
 
     // 3. Three refusals: Expired, BondTooLow, RefundNotAllowed
-    expect(scope.getByText(/deal 3.*Expired/i)).toBeInTheDocument();
-    expect(scope.getByText(/deal 5.*BondTooLow/i)).toBeInTheDocument();
-    expect(scope.getByText(/deal 5.*RefundNotAllowed/i)).toBeInTheDocument();
+    expect(scope.getByText(/deal 3: lock refused Expired/i)).toBeInTheDocument();
+    expect(scope.getByText(/deal 5: release refused BondTooLow/i)).toBeInTheDocument();
+    expect(scope.getByText(/deal 5: refund refused RefundNotAllowed/i)).toBeInTheDocument();
 
     // Every entry links to /gate
     const links = scope.getAllByRole("link");

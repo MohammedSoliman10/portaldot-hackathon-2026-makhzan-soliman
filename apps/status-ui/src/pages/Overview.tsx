@@ -5,7 +5,8 @@ import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, formatWeiAsNative, type Label } from "../data/labels";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
-import type { EvidenceBundle, RoundInfo } from "../data/schema";
+import { useLiveDeals } from "../data/use-live-deals";
+import type { EvidenceBundle, Hex, RoundInfo } from "../data/schema";
 import { Card } from "../components/shared/Card";
 import { Button } from "../components/shared/Button";
 import { Chip } from "../components/shared/Chip";
@@ -95,6 +96,12 @@ export function Overview(options: LiveOptions) {
     ...options,
     providerAddress,
     dealIds: deals.map((deal) => deal.id),
+  });
+
+  const liveDeals = useLiveDeals(mode, {
+    client: options.client,
+    nextDealId: live.config?.nextDealId ?? null,
+    block: live.block,
   });
 
   const config = live.config ?? bundle?.config ?? null;
@@ -194,28 +201,28 @@ export function Overview(options: LiveOptions) {
           Platform statistics
         </h2>
         <Stat
-          value="2"
-          subtitle="deals verified on-chain"
+          value={formatCount(live.status === "live" ? liveDeals.counts.created : (bundle?.deals.length ?? 2))}
+          subtitle="deals created"
           label={live.status === "live" ? "MEASURED" : "REPORTED"}
-          detail="deals 1 & 2 settled on Portaldot"
+          detail={live.status === "live" ? "nextDealId - 1 read from chain" : "deals 1 & 2 recorded in evidence"}
+        />
+        <Stat
+          value={formatCount(live.status === "live" ? liveDeals.counts.settled : 2)}
+          subtitle="settled"
+          label={live.status === "live" ? "MEASURED" : "REPORTED"}
+          detail={live.status === "live" ? "healthOf = 0 (settled or none)" : "deals 1 & 2 settled on Portaldot"}
+        />
+        <Stat
+          value={formatCount(live.status === "live" ? liveDeals.counts.healthyNow : 0)}
+          subtitle="healthy now"
+          label={live.status === "live" ? "MEASURED" : "REPORTED"}
+          detail={live.status === "live" ? "active term before end block" : "no deals currently active"}
         />
         <Stat
           value="6 tPOT"
           subtitle="slashed = exactly 20% of the bond"
           label="REPORTED"
           detail="round 2 slashed in block 172,658"
-        />
-        <Stat
-          value="1 MiB"
-          subtitle="1,024 blocks"
-          label={live.status === "live" ? "MEASURED" : "REPORTED"}
-          detail="1,048,576 bytes per challenge tree"
-        />
-        <Stat
-          value="208"
-          subtitle="contract tests"
-          label="REPORTED"
-          detail="unit, fuzz & invariant suites pass"
         />
       </section>
 
@@ -320,6 +327,226 @@ export function Overview(options: LiveOptions) {
           </div>
         </Card>
       </section>
+
+      {/* Live Deals Card */}
+      <Card
+        as="section"
+        aria-labelledby="live-deals-heading"
+        data-testid="overview-live-deals-card"
+        className="border-slate-200/90 bg-white"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h2 id="live-deals-heading" className="eyebrow text-slate-700 font-semibold">
+              Live deals
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Latest deals on chain {mode.expectedChainId} read from Makhzan storage. Each row links to its full deal view.
+            </p>
+          </div>
+          <Chip label={liveLabel} />
+        </div>
+
+        {liveDeals.status === "error" && liveDeals.deals.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50/50 p-4 text-sm text-red-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold">RPC read failed</p>
+              <p className="text-xs text-red-600 mt-0.5">{liveDeals.error ?? "Failed to read live deals from chain"}</p>
+            </div>
+            <button
+              type="button"
+              onClick={liveDeals.retry}
+              className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-red-600 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-red-700 cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 font-mono text-[11px] uppercase tracking-wider text-slate-400">
+                  <th scope="col" className="pb-2.5 font-semibold">Deal</th>
+                  <th scope="col" className="pb-2.5 font-semibold">Owner</th>
+                  <th scope="col" className="pb-2.5 font-semibold">Provider</th>
+                  <th scope="col" className="pb-2.5 font-semibold">Price</th>
+                  <th scope="col" className="pb-2.5 font-semibold">End block</th>
+                  <th scope="col" className="pb-2.5 font-semibold">Blocks left</th>
+                  <th scope="col" className="pb-2.5 font-semibold">Flags</th>
+                  <th scope="col" className="pb-2.5 font-semibold">Health</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {(liveDeals.deals.length > 0
+                  ? liveDeals.deals
+                  : deals.map((d) => ({
+                      id: d.id,
+                      owner: (d.owner ?? "0x0948EBD7637D1C32858a6FC5D947E85A6600205C") as Hex,
+                      providerId: d.providerId ?? 1,
+                      priceUnits: d.priceUnits ?? "500000000000000",
+                      startBlock: d.startBlock ?? 172266,
+                      endBlock: d.endBlock ?? 172416,
+                      blocksLeft: 0,
+                      flags: d.flags ?? 1,
+                      health: d.health ?? 0,
+                      healthLabel: "settled or none" as const,
+                    }))
+                ).map((deal) => (
+                  <tr key={deal.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-3 font-mono font-semibold text-xs">
+                      <Link
+                        to={`/deal/${deal.id}`}
+                        className="text-ochre hover:underline inline-flex items-center gap-1"
+                      >
+                        Deal {deal.id} <span aria-hidden="true" className="text-[10px]">→</span>
+                      </Link>
+                    </td>
+                    <td className="py-3 font-mono text-xs text-slate-700">
+                      <span title={deal.owner}>
+                        {deal.owner.length > 12
+                          ? `${deal.owner.slice(0, 6)}…${deal.owner.slice(-4)}`
+                          : deal.owner}
+                      </span>
+                    </td>
+                    <td className="py-3 font-mono text-xs text-slate-700">
+                      provider {deal.providerId}
+                    </td>
+                    <td className="py-3 font-mono text-xs text-slate-900">
+                      {formatNative(deal.priceUnits)} tPOT
+                    </td>
+                    <td className="py-3 font-mono text-xs text-slate-700">
+                      <BlockLink block={deal.endBlock} />
+                    </td>
+                    <td className="py-3 font-mono text-xs text-slate-700">
+                      {formatCount(deal.blocksLeft)}
+                    </td>
+                    <td className="py-3 font-mono text-xs text-slate-700">
+                      {deal.flags}
+                    </td>
+                    <td className="py-3">
+                      <span className="font-mono text-xs font-medium text-slate-800">
+                        {deal.healthLabel}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      {/* Gate Demo Card */}
+      <Card
+        as="section"
+        aria-labelledby="gate-demo-heading"
+        data-testid="overview-gate-demo-card"
+        className="border-slate-200/90 bg-white"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h2 id="gate-demo-heading" className="eyebrow text-slate-700 font-semibold">
+              Gate demo
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Recorded live-run StorageGate operations and refusal outcomes from evidence/raw/t8/ on chain 420420777.
+            </p>
+          </div>
+          <Chip label="REPORTED" />
+        </div>
+
+        <div className="mt-4 space-y-3">
+          <Link
+            to="/gate"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+          >
+            <div>
+              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+                Deal 4: locked and released (2 tPOT to provider-1)
+              </span>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Released at block 252,538 while provider bond was 24 tPOT (tx 0x4c63d339...)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Chip label="REPORTED" tone="neutral" />
+              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+            </div>
+          </Link>
+
+          <Link
+            to="/gate"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+          >
+            <div>
+              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+                Deal 5: locked with 2 tPOT, refunded to payer
+              </span>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Payment refunded to payer 0x0948EBD7... after deal expiry (lock tx 0xf84af2e3...)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Chip label="REPORTED" tone="neutral" />
+              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+            </div>
+          </Link>
+
+          <Link
+            to="/gate"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+          >
+            <div>
+              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+                Deal 3: lock refused Expired
+              </span>
+              <p className="text-xs text-slate-500 mt-0.5">
+                CLI refused lock simulation at block 251,940 because block &gt;= endBlock (250,692). 0 gas spent.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Chip label="REPORTED" tone="neutral" />
+              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+            </div>
+          </Link>
+
+          <Link
+            to="/gate"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+          >
+            <div>
+              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+                Deal 5: release refused BondTooLow
+              </span>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Release reverted at block 252560 because active bond 24.0 tPOT was below the 30.0 tPOT floor.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Chip label="REPORTED" tone="neutral" />
+              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+            </div>
+          </Link>
+
+          <Link
+            to="/gate"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+          >
+            <div>
+              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+                Deal 5: refund refused RefundNotAllowed
+              </span>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Refund reverted at block 252564 because deal was healthy and before endBlock (255,544).
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Chip label="REPORTED" tone="neutral" />
+              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+            </div>
+          </Link>
+        </div>
+      </Card>
 
       {/* Deployment Card */}
       <Card as="section" aria-labelledby="deployment-heading">

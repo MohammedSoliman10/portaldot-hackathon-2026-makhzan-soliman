@@ -13,7 +13,7 @@ import { Verify } from "../pages/Verify";
 export function AppRoutes({ client }: { client?: ReadClient } = {}) {
   return (
     <Routes>
-      <Route path="/" element={<Overview />} />
+      <Route path="/" element={<Overview client={client} />} />
       <Route path="/deal" element={<Navigate to="/deal/1" replace />} />
       <Route path="/deal/:id" element={<Deal client={client} />} />
       <Route path="/verify" element={<Verify />} />
