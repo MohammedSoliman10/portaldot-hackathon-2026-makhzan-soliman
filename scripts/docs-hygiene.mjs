@@ -71,6 +71,7 @@ export function extractFacts(text) {
 
   for (const match of text.matchAll(/\bblock(?:s)?\s+`?(\d{2,9})`?/g)) add("block", match[1], [match[1]]);
   for (const match of text.matchAll(/\|\s*Block\s*\|\s*`?(\d{2,9})`?/g)) add("block", match[1], [match[1]]);
+  for (const match of text.matchAll(/\|\s*(?:block\s+)?`?(\d{6,7})`?\s*\|/gi)) add("block", match[1], [match[1]]);
 
   for (const match of text.matchAll(/(\d[\d,]*(?:\.\d+)?)\s*tPOT/g)) add("amount", match[1], tPotVariants(match[1]));
   for (const match of text.matchAll(/\b(\d{6,})\s*units\b/g)) {
