@@ -1,0 +1,104 @@
+{
+  "timestamp": "2026-10-31T13:25:32.933Z",
+  "chainId": 420420777,
+  "blockNumber": 265101,
+  "makhzanAddress": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+  "slot0Raw": "0x0000000189c00000006400010000000500038d7ea4c6800007d0040000000032",
+  "decodedSlot0": {
+    "challengeWindow": 50,
+    "challengeBlockSize": 1024,
+    "slashBps": 2000,
+    "minBondUnits": "1000000000000000",
+    "nextDealId": 5,
+    "providerCount": 1,
+    "minDurationBlocks": 100,
+    "maxDurationBlocks": 100800
+  },
+  "storedNextDealId": 5,
+  "findings": {
+    "explanation": "nextDealId in slot 0 holds the last assigned deal ID (5), not the next-to-be-assigned ID (6). When 5 deals exist on-chain, nextDealId = 5, and deals 1 to 5 exist.",
+    "deal5Exists": true,
+    "deal6DoesNotExist": true,
+    "totalDealsCreated": 5
+  },
+  "deals": {
+    "1": {
+      "owner": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+      "startBlock": 172266,
+      "endBlock": 172416,
+      "providerId": 1,
+      "flags": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "size": 1048576,
+      "priceUnits": "500000000000000",
+      "claimedUnits": "500000000000000",
+      "health": 0,
+      "exists": true
+    },
+    "2": {
+      "owner": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+      "startBlock": 172578,
+      "endBlock": 172878,
+      "providerId": 1,
+      "flags": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "size": 1048576,
+      "priceUnits": "500000000000000",
+      "claimedUnits": "500000000000000",
+      "health": 0,
+      "exists": true
+    },
+    "3": {
+      "owner": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+      "startBlock": 250092,
+      "endBlock": 250692,
+      "providerId": 1,
+      "flags": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "size": 1048576,
+      "priceUnits": "500000000000000",
+      "claimedUnits": "500000000000000",
+      "health": 0,
+      "exists": true
+    },
+    "4": {
+      "owner": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+      "startBlock": 252512,
+      "endBlock": 255512,
+      "providerId": 1,
+      "flags": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "size": 1048576,
+      "priceUnits": "500000000000000",
+      "claimedUnits": "500000000000000",
+      "health": 0,
+      "exists": true
+    },
+    "5": {
+      "owner": "0x0948ebd7637d1c32858a6fc5d947e85a6600205c",
+      "startBlock": 252544,
+      "endBlock": 255544,
+      "providerId": 1,
+      "flags": 1,
+      "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+      "size": 1048576,
+      "priceUnits": "500000000000000",
+      "claimedUnits": "500000000000000",
+      "health": 0,
+      "exists": true
+    },
+    "6": {
+      "owner": "0x0000000000000000000000000000000000000000",
+      "startBlock": 0,
+      "endBlock": 0,
+      "providerId": 0,
+      "flags": 0,
+      "root": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "priceUnits": "0",
+      "claimedUnits": "0",
+      "health": 0,
+      "exists": false
+    }
+  }
+}
