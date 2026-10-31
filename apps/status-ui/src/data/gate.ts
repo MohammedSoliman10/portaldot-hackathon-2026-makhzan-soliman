@@ -24,9 +24,11 @@ export function lockStatusName(code: number): LockStatus {
 export interface LockRead {
   payer: Hex;
   payee: Hex;
-  /** The payment, in planck. */
+  /** The payment, in wei (18 decimals). */
+  amountWei: string;
+  /** The payment in wei, kept for backwards compatibility. */
   amountUnits: string;
-  /** The provider bond floor the payee must clear at release, in planck. `0` disables the check. */
+  /** The provider bond floor the payee must clear at release, in planck (14 decimals). `0` disables the check. */
   minBondUnits: string;
   status: LockStatus;
   statusCode: number;
@@ -45,6 +47,7 @@ export function lockOf(client: ReadClient, gate: Hex, dealId: number): Promise<R
     return {
       payer: String(payer) as Hex,
       payee: String(payee) as Hex,
+      amountWei: String(amount),
       amountUnits: String(amount),
       minBondUnits: String(minBond),
       status: lockStatusName(Number(status)),

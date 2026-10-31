@@ -6,7 +6,6 @@ import { resolveMode } from "../src/config/modes";
 import type { ReadClient } from "../src/data/client";
 import { formatNative, formatWeiAsNative } from "../src/data/labels";
 import type { EvidenceBundle } from "../src/data/schema";
-import { Deal } from "../src/pages/Deal";
 import { Gate } from "../src/pages/Gate";
 import { renderApp } from "../src/test/render";
 
@@ -27,6 +26,8 @@ const liveMode = resolveMode(
     VITE_GATE_ADDRESS: GATE,
   }),
 );
+
+const SLOT0 = "0x0000000189c00000006400010000000200038d7ea4c6800007d0040000000032";
 
 function makeClient(overrides: {
   lockStatus?: number;
@@ -53,6 +54,7 @@ function makeClient(overrides: {
 
   return {
     readContract: vi.fn(async ({ functionName, args }: { functionName: string; args?: unknown[] }) => {
+      if (functionName === "peek") return [SLOT0];
       if (functionName === "lockOf") {
         return [PAYER, amountWei, PAYEE, minBond, lockStatus];
       }

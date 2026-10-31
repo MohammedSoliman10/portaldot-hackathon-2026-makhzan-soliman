@@ -34,6 +34,7 @@ describe("lockOf", () => {
     expect(result.value).toEqual({
       payer: PAYER,
       payee: PAYEE,
+      amountWei: "5000000000000000",
       amountUnits: "5000000000000000",
       minBondUnits: "24000000000000000",
       status: "locked",

@@ -4,7 +4,7 @@ import { BlockLink } from "../components/BlockLink";
 import { useMode } from "../app/app-context";
 import { useEvidence } from "../data/evidence-context";
 import { guardDecision, releaseVerdict } from "../data/gate";
-import { formatCount, formatNative, formatWei } from "../data/labels";
+import { formatCount, formatNative, formatWei, formatWeiAsNative } from "../data/labels";
 import type { ReadClient } from "../data/client";
 import { useGate } from "../data/use-gate";
 import { Card } from "../components/shared/Card";
@@ -264,9 +264,9 @@ export function Gate({ client }: { client?: ReadClient }) {
                   <Field name="Payee" value={<span className="mono text-xs font-mono">{live.lock.payee}</span>} />
                   <Field
                     name="Amount"
-                    value={formatNative(live.lock.amountUnits)}
+                    value={formatWeiAsNative(live.lock.amountWei ?? live.lock.amountUnits)}
                     unit="tPOT"
-                    detail={`${formatWei(live.lock.amountUnits)} planck`}
+                    detail={`${formatWei(live.lock.amountWei ?? live.lock.amountUnits)} wei`}
                   />
                   <Field
                     name="Min bond"
@@ -320,27 +320,56 @@ export function Gate({ client }: { client?: ReadClient }) {
                   />
                 </dl>
 
-                <div
-                  data-testid="gate-verdict"
-                  className={`mt-6 rounded-2xl border p-4 text-sm ${
-                    verdict?.kind === "pass"
-                      ? "border-emerald-200 bg-emerald-50/80 text-emerald-900"
-                      : "border-red-200 bg-red-50/80 text-red-900"
-                  }`}
-                >
-                  <p className="font-mono font-semibold">
-                    {verdict === null
-                      ? "the verdict is not readable yet"
-                      : verdict.kind === "pass"
-                        ? "release would pass now"
-                        : `release would revert: ${verdict.name}`}
-                  </p>
-                  <p className="mt-2 text-xs text-slate-600">
-                    Assuming the recorded payee sends the transaction, at block{" "}
-                    {formatCount(live.block ?? 0)}. This page cannot send it, and it does not know who
-                    will.
-                  </p>
-                </div>
+                {live.lock.status === "released" ? (
+                  <div
+                    data-testid="gate-released"
+                    className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-800"
+                  >
+                    <p className="font-mono font-semibold">
+                      Released: {formatWeiAsNative(live.lock.amountWei ?? live.lock.amountUnits)} tPOT paid to the payee
+                    </p>
+                    <p className="mt-2 text-xs text-slate-600">
+                      The payment was released to payee {live.lock.payee}.
+                    </p>
+                  </div>
+                ) : live.lock.status === "refunded" ? (
+                  <div
+                    data-testid="gate-refunded"
+                    className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-800"
+                  >
+                    <p className="font-mono font-semibold">
+                      Refunded: {formatWeiAsNative(live.lock.amountWei ?? live.lock.amountUnits)} tPOT returned to the payer
+                    </p>
+                    <p className="mt-2 text-xs text-slate-600">
+                      The payment was refunded to payer {live.lock.payer}.
+                    </p>
+                  </div>
+                ) : live.lock.status === "locked" ? (
+                  <div
+                    data-testid="gate-verdict"
+                    className={`mt-6 rounded-2xl border p-4 text-sm ${
+                      verdict?.kind === "pass"
+                        ? "border-emerald-200 bg-emerald-50/80 text-emerald-900"
+                        : "border-red-200 bg-red-50/80 text-red-900"
+                    }`}
+                  >
+                    <p className="font-mono font-semibold">
+                      {verdict === null
+                        ? "the verdict is not readable yet"
+                        : verdict.kind === "pass"
+                          ? "release would pass now"
+                          : `release would revert: ${verdict.name}`}
+                    </p>
+                    <p className="mt-2 text-xs text-slate-600">
+                      The guard checks expiry before the bond floor, so an expired deal shows Expired even if the bond is too low.
+                    </p>
+                    <p className="mt-1 text-xs text-slate-600">
+                      Assuming the recorded payee sends the transaction, at block{" "}
+                      {formatCount(live.block ?? 0)}. This page cannot send it, and it does not know who
+                      will.
+                    </p>
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </Card>
@@ -364,6 +393,80 @@ export function Gate({ client }: { client?: ReadClient }) {
                 </>
               )}
             </p>
+          </Card>
+
+          <Card as="section" aria-labelledby="live-gate-demo-heading" className="p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <h2 id="live-gate-demo-heading" className="eyebrow text-slate-700 font-semibold">
+                Live gate demo
+              </h2>
+              <Chip label="REPORTED" />
+            </div>
+            <p className="mt-2 max-w-[64ch] text-sm text-slate-600">
+              Recorded live-run gate operations and refusal results from <span className="mono font-mono text-slate-800">evidence/raw/t8/</span> on chain 420420777.
+            </p>
+
+            <div className="mt-4 space-y-4">
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-mono text-sm font-bold text-slate-900">
+                    Deal 3: lock refused Expired
+                  </h3>
+                  <Chip label="REPORTED" />
+                </div>
+                <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                  Deal 3 was created at block 250,092 (term 600 blocks, endBlock 250,692). The lock transaction simulation at block 251,940 was refused by the guarded CLI because <span className="font-mono text-slate-800">block &gt;= endBlock</span> (Expired). 0 gas was spent.
+                </p>
+                <dl className="mt-2.5 grid grid-cols-1 gap-1 text-xs sm:grid-cols-[6.5rem_1fr]">
+                  <dt className="font-mono text-slate-500">Create tx</dt>
+                  <dd className="font-mono text-slate-800 break-all">0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee</dd>
+                  <dt className="font-mono text-slate-500">Refusal</dt>
+                  <dd className="font-mono text-red-700 font-semibold">call would revert with Expired (at block 251,940)</dd>
+                </dl>
+              </div>
+
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-mono text-sm font-bold text-slate-900">
+                    Deal 4: locked and released (2 tPOT to provider-1)
+                  </h3>
+                  <Chip label="REPORTED" />
+                </div>
+                <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                  Deal 4 was created at block 252,512, locked with 2 tPOT (minBond 20 tPOT) at block 252,523, and successfully released 2 tPOT to provider-1 at block 252,538 while provider bond was 24 tPOT.
+                </p>
+                <dl className="mt-2.5 grid grid-cols-1 gap-1 text-xs sm:grid-cols-[6.5rem_1fr]">
+                  <dt className="font-mono text-slate-500">Create tx</dt>
+                  <dd className="font-mono text-slate-800 break-all">0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761</dd>
+                  <dt className="font-mono text-slate-500">Lock tx</dt>
+                  <dd className="font-mono text-slate-800 break-all">0x3719248237ec37c916b11e3d014aebba05d84cedcdcdc79cc1b9feaa18a62203</dd>
+                  <dt className="font-mono text-slate-500">Release tx</dt>
+                  <dd className="font-mono text-slate-800 break-all">0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f</dd>
+                </dl>
+              </div>
+
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-mono text-sm font-bold text-slate-900">
+                    Deal 5: release refused BondTooLow &amp; refund refused RefundNotAllowed
+                  </h3>
+                  <Chip label="REPORTED" />
+                </div>
+                <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                  Deal 5 was locked with minBond 30 tPOT. At block 252,560, release was refused because provider-1 active bond (24 tPOT) was below the 30 tPOT floor (BondTooLow). At block 252,564, refund was refused because the deal was healthy and before endBlock (RefundNotAllowed).
+                </p>
+                <dl className="mt-2.5 grid grid-cols-1 gap-1 text-xs sm:grid-cols-[6.5rem_1fr]">
+                  <dt className="font-mono text-slate-500">Create tx</dt>
+                  <dd className="font-mono text-slate-800 break-all">0x12557be0d42359a70cbb22acd05310efff94c1bd19223c7d524e8c59400662be</dd>
+                  <dt className="font-mono text-slate-500">Lock tx</dt>
+                  <dd className="font-mono text-slate-800 break-all">0xf84af2e383b8239c350a16bdf074a14925cd954cacd3ca25ec1621a5fcf869db</dd>
+                  <dt className="font-mono text-slate-500">Release refusal</dt>
+                  <dd className="font-mono text-red-700 font-semibold">revert BondTooLow at block 252560 (active bond 24.0 tPOT &lt; floor 30.0 tPOT)</dd>
+                  <dt className="font-mono text-slate-500">Refund refusal</dt>
+                  <dd className="font-mono text-red-700 font-semibold">revert RefundNotAllowed at block 252564 (healthy, block 252564 &lt; endBlock 255544)</dd>
+                </dl>
+              </div>
+            </div>
           </Card>
 
           <Card as="section" aria-labelledby="explain-heading" className="p-6">
