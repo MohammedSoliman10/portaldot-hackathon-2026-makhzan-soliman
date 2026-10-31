@@ -1,0 +1,180 @@
+
+> makhzan-mcp@0.1.0 test
+> node --test test/*.test.ts
+
+✔ loadConfig needs an explicit RPC, chain id and contract (2.2123ms)
+✔ loadConfig defaults to live StorageGate on chain 420420777 (0.3068ms)
+✔ loadConfig defaults to no gate on unconfigured chains (0.1758ms)
+✔ loadConfig allows MAKHZAN_GATE_ADDRESS to override the default (0.2477ms)
+✔ loadConfig treats empty MAKHZAN_GATE_ADDRESS as no gate (0.2125ms)
+✔ loadConfig accepts a gate and an explicit timeout (0.2069ms)
+✔ loadConfig refuses to start with a key in the environment, and never echoes it (0.4722ms)
+✔ loadConfig rejects a timeout that is not a positive integer (0.2835ms)
+✔ loadConfig keeps verify_file inside the current directory by default (0.3474ms)
+✔ loadConfig resolves MAKHZAN_VERIFY_DIR to an absolute folder (1.747201ms)
+✔ parseDealIds: defaults to [1, 2] when no argv and no env (2.6367ms)
+✔ parseDealIds: parses comma-separated string from argv (0.4286ms)
+✔ parseDealIds: parses multiple positional arguments from argv (0.2465ms)
+✔ parseDealIds: parses --deals flag with comma-separated list (0.3037ms)
+✔ parseDealIds: parses --deals=val option (0.3257ms)
+✔ parseDealIds: parses MAKHZAN_DEAL_IDS from env (0.2622ms)
+✔ parseDealIds: parses MAKHZAN_DEALS from env (0.2056ms)
+✔ parseDealIds: argv takes precedence over env (0.2827ms)
+✔ parseDealIds: empty env string falls back to default [1, 2] (0.3422ms)
+✔ parseDealIds: rejects non-numeric deal id (0.830101ms)
+✔ parseDealIds: rejects zero deal id (0.2689ms)
+✔ parseDealIds: rejects negative deal id (1.4688ms)
+✔ parseDealIds: rejects fractional deal id (0.2949ms)
+file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan-mcp/test/format.test.ts:12
+  WEI_PER_TPOT,
+  ^^^^^^^^^^^^
+SyntaxError: The requested module '../src/format.ts' does not provide an export named 'WEI_PER_TPOT'
+    at #asyncInstantiate (node:internal/modules/esm/module_job:455:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:553:5)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.20.0
+✖ test/format.test.ts (111.874312ms)
+✔ gate_status says the gate is not deployed when no address is configured (2.5655ms)
+✔ gate_status reports lock, payee, amount, floor and bond, and that release would pass (1.1111ms)
+✔ gate_status says NO when the provider bond is under the floor (1.928201ms)
+✔ gate_status says NO and names the guard state when a challenge is open (0.4162ms)
+✖ gate_status reports a released lock as paid to payee, not a release-would-revert verdict (1.5433ms)
+✖ gate_status reports a refunded lock as refunded, not a release-would-revert verdict (0.771ms)
+✖ gate_status formats wei lock amount without 10,000x inflation and includes verdict explanation (0.6825ms)
+✔ gate_status refuses a gate that points at a different Makhzan (0.9364ms)
+✔ guardDecision maps healthOf and the term exactly as MakhzanGuard does (1.8136ms)
+✔ healthTool reports the measured block, end block and the guard decision (1.5401ms)
+✔ healthTool says the term is over instead of pretending the deal is healthy (19.355302ms)
+✔ healthTool refuses an unknown deal rather than inventing state (0.9345ms)
+✔ withRetry returns the first success and does not retry it (1.2968ms)
+✔ withRetry retries exactly once after a failure (0.4633ms)
+✔ withRetry gives up after two attempts and keeps both messages (1.1339ms)
+✔ withRetry times an attempt out at the configured budget and retries it (51.330006ms)
+✔ the server exposes exactly four read-only tools and no write tool (19.027902ms)
+✔ makhzan_health answers over JSON-RPC with a MEASURED block (4.2163ms)
+✔ makhzan_gate_status says gate not deployed with no address configured (2.204401ms)
+✔ makhzan_gate_status uses the configured gate when there is one (1.916ms)
+✔ makhzan_verify_file verifies a real file over JSON-RPC and names a mismatch (21.973002ms)
+✔ a failing read is returned as an MCP error, not as a fabricated verdict (1.8987ms)
+✔ an unknown tool is refused, and the refusal is not a verdict (1.296701ms)
+✔ makhzan_verify_file refuses a file outside MAKHZAN_VERIFY_DIR over JSON-RPC (2.0381ms)
+✔ deal_story rebuilds the history from events and reports the verify result (2.1209ms)
+✔ deal_story is INCOMPLETE, never PASS, when the node refuses the log range (0.399ms)
+✔ deal_story surfaces a failed fetch instead of inventing a history (0.5592ms)
+✔ verify_file matches a file whose Merkle root equals the on-chain root (22.862103ms)
+✔ verify_file names the first bad block when a reference copy localises it (3.9343ms)
+✔ verify_file refuses to guess a block from the chain root alone, and says why (2.3004ms)
+✔ verify_file refuses a reference file that does not hash to the committed root (3.865701ms)
+✔ verify_file refuses a file whose size is not the deal size (2.324ms)
+✔ verify_file refuses when the block size does not reproduce the deal leaf count (1.6735ms)
+✔ verify_file refuses a missing path instead of returning a verdict (1.2984ms)
+✔ verify_file accepts a path relative to MAKHZAN_VERIFY_DIR (1.835501ms)
+✔ verify_file accepts a symlink that stays inside MAKHZAN_VERIFY_DIR (2.0264ms)
+✔ verify_file refuses ../ that escapes MAKHZAN_VERIFY_DIR (1.6354ms)
+✔ verify_file refuses an absolute path outside MAKHZAN_VERIFY_DIR and names the setting (1.0891ms)
+✔ verify_file refuses a symlink inside the folder that points outside it (1.1302ms)
+✔ verify_file refuses a symlinked folder that leads outside (1.0061ms)
+✔ verify_file applies the same rule to referencePath (1.676501ms)
+ℹ tests 65
+ℹ suites 0
+ℹ pass 61
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 514.738957
+
+✖ failing tests:
+
+test at test/format.test.ts:1:1
+✖ test/format.test.ts (111.874312ms)
+  'test failed'
+
+test at test/gate.test.ts:59:1
+✖ gate_status reports a released lock as paid to payee, not a release-would-revert verdict (1.5433ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /released: 2 tPOT paid to the payee/. Input:
+  
+  '[MEASURED] makhzan_gate_status — deal 1\n' +
+    'chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x1111111111111111111111111111111111111111, read at block 172756\n' +
+    'gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)\n' +
+    'lock: status 2 (released)\n' +
+    'payer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C\n' +
+    'payee 0x70997970C51812dc3A010C7d01b50e0d17dc79C8\n' +
+    'amount 20000.00000000000000 tPOT (2000000000000000000 planck)\n' +
+    'minBond floor 0.00000000000000 tPOT (0 planck)\n' +
+    'provider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)\n' +
+    'MakhzanGuard decision: healthy\n' +
+    'release would pass now: NO — status 2 (released): no lock is open, so there is nothing to release or refund\n' +
+    "label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.\n" +
+    'note: no transaction was built or sent. This is a read-only prediction, not a payment.'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan-mcp/test/gate.test.ts:74:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: "[MEASURED] makhzan_gate_status — deal 1\nchain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x1111111111111111111111111111111111111111, read at block 172756\ngate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)\nlock: status 2 (released)\npayer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C\npayee 0x70997970C51812dc3A010C7d01b50e0d17dc79C8\namount 20000.00000000000000 tPOT (2000000000000000000 planck)\nminBond floor 0.00000000000000 tPOT (0 planck)\nprovider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)\nMakhzanGuard decision: healthy\nrelease would pass now: NO — status 2 (released): no lock is open, so there is nothing to release or refund\nlabel: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.\nnote: no transaction was built or sent. This is a read-only prediction, not a payment.",
+    expected: /released: 2 tPOT paid to the payee/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/gate.test.ts:79:1
+✖ gate_status reports a refunded lock as refunded, not a release-would-revert verdict (0.771ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /release would pass now: NO — refunded/. Input:
+  
+  '[MEASURED] makhzan_gate_status — deal 1\n' +
+    'chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x1111111111111111111111111111111111111111, read at block 172756\n' +
+    'gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)\n' +
+    'lock: status 3 (refunded)\n' +
+    'payer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C\n' +
+    'payee 0x70997970C51812dc3A010C7d01b50e0d17dc79C8\n' +
+    'amount 20000.00000000000000 tPOT (2000000000000000000 planck)\n' +
+    'minBond floor 0.00000000000000 tPOT (0 planck)\n' +
+    'provider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)\n' +
+    'MakhzanGuard decision: healthy\n' +
+    'release would pass now: NO — status 3 (refunded): no lock is open, so there is nothing to release or refund\n' +
+    "label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.\n" +
+    'note: no transaction was built or sent. This is a read-only prediction, not a payment.'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan-mcp/test/gate.test.ts:94:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: "[MEASURED] makhzan_gate_status — deal 1\nchain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x1111111111111111111111111111111111111111, read at block 172756\ngate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)\nlock: status 3 (refunded)\npayer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C\npayee 0x70997970C51812dc3A010C7d01b50e0d17dc79C8\namount 20000.00000000000000 tPOT (2000000000000000000 planck)\nminBond floor 0.00000000000000 tPOT (0 planck)\nprovider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)\nMakhzanGuard decision: healthy\nrelease would pass now: NO — status 3 (refunded): no lock is open, so there is nothing to release or refund\nlabel: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.\nnote: no transaction was built or sent. This is a read-only prediction, not a payment.",
+    expected: /release would pass now: NO — refunded/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/gate.test.ts:98:1
+✖ gate_status formats wei lock amount without 10,000x inflation and includes verdict explanation (0.6825ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /amount 2\.00000000000000 tPOT \(2000000000000000000 wei\)/. Input:
+  
+  '[MEASURED] makhzan_gate_status — deal 1\n' +
+    'chain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x1111111111111111111111111111111111111111, read at block 172756\n' +
+    'gate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)\n' +
+    'lock: status 1 (locked)\n' +
+    'payer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C\n' +
+    'payee 0x70997970C51812dc3A010C7d01b50e0d17dc79C8\n' +
+    'amount 20000.00000000000000 tPOT (2000000000000000000 planck)\n' +
+    'minBond floor 20.00000000000000 tPOT (2000000000000000 planck)\n' +
+    'provider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)\n' +
+    'MakhzanGuard decision: healthy\n' +
+    'release would pass now: YES — no condition fails\n' +
+    "label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.\n" +
+    'note: no transaction was built or sent. This is a read-only prediction, not a payment.'
+  
+      at TestContext.<anonymous> (file:///home/mohammed_soliman/hackathons/portaldot-tier1/apps/makhzan-mcp/test/gate.test.ts:110:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: "[MEASURED] makhzan_gate_status — deal 1\nchain 420420777, Makhzan 0x60481DFcFCA34A8F095939D9675eC715127B2e44, gate 0x1111111111111111111111111111111111111111, read at block 172756\ngate.makhzan() = 0x60481DFcFCA34A8F095939D9675eC715127B2e44 (matches the Makhzan this server is configured for)\nlock: status 1 (locked)\npayer 0x0948EBD7637D1C32858a6FC5D947E85A6600205C\npayee 0x70997970C51812dc3A010C7d01b50e0d17dc79C8\namount 20000.00000000000000 tPOT (2000000000000000000 planck)\nminBond floor 20.00000000000000 tPOT (2000000000000000 planck)\nprovider 1 bond 24.00000000000000 tPOT (0 active deal(s), payee id 1)\nMakhzanGuard decision: healthy\nrelease would pass now: YES — no condition fails\nlabel: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.\nnote: no transaction was built or sent. This is a read-only prediction, not a payment.",
+    expected: /amount 2\.00000000000000 tPOT \(2000000000000000000 wei\)/,
+    operator: 'match',
+    diff: 'simple'
+  }

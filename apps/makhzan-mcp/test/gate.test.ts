@@ -56,11 +56,11 @@ test("gate_status says NO and names the guard state when a challenge is open", a
   assert.match(result.text, /Pending/);
 });
 
-test("gate_status reports a released or refunded lock instead of pretending it is locked", async () => {
+test("gate_status reports a released lock as paid to payee, not a release-would-revert verdict", async () => {
   const reads = fakeReads({
     gateLock: async () => ({
       payer: "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
-      amount: 500_000_000_000_000n,
+      amount: 2_000_000_000_000_000_000n, // 2e18 wei = 2 tPOT
       payee: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
       minBond: 0n,
       status: 2,
@@ -71,7 +71,46 @@ test("gate_status reports a released or refunded lock instead of pretending it i
   assert.equal(result.facts.status, 2);
   assert.equal(result.facts.releaseWouldPass, false);
   assert.match(result.text, /status 2 \(released\)/);
-  assert.match(result.text, /no lock is open/);
+  assert.match(result.text, /released: 2 tPOT paid to the payee/);
+  assert.ok(!result.text.includes("no lock is open"), "must not say no lock is open on released lock");
+  assert.ok(!result.text.includes("Expired"), "must not give a release-would-revert verdict on released lock");
+});
+
+test("gate_status reports a refunded lock as refunded, not a release-would-revert verdict", async () => {
+  const reads = fakeReads({
+    gateLock: async () => ({
+      payer: "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      amount: 2_000_000_000_000_000_000n,
+      payee: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      minBond: 0n,
+      status: 3,
+    }),
+  });
+  const result = await gateStatusTool(reads, 1, { contract: CONTRACT, gate: GATE });
+
+  assert.equal(result.facts.status, 3);
+  assert.equal(result.facts.releaseWouldPass, false);
+  assert.match(result.text, /status 3 \(refunded\)/);
+  assert.match(result.text, /release would pass now: NO — refunded/);
+  assert.ok(!result.text.includes("no lock is open"), "must not say no lock is open on refunded lock");
+});
+
+test("gate_status formats wei lock amount without 10,000x inflation and includes verdict explanation", async () => {
+  const reads = fakeReads({
+    gateLock: async () => ({
+      payer: "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
+      amount: 2_000_000_000_000_000_000n, // 2e18 wei = 2 tPOT
+      payee: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      minBond: 2_000_000_000_000_000n, // 2e15 planck = 20 tPOT
+      status: 1,
+    }),
+  });
+  const result = await gateStatusTool(reads, 1, { contract: CONTRACT, gate: GATE });
+
+  assert.match(result.text, /amount 2\.00000000000000 tPOT \(2000000000000000000 wei\)/);
+  assert.equal(result.facts.amountTpot, "2.00000000000000");
+  assert.ok(!result.text.includes("20000.00000000000000 tPOT"), "must not be 10,000x inflated");
+  assert.match(result.text, /the guard checks expiry before the bond floor/);
 });
 
 test("gate_status refuses a gate that points at a different Makhzan", async () => {
