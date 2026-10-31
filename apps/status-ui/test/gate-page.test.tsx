@@ -15,7 +15,7 @@ const LIVE_GATE = "0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA";
 const RPC = "https://test-evm-rpc-v3.portaldot.dev";
 const PAYER = "0x0948EBD7637D1C32858a6FC5D947E85A6600205C";
 const PAYEE = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
-const AMOUNT = 500_000_000_000_000n; // 5 tPOT in planck (1e14 per tPOT)
+const AMOUNT = 5_000_000_000_000_000_000n; // 5 tPOT in wei (1e18 per tPOT)
 const MIN_BOND = 2_400_000_000_000_000n; // 24 tPOT
 
 const bundle = run2 as unknown as EvidenceBundle;
@@ -171,14 +171,17 @@ describe("the gate page with an address", () => {
     expect(await findByTestId("gate-verdict")).toHaveTextContent("release would revert: BondTooLow");
   });
 
-  it("names NotLocked when the payment was already released", async () => {
-    const { findByTestId } = live(gateClient({ status: 2 }));
-    expect(await findByTestId("gate-verdict")).toHaveTextContent("release would revert: NotLocked");
+  it("shows neutral released status and no verdict banner when already released", async () => {
+    const { container, queryByTestId, findByTestId } = live(gateClient({ status: 2 }));
+    await findByTestId("gate-live");
+    expect(queryByTestId("gate-verdict")).toBeNull();
+    expect(container.textContent).toContain("Released: 5 tPOT paid to the payee");
   });
 
-  it("names NotLocked when nothing is locked yet (status 0)", async () => {
-    const { findByTestId } = live(gateClient({ status: 0 }));
-    expect(await findByTestId("gate-verdict")).toHaveTextContent("release would revert: NotLocked");
+  it("shows no verdict banner when nothing is locked yet (status 0)", async () => {
+    const { queryByTestId, findByTestId } = live(gateClient({ status: 0 }));
+    await findByTestId("gate-live");
+    expect(queryByTestId("gate-verdict")).toBeNull();
   });
 
   it("renders the makhzan address as a link to the overview page", async () => {
