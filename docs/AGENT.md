@@ -71,7 +71,7 @@ is `gate not deployed` — nothing about a lock, a payee or a bond is inferred. 
 deployed StorageGate (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`) is used by default. With a gate configured, the
 tool first checks `gate.makhzan()` equals the Makhzan it was pointed at, then evaluates exactly the
 conditions `StorageGate.release` evaluates (lock open, guard healthy, `minBond` floor satisfied) and
-names the one that fails (`NotLocked`, `Pending`, `BondTooLow`, …). It never builds that transaction.
+names the one that fails (`NotLocked`, `Pending`, `BondTooLow`, …) — noting that the guard checks expiry before the bond floor. When the lock status is already released or refunded, `makhzan_gate_status` reports the final payment outcome (`released: 2 tPOT paid to the payee` or `refunded`) rather than a release-would-revert verdict. It never builds that transaction.
 
 ## Configuration
 
@@ -182,12 +182,12 @@ tools (4):
   lock: status 0 (none)
   payer 0x0000000000000000000000000000000000000000
   payee 0x0000000000000000000000000000000000000000
-  amount 0.00000000000000 tPOT (0 planck)
+  amount 0.00000000000000 tPOT (0 wei)
   minBond floor 0.00000000000000 tPOT (0 planck)
   provider 1 bond 0.00000000000000 tPOT (0 active deal(s), payee id 0)
   MakhzanGuard decision: settled-or-none
   release would pass now: NO — status 0 (none): no lock is open, so there is nothing to release or refund
-  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.
+  label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks (the guard checks expiry before the bond floor).
   note: no transaction was built or sent. This is a read-only prediction, not a payment.
 
 [request]  tools/call makhzan_verify_file {"dealId":2,"path":".../public/samples/demo-1mib.bin"}
