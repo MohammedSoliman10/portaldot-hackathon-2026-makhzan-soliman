@@ -1,0 +1,8 @@
+{
+  "schema": "makhzan.submitted/v0",
+  "network": "LIVE",
+  "action": "settle",
+  "txHash": "0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34",
+  "nonce": 21,
+  "utc": "2026-10-31T08:28:45Z"
+}

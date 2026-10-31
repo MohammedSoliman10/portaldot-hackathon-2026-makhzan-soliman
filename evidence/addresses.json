@@ -4,7 +4,7 @@
   "derivedFrom": "evidence/receipts",
   "network": "LIVE",
   "chainId": 420420777,
-  "generatedAt": "2026-10-30T23:02:08Z",
+  "generatedAt": "2026-10-31T08:28:49Z",
   "entries": [
     {
       "address": "0x60481dfcfca34a8f095939d9675ec715127b2e44",
@@ -22,6 +22,7 @@
       "address": "0x5ee99e8ae165d0c33677c812d70b0b07820c1dca",
       "actions": [
         "gate:lock",
+        "gate:refund",
         "gate:release"
       ]
     }

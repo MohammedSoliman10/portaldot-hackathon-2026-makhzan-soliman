@@ -4,7 +4,7 @@
   "derivedFrom": "evidence/receipts",
   "network": "LIVE",
   "chainId": 420420777,
-  "generatedAt": "2026-10-30T23:02:08Z",
+  "generatedAt": "2026-10-31T08:28:49Z",
   "entries": [
     {
       "hash": "0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda",
@@ -14,6 +14,24 @@
       "network": "LIVE",
       "utc": "2026-10-24T08:34:37Z",
       "receiptPath": "evidence/receipts/live/0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda.json"
+    },
+    {
+      "hash": "0x0bda52e6038d9955293ffbb2b78935638659696e4e5a1dd905809d6ee2134745",
+      "action": "claim",
+      "block": 264458,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-31T08:26:56Z",
+      "receiptPath": "evidence/receipts/live/0x0bda52e6038d9955293ffbb2b78935638659696e4e5a1dd905809d6ee2134745.json"
+    },
+    {
+      "hash": "0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23",
+      "action": "gate:refund",
+      "block": 264442,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-31T08:25:19Z",
+      "receiptPath": "evidence/receipts/live/0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23.json"
     },
     {
       "hash": "0x12557be0d42359a70cbb22acd05310efff94c1bd19223c7d524e8c59400662be",
@@ -79,6 +97,15 @@
       "receiptPath": "evidence/receipts/live/0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b.json"
     },
     {
+      "hash": "0x491fdf174810101c7e96915604d78cc6c0e12bcdb1ef7d810adb264382ca1846",
+      "action": "claim",
+      "block": 264450,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-31T08:26:07Z",
+      "receiptPath": "evidence/receipts/live/0x491fdf174810101c7e96915604d78cc6c0e12bcdb1ef7d810adb264382ca1846.json"
+    },
+    {
       "hash": "0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f",
       "action": "gate:release",
       "block": 252535,
@@ -95,6 +122,15 @@
       "network": "LIVE",
       "utc": "2026-10-24T09:06:55Z",
       "receiptPath": "evidence/receipts/live/0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db.json"
+    },
+    {
+      "hash": "0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34",
+      "action": "settle",
+      "block": 264477,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-31T08:28:49Z",
+      "receiptPath": "evidence/receipts/live/0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34.json"
     },
     {
       "hash": "0x57d35092a6f16989ae26a59fa35acec60179aac043bbf247f2ecf54c32d8e064",
@@ -122,6 +158,15 @@
       "network": "LIVE",
       "utc": "2026-10-29T17:02:56Z",
       "receiptPath": "evidence/receipts/live/0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7.json"
+    },
+    {
+      "hash": "0x5a156d435057ddbeb9de0ca9b4cd48155dbf63391af0fca7cfd76231c4448279",
+      "action": "settle",
+      "block": 264469,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-10-31T08:28:02Z",
+      "receiptPath": "evidence/receipts/live/0x5a156d435057ddbeb9de0ca9b4cd48155dbf63391af0fca7cfd76231c4448279.json"
     },
     {
       "hash": "0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761",

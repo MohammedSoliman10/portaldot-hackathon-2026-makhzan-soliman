@@ -1,0 +1,8 @@
+{
+  "schema": "makhzan.submitted/v0",
+  "network": "LIVE",
+  "action": "gate:refund",
+  "txHash": "0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23",
+  "nonce": 19,
+  "utc": "2026-10-31T08:25:13Z"
+}
