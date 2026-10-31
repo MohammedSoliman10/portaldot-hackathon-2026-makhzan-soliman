@@ -101,16 +101,16 @@ describe("Overview - Deal Count & Live Index Corrections", () => {
     const scope = within(statsStrip);
 
     // 1. deals created: nextDealId = 5 (NOT 4)
-    expect(scope.getByText("5")).toBeInTheDocument();
-    expect(scope.getByText(/deals created/i)).toBeInTheDocument();
+    const createdStat = within(scope.getByText(/deals created/i).closest("div")!);
+    expect(createdStat.getByText("5")).toBeInTheDocument();
 
     // 2. settled count: 5 (covers all 5 deals)
-    expect(scope.getByText("5")).toBeInTheDocument();
-    expect(scope.getByText(/^settled$/i)).toBeInTheDocument();
+    const settledStat = within(scope.getByText(/^settled$/i).closest("div")!);
+    expect(settledStat.getByText("5")).toBeInTheDocument();
 
     // 3. healthy now: 0 (all 5 are settled)
-    expect(scope.getByText("0")).toBeInTheDocument();
-    expect(scope.getByText(/healthy now/i)).toBeInTheDocument();
+    const healthyStat = within(scope.getByText(/healthy now/i).closest("div")!);
+    expect(healthyStat.getByText("0")).toBeInTheDocument();
 
     // 4. 6 tPOT slashed kept as REPORTED
     expect(scope.getByText("6 tPOT")).toBeInTheDocument();
@@ -192,7 +192,7 @@ describe("Overview - Deal Count & Live Index Corrections", () => {
     const cardScope = within(card);
 
     // Empty state rendered
-    expect(cardScope.getByText(/no deals created yet/i)).toBeInTheDocument();
+    expect(await cardScope.findByText(/no deals created yet/i)).toBeInTheDocument();
     // No deal links
     const dealLinks = cardScope.queryAllByRole("link").filter((l) => l.getAttribute("href")?.startsWith("/deal/"));
     expect(dealLinks.length).toBe(0);

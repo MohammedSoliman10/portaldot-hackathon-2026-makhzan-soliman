@@ -201,10 +201,10 @@ export function Overview(options: LiveOptions) {
           Platform statistics
         </h2>
         <Stat
-          value={formatCount(live.status === "live" ? liveDeals.counts.created : (bundle?.deals.length ?? 2))}
+          value={formatCount(live.status === "live" ? liveDeals.counts.created : (bundle?.config?.nextDealId ?? bundle?.deals.length ?? 2))}
           subtitle="deals created"
           label={live.status === "live" ? "MEASURED" : "REPORTED"}
-          detail={live.status === "live" ? "nextDealId - 1 read from chain" : "deals 1 & 2 recorded in evidence"}
+          detail={live.status === "live" ? "nextDealId read from chain" : "deals 1 & 2 recorded in evidence"}
         />
         <Stat
           value={formatCount(live.status === "live" ? liveDeals.counts.settled : 2)}
@@ -360,6 +360,10 @@ export function Overview(options: LiveOptions) {
             >
               Retry
             </button>
+          </div>
+        ) : liveDeals.status === "live" && liveDeals.deals.length === 0 ? (
+          <div className="mt-4 p-8 text-center text-sm text-slate-500 rounded-xl border border-dashed border-slate-200">
+            No deals created yet on-chain.
           </div>
         ) : (
           <div className="mt-4 overflow-x-auto">
@@ -770,7 +774,8 @@ export function Overview(options: LiveOptions) {
                   <Row field="Minimum bond" value={formatNative(config.minBondUnits)} unit="tPOT" label={liveLabel} source={configSource} />
                   <Row field="Minimum duration" value={formatCount(config.minDurationBlocks)} unit="blocks" label={liveLabel} source={configSource} />
                   <Row field="Maximum duration" value={formatCount(config.maxDurationBlocks)} unit="blocks" label={liveLabel} source={configSource} />
-                  <Row field="Next deal id" value={formatCount(config.nextDealId)} label={liveLabel} source={configSource} />
+                  <Row field="Deals created" value={formatCount(config.nextDealId)} label={liveLabel} source={configSource} />
+                  <Row field="Next deal id" value={formatCount(config.nextDealId + 1)} detail={`last assigned: deal ${formatCount(config.nextDealId)}`} label={liveLabel} source={configSource} />
                   <Row field="Providers" value={formatCount(config.providerCount)} label={liveLabel} source={configSource} />
                 </>
               )}

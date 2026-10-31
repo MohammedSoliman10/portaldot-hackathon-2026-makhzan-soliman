@@ -56,13 +56,26 @@ export function formatDealHealth(
   return "settled or none";
 }
 
-function loadSessionDeals(chainId: number, address: string | null): LiveDealRow[] | null {
+interface CachedData {
+  deals: LiveDealRow[];
+  counts: LiveDealsCounts;
+}
+
+function loadSessionDeals(chainId: number, address: string | null): CachedData | null {
   if (!address || typeof window === "undefined" || !window.sessionStorage) return null;
   try {
     const raw = window.sessionStorage.getItem(`${CACHE_KEY_PREFIX}:${chainId}:${address.toLowerCase()}`);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed as LiveDealRow[];
+      if (Array.isArray(parsed)) {
+        return {
+          deals: parsed as LiveDealRow[],
+          counts: deriveCounts(parsed as LiveDealRow[], parsed.length),
+        };
+      }
+      if (parsed && Array.isArray(parsed.deals) && parsed.counts) {
+        return parsed as CachedData;
+      }
     }
   } catch {
     // ignore
@@ -70,17 +83,25 @@ function loadSessionDeals(chainId: number, address: string | null): LiveDealRow[
   return null;
 }
 
-function saveSessionDeals(chainId: number, address: string | null, deals: LiveDealRow[]): void {
+function saveSessionDeals(
+  chainId: number,
+  address: string | null,
+  deals: LiveDealRow[],
+  counts: LiveDealsCounts,
+): void {
   if (!address || typeof window === "undefined" || !window.sessionStorage) return;
   try {
-    window.sessionStorage.setItem(`${CACHE_KEY_PREFIX}:${chainId}:${address.toLowerCase()}`, JSON.stringify(deals));
+    window.sessionStorage.setItem(
+      `${CACHE_KEY_PREFIX}:${chainId}:${address.toLowerCase()}`,
+      JSON.stringify({ deals, counts }),
+    );
   } catch {
     // ignore
   }
 }
 
 function deriveCounts(deals: LiveDealRow[], nextDealId: number | null): LiveDealsCounts {
-  const created = nextDealId !== null && nextDealId > 0 ? nextDealId - 1 : deals.length;
+  const created = nextDealId !== null ? Math.max(0, nextDealId) : deals.length;
   const settled = deals.filter((d) => d.health === 0).length;
   const healthyNow = deals.filter((d) => d.healthLabel === "healthy").length;
   return { created, settled, healthyNow };
@@ -91,13 +112,13 @@ export function useLiveDeals(mode: ModeState, options: LiveDealsOptions = {}): L
   const address = mode.address ?? null;
   const chainId = mode.expectedChainId;
 
-  const [cachedDeals] = useState<LiveDealRow[] | null>(() => loadSessionDeals(chainId, address));
-  const [deals, setDeals] = useState<LiveDealRow[]>(() => cachedDeals ?? []);
+  const [cachedData] = useState<CachedData | null>(() => loadSessionDeals(chainId, address));
+  const [deals, setDeals] = useState<LiveDealRow[]>(() => cachedData?.deals ?? []);
   const [counts, setCounts] = useState<LiveDealsCounts>(() =>
-    deriveCounts(cachedDeals ?? [], options.nextDealId ?? null),
+    cachedData?.counts ?? deriveCounts([], options.nextDealId ?? null),
   );
   const [status, setStatus] = useState<"idle" | "loading" | "live" | "error">(
-    cachedDeals ? "live" : "idle",
+    cachedData ? "live" : "idle",
   );
   const [error, setError] = useState<string | null>(null);
   const [retryTick, setRetryTick] = useState(0);
@@ -131,7 +152,7 @@ export function useLiveDeals(mode: ModeState, options: LiveDealsOptions = {}): L
               : Promise.resolve(null),
           ]);
           if (cancelled) return;
-          if (cfg?.value?.nextDealId) {
+          if (cfg?.value?.nextDealId !== undefined && cfg?.value?.nextDealId !== null) {
             nextDealId = cfg.value.nextDealId;
           }
           if (blk?.value !== null && blk?.value !== undefined) {
@@ -143,65 +164,106 @@ export function useLiveDeals(mode: ModeState, options: LiveDealsOptions = {}): L
           throw new Error("Unable to read nextDealId from contract");
         }
 
-        const totalDeals = Math.max(0, nextDealId - 1);
+        const totalDeals = Math.max(0, nextDealId);
         if (totalDeals === 0) {
           if (cancelled) return;
+          const zeroCounts: LiveDealsCounts = { created: 0, settled: 0, healthyNow: 0 };
           setDeals([]);
-          setCounts({ created: 0, settled: 0, healthyNow: 0 });
+          setCounts(zeroCounts);
           setStatus("live");
-          saveSessionDeals(chainId, address, []);
+          saveSessionDeals(chainId, address, [], zeroCounts);
           return;
         }
 
-        // Latest 20 deals, in ascending order: from max(1, totalDeals - 19) to totalDeals
-        const count = Math.min(totalDeals, 20);
-        const startId = totalDeals - count + 1;
-        const dealIds = Array.from({ length: count }, (_, i) => startId + i);
+        // All deal IDs 1..totalDeals for full settled and health coverage
+        const allIds = Array.from({ length: totalDeals }, (_, i) => i + 1);
 
-        const dealResults = await Promise.all(
-          dealIds.map(async (id) => {
-            const [dealRes, healthRes] = await Promise.all([
-              dealOf(client!, address!, id),
-              healthOf(client!, address!, id),
-            ]);
-
-            if (!dealRes || dealRes.value === null) {
-              throw new Error(`Failed to read deal ${id}: ${dealRes?.error?.message ?? "unknown error"}`);
-            }
-            if (!healthRes || healthRes.value === null) {
-              throw new Error(`Failed to read health of deal ${id}: ${healthRes?.error?.message ?? "unknown error"}`);
-            }
-
-            const d = dealRes.value;
-            const h = healthRes.value;
-            const endBlock = d.endBlock;
-            const blocksLeft =
-              currentBlock !== null && currentBlock < endBlock ? endBlock - currentBlock : 0;
-            const healthLabel = formatDealHealth(h, endBlock, currentBlock);
-
-            const row: LiveDealRow = {
-              id,
-              owner: d.owner,
-              providerId: d.providerId,
-              priceUnits: d.priceUnits,
-              startBlock: d.startBlock,
-              endBlock: d.endBlock,
-              blocksLeft,
-              flags: d.flags,
-              health: h,
-              healthLabel,
-            };
-            return row;
-          }),
+        // Fetch healthOf for every deal to compute settled and healthyNow accurately
+        const allHealth = await Promise.all(
+          allIds.map((id) => healthOf(client!, address!, id)),
         );
+
+        // Latest 20 deals, ordered descending from totalDeals down to max(1, totalDeals - 19)
+        const count = Math.min(totalDeals, 20);
+        const dealIds = Array.from({ length: count }, (_, i) => totalDeals - i);
+
+        // Fetch dealOf for the latest 20 deals to display in the table
+        const latestDealDetails = await Promise.all(
+          dealIds.map((id) => dealOf(client!, address!, id)),
+        );
+
+        // Verify reads on latest deals
+        for (let i = 0; i < dealIds.length; i++) {
+          const id = dealIds[i]!;
+          const dealRes = latestDealDetails[i];
+          const healthRes = allHealth[id - 1];
+          if (!dealRes || dealRes.value === null) {
+            throw new Error(`Failed to read deal ${id}: ${dealRes?.error?.message ?? "unknown error"}`);
+          }
+          if (!healthRes || healthRes.value === null) {
+            throw new Error(`Failed to read health of deal ${id}: ${healthRes?.error?.message ?? "unknown error"}`);
+          }
+        }
+
+        const dealResults: LiveDealRow[] = dealIds.map((id, index) => {
+          const d = latestDealDetails[index]!.value!;
+          const h = allHealth[id - 1]!.value!;
+          const endBlock = d.endBlock;
+          const blocksLeft =
+            currentBlock !== null && currentBlock < endBlock ? endBlock - currentBlock : 0;
+          const healthLabel = formatDealHealth(h, endBlock, currentBlock);
+
+          return {
+            id,
+            owner: d.owner,
+            providerId: d.providerId,
+            priceUnits: d.priceUnits,
+            startBlock: d.startBlock,
+            endBlock: d.endBlock,
+            blocksLeft,
+            flags: d.flags,
+            health: h,
+            healthLabel,
+          };
+        });
+
+        // Settled count covers EVERY deal 1..totalDeals (where healthOf == 0)
+        const settled = allHealth.filter((h) => h?.value === 0).length;
+
+        // Healthy now: deals where health === 1 and (currentBlock === null || currentBlock < endBlock)
+        const latestHealthy = dealResults.filter((d) => d.healthLabel === "healthy").length;
+
+        // For any older deals (outside latest 20) with healthOf == 1, fetch endBlock to check if active
+        const olderUnsettledCandidateIds = allIds
+          .slice(0, Math.max(0, totalDeals - 20))
+          .filter((id) => allHealth[id - 1]?.value === 1);
+
+        let olderHealthy = 0;
+        if (olderUnsettledCandidateIds.length > 0) {
+          const olderDeals = await Promise.all(
+            olderUnsettledCandidateIds.map((id) => dealOf(client!, address!, id)),
+          );
+          for (const res of olderDeals) {
+            if (res?.value && (currentBlock === null || currentBlock < res.value.endBlock)) {
+              olderHealthy++;
+            }
+          }
+        }
+
+        const healthyNow = latestHealthy + olderHealthy;
 
         if (cancelled) return;
 
+        const newCounts: LiveDealsCounts = {
+          created: totalDeals,
+          settled,
+          healthyNow,
+        };
+
         setDeals(dealResults);
-        const newCounts = deriveCounts(dealResults, nextDealId);
         setCounts(newCounts);
         setStatus("live");
-        saveSessionDeals(chainId, address, dealResults);
+        saveSessionDeals(chainId, address, dealResults, newCounts);
       } catch (err: unknown) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);

@@ -584,3 +584,19 @@ what we actually commit. No allowlist entry was added, and the planted-secret te
 
 **Consequences.** A secret pasted into build output would not be caught by this scan. That output is
 reproducible from the scanned source, so the risk stays with the source.
+
+## D-14 — nextDealId in slot 0 is the last assigned deal ID (2026-10-31, feature 022)
+
+**Context.** In `Makhzan.sol`, deal creation executes `uint32 dealId = ++nextDealId;` starting from 0.
+Thus slot 0 stores the ID of the last assigned deal (e.g. 5 when 5 deals exist). An earlier implementation
+assumed `nextDealId - 1` deals were created, resulting in an off-by-one error (showing 4 deals created
+and omitting deal 5 from the live index).
+
+**Decision.** Treat `nextDealId` in slot 0 as the exact count of deals created (deals 1 to `nextDealId` exist).
+Derive counts and order the live deals table descending from `nextDealId` down to `max(1, nextDealId - 19)`.
+Query `healthOf` for all deals 1..`nextDealId` so settled and healthy-now counts cover the full deal history.
+Display `nextDealId + 1` as the true next deal ID to be assigned.
+
+**Consequences.** The UI accurately reports all on-chain deals (1 through 5 on current testnet) with 0 off-by-one
+errors.
+
