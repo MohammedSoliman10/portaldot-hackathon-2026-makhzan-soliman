@@ -19,6 +19,7 @@ export const PAYER: Hex = "0x0948EBD7637D1C32858a6FC5D947E85A6600205C";
 export const PAYEE: Hex = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 
 export const TPOT = 100_000_000_000_000n; // 1 tPOT = 1e14 planck
+export const TPOT_WEI = 1_000_000_000_000_000_000n; // 1 tPOT = 1e18 wei
 
 /** A deal whose whole history has already been checked by `verifyDeal`; shared by story and server tests. */
 export function storyInput(): DealVerifyInput {
@@ -80,7 +81,7 @@ export function fakeReads(overrides: Partial<Reads> = {}): FakeReads {
   const challenge = (): ChallengeSnapshot => ({ open: false, index: 0, start: 0, deadline: 0 });
   const gateLock = (): GateLockSnapshot => ({
     payer: PAYER,
-    amount: 5n * TPOT,
+    amount: 5n * TPOT_WEI,
     payee: PAYEE,
     minBond: 0n,
     status: 1,

@@ -33,7 +33,7 @@ test("gate_status says NO when the provider bond is under the floor", async () =
   const reads = fakeReads({
     gateLock: async () => ({
       payer: "0x0948EBD7637D1C32858a6FC5D947E85A6600205C",
-      amount: 500_000_000_000_000n,
+      amount: 5_000_000_000_000_000_000n,
       payee: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
       minBond: 30n * TPOT,
       status: 1,

@@ -51,6 +51,7 @@ export interface AccruedSnapshot {
 
 export interface GateLockSnapshot {
   payer: Hex;
+  /** Lock deposit in native wei (1e18 per tPOT). */
   amount: bigint;
   payee: Hex;
   /** Provider bond floor in planck; 0 means the gate does not check the bond. */

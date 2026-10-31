@@ -10,7 +10,7 @@
  * has no StorageGate, and an invented address would be worse than no answer.
  */
 import type { Hex } from "viem";
-import { formatTpot } from "../format.ts";
+import { cleanTpot, formatTpot, formatTpotFromWei, WEI_PER_PLANCK } from "../format.ts";
 import type { Reads } from "../reads.ts";
 import type { ToolResult } from "../result.ts";
 import { guardDecision, type GuardDecision } from "./health.ts";
@@ -21,7 +21,7 @@ const DECISION_REFUSAL: Record<GuardDecision, string> = {
   healthy: "the guard is satisfied",
   pending: "Pending: a challenge is open and still inside its window",
   default: "Default: a challenge passed its deadline unanswered",
-  expired: "Expired: the term is over, so the guard refuses a release",
+  expired: "Expired: the term is over, so the guard refuses a release (the guard checks expiry before the bond floor)",
   "settled-or-none": "settled-or-none: no release can happen",
   unknown: "an unknown healthOf value",
 };
@@ -65,7 +65,13 @@ export async function gateStatusTool(
 
   let refusal: string;
   if (!locked) {
-    refusal = `status ${lock.status} (${statusName}): no lock is open, so there is nothing to release or refund`;
+    if (lock.status === 2) {
+      refusal = `released: ${cleanTpot(formatTpotFromWei(lock.amount))} tPOT paid to the payee`;
+    } else if (lock.status === 3) {
+      refusal = "refunded";
+    } else {
+      refusal = `status ${lock.status} (${statusName}): no lock is open, so there is nothing to release or refund`;
+    }
   } else if (decision !== "healthy") {
     refusal = DECISION_REFUSAL[decision];
   } else if (!bondOk) {
@@ -83,12 +89,12 @@ export async function gateStatusTool(
     `lock: status ${lock.status} (${statusName})`,
     `payer ${lock.payer}`,
     `payee ${lock.payee}`,
-    `amount ${formatTpot(lock.amount)} tPOT (${lock.amount} planck)`,
+    `amount ${formatTpotFromWei(lock.amount)} tPOT (${lock.amount} wei)`,
     `minBond floor ${formatTpot(lock.minBond)} tPOT (${lock.minBond} planck)`,
     `provider ${deal.providerId} bond ${formatTpot(providerBond)} tPOT (${payeeProvider.activeDeals} active deal(s), payee id ${payeeProvider.id})`,
     `MakhzanGuard decision: ${decision}`,
     `release would pass now: ${releaseWouldPass ? "YES" : "NO"} — ${refusal}`,
-    "label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks.",
+    "label: MEASURED for the reads; DERIVED for the release verdict, which follows StorageGate.release's own checks (the guard checks expiry before the bond floor).",
     "note: no transaction was built or sent. This is a read-only prediction, not a payment.",
   ].join("\n");
 
@@ -105,8 +111,9 @@ export async function gateStatusTool(
       payee: lock.payee,
       status: lock.status,
       statusName,
-      amountPlanck: lock.amount.toString(),
-      amountTpot: formatTpot(lock.amount),
+      amountWei: lock.amount.toString(),
+      amountPlanck: (lock.amount / WEI_PER_PLANCK).toString(),
+      amountTpot: formatTpotFromWei(lock.amount),
       minBondPlanck: lock.minBond.toString(),
       minBondTpot: formatTpot(lock.minBond),
       providerId: deal.providerId,
