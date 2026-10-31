@@ -15,6 +15,8 @@ missing block and be paid from the bond.**
   pass exposed daemon defect T1-002 (a 15 s receipt wait mislabelled a landed answer); it is fixed and
   the re-run is clean. A fresh read-only client then retrieved the 1 MiB file as 1,024 blocks, verified
   every block against the on-chain root, and reproduced the upload sha256; a tampered copy was rejected.
+  StorageGate live demo complete: deals 3, 4, and 5 exercised across 11 transactions (lock, release,
+  refusals, post-term refund, claims, settles) with total fees of 50.205185 tPOT and gate balance at 0.
   Everything not marked `[live run]` is local evidence.
 
 ## The problem
@@ -197,6 +199,65 @@ Read-only chain facts gathered after the run — `TransactionStorage` metadata a
 `171308` on the scanner, the account mapping and the storage-deposit split — are in
 `evidence/raw/t1/78-chain-facts.txt` and `79-account-mapping-deposits.txt`.
 
+## Live gate demo
+
+The live demo of `StorageGate` on Portaldot V3 exercised end-to-end escrow, guard validation, preflight refusals, release payout, expiry and bond-floor enforcement, post-term refund, and deal settlement across deals 3, 4, and 5 (`evidence/raw/t8/gate-demo-summary.md`).
+
+Across the 11 transactions broadcast to the network, total gas fees were **`50.205185 tPOT`** (out of an 80 tPOT budget cap), leaving the owner balance at `195.509586 tPOT` (100 tPOT reserve intact), Provider-1 balance at `44.932150 tPOT`, and the `StorageGate` contract balance at `0 tPOT`.
+
+| Step | Action | Tx hash or refusal | Block | Result |
+| --- | --- | --- | --- | --- |
+| 1 | `createDeal(3)` (term 500 blocks, price 5 tPOT) | `0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee` | `250092` | Deal 3 created (endBlock `250692`, fee 11.557014 tPOT) |
+| 2 | `gate lock 3` | *refused before broadcast* (`Expired`) | `251940` | Refused: block 251940 > endBlock 250692; guard checks expiry before bond floor (0 gas) |
+| 3 | `createDeal(4)` (term 3,000 blocks, price 5 tPOT) | `0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761` | `252512` | Deal 4 created (endBlock `255512`, fee 11.557014 tPOT) |
+| 4 | `gate lock 4` (payee Provider-1, minBond 20 tPOT, amount 2 tPOT) | `0x3719248237ec37c916b11e3d014aebba05d84cedcdcdc79cc1b9feaa18a62203` | `252523` | Lock 4 opened; 2 tPOT deposited to gate (fee 7.705815 tPOT) |
+| 5 | `gate release 4` (called by Provider-1) | `0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f` | `252535` | Payout released; +2 tPOT to Provider-1 (fee 0.015322 tPOT); released lock stays released |
+| 6 | `createDeal(5)` (term 3,000 blocks, price 5 tPOT) | `0x12557be0d42359a70cbb22acd05310efff94c1bd19223c7d524e8c59400662be` | `252544` | Deal 5 created (endBlock `255544`, fee 11.557014 tPOT) |
+| 7 | `gate lock 5` (payee Provider-1, minBond 30 tPOT, amount 2 tPOT) | `0xf84af2e383b8239c350a16bdf074a14925cd954cacd3ca25ec1621a5fcf869db` | `252552` | Lock 5 opened; 2 tPOT deposited to gate (fee 7.705815 tPOT) |
+| 8 | `gate release 5` | *refused before broadcast* (`BondTooLow`) | `252560` | Refused: provider bond 24 tPOT < minBond 30 tPOT (0 gas) |
+| 9 | `gate refund 5` (in-term) | *refused before broadcast* (`RefundNotAllowed`) | `252564` | Refused: deal healthy and within term (block 252564 < 255544) (0 gas) |
+| 10 | `claim(3)` | `0x9c8ec1c10b2f57ffa90ed22c09db49b019e26b7656825df3bd764bad46505441` | `258836` | Deal 3 claimed by Provider-1 (+5 tPOT, fee 0.015313 tPOT) |
+| 11 | `settle(3)` | `0x57d35092a6f16989ae26a59fa35acec60179aac043bbf247f2ecf54c32d8e064` | `258844` | Deal 3 settled by Owner (fee 0.015312 tPOT) |
+| 12 | `gate refund 5` (post-term) | `0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23` | `264442` | Lock 5 refunded to Owner (+2 tPOT, fee 0.015317 tPOT); gate balance returns to 0 tPOT |
+| 13 | `claim(4)` | `0x491fdf174810101c7e96915604d78cc6c0e12bcdb1ef7d810adb264382ca1846` | `264450` | Deal 4 claimed by Provider-1 (+5 tPOT, fee 0.015313 tPOT) |
+| 14 | `claim(5)` | `0x0bda52e6038d9955293ffbb2b78935638659696e4e5a1dd905809d6ee2134745` | `264458` | Deal 5 claimed by Provider-1 (+5 tPOT, fee 0.015313 tPOT) |
+| 15 | `settle(4)` | `0x5a156d435057ddbeb9de0ca9b4cd48155dbf63391af0fca7cfd76231c4448279` | `264469` | Deal 4 settled by Owner (fee 0.015312 tPOT) |
+| 16 | `settle(5)` | `0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34` | `264477` | Deal 5 settled by Owner (fee 0.015312 tPOT) |
+
+### Keyless gate inspection commands
+
+Judges can inspect the live on-chain status of deals 3, 4, and 5 at any time without private keys using the Makhzan CLI or MCP tool:
+
+```bash
+cd apps/makhzan
+MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
+MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
+MAKHZAN_GATE=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA \
+node src/cliMain.ts gate status 3
+
+node src/cliMain.ts gate status 4
+
+node src/cliMain.ts gate status 5
+```
+
+- **Deal 3:** shows `healthOf = 0` (settled), lock `None` (lock was refused `Expired`).
+- **Deal 4:** shows `healthOf = 0` (settled), lock `Released` (status 2, amount 2 tPOT, payee Provider-1 `0xf4ec143c743ff57c0d32e829f50692551cbf6029`, minBond 20 tPOT).
+- **Deal 5:** shows `healthOf = 0` (settled), lock `Refunded` (status 3, amount 2 tPOT, payer Owner `0x0948ebd7637d1c32858a6fc5d947e85a6600205c`, minBond 30 tPOT).
+
+Or via the read-only MCP server (`apps/makhzan-mcp`):
+```json
+{
+  "name": "makhzan_gate_status",
+  "arguments": { "dealId": "4" }
+}
+```
+Tool returns the complete lock state, predicted release verdict (`Released`), payer, payee, amounts, and health.
+
+### Honest notes from live execution
+1. **The guard checks expiry before the bond floor:** In `MakhzanGuard.requireHealthy`, the end-block check executes before checking `_dealProviderBond`. When deal 3's term elapsed, `gate lock 3` failed with `Expired` rather than examining the bond floor.
+2. **A released lock stays released:** Once a lock transitions to `Released` (status 2) or `Refunded` (status 3), it cannot be re-locked, released again, or refunded; it is immutable and terminal.
+3. **Display-unit bug caught and resolved:** Live evidence capture uncovered a display-unit bug where a 2 tPOT gate lock was formatted as 20,000 in raw unit parsing. This was fixed in both the web UI (`0f5e93e`) and the MCP server (`1f4b029`).
+
 ## Architecture
 
 ```mermaid
@@ -278,7 +339,7 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Daemon receipt-timeout fix (T1-002) | **implemented, red then green**; hash persisted before wait, 120 s minimum, later poll labels from receipt/read-back | `61-t1002-red.txt`, `61-t1002-green.txt` |
 | Status web app (feature 003) | **merged and live**; Overview, Deals, Proof, Verify, Replay (`/replay`) and Judges read the deployment live and fall back to the recorded run | <https://status-ui-one.vercel.app/> |
 | Consumer example: `MakhzanGuard` (health + term) and `StorageGate` (lock / release / refund, optional bond floor) | **deployed live** (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`) | `contracts/src/makhzan/MakhzanGuard.sol`, `contracts/src/makhzan/StorageGate.sol`, `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt` |
-| Consumer demo: `gate-demo` (deploy, lock, release, expire, slash, `BondTooLow`, refund) and the gate's size budget | implemented, local demo deals (`2,528 B` against a `2,600 B` budget; live gate deployed, demo deals pending live run) | `evidence/raw/t1/100-gate-deploy.txt`, `101-gate-demo-local.txt`, `102-size-check-gate.txt` |
+| Consumer demo: `gate-demo` (deploy, lock, release, expire, slash, `BondTooLow`, refund) and the gate's size budget | **implemented [live run]**; deals 3, 4, 5 exercised on live chain (lock 4 + release 4, lock 5 + BondTooLow refusal + RefundNotAllowed refusal, post-term refund 5, lock 3 Expired refusal, claims and settles for 3, 4, 5; gate balance 0) | `evidence/raw/t8/gate-demo-summary.md`, `evidence/raw/t1/100-gate-deploy.txt`, `101-gate-demo-local.txt` |
 | Agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
 | Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
 | PolkaVM (`resolc`) deployment path | simulated only (compiler probe) | `evidence/raw/t1/` Tier-0 gates |

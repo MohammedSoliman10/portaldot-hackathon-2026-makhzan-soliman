@@ -83,6 +83,33 @@ console.log(`gate code: ${(code.length - 2) / 2} B, codeHash: ${keccak256(code)}
 
 Recorded run: `evidence/raw/t2/126-gate-live-verify.txt`.
 
+## 2c. Inspect live StorageGate demo deals (keyless) — about 5 s
+
+The live demo of `StorageGate` exercised deals 3, 4, and 5 on Portaldot V3 (`evidence/raw/t8/gate-demo-summary.md`) across 11 transactions totaling `50.205185 tPOT` in fees. Anyone can query the on-chain lock states, payees, amounts, and health without a private key:
+
+```bash
+cd apps/makhzan
+MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
+MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
+MAKHZAN_GATE=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA \
+node src/cliMain.ts gate status 3
+
+node src/cliMain.ts gate status 4
+
+node src/cliMain.ts gate status 5
+```
+
+- **Deal 3:** shows `healthOf = 0` (settled), lock `None` (locking was refused with `Expired` because term elapsed).
+- **Deal 4:** shows `healthOf = 0` (settled), lock `Released` (status 2, amount 2 tPOT released to Provider-1 `0xf4ec143c743ff57c0d32e829f50692551cbf6029`, minBond 20 tPOT).
+- **Deal 5:** shows `healthOf = 0` (settled), lock `Refunded` (status 3, amount 2 tPOT refunded to Owner `0x0948ebd7637d1c32858a6fc5d947e85a6600205c`, minBond 30 tPOT; release was refused with `BondTooLow` because provider bond 24 < minBond 30 tPOT).
+
+Or via the read-only MCP tool `makhzan_gate_status` (`{"dealId": "4"}`).
+
+Honest notes:
+1. The guard checks expiry before the bond floor (`MakhzanGuard.requireHealthy` reverts `Expired` before checking `_dealProviderBond`).
+2. A released lock stays released (status `Released` is final and irreversible).
+3. A display-unit bug (2 tPOT shown as 20,000) was found by our own live capture and fixed in the UI (`0f5e93e`) and the MCP server (`1f4b029`).
+
 ## 3. Fresh-client retrieval — under 1 s
 
 ```bash

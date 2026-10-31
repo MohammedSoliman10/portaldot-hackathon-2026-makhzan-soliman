@@ -73,9 +73,8 @@ covered there is `[pending live run]`.
   record's provider id matches the deal's `providerId`. Any other payee reads bond `0` — refused with
   `BondTooLow` when the floor is non-zero, paid when it is zero. The gate cannot verify a provider it
   was not told about.
-- **The gate is deployed live, but deals are unexercised on chain**: StorageGate is live on Portaldot V3
-  at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured cost `210.575612711692978125 tPOT`), but gate demo deals have only run on local anvil. It has no admin and
-  no upgrade path, so a bug cannot be fixed at the same address.
+- **The gate is deployed live and demo deals are fully exercised on chain**: StorageGate is live on Portaldot V3
+  at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured cost `210.575612711692978125 tPOT`). Demo deals 3, 4, and 5 have been fully exercised end-to-end (`evidence/raw/t8/gate-demo-summary.md`): lock 4 + release 4 (+2 tPOT to provider-1); lock 5 + release refusal (`BondTooLow`: provider bond 24 < minBond 30 tPOT); in-term refund refusal (`RefundNotAllowed`); post-term refund 5 (+2 tPOT back to owner, gate balance 0); deal 3 lock refusal (`Expired`); and claims/settles for 3, 4, 5 across 11 transactions totaling `50.205185 tPOT` in fees. Honest limits and operational notes confirmed in live testing: the guard checks expiry before the bond floor; a released lock stays released; and an early display-unit bug (2 tPOT shown as 20,000) was caught by our own live capture and fixed in the UI (`0f5e93e`) and MCP server (`1f4b029`). It has no admin and no upgrade path, so a bug cannot be fixed at the same address.
 - **The gate's deploy is not byte-for-byte verified**: `StorageGate` stores the Makhzan address as an
   immutable, so the artifact has zeros where the chain has the address (`verify:deployment` reports
   `differs at byte 191: chain 60 artifact 00`). The gate deploy is checked by code length (2,528 B), code hash

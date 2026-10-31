@@ -251,7 +251,7 @@ runtime-vs-docs checker, a scaffolder or an agent-payments rail. A read-only MCP
 (`apps/makhzan-mcp`, keyless and safe). We use no Portaldot-native module in the live path — the
 `TransactionStorage` anchor is a plan, not a shipped feature. We do not promise refunds of the storage
 reserve (refundability is unmeasured and contested). We do not verify continuous storage, bandwidth
-or availability. We have one provider, one operator and two deals, and no consumer beyond `StorageGate` (deployed live at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost 210.575612711692978125 tPOT; gate demo deals are local/pending live execution).
+or availability. We have one provider, one operator and five live deals (deals 1 and 2 for core Makhzan; deals 3, 4, and 5 for the live gate demo), with `StorageGate` deployed live at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost `210.575612711692978125 tPOT`). The live gate demo (`evidence/raw/t8/gate-demo-summary.md`) is complete: 11 transactions broadcast totaling `50.205185 tPOT` in fees, covering deal creation, locks, payouts, refusals (`Expired`, `BondTooLow`, `RefundNotAllowed`), post-term refund with gate balance returning to 0 tPOT, and all claims and settlements. Honest operational notes: the guard checks expiry before the bond floor; a released lock stays released; and an early display-unit bug (2 tPOT shown as 20,000) was discovered during live testing and fixed in the UI (`0f5e93e`) and MCP server (`1f4b029`).
 
 ## 9. 30 / 60 / 90 days
 

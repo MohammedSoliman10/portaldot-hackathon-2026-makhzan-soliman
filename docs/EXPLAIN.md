@@ -78,10 +78,13 @@ slash), then a second deal whose release is refused `BondTooLow`, whose in-term 
 deploys through the same tooling, dry run and pending record as Makhzan
 (`evidence/raw/t1/100-gate-deploy.txt`) at 2,528 B runtime against a 2,600 B budget
 (`evidence/raw/t1/102-size-check-gate.txt`). StorageGate is deployed live on Portaldot V3 testnet
-at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost `210.575612711692978125 tPOT`, runtime `2,528 B`, keccak `0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5`), pointing immutably at Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`). Gate demo deals remain locally verified.
+at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost `210.575612711692978125 tPOT`, runtime `2,528 B`, keccak `0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5`), pointing immutably at Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`). The live gate demo exercised deals 3, 4, and 5 end-to-end on chain (`evidence/raw/t8/gate-demo-summary.md`): lock 4 + release 4 (+2 tPOT paid to provider-1), lock 5 + release refusal `BondTooLow` (provider-1 bond 24 tPOT < minBond 30 tPOT), in-term refund refusal `RefundNotAllowed`, post-term refund 5 (+2 tPOT back to owner, gate balance 0), lock 3 refusal `Expired`, and all claims and settlements across 11 transactions totaling `50.205185 tPOT` in fees.
 
-`minBond` is a floor, not a proof, and these are its limits:
+`minBond` is a floor, not a proof, and these are its limits and honest notes from live execution:
 
+- **The guard checks expiry before the bond floor.** In `MakhzanGuard.requireHealthy`, the end-block check executes before evaluating `_dealProviderBond`. When deal 3 passed its term, `gate lock 3` failed with `Expired` without checking the provider bond.
+- **A released lock stays released.** Once a lock is released (status 2) or refunded (status 3), it cannot be re-locked, released again, or refunded. State transitions are permanent.
+- **Display-unit bug caught and resolved.** Live capture uncovered a display-unit bug where 2 tPOT in gate locks was displayed as 20,000 raw units; this was fixed in both the web UI (`0f5e93e`) and the MCP server (`1f4b029`).
 - **The bond is read in the same transaction as the payment.** `release` reads `healthOf` and
   `providerOf(payee)` while it runs. A slash that lands afterwards — even later in the same block —
   does not undo a release that already succeeded. The gate is not atomic with Makhzan's state.
