@@ -21,7 +21,7 @@ export function Hero({ headline, subtitle, children, className = "" }: HeroProps
           {headline}
         </h1>
         {subtitle ? (
-          <p className="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-[56ch]">
+          <p className="mt-4 text-[19px] sm:text-[19px] text-slate-300 leading-relaxed max-w-[56ch]">
             {subtitle}
           </p>
         ) : null}

@@ -36,7 +36,7 @@ export function Stat({ value, subtitle, label, detail, className = "" }: StatPro
         <div className="font-mono text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl whitespace-nowrap min-w-0">
           {formattedValue}
         </div>
-        <p className="mt-2 text-xs font-medium text-slate-600 sm:text-sm min-w-0">{subtitle}</p>
+        <p className="mt-2 text-[19px] font-medium text-slate-700 min-w-0 leading-snug">{subtitle}</p>
       </div>
       {detail ? (
         <p className="mt-3 text-[15px] text-slate-600 border-t border-slate-100 pt-2 min-w-0">

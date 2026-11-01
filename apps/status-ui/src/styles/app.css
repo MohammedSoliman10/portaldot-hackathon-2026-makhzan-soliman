@@ -50,12 +50,13 @@
   table {
     border-collapse: collapse;
     width: 100%;
+    font-size: 15px;
   }
 
   caption {
     text-align: left;
     color: var(--ash);
-    font-size: var(--step--1);
+    font-size: 15px;
     padding-bottom: 0.5rem;
   }
 
@@ -63,7 +64,7 @@
     text-align: left;
     font-weight: 500;
     color: var(--ash);
-    font-size: var(--step--1);
+    font-size: 15px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
   }
@@ -73,6 +74,7 @@
     border-bottom: var(--hairline) solid var(--rule);
     padding: 0.6rem 0.75rem 0.6rem 0;
     vertical-align: top;
+    font-size: 15px;
   }
 
   code,
