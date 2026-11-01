@@ -101,11 +101,15 @@
   }
 
   .eyebrow {
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    letter-spacing: 0.18em;
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--ash);
+    color: var(--ink);
+    border-bottom: 2px solid var(--ochre);
+    padding-bottom: 0.25rem;
+    display: inline-block;
+    width: fit-content;
   }
 
   .rule {

@@ -161,7 +161,7 @@ export function Judges(options: LiveOptions) {
 
       {/* The walkthrough Card */}
       <Card as="section" aria-labelledby="walkthrough-heading">
-        <h2 id="walkthrough-heading" className="eyebrow text-slate-700 font-semibold border-b border-slate-100 pb-3">
+        <h2 id="walkthrough-heading" className="eyebrow text-slate-700 font-semibold">
           The walkthrough
         </h2>
         <ol className="mt-4 max-w-[68ch] list-decimal space-y-3.5 pl-5 text-sm text-slate-700 leading-relaxed">
