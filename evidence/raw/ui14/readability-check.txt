@@ -1,0 +1,36 @@
+# Readability and Responsive Layout Verification (Headless Chromium)
+Timestamp (UTC): 2026-11-01T09:40:29Z
+Branch: 024-ui-readability
+Host: Local Vite Preview (http://localhost:4173)
+
+| Viewport | Route | scrollWidth | Viewport Width | Overflow | Text < 13px Count | Status |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|
+| 1440px | / | 1440px | 1440px | 0px | 0 | PASS |
+| 1440px | /deal/1 | 1440px | 1440px | 0px | 0 | PASS |
+| 1440px | /verify | 1440px | 1440px | 0px | 0 | PASS |
+| 1440px | /proof | 1440px | 1440px | 0px | 0 | PASS |
+| 1440px | /judges | 1440px | 1440px | 0px | 0 | PASS |
+| 1440px | /replay | 1440px | 1440px | 0px | 0 | PASS |
+| 1440px | /gate | 1440px | 1440px | 0px | 0 | PASS |
+| 1440px | /receipt/1 | 1440px | 1440px | 0px | 0 | PASS |
+| 1024px | / | 1024px | 1024px | 0px | 0 | PASS |
+| 1024px | /deal/1 | 1024px | 1024px | 0px | 0 | PASS |
+| 1024px | /verify | 1024px | 1024px | 0px | 0 | PASS |
+| 1024px | /proof | 1024px | 1024px | 0px | 0 | PASS |
+| 1024px | /judges | 1024px | 1024px | 0px | 0 | PASS |
+| 1024px | /replay | 1024px | 1024px | 0px | 0 | PASS |
+| 1024px | /gate | 1024px | 1024px | 0px | 0 | PASS |
+| 1024px | /receipt/1 | 1024px | 1024px | 0px | 0 | PASS |
+| 390px | / | 390px | 390px | 0px | 0 | PASS |
+| 390px | /deal/1 | 390px | 390px | 0px | 0 | PASS |
+| 390px | /verify | 390px | 390px | 0px | 0 | PASS |
+| 390px | /proof | 390px | 390px | 0px | 0 | PASS |
+| 390px | /judges | 390px | 390px | 0px | 0 | PASS |
+| 390px | /replay | 390px | 390px | 0px | 0 | PASS |
+| 390px | /gate | 390px | 390px | 0px | 0 | PASS |
+| 390px | /receipt/1 | 390px | 390px | 0px | 0 | PASS |
+
+Summary:
+- Total check points: 24/24 PASS
+- Overflow on all routes: 0px (scrollWidth equals viewport width)
+- Computed font-size < 13px: 0 elements across all routes and viewports
