@@ -75,7 +75,7 @@ export function Proof(options: LiveOptions) {
 
       {/* Before and after Card */}
       <Card as="section" aria-labelledby="before-after">
-        <h2 id="before-after" className="eyebrow text-slate-700 font-semibold border-b border-slate-100 pb-3">
+        <h2 id="before-after" className="eyebrow text-slate-700 font-semibold">
           Before and after
         </h2>
         <div className="mt-3 overflow-x-auto">
@@ -160,7 +160,7 @@ export function Proof(options: LiveOptions) {
 
       {/* What the chain holds now Card */}
       <Card as="section" aria-labelledby="proof-live-heading">
-        <h2 id="proof-live-heading" className="eyebrow text-slate-700 font-semibold border-b border-slate-100 pb-3">
+        <h2 id="proof-live-heading" className="eyebrow text-slate-700 font-semibold">
           What the chain holds now
         </h2>
         <div
