@@ -58,7 +58,7 @@ describe("024-ui-readability: Readability and Layout Improvements", () => {
     // Footer source line
     const footerSrc = readFileSync(resolve(__dirname, "../src/components/layout/Footer.tsx"), "utf8");
     expect(footerSrc).toMatch(/Source:[^<]*<\/p>/);
-    expect(footerSrc).toContain("text-slate-600");
+    expect(footerSrc).toContain("text-muted");
   });
 
   it("Task 3: Stat card has whitespace-nowrap, chip in its own row above number, and stat grid uses 2 cols up to 1279px, 4 cols from 1280px (xl:)", () => {

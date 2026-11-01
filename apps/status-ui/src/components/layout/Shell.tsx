@@ -12,8 +12,8 @@ import { SideIndex } from "./SideIndex";
 function Wordmark() {
   return (
     <Link to="/" className="group inline-flex items-baseline gap-2 no-underline" aria-label="Makhzan, home">
-      <span className="text-sm font-bold tracking-[0.28em] text-slate-900 group-hover:text-amber-600 transition-colors">MAKHZAN</span>
-      <span className="text-xs text-slate-600 font-medium">مخزن</span>
+      <span className="text-sm font-bold tracking-[0.28em] text-ink group-hover:text-gold transition-colors">MAKHZAN</span>
+      <span className="text-xs text-muted font-medium">مخزن</span>
     </Link>
   );
 }
@@ -29,10 +29,10 @@ export function Shell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[var(--canvas)] text-slate-900">
+    <div className="min-h-screen bg-bg text-ink">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-ochre focus:px-3 focus:py-2 focus:text-ink focus:rounded-full font-mono text-xs font-semibold shadow-md"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-gold focus:px-3 focus:py-2 focus:text-on-gold focus:rounded-full font-mono text-xs font-semibold shadow-md"
       >
         Skip to content
       </a>

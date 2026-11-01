@@ -28,11 +28,11 @@ export function SideIndex() {
                 aria-current={active ? "page" : undefined}
                 className={`flex items-center gap-2.5 rounded-full px-4 py-2.5 transition-all no-underline ${
                   active
-                    ? "bg-slate-900 text-white font-semibold shadow-xs"
-                    : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 font-medium"
+                    ? "bg-gold text-on-gold font-semibold"
+                    : "text-muted hover:bg-surface-2 hover:text-ink font-medium"
                 }`}
               >
-                <span className={`font-mono text-[14px] ${active ? "text-amber-400 font-bold" : "text-slate-600 font-semibold"}`}>
+                <span className={`font-mono text-[14px] ${active ? "text-on-gold font-bold" : "text-muted font-semibold"}`}>
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span>{route.label}</span>

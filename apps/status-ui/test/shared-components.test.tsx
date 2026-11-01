@@ -8,11 +8,11 @@ import { Stat } from "../src/components/shared/Stat";
 
 describe("Shared Voltline design components", () => {
   describe("Card", () => {
-    it("renders as a rounded white card with soft shadow", () => {
+    it("renders as a rounded dark card with a gold glow", () => {
       const { container } = render(<Card>Card content</Card>);
       const card = container.firstChild as HTMLElement;
       expect(card).toBeInTheDocument();
-      expect(card.className).toMatch(/bg-white/);
+      expect(card.className).toMatch(/bg-surface/);
       expect(card.className).toMatch(/rounded-/);
       expect(card.className).toMatch(/shadow-/);
       expect(screen.getByText("Card content")).toBeInTheDocument();
@@ -31,8 +31,8 @@ describe("Shared Voltline design components", () => {
     it("uses black text on gold for primary variant, never gold text", () => {
       render(<Button variant="primary">Start</Button>);
       const btn = screen.getByRole("button", { name: "Start" });
-      expect(btn.className).toMatch(/bg-ochre/);
-      expect(btn.className).toMatch(/text-ink/);
+      expect(btn.className).toMatch(/bg-gold/);
+      expect(btn.className).toMatch(/text-on-gold/);
     });
 
     it("supports secondary and dark ink pill variants", () => {

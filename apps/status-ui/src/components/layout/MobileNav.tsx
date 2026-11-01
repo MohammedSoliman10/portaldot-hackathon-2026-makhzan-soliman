@@ -41,7 +41,7 @@ export function MobileNav() {
         aria-expanded={isOpen}
         aria-controls="mobile-navigation-menu"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-200 bg-white px-3.5 py-2 font-mono text-xs uppercase tracking-wider text-slate-800 shadow-xs hover:border-ochre hover:text-ochre focus-visible:outline-2 focus-visible:outline-ochre"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line bg-surface px-3.5 py-2 font-mono text-xs uppercase tracking-wider text-ink shadow-xs hover:border-gold-bright hover:text-gold-bright focus-visible:outline-2 focus-visible:outline-gold-bright"
       >
         <span className="sr-only">{isOpen ? "Close" : "Open"}</span>
         <span className="flex items-center gap-1.5">
@@ -67,7 +67,7 @@ export function MobileNav() {
         <nav
           id="mobile-navigation-menu"
           aria-label="Mobile navigation"
-          className="mt-3 w-full rounded-2xl border border-slate-200 bg-white p-2.5 shadow-xl text-slate-800"
+          className="mt-3 w-full rounded-2xl border border-line bg-surface p-2.5 shadow-xl text-ink"
         >
           <ul className="space-y-1">
             {MOBILE_ROUTES.map((route, index) => {
@@ -83,11 +83,11 @@ export function MobileNav() {
                     onClick={() => setIsOpen(false)}
                     className={`flex min-h-[44px] items-center gap-3 rounded-xl px-4 py-2.5 text-[16px] no-underline transition-colors ${
                       active
-                        ? "bg-slate-900 text-white font-semibold shadow-xs"
-                        : "text-slate-700 hover:bg-slate-100 font-medium"
+                        ? "bg-gold text-on-gold font-semibold"
+                        : "text-ink hover:bg-surface-2 font-medium"
                     }`}
                   >
-                    <span className={`font-mono text-[14px] ${active ? "text-amber-400 font-bold" : "text-slate-600 font-semibold"}`}>
+                    <span className={`font-mono text-[14px] ${active ? "text-on-gold font-bold" : "text-muted font-semibold"}`}>
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span>{route.label}</span>

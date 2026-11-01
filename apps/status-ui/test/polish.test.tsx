@@ -51,9 +51,9 @@ describe("025-ui-polish: UI Readability and Polish", () => {
     expect(statSrc).not.toContain("h-fit");
   });
 
-  it("Task 4: Cards have 1px slate-300 border, soft shadow, 20px radius; sections have at least 40px spacing", () => {
+  it("Task 4: Cards have a 1px gold border, a gold glow and a 20px radius; sections have at least 40px spacing", () => {
     const cardSrc = readFileSync(resolve(__dirname, "../src/components/shared/Card.tsx"), "utf8");
-    expect(cardSrc).toContain("border-slate-300");
+    expect(cardSrc).toContain("border-line-strong");
     expect(cardSrc).toMatch(/rounded-\[20px\]/);
 
     const overviewSrc = readFileSync(resolve(__dirname, "../src/pages/Overview.tsx"), "utf8");
