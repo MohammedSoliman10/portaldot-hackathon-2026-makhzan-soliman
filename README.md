@@ -340,8 +340,8 @@ The full component and sequence views are in [docs/architecture.md](docs/archite
 | Status web app (feature 003) | **merged and live**; Overview, Deals, Proof, Verify, Replay (`/replay`) and Judges read the deployment live and fall back to the recorded run | <https://status-ui-one.vercel.app/> |
 | Consumer example: `MakhzanGuard` (health + term) and `StorageGate` (lock / release / refund, optional bond floor) | **deployed live** (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`) | `contracts/src/makhzan/MakhzanGuard.sol`, `contracts/src/makhzan/StorageGate.sol`, `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt` |
 | Consumer demo: `gate-demo` (deploy, lock, release, expire, slash, `BondTooLow`, refund) and the gate's size budget | **implemented [live run]**; deals 3, 4, 5 exercised on live chain (lock 4 + release 4, lock 5 + BondTooLow refusal + RefundNotAllowed refusal, post-term refund 5, lock 3 Expired refusal, claims and settles for 3, 4, 5; gate balance 0) | `evidence/raw/t8/gate-demo-summary.md`, `evidence/raw/t1/100-gate-deploy.txt`, `101-gate-demo-local.txt` |
-| Agent client, indexed history, pull-payment escrow | roadmap (Tier 2+) | not started |
-| Randomness beyond the D5 fallback | roadmap, blocked on the randomness gate | not started |
+| Write-capable agent client, indexed history, pull-payment escrow | roadmap (Tier 2+; read-only MCP server exists) | not started |
+| Randomness beyond the D5 fallback | roadmap (Discord reply said YES to prevrandao, but mixHash is constant 0x8e1bc9bf04000 across 37 blocks) | not started |
 | PolkaVM (`resolc`) deployment path | simulated only (compiler probe) | `evidence/raw/t1/` Tier-0 gates |
 
 ## Using Makhzan from your contract
@@ -383,7 +383,7 @@ contract PayOnServe {
   lock time. Because Makhzan exposes `providerOf(address)` and no `providerId` lookup, the gate
   resolves the provider through the payee — the payee must be the deal's provider — and any other
   payee reads as a zero bond.
-- Limits: this is a local-only example, never deployed; the guard reads two views per check
+- Deployment and limits: StorageGate is deployed live on Portaldot V3 (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, block `240956`); the guard reads two views per check
   (`healthOf`, `dealOf`), so it inherits whatever the Makhzan deployment says at that block. The
   gate's runtime is 2,528 B, measured — over the 1,500 B target, because the inlined guard costs
   about 285 B per entry point (`evidence/raw/t1/94-storage-gate-size-gas.txt`). Tests: 41 in the
@@ -550,8 +550,7 @@ transport, plus a scripted client that calls every tool over stdio against the l
 - Identical 1 KiB blocks are interchangeable by design (the leaf commits bytes, not position); this
   does not reduce what a distinct file costs to store.
 - One bond backs every deal a provider holds; the bond is the economic bound, not a per-deal deposit.
-- The challenge index uses the documented D5 fallback until the randomness gate rules; it is not
-  claimed unpredictable.
+- The challenge index uses the documented D5 fallback (`keccak256(blockhash(block.number - 1), prevrandao, dealId) % leafCount`). A reply in the Portaldot Discord on Nov 1 2026 said YES to using block.prevrandao. Our read-only measurement shows the block header mixHash is the same constant 0x8e1bc9bf04000 (2,500,000,000,000,000) on 37 blocks from 1 to 282,087, so we do not rely on prevrandao for entropy. Makhzan's challenge index also mixes the parent blockhash and the deal id: unpredictable until the previous block exists, but not VRF-grade and biasable by block producers.
 - A value-rejecting owner or provider can block its own payout; Tier 1 assumes externally owned
   accounts. Pull-payment escrow is a Tier 2 item.
 - No audit, no explorer source verification, no per-deal bond, no proof of replication.

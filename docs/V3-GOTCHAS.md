@@ -44,7 +44,7 @@ The transaction carried `value: 0` and the contract did not exist before it, so 
 have funded the reserve, and the two parts add up to the drop exactly.
 
 The split is `[inferred from reconciliation]`, not a receipt field: the receipt reports `gasUsed`
-and effective price only. Refundability of the reserved deposit: not measured.
+and effective price only. A reply in the Portaldot Discord on Nov 1 2026 confirmed NO, storage deposits are not refunded; the deploy cost is permanent, and a redeploy costs the full amount again.
 
 `[design note]` Budget a deployment from measured runtime bytes, not from the artifact size and not
 from the estimate: the estimate was 1.56% high, and the cost per creation byte is about 9% lower than the cost per runtime byte (0.0807 vs 0.0741 tPOT).
@@ -159,7 +159,7 @@ This reserve was not paid on top of the deploy: the deploy transaction carried `
 contract did not exist before it, and the owner's measured balance drop of
 `529.844316817465986480 tPOT` (section 2) splits exactly into this `165.513 tPOT` reserve plus
 `364.331316817465986480 tPOT` of execution fees. The split is `[inferred from reconciliation]`;
-refundability of the reserved deposit is not measured.
+a reply in the Portaldot Discord on Nov 1 2026 confirmed NO, storage deposits are not refunded: the deploy cost is permanent, and a redeploy costs the full amount again (`evidence/raw/t9/00-answers-from-discord.txt`).
 
 **Correction to the brief.** The check-in note said "storage-deposit split not exposed by the RPC".
 Measured reality: the per-receipt split is not exposed, but the per-account split is, and it
@@ -247,3 +247,19 @@ duration `100…100 800`. `price` is `uint64` **planck**, and `createDeal` requi
 
 Evidence: `contracts/test/makhzan/HealthSemantics.t.sol`; deploy config in
 `evidence/raw/t1/59-live-deploy.txt`.
+
+## 12. `prevrandao` reads a constant on V3 testnet `[measured]`
+
+A reply in the Portaldot Discord on Nov 1 2026 said YES to using `block.prevrandao` (`evidence/raw/t9/00-answers-from-discord.txt`).
+
+Our read-only measurement shows the block header `mixHash` is the same constant `0x8e1bc9bf04000` (`2,500,000,000,000,000`) on 37 blocks from 1 to 282,087 (`evidence/raw/t9/01-prevrandao-30-blocks.json`, `evidence/raw/t9/03-prevrandao-history-spotcheck.json`).
+
+Furthermore, contract-level EVM execution (`eth_call` without `to`) of bytecode evaluating the `PREVRANDAO` opcode (`0x44`):
+```text
+0x4460005260206000f3  (PREVRANDAO; PUSH1 0; MSTORE; PUSH1 32; PUSH1 0; RETURN)
+```
+across recent blocks (283135, 283125, 283115) returns this exact same constant: `0x0000000000000000000000000000000000000000000000000008e1bc9bf04000` (`evidence/raw/t9/04-prevrandao-opcode-call.json`).
+
+`[design note]` We do not rely on `prevrandao` for entropy. Makhzan's challenge index also mixes the parent blockhash and the deal id: unpredictable until the previous block exists, but not VRF-grade and biasable by block producers.
+
+Evidence: `evidence/raw/t9/00-answers-from-discord.txt`, `evidence/raw/t9/01-prevrandao-30-blocks.json`, `evidence/raw/t9/02-prevrandao-summary.txt`, `evidence/raw/t9/03-prevrandao-history-spotcheck.json`, `evidence/raw/t9/04-prevrandao-opcode-call.json`, `evidence/raw/t9/04-prevrandao-opcode-summary.txt`.

@@ -4,7 +4,7 @@
 
 - **The problem:** Off-chain storage offers promises and invoices, but buyers have no way to audit custody or penalise missing data on-chain.
 - **What we built:** Makhzan, an accountable storage protocol on Portaldot EVM where providers bond tPOT and are challenged on random blocks with a 20% slash on failure.
-- **What is measured live:** Two deals, one provider, one pass, one slash, linear accrual, settlement, and keyless verification on the Portaldot V3 testnet.
+- **What is measured live:** Five deals, one provider, one pass, one slash, linear accrual, settlement, and keyless verification on the Portaldot V3 testnet.
 - **The biggest honest limit:** One provider and operator (all ours), with challenge randomness relying on a blockhash/prevrandao fallback rather than a VRF.
 - **What we need:** Foundation support for redeployment budget, an independent provider, day-scale deal runs, and clarity on V3 randomness.
 - **Where to verify:** Complete reproduction commands in `docs/REPRODUCE.md`, receipts in `evidence/`, and a read-only status UI and MCP server.
@@ -18,7 +18,7 @@ arithmetic on measured values. `[assumed]` = an invented input, stated where it 
 `[design note]` = a plan, not a fact. `[reported by another team]` = a competitor's own README claim
 that we did not verify on chain.
 
-**Scope, stated before the pitch.** Two deals, one provider, one operator — all of them ours. No
+**Scope, stated before the pitch.** Five deals, one provider, one operator — all of them ours. No
 third party has run a deal. There is no paying customer, no interview and no letter of intent. The
 cost side is measured to the wei; the demand side is a hypothesis. Every command that reproduces a
 number below is in `docs/REPRODUCE.md`.
@@ -216,8 +216,7 @@ rule is clean: one round needs `B ≥ 5S` for a saving `S` `[derived]`.
 **The selector is a fallback, and its randomness is unproven.** The index is
 `keccak256(blockhash, prevrandao, dealId) % leafCount`. It is not a VRF. Every detection number above
 assumes the index is uniform (A1), and a provider with block control can do better than these odds.
-We have not yet received a statement from the Portaldot team on randomness on V3; we make no claim about
-it in either direction. A v2 would use a VRF or a native randomness source `[design note]`.
+A reply in the Portaldot Discord on Nov 1 2026 said YES to using block.prevrandao. Our read-only measurement shows the block header mixHash is the same constant 0x8e1bc9bf04000 (2,500,000,000,000,000) on 37 blocks from 1 to 282,087, so we do not rely on prevrandao for entropy. Makhzan's challenge index also mixes the parent blockhash and the deal id: unpredictable until the previous block exists, but not VRF-grade and biasable by block producers. A v2 would use a VRF or a native randomness source `[design note]`.
 
 **What a pass does not prove**, in the same words as `docs/EXPLAIN.md`: one block, at one time, from a
 provider that could produce it. Not continuous storage, not a distinct copy of duplicated blocks, not
@@ -250,7 +249,7 @@ risk on retrieval.
 runtime-vs-docs checker, a scaffolder or an agent-payments rail. A read-only MCP server exists
 (`apps/makhzan-mcp`, keyless and safe). We use no Portaldot-native module in the live path — the
 `TransactionStorage` anchor is a plan, not a shipped feature. We do not promise refunds of the storage
-reserve (refundability is unmeasured and contested). We do not verify continuous storage, bandwidth
+reserve (a reply in the Portaldot Discord on Nov 1 2026 confirmed NO, storage deposits are not refunded; the deploy cost is permanent, and a redeploy costs the full amount again). We do not verify continuous storage, bandwidth
 or availability. We have one provider, one operator and five live deals (deals 1 and 2 for core Makhzan; deals 3, 4, and 5 for the live gate demo), with `StorageGate` deployed live at `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured deploy cost `210.575612711692978125 tPOT`). The live gate demo (`evidence/raw/t8/gate-demo-summary.md`) is complete: 11 transactions broadcast totaling `50.205185 tPOT` in fees, covering deal creation, locks, payouts, refusals (`Expired`, `BondTooLow`, `RefundNotAllowed`), post-term refund with gate balance returning to 0 tPOT, and all claims and settlements. Honest operational notes: the guard checks expiry before the bond floor; a released lock stays released; and an early display-unit bug (2 tPOT shown as 20,000) was discovered during live testing and fixed in the UI (`0f5e93e`) and MCP server (`1f4b029`).
 
 ## 9. 30 / 60 / 90 days
@@ -293,7 +292,7 @@ Not "more marketing". Four specific things, in order of what unblocks what:
 | **Redeploy budget** (~530 tPOT EVM, or ~131 tPOT deposit plus fees on the native path) | Per-deal bonds, parameterised window/slash, challenger reward | The current contract cannot be re-parameterised. Every fix in §9 is behind that one cost |
 | **A funded independent provider** (bond 30 tPOT, register 11.537715357304598880 tPOT, plus that provider's own gas) | A third-party deal, a real track record, multi-provider health | One-operator evidence is the weakest part of the technical story |
 | **Budget for a day-scale deal** (22 hunting rounds = 0.674 tPOT of client gas; the provider pays 0.1629 per answer) | 288 rounds, so §7 stops being a caveat | Detection maths only becomes honest at that duration |
-| **An answer on randomness, and on native deposit refundability** | Whether the selector can ship, and whether we may promise a refund | Both are currently "unmeasured and contested"; both decide what a v2 can claim |
+| **An answer on randomness, and on native deposit refundability** | Whether the selector can ship, and whether we may promise a refund | Discord replies on Nov 1 2026 said YES to prevrandao and NO to refund; our read-only check shows mixHash is constant 0x8e1bc9bf04000 across 37 blocks and deploy cost is permanent |
 
 Beyond money, two things are worth more than they cost: an **audit** of the two money paths, and a
 listing in the Portaldot docs/ecosystem so a provider can find this without reading a hackathon repo.
@@ -308,4 +307,4 @@ instead of guessing, and why we keep receipts in `evidence/`.
 - No claim that the demo deal length is sufficient for the security argument — §7 says the opposite.
 - No claim about randomness quality, provider independence, retrieval bandwidth, or refundability.
 - No competitor claim verified on chain; §8 is their READMEs.
-- No projection of deal volume, market size or growth. We have two deals.
+- No projection of deal volume, market size or growth. We have five deals.

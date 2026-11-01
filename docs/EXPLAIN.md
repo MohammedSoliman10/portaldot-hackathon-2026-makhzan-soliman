@@ -26,8 +26,7 @@ A **deal** is one file, one provider, one price paid up front.
 The proofs remove trust in the provider's *honesty*, not in the machinery around it. A user trusts:
 
 - **The chain** to order transactions and produce the block data the contract reads.
-- **The challenge index source** — the D5 fallback (parent hash, `prevrandao`, deal id) — to be hard
-  to bias. It is a fallback, not a proven randomness beacon; G03 may replace it.
+- **The challenge index source** — the D5 fallback (parent hash, `prevrandao`, deal id). A reply in the Portaldot Discord on Nov 1 2026 said YES to using block.prevrandao. Our read-only measurement shows the block header mixHash is the same constant 0x8e1bc9bf04000 (2,500,000,000,000,000) on 37 blocks from 1 to 282,087, so we do not rely on prevrandao for entropy. Makhzan's challenge index also mixes the parent blockhash and the deal id: unpredictable until the previous block exists, but not VRF-grade and biasable by block producers.
 - **The keeper/resolver** to call `resolve` after the deadline. Anyone may do it and the owner is
   credited whether or not the caller is the owner, so it is permissionless — but if nobody resolves,
   the slash is not applied until someone does. There is no automatic timer on-chain.
@@ -149,7 +148,7 @@ to `77-verify-deal2.txt`, summarised in `72-live-summary.txt`), and live block t
 - No finality rule beyond the one-confirmation heuristic.
 - No live evidence-bundle CLI run `[pending live run]`; the bundle schema and its validator exist
   and are tested locally.
-- No randomness beacon beyond the D5 fallback (blocked on G03).
+- No randomness beacon beyond the D5 fallback (Discord reply said YES to prevrandao, but mixHash is constant 0x8e1bc9bf04000 across 37 blocks).
 - No agent that can **act**: no indexed history, no pull-payment escrow, no agent with a budget
   (Tier 2+). A read-only agent does exist (feature 007, [AGENT.md](AGENT.md)): it can verify a deal and
   a file for a human, but it cannot sign, pay or release anything. The read-only status app is also

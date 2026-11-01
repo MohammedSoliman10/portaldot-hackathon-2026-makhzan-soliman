@@ -46,7 +46,7 @@ non-answer, and release payment; a separate keyless client can audit every step 
   independent key holder, and no adversarial participant.
 - Scale: 1 MiB / 1,024 blocks in the demo. Nothing here proves behaviour at 1 GiB or with hundreds of
   concurrent deals.
-- Challenge index comes from the documented D5 fallback, not a VRF. A miner-style adversary with block
+- Challenge index comes from the documented D5 fallback, not a VRF. A reply in the Portaldot Discord on Nov 1 2026 said YES to using block.prevrandao. Our read-only measurement shows the block header mixHash is the same constant 0x8e1bc9bf04000 (2,500,000,000,000,000) on 37 blocks from 1 to 282,087, so we do not rely on prevrandao for entropy. Makhzan's challenge index also mixes the parent blockhash and the deal id: unpredictable until the previous block exists, but not VRF-grade and biasable by block producers. A miner-style adversary with block
   control is discussed in `docs/THREAT_MODEL.md` but not defeated by this design.
 - Retrieval is not incentivised beyond the bond. A provider can hold the root commitment and still fail
   to serve bytes; the current slash covers an unanswered challenge, not a bandwidth drought.
@@ -98,7 +98,7 @@ contradicted our own earlier notes.
 
 | Evidence | What it shows |
 | --- | --- |
-| `docs/V3-GOTCHAS.md` | Ten measured sections: via-IR accepted, deploy cost and its split, gas band, `10,000 wei` factor and ED, 15 s receipt trap, custom selectors, H160 mapping, deposit split, no answer/settle refund, TransactionStorage facts |
+| `docs/V3-GOTCHAS.md` | Twelve measured sections: via-IR accepted, deploy cost and its split, gas band, `10,000 wei` factor and ED, 15 s receipt trap, custom selectors, H160 mapping, deposit split, no answer/settle refund, TransactionStorage facts, healthOf semantics, and constant prevrandao reading |
 | `evidence/raw/t1/78-chain-facts.txt` | TransactionStorage metadata, fees for 0 B…4 MiB, retention semantics, scanner block URL |
 | `evidence/raw/t1/79-account-mapping-deposits.txt` | `accountInfoOf` split = `system.account.reserved`, `nativeDepositOf` empty |
 | `evidence/raw/t1/81-deploy-cost.txt` | The deploy-cost split, labelled as inferred where the receipt has no field |

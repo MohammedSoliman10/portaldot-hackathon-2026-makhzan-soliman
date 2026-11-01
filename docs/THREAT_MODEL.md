@@ -47,8 +47,7 @@ covered there is `[pending live run]`.
 ## Honest limits
 
 - **One block at one moment**: a passed challenge does not prove continuous possession.
-- **Index choice**: the challenge index comes from the D5 fallback (block hash + deal id + attempt),
-  not a VRF; a miner can bias it at a cost, and the spec does not claim otherwise.
+- **Index choice**: the challenge index comes from the D5 fallback (`keccak256(blockhash(block.number - 1), prevrandao, dealId) % leafCount`), not a VRF. A reply in the Portaldot Discord on Nov 1 2026 said YES to using block.prevrandao. Our read-only measurement shows the block header mixHash is the same constant 0x8e1bc9bf04000 (2,500,000,000,000,000) on 37 blocks from 1 to 282,087, so we do not rely on prevrandao for entropy. Makhzan's challenge index also mixes the parent blockhash and the deal id: unpredictable until the previous block exists, but not VRF-grade and biasable by block producers.
 - **Identical blocks**: leaves commit bytes, not positions, so identical blocks are interchangeable.
 - **Bond coverage**: one shared provider bond covers all of that provider's deals.
 - **No source verification on the local chain**: the fixture records `sourceVerified: false`; the
