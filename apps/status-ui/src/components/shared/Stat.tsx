@@ -27,7 +27,7 @@ export function Stat({ value, subtitle, label, detail, className = "" }: StatPro
 
   return (
     <div
-      className={`flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs min-w-0 h-full ${className}`}
+      className={`flex flex-col justify-between rounded-[20px] border border-slate-300 bg-white p-5 shadow-[0_4px_20px_-2px_rgba(16,24,40,0.06),0_1px_3px_rgba(16,24,40,0.04)] min-w-0 h-full ${className}`}
     >
       <div className="min-w-0">
         <div className="mb-2 flex items-center justify-start min-w-0">

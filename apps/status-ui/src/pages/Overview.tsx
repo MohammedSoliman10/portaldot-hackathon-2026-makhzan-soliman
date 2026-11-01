@@ -131,7 +131,7 @@ export function Overview(options: LiveOptions) {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       {/* Dark Hero Panel with editorial typography & highlight pill */}
       <Hero
         headline={

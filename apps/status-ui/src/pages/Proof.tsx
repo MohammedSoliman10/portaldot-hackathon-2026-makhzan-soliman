@@ -62,7 +62,7 @@ export function Proof(options: LiveOptions) {
   const liveSource = `chain ${bundle?.chain.chainId ?? mode.expectedChainId} @ block ${formatCount(live.block ?? 0)} · ${live.at}`;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <header>
         <p className="eyebrow">04 / proof</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">The slash, in plain words</h1>

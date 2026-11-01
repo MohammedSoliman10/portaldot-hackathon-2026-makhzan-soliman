@@ -107,7 +107,7 @@ export function Replay() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <header>
         <p className="eyebrow">06 / replay</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">The recorded run, step by step</h1>

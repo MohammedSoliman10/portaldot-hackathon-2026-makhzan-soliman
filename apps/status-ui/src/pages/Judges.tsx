@@ -138,7 +138,7 @@ export function Judges(options: LiveOptions) {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <header>
         <p className="eyebrow">05 / judges</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">For judges</h1>

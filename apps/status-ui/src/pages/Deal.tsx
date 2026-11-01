@@ -374,7 +374,7 @@ export function Deal(options: LiveOptions) {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <header>
         <p className="eyebrow">02 / deals</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Deals</h1>
