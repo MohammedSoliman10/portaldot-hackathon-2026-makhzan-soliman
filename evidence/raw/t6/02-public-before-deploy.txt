@@ -1,0 +1,9 @@
+# the public alias after the merge, before any deploy — 2026-10-29T17:02Z
+# expectation: the 006 build is still live, so /gate is not there yet
+
+HTTP 200
+h1="The gate that pays on a healthy deal" h2="StorageGate is not deployed yet"
+nav gate link on the public site: 1
+gate page copy present: true
+footer: evidence portaldot-live-run2 · makhzan.evidence/v0 · hash verified · build 989761119dd03131b35c5eda02080777aa0af9a0 read-only: this page cannot sign, send or spend. Mode LIVE, chain 420420777. Every n
+CONSOLE ERRORS: none
