@@ -86,7 +86,7 @@ function DealCard({
               Deal {deal.id}
             </h2>
             {selected ? (
-              <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[13px] font-semibold text-amber-900 border border-amber-200">
+              <span className="label-chip inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[13px] font-semibold text-amber-900 border border-amber-200">
                 selected
               </span>
             ) : null}
@@ -231,7 +231,7 @@ function LiveDealCard({
             <h2 className="text-xl font-bold tracking-tight text-slate-900">
               Deal {dealId}
             </h2>
-            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[13px] font-semibold text-amber-900 border border-amber-200">
+            <span className="label-chip inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[13px] font-semibold text-amber-900 border border-amber-200">
               selected
             </span>
           </div>

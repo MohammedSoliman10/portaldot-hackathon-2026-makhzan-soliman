@@ -387,7 +387,7 @@ export function Verify(options: VerifyOptions) {
               <li key={call.id} className="border-t border-slate-100 pt-4">
                 <h3 className="text-base font-bold text-slate-900">{call.title}</h3>
                 <p className="mt-1 max-w-[68ch] text-sm text-slate-600 leading-relaxed">{call.description}</p>
-                <div className="mt-2 space-y-0.5 font-mono text-[13px] text-slate-500">
+                <div className="mt-2 space-y-0.5 font-mono text-[14px] text-slate-500">
                   <p className="break-all">checks first: {call.expectedCheck}</p>
                   <p className="break-all">
                     eth_call to {mode.address ?? "no address"} · from {REFUSAL_CALLER}
