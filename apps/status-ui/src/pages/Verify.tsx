@@ -61,16 +61,16 @@ function Field({
   mono?: boolean;
 }) {
   return (
-    <div className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[10rem_1fr] sm:gap-4 sm:items-start">
-      <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">{name}</dt>
+    <div className="border-t border-line py-3 sm:grid sm:grid-cols-[10rem_1fr] sm:gap-4 sm:items-start">
+      <dt className="text-xs font-mono uppercase tracking-wider text-muted">{name}</dt>
       <dd className="mt-1 text-sm sm:mt-0">
         <div className="flex flex-wrap items-baseline gap-2">
-          <span className={`break-all font-semibold text-slate-900 ${mono ? "mono font-mono" : "numeral font-mono"}`}>{value}</span>
-          {unit ? <span className="text-xs text-slate-500"> {unit}</span> : null}
+          <span className={`break-all font-semibold text-ink ${mono ? "mono font-mono hash" : "numeral font-mono"}`}>{value}</span>
+          {unit ? <span className="text-xs text-muted"> {unit}</span> : null}
           <Chip label={label} />
         </div>
-        {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
-        <p className="mt-1 break-words text-[15px] text-slate-600">{source}</p>
+        {detail ? <p className="mono mt-1 break-all text-xs text-muted">{detail}</p> : null}
+        <p className="mt-1 break-words text-[15px] text-muted">{source}</p>
       </dd>
     </div>
   );
@@ -224,10 +224,10 @@ export function Verify(options: VerifyOptions) {
   }
   const verdictClass =
     verdict === "PASS"
-      ? "text-emerald-700 font-bold"
+      ? "text-ok font-bold"
       : verdict === "FAIL"
-        ? "text-red-700 font-bold"
-        : "text-slate-500 font-bold";
+        ? "text-danger font-bold"
+        : "text-muted font-bold";
 
   const sampleIntegrity =
     result?.source === "sample" && result.sha256 !== SAMPLE.sha256
@@ -238,14 +238,14 @@ export function Verify(options: VerifyOptions) {
     <div className="space-y-12">
       <header>
         <p className="eyebrow">03 / verify</p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Verify a file</h1>
-        <p className="mt-3 max-w-[68ch] text-slate-600 leading-relaxed">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-gold-bright">Verify a file</h1>
+        <p className="mt-3 max-w-[68ch] text-muted leading-relaxed">
           Drop the file, or use the sample the deals committed. This page hashes it in the browser,
           splits it into {formatCount(SAMPLE.blockSize)}-byte blocks, rebuilds the same keccak256 Merkle
           tree the contract commits to, and compares the root with the root deal {dealId} holds now. The
           bytes never leave the tab and nothing is signed.
         </p>
-        <p className="mt-3 max-w-[68ch] text-xs text-slate-500">
+        <p className="mt-3 max-w-[68ch] text-xs text-muted">
           MEASURED — read from the chain now, or computed in this browser from the bytes you loaded; the
           source on each row says which. REPORTED — recorded evidence. PENDING — not run.
         </p>
@@ -253,10 +253,10 @@ export function Verify(options: VerifyOptions) {
 
       {/* Sample Meta Card */}
       <Card as="section" aria-labelledby="sample-heading">
-        <h2 id="sample-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="sample-heading" className="eyebrow text-gold-bright font-semibold">
           The sample file
         </h2>
-        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
+        <p className="mt-2 max-w-[68ch] text-sm text-muted leading-relaxed">
           Deals 1 and 2 committed this exact 1 MiB file. It is served byte-for-byte, so the numbers
           below can be checked without trusting this page.
         </p>
@@ -280,14 +280,14 @@ export function Verify(options: VerifyOptions) {
           <Field name="SHA-256" value={SAMPLE.sha256} label="REPORTED" source="scripts/check-sample.mjs" mono />
           <Field name="Deal root" value={SAMPLE.root} label="REPORTED" source="scripts/check-sample.mjs" mono />
         </dl>
-        <p className="mt-4 max-w-[68ch] text-xs text-slate-500 border-t border-slate-100 pt-3">
+        <p className="mt-4 max-w-[68ch] text-xs text-muted border-t border-line pt-3">
           {SAMPLE.provenance} Created {SAMPLE.createdUtc} with <code className="mono">{SAMPLE.command}</code>.
         </p>
       </Card>
 
       {/* Dropzone Card */}
       <Card as="section" aria-labelledby="drop-heading">
-        <h2 id="drop-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="drop-heading" className="eyebrow text-gold-bright font-semibold">
           Drop a file
         </h2>
         <div
@@ -299,14 +299,14 @@ export function Verify(options: VerifyOptions) {
           onDrop={onDrop}
           className={`mt-4 rounded-2xl border-2 border-dashed p-8 text-center transition-all ${
             dragging
-              ? "border-ochre bg-amber-50/40"
-              : "border-slate-200 bg-slate-50/60 hover:border-slate-300"
+              ? "border-gold bg-warn-surface/40"
+              : "border-line bg-surface-2 hover:border-line-strong"
           }`}
         >
-          <p className="text-sm font-medium text-slate-700">Drop a file here to hash and verify locally</p>
-          <p className="text-xs text-slate-500 mt-1">Files never leave your browser</p>
+          <p className="text-sm font-medium text-ink">Drop a file here to hash and verify locally</p>
+          <p className="text-xs text-muted mt-1">Files never leave your browser</p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <label className="inline-flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 font-mono text-xs font-semibold text-slate-800 shadow-xs hover:border-ochre hover:text-slate-900 transition-all focus-within:outline-2 focus-within:outline-ochre">
+            <label className="inline-flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-full border border-line-strong bg-surface px-5 py-2.5 font-mono text-xs font-semibold text-ink shadow-xs hover:border-gold-bright hover:text-ink transition-all focus-within:outline-2 focus-within:outline-gold-bright">
               Choose a file
               <input
                 type="file"
@@ -323,7 +323,7 @@ export function Verify(options: VerifyOptions) {
               aria-label="Use the sample file"
               onClick={() => void useSample()}
               disabled={work !== null}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-ochre px-5 py-2.5 font-mono text-xs font-semibold text-ink shadow-xs hover:bg-[#e5b350] transition-all disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-ochre"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gold px-5 py-2.5 font-mono text-xs font-semibold text-on-gold shadow-xs hover:bg-gold-bright transition-all disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-gold-bright"
             >
               Use the sample file
             </button>
@@ -332,7 +332,7 @@ export function Verify(options: VerifyOptions) {
                 type="button"
                 aria-label="Re-read the deal root from the chain"
                 onClick={live.refresh}
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 font-mono text-xs font-medium text-slate-800 shadow-xs hover:border-ochre hover:text-ochre transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-ochre"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line-strong bg-surface px-4 py-2 font-mono text-xs font-medium text-ink shadow-xs hover:border-gold-bright hover:text-gold-bright transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-gold-bright"
               >
                 Re-read the deal root
               </button>
@@ -341,8 +341,8 @@ export function Verify(options: VerifyOptions) {
         </div>
 
         {work !== null ? (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4" data-testid="verify-progress" aria-live="polite">
-            <p className="font-mono text-xs font-medium text-slate-800">
+          <div className="mt-4 rounded-xl border border-line bg-surface-2 p-4" data-testid="verify-progress" aria-live="polite">
+            <p className="font-mono text-xs font-medium text-ink">
               {work.stage === "reading"
                 ? `Reading ${work.name}…`
                 : work.stage === "sha256"
@@ -352,7 +352,7 @@ export function Verify(options: VerifyOptions) {
                     : "Building the Merkle tree…"}
             </p>
             <progress
-              className="mt-3 h-2 w-full overflow-hidden rounded-full accent-amber-500"
+              className="mt-3 h-2 w-full overflow-hidden rounded-full accent-gold"
               value={work.stage === "reading" || work.stage === "sha256" ? 0 : work.done}
               max={work.total === 0 ? 1 : work.total}
             />
@@ -360,7 +360,7 @@ export function Verify(options: VerifyOptions) {
         ) : null}
 
         {error !== null ? (
-          <p role="alert" className="mt-4 border-l-2 border-red-600 bg-red-50 py-2 pl-3 text-sm text-red-900 rounded-r-lg">
+          <p role="alert" className="mt-4 border-l-2 border-danger bg-danger-surface py-2 pl-3 text-sm text-danger rounded-r-lg">
             {error}
           </p>
         ) : null}
@@ -368,10 +368,10 @@ export function Verify(options: VerifyOptions) {
 
       {/* Refusals Card */}
       <Card as="section" aria-labelledby="refusals-heading">
-        <h2 id="refusals-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="refusals-heading" className="eyebrow text-gold-bright font-semibold">
           Refusals we can run
         </h2>
-        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
+        <p className="mt-2 max-w-[68ch] text-sm text-muted leading-relaxed">
           Three calls the contract must reject. Each button sends an{" "}
           <code className="mono">{`eth_call`}</code> from <span className="mono break-all">{REFUSAL_CALLER}</span> — the
           burn address, which is neither the deal owner nor provider 1 — and shows the selector that came
@@ -384,10 +384,10 @@ export function Verify(options: VerifyOptions) {
             const running = busy === call.id;
             const available = client !== null && mode.clientEnabled && mode.address !== null;
             return (
-              <li key={call.id} className="border-t border-slate-100 pt-4">
-                <h3 className="text-base font-bold text-slate-900">{call.title}</h3>
-                <p className="mt-1 max-w-[68ch] text-sm text-slate-600 leading-relaxed">{call.description}</p>
-                <div className="mt-2 space-y-0.5 font-mono text-[14px] text-slate-500">
+              <li key={call.id} className="border-t border-line pt-4">
+                <h3 className="text-base font-bold text-gold-bright">{call.title}</h3>
+                <p className="mt-1 max-w-[68ch] text-sm text-muted leading-relaxed">{call.description}</p>
+                <div className="mt-2 space-y-0.5 font-mono text-[14px] text-muted">
                   <p className="break-all">checks first: {call.expectedCheck}</p>
                   <p className="break-all">
                     eth_call to {mode.address ?? "no address"} · from {REFUSAL_CALLER}
@@ -399,7 +399,7 @@ export function Verify(options: VerifyOptions) {
                     type="button"
                     onClick={() => void runCall(call)}
                     disabled={!available || running}
-                    className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 font-mono text-xs font-semibold text-slate-800 shadow-xs hover:border-ochre hover:text-slate-900 transition-all disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-ochre"
+                    className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line-strong bg-surface px-4 py-2 font-mono text-xs font-semibold text-ink shadow-xs hover:border-gold-bright hover:text-ink transition-all disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-gold-bright"
                   >
                     {running ? "Running…" : "Run the call"}
                   </button>
@@ -407,11 +407,11 @@ export function Verify(options: VerifyOptions) {
                     <Chip label="PENDING LIVE RUN" />
                   )}
                   {available ? null : (
-                    <span className="text-xs text-slate-500">no live client in this build, so there is nothing to call</span>
+                    <span className="text-xs text-muted">no live client in this build, so there is nothing to call</span>
                   )}
                 </div>
                 {run !== null ? (
-                  <dl className="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4" data-testid={`refusal-result-${call.id}`}>
+                  <dl className="mt-4 rounded-xl border border-line bg-surface-2 p-4" data-testid={`refusal-result-${call.id}`}>
                     {run.status === "reverted" ? (
                       <>
                         <Field
@@ -457,7 +457,7 @@ export function Verify(options: VerifyOptions) {
             );
           })}
         </ul>
-        <p className="mt-4 max-w-[68ch] text-xs text-slate-500 border-t border-slate-100 pt-3">
+        <p className="mt-4 max-w-[68ch] text-xs text-muted border-t border-line pt-3">
           Each attempt times out after 8 s and is retried once, so a slow phone sees a timeout instead of
           a spinner that never stops. A revert is never retried: it is the answer.
         </p>
@@ -466,15 +466,15 @@ export function Verify(options: VerifyOptions) {
       {/* Result Card */}
       {result !== null ? (
         <Card as="section" aria-labelledby="result-heading" data-testid="verify-result" className="space-y-4">
-          <h2 id="result-heading" className="eyebrow text-slate-700 font-semibold">
+          <h2 id="result-heading" className="eyebrow text-gold-bright font-semibold">
             Result
           </h2>
           <div data-testid="verify-verdict" aria-live="polite" className="flex items-center gap-2 text-sm">
             <span className={`font-mono text-base ${verdictClass}`}>{verdict}</span>
-            <span className="text-slate-600"> — {verdictReason}</span>
+            <span className="text-muted"> — {verdictReason}</span>
           </div>
           {sampleIntegrity !== null ? (
-            <p role="alert" className="border-l-2 border-red-600 bg-red-50 py-2 pl-3 text-sm text-red-900 rounded-r-lg">
+            <p role="alert" className="border-l-2 border-danger bg-danger-surface py-2 pl-3 text-sm text-danger rounded-r-lg">
               {sampleIntegrity}
             </p>
           ) : null}
@@ -538,24 +538,24 @@ export function Verify(options: VerifyOptions) {
               aria-label="Flip one byte in memory copy to test tamper rejection"
               onClick={() => void flipOneByte()}
               disabled={work !== null}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 font-mono text-xs font-semibold text-slate-800 shadow-xs hover:border-ochre hover:text-slate-900 transition-all disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-ochre"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line-strong bg-surface px-5 py-2.5 font-mono text-xs font-semibold text-ink shadow-xs hover:border-gold-bright hover:text-ink transition-all disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-gold-bright"
             >
               Flip one byte in a copy
             </button>
           </div>
 
           {tamper !== null ? (
-            <div data-testid="tamper-result" className="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 p-5">
-              <h3 className="text-base font-bold text-slate-900">Tampered copy</h3>
-              <p className="mt-1 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
+            <div data-testid="tamper-result" className="mt-4 rounded-xl border border-line bg-surface-2 p-5">
+              <h3 className="text-base font-bold text-gold-bright">Tampered copy</h3>
+              <p className="mt-1 max-w-[68ch] text-sm text-muted leading-relaxed">
                 One byte of block {formatCount(tamper.index)} was flipped in a copy held in memory. The
                 file you loaded was not touched.
               </p>
               <p className="mt-3 text-sm" data-testid="tamper-verdict">
-                <span className={`font-mono font-bold ${tamper.rejected ? "text-red-700" : "text-emerald-700"}`}>
+                <span className={`font-mono font-bold ${tamper.rejected ? "text-danger" : "text-ok"}`}>
                   {tamper.rejected ? "FAIL" : "UNEXPECTED PASS"}
                 </span>
-                <span className="text-slate-600">
+                <span className="text-muted">
                   {tamper.rejected
                     ? ` — the original path for block ${formatCount(tamper.index)} no longer verifies against the file root, so the same check the contract runs rejects it.`
                     : " — the flipped block still verified, which should be impossible; do not trust this run."}
@@ -588,7 +588,7 @@ export function Verify(options: VerifyOptions) {
         </Card>
       ) : null}
 
-      <p className="max-w-[68ch] text-xs text-slate-500 leading-relaxed">
+      <p className="max-w-[68ch] text-xs text-muted leading-relaxed">
         Read-only: this page cannot sign, send or spend. A PASS means the bytes you loaded hash to the
         root the contract holds; it does not prove where the file came from.
       </p>

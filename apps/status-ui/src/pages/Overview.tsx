@@ -47,22 +47,22 @@ function Row({
   source: string;
 }) {
   return (
-    <tr className="hover:bg-slate-50/50 transition-colors">
-      <td className="break-words font-medium text-slate-700 py-3">{field}</td>
-      <td className="numeral font-mono text-slate-900 py-3">
+    <tr className="hover:bg-surface-2 transition-colors">
+      <td className="break-words font-medium text-ink py-3">{field}</td>
+      <td className="numeral font-mono text-ink py-3">
         {value}
         {unit ? (
           <>
             {" "}
-            <span className="text-slate-500 font-sans text-xs">{unit}</span>
+            <span className="text-muted font-sans text-xs">{unit}</span>
           </>
         ) : null}
-        {detail ? <p className="mono mt-1 break-words text-xs text-slate-500">{detail}</p> : null}
+        {detail ? <p className="mono mt-1 break-words text-xs text-muted">{detail}</p> : null}
       </td>
       <td className="py-3">
         <Chip label={label} />
       </td>
-      <td className="mono break-words text-xs text-slate-500 py-3">{source}</td>
+      <td className="mono break-words text-xs text-muted py-3">{source}</td>
     </tr>
   );
 }
@@ -70,7 +70,7 @@ function Row({
 function TableHead() {
   return (
     <thead>
-      <tr className="border-b border-slate-200 text-left text-[15px] uppercase tracking-wider text-slate-600">
+      <tr className="border-b border-line text-left text-[15px] uppercase tracking-wider text-muted">
         <th scope="col" className="pb-2.5 font-semibold">Field</th>
         <th scope="col" className="pb-2.5 font-semibold">Value</th>
         <th scope="col" className="pb-2.5 font-semibold">Label</th>
@@ -143,24 +143,24 @@ export function Overview(options: LiveOptions) {
         subtitle="A storage-proof deployment on Portaldot testnet: an owner commits a file Merkle root, a provider answers random block challenges, and a wrong or missing answer costs bond. This status dashboard is strictly read-only — it holds no keys and cannot sign or spend."
       >
         <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-slate-200 border border-white/15">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-muted border border-white/15">
+            <span className="h-2 w-2 rounded-full bg-ok" />
             01 / deployment
           </span>
-          <span className="text-slate-400">
+          <span className="text-muted">
             Makhzan on chain {mode.expectedChainId}
           </span>
         </div>
 
         {live.status === "live" ? (
-          <p className="mt-4 text-[15px] text-ochre" data-testid="live-source">
+          <p className="mt-4 text-[15px] text-gold" data-testid="live-source">
             Measured live — block {formatCount(live.block ?? 0)} · chain {mode.expectedChainId} ·{" "}
             {hostOf(mode.rpcUrl)} · {live.at}
           </p>
         ) : null}
 
         {live.status === "blocked" ? (
-          <p role="alert" className="mt-4 border-l-2 border-red py-1 pl-3 text-sm text-red-200">
+          <p role="alert" className="mt-4 border-l-2 border-danger py-1 pl-3 text-sm text-danger">
             {live.blockingDetail}
           </p>
         ) : null}
@@ -169,7 +169,7 @@ export function Overview(options: LiveOptions) {
           <p
             role="note"
             data-testid={live.stale ? "live-stale" : undefined}
-            className="mt-4 border-l-2 border-amber-400 py-1 pl-3 text-sm text-amber-200"
+            className="mt-4 border-l-2 border-gold py-1 pl-3 text-sm text-gold"
           >
             {live.stale
               ? `STALE — the last live read failed (${live.error ?? "unknown error"}). Showing the last good value from ${live.at ?? "an earlier read"}.`
@@ -183,7 +183,7 @@ export function Overview(options: LiveOptions) {
               type="button"
               aria-label="Re-read deployment status from RPC"
               onClick={live.refresh}
-              className="inline-flex min-h-[38px] items-center justify-center rounded-full bg-white/10 px-4 py-1.5 font-mono text-xs font-medium text-white border border-white/20 hover:bg-white/20 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-ochre"
+              className="inline-flex min-h-[38px] items-center justify-center rounded-full bg-white/10 px-4 py-1.5 font-mono text-xs font-medium text-ink border border-white/20 hover:bg-white/20 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-gold-bright"
             >
               Re-read
             </button>
@@ -231,35 +231,35 @@ export function Overview(options: LiveOptions) {
         as="section"
         aria-labelledby="judges-strip-heading"
         data-testid="judges-strip"
-        className="border-slate-200/90 bg-white"
+        className="border-line bg-surface"
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-          <h2 id="judges-strip-heading" className="eyebrow text-slate-700 font-semibold">
+          <h2 id="judges-strip-heading" className="eyebrow text-gold-bright font-semibold">
             Start here for judges
           </h2>
-          <span className="text-[15px] text-slate-600">Essential verification routes</span>
+          <span className="text-[15px] text-muted">Essential verification routes</span>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Link
             to="/verify"
-            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-[15px] font-medium text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-[15px] font-medium text-ink no-underline transition-all hover:border-gold-bright hover:bg-surface hover:text-ink shadow-xs"
           >
             <span>Verify a file</span>
-            <span aria-hidden="true" className="text-ochre font-bold">→</span>
+            <span aria-hidden="true" className="text-gold font-bold">→</span>
           </Link>
           <Link
             to="/replay"
-            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-[15px] font-medium text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-[15px] font-medium text-ink no-underline transition-all hover:border-gold-bright hover:bg-surface hover:text-ink shadow-xs"
           >
             <span>Watch the slash replay</span>
-            <span aria-hidden="true" className="text-ochre font-bold">→</span>
+            <span aria-hidden="true" className="text-gold font-bold">→</span>
           </Link>
           <Link
             to="/gate"
-            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-[15px] font-medium text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-[15px] font-medium text-ink no-underline transition-all hover:border-gold-bright hover:bg-surface hover:text-ink shadow-xs"
           >
             <span>See the gate</span>
-            <span aria-hidden="true" className="text-ochre font-bold">→</span>
+            <span aria-hidden="true" className="text-gold font-bold">→</span>
           </Link>
         </div>
       </Card>
@@ -276,15 +276,15 @@ export function Overview(options: LiveOptions) {
         <Card className="flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
             <div className="flex items-center justify-between">
-              <span className="eyebrow text-slate-500">01 / VERIFICATION</span>
+              <span className="eyebrow text-muted">01 / VERIFICATION</span>
               <Chip label="REPORTED" tone="neutral" />
             </div>
-            <h3 className="mt-3 text-lg font-bold text-slate-900">Verify a file</h3>
-            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+            <h3 className="mt-3 text-lg font-bold text-gold-bright">Verify a file</h3>
+            <p className="mt-2 text-sm text-muted leading-relaxed">
               Hash a sample file block-by-block directly in your browser and check against the live on-chain Merkle root.
             </p>
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-100">
+          <div className="mt-6 pt-4 border-t border-line">
             <Button to="/verify" variant="primary" className="w-full">
               Verify a file →
             </Button>
@@ -294,15 +294,15 @@ export function Overview(options: LiveOptions) {
         <Card className="flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
             <div className="flex items-center justify-between">
-              <span className="eyebrow text-slate-500">02 / PENALTY AUDIT</span>
+              <span className="eyebrow text-muted">02 / PENALTY AUDIT</span>
               <Chip label="REPORTED" tone="neutral" />
             </div>
-            <h3 className="mt-3 text-lg font-bold text-slate-900">Watch slash replay</h3>
-            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+            <h3 className="mt-3 text-lg font-bold text-gold-bright">Watch slash replay</h3>
+            <p className="mt-2 text-sm text-muted leading-relaxed">
               Examine the step-by-step cryptographic proof challenge failure where provider 1 lost 6 tPOT bond.
             </p>
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-100">
+          <div className="mt-6 pt-4 border-t border-line">
             <Button to="/replay" variant="secondary" className="w-full">
               Watch replay →
             </Button>
@@ -312,15 +312,15 @@ export function Overview(options: LiveOptions) {
         <Card className="flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
             <div className="flex items-center justify-between">
-              <span className="eyebrow text-slate-500">03 / ESCROW GATE</span>
+              <span className="eyebrow text-muted">03 / ESCROW GATE</span>
               <Chip label="REPORTED" tone="neutral" />
             </div>
-            <h3 className="mt-3 text-lg font-bold text-slate-900">Inspect StorageGate</h3>
-            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+            <h3 className="mt-3 text-lg font-bold text-gold-bright">Inspect StorageGate</h3>
+            <p className="mt-2 text-sm text-muted leading-relaxed">
               Read the unforgeable escrow gate contract that requires storage verification before funds release.
             </p>
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-100">
+          <div className="mt-6 pt-4 border-t border-line">
             <Button to="/gate" variant="dark" className="w-full">
               See the gate →
             </Button>
@@ -333,14 +333,14 @@ export function Overview(options: LiveOptions) {
         as="section"
         aria-labelledby="live-deals-heading"
         data-testid="overview-live-deals-card"
-        className="border-slate-200/90 bg-white"
+        className="border-line bg-surface"
       >
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
           <div>
-            <h2 id="live-deals-heading" className="eyebrow text-slate-700 font-semibold">
+            <h2 id="live-deals-heading" className="eyebrow text-gold-bright font-semibold">
               Live deals
             </h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted">
               Latest deals on chain {mode.expectedChainId} read from Makhzan storage. Each row links to its full deal view.
             </p>
           </div>
@@ -348,28 +348,28 @@ export function Overview(options: LiveOptions) {
         </div>
 
         {liveDeals.status === "error" && liveDeals.deals.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50/50 p-4 text-sm text-red-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="mt-4 rounded-xl border border-danger bg-danger-surface p-4 text-sm text-danger flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <p className="font-semibold">RPC read failed</p>
-              <p className="text-xs text-red-600 mt-0.5">{liveDeals.error ?? "Failed to read live deals from chain"}</p>
+              <p className="text-xs text-danger mt-0.5">{liveDeals.error ?? "Failed to read live deals from chain"}</p>
             </div>
             <button
               type="button"
               onClick={liveDeals.retry}
-              className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-red-600 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-red-700 cursor-pointer"
+              className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-danger px-3.5 py-1.5 text-xs font-medium text-bg hover:bg-danger cursor-pointer"
             >
               Retry
             </button>
           </div>
         ) : liveDeals.status === "live" && liveDeals.deals.length === 0 ? (
-          <div className="mt-4 p-8 text-center text-sm text-slate-500 rounded-xl border border-dashed border-slate-200">
+          <div className="mt-4 p-8 text-center text-sm text-muted rounded-xl border border-dashed border-line">
             No deals created yet on-chain.
           </div>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-[15px] uppercase tracking-wider text-slate-600">
+                <tr className="border-b border-line text-[15px] uppercase tracking-wider text-muted">
                   <th scope="col" className="pb-2.5 font-semibold">Deal</th>
                   <th scope="col" className="pb-2.5 font-semibold">Owner</th>
                   <th scope="col" className="pb-2.5 font-semibold">Provider</th>
@@ -380,7 +380,7 @@ export function Overview(options: LiveOptions) {
                   <th scope="col" className="pb-2.5 font-semibold">Health</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {(liveDeals.deals.length > 0
                   ? liveDeals.deals
                   : deals.map((d) => ({
@@ -396,39 +396,39 @@ export function Overview(options: LiveOptions) {
                       healthLabel: "settled or none" as const,
                     }))
                 ).map((deal) => (
-                  <tr key={deal.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={deal.id} className="hover:bg-surface-2 transition-colors">
                     <td className="py-3 font-mono font-semibold text-xs">
                       <Link
                         to={`/deal/${deal.id}`}
-                        className="text-ochre hover:underline inline-flex items-center gap-1"
+                        className="text-gold hover:underline inline-flex items-center gap-1"
                       >
-                        Deal {deal.id} <span aria-hidden="true" className="text-[13px]">→</span>
+                        Deal {deal.id} <span aria-hidden="true" className="text-sm">→</span>
                       </Link>
                     </td>
-                    <td className="py-3 font-mono text-xs text-slate-700">
+                    <td className="py-3 font-mono text-xs text-ink">
                       <span title={deal.owner}>
                         {deal.owner.length > 12
                           ? `${deal.owner.slice(0, 6)}…${deal.owner.slice(-4)}`
                           : deal.owner}
                       </span>
                     </td>
-                    <td className="py-3 font-mono text-xs text-slate-700">
+                    <td className="py-3 font-mono text-xs text-ink">
                       provider {deal.providerId}
                     </td>
-                    <td className="py-3 font-mono text-xs text-slate-900">
+                    <td className="py-3 font-mono text-xs text-ink">
                       {formatNative(deal.priceUnits)} tPOT
                     </td>
-                    <td className="py-3 font-mono text-xs text-slate-700">
+                    <td className="py-3 font-mono text-xs text-ink">
                       <BlockLink block={deal.endBlock} />
                     </td>
-                    <td className="py-3 font-mono text-xs text-slate-700">
+                    <td className="py-3 font-mono text-xs text-ink">
                       {formatCount(deal.blocksLeft)}
                     </td>
-                    <td className="py-3 font-mono text-xs text-slate-700">
+                    <td className="py-3 font-mono text-xs text-ink">
                       {deal.flags}
                     </td>
                     <td className="py-3">
-                      <span className="font-mono text-xs font-medium text-slate-800">
+                      <span className="font-mono text-xs font-medium text-ink">
                         {deal.healthLabel}
                       </span>
                     </td>
@@ -445,14 +445,14 @@ export function Overview(options: LiveOptions) {
         as="section"
         aria-labelledby="gate-demo-heading"
         data-testid="overview-gate-demo-card"
-        className="border-slate-200/90 bg-white"
+        className="border-line bg-surface"
       >
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
           <div>
-            <h2 id="gate-demo-heading" className="eyebrow text-slate-700 font-semibold">
+            <h2 id="gate-demo-heading" className="eyebrow text-gold-bright font-semibold">
               Gate demo
             </h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted">
               Recorded live-run StorageGate operations and refusal outcomes from evidence/raw/t8/ on chain 420420777.
             </p>
           </div>
@@ -462,91 +462,91 @@ export function Overview(options: LiveOptions) {
         <div className="mt-4 space-y-3">
           <Link
             to="/gate"
-            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-line bg-surface-2 hover:bg-surface-2 transition-colors no-underline"
           >
             <div>
-              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+              <span className="font-mono text-xs font-bold text-ink group-hover:text-gold-bright transition-colors">
                 Deal 4: locked and released (2 tPOT to provider-1)
               </span>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 Released at block 252,538 while provider bond was 24 tPOT (tx 0x4c63d339...)
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Chip label="REPORTED" tone="neutral" />
-              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+              <span aria-hidden="true" className="text-xs text-muted font-mono">→</span>
             </div>
           </Link>
 
           <Link
             to="/gate"
-            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-line bg-surface-2 hover:bg-surface-2 transition-colors no-underline"
           >
             <div>
-              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+              <span className="font-mono text-xs font-bold text-ink group-hover:text-gold-bright transition-colors">
                 Deal 5: locked with 2 tPOT, refunded to payer
               </span>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 Payment refunded to payer 0x0948EBD7... after deal expiry (lock tx 0xf84af2e3...)
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Chip label="REPORTED" tone="neutral" />
-              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+              <span aria-hidden="true" className="text-xs text-muted font-mono">→</span>
             </div>
           </Link>
 
           <Link
             to="/gate"
-            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-line bg-surface-2 hover:bg-surface-2 transition-colors no-underline"
           >
             <div>
-              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+              <span className="font-mono text-xs font-bold text-ink group-hover:text-gold-bright transition-colors">
                 Deal 3: lock refused Expired
               </span>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 CLI refused lock simulation at block 251,940 because block &gt;= endBlock (250,692). 0 gas spent.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Chip label="REPORTED" tone="neutral" />
-              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+              <span aria-hidden="true" className="text-xs text-muted font-mono">→</span>
             </div>
           </Link>
 
           <Link
             to="/gate"
-            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-line bg-surface-2 hover:bg-surface-2 transition-colors no-underline"
           >
             <div>
-              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+              <span className="font-mono text-xs font-bold text-ink group-hover:text-gold-bright transition-colors">
                 Deal 5: release refused BondTooLow
               </span>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 Release reverted at block 252560 because active bond 24.0 tPOT was below the 30.0 tPOT floor.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Chip label="REPORTED" tone="neutral" />
-              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+              <span aria-hidden="true" className="text-xs text-muted font-mono">→</span>
             </div>
           </Link>
 
           <Link
             to="/gate"
-            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors no-underline"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border border-line bg-surface-2 hover:bg-surface-2 transition-colors no-underline"
           >
             <div>
-              <span className="font-mono text-xs font-bold text-slate-900 group-hover:text-ochre transition-colors">
+              <span className="font-mono text-xs font-bold text-ink group-hover:text-gold-bright transition-colors">
                 Deal 5: refund refused RefundNotAllowed
               </span>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 Refund reverted at block 252564 because deal was healthy and before endBlock (255,544).
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Chip label="REPORTED" tone="neutral" />
-              <span aria-hidden="true" className="text-xs text-slate-400 font-mono">→</span>
+              <span aria-hidden="true" className="text-xs text-muted font-mono">→</span>
             </div>
           </Link>
         </div>
@@ -554,17 +554,17 @@ export function Overview(options: LiveOptions) {
 
       {/* Deployment Card */}
       <Card as="section" aria-labelledby="deployment-heading">
-        <h2 id="deployment-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="deployment-heading" className="eyebrow text-gold-bright font-semibold">
           Deployment
         </h2>
-        <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm border-b border-slate-100 pb-4">
+        <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm border-b border-line pb-4">
           <div>
-            <dt className="text-xs font-mono uppercase text-slate-500">Contract address</dt>
-            <dd className="mono mt-1 break-all font-medium text-slate-900">{deployment?.address ?? "not recorded in the evidence"}</dd>
+            <dt className="text-xs font-mono uppercase text-muted">Contract address</dt>
+            <dd className="mono mt-1 break-all font-medium text-ink">{deployment?.address ?? "not recorded in the evidence"}</dd>
           </div>
           <div>
-            <dt className="text-xs font-mono uppercase text-slate-500">Deployment transaction</dt>
-            <dd className="mono mt-1 break-all font-medium text-slate-900">{deployment?.txHash ?? "not recorded in the evidence"}</dd>
+            <dt className="text-xs font-mono uppercase text-muted">Deployment transaction</dt>
+            <dd className="mono mt-1 break-all font-medium text-ink">{deployment?.txHash ?? "not recorded in the evidence"}</dd>
           </div>
         </dl>
         <div className="mt-4 overflow-x-auto">
@@ -577,7 +577,7 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Deployment facts, transcribed from the recorded verification run.</caption>
             <TableHead />
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               <Row
                 field="Block"
                 value={<BlockLink block={deployment?.block} />}
@@ -610,31 +610,31 @@ export function Overview(options: LiveOptions) {
 
       {/* Code Card */}
       <Card as="section" aria-labelledby="code-heading">
-        <h2 id="code-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="code-heading" className="eyebrow text-gold-bright font-semibold">
           Code
         </h2>
         <div className="mt-4 space-y-2 text-sm">
           <p className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-slate-900">verified — runtime code matches the build artifact</span>
+            <span className="font-medium text-ink">verified — runtime code matches the build artifact</span>
             <Chip label="REPORTED" />
           </p>
-          <p className="mono break-all text-xs text-slate-600">
+          <p className="mono break-all text-xs text-muted">
             runtime code hash {deployment?.codeHash ?? "not recorded"}
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted">
             {codeVerified?.artifact ?? "no artifact recorded"} · {codeVerified?.note ?? ""}
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted">
             source verification: {codeVerified?.sourceVerified ? "present" : "not available on this network (no explorer)"}.
           </p>
           {live.codeHash ? (
-            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs" data-testid="live-code">
+            <div className="mt-3 rounded-xl border border-line bg-surface-2 p-3 text-xs" data-testid="live-code">
               <p>
                 <Chip label="MEASURED" /> runtime code hash{" "}
-                <span className="mono break-all font-medium text-slate-900">{live.codeHash}</span> ·{" "}
+                <span className="hash font-medium text-ink">{live.codeHash}</span> ·{" "}
                 {formatCount(live.codeBytes ?? 0)} bytes
               </p>
-              <p className="mt-1 text-slate-500">
+              <p className="mt-1 text-muted">
                 {live.codeHash === deployment?.codeHash
                   ? "matches the recorded hash"
                   : "differs from the recorded hash"}
@@ -646,10 +646,10 @@ export function Overview(options: LiveOptions) {
 
       {/* Results Card */}
       <Card as="section" aria-labelledby="results-heading">
-        <h2 id="results-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="results-heading" className="eyebrow text-gold-bright font-semibold">
           Live results
         </h2>
-        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
+        <p className="mt-2 max-w-[68ch] text-sm text-muted leading-relaxed">
           The chain now, then the run that produced it. Deals 1 and 2 are both settled on this
           deployment: deal 1 was answered in time, deal 2 took one slash. Health 0 is the settled
           state, not a fault — a deal ends at 0 whether it was answered or slashed, so read the
@@ -668,7 +668,7 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Read by this browser on each refresh.</caption>
             <TableHead />
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               <Row
                 field="Provider 1 bond"
                 value={provider ? formatNative(provider.bondUnits) : "not recorded"}
@@ -702,13 +702,13 @@ export function Overview(options: LiveOptions) {
           </table>
         </div>
         {live.balanceWei === null ? (
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-muted">
             The contract balance was not part of the recorded evidence; it appears when the live read
             answers.
           </p>
         ) : null}
 
-        <h3 className="mt-8 font-mono text-xs font-semibold uppercase tracking-wider text-slate-500">Recorded run</h3>
+        <h3 className="mt-8 font-mono text-xs font-semibold uppercase tracking-wider text-muted">Recorded run</h3>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full table-fixed">
             <colgroup>
@@ -719,7 +719,7 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Every transaction below has a receipt file; the block is the inclusion block.</caption>
             <TableHead />
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {txRow("deploy", "Deploy")}
               {txRow("register", "Register provider 1")}
               {txRow("answer-2a", "Pass answer (deal 2)")}
@@ -743,10 +743,10 @@ export function Overview(options: LiveOptions) {
 
       {/* On-Chain Config Card */}
       <Card as="section" aria-labelledby="config-heading">
-        <h2 id="config-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="config-heading" className="eyebrow text-gold-bright font-semibold">
           On-chain configuration
         </h2>
-        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
+        <p className="mt-2 max-w-[68ch] text-sm text-muted leading-relaxed">
           Decoded from packed storage slot 0. {live.config ? "These values were read by this browser." : "These values are the recorded ones; a live read replaces them when an RPC answers."}
         </p>
         <div className="mt-4 overflow-x-auto">
@@ -759,10 +759,10 @@ export function Overview(options: LiveOptions) {
             </colgroup>
             <caption>Packed slot 0, field by field.</caption>
             <TableHead />
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {config === null ? (
                 <tr>
-                  <td colSpan={4} className="text-slate-500 py-3">
+                  <td colSpan={4} className="text-muted py-3">
                     No configuration is recorded and no live read has answered.
                   </td>
                 </tr>
@@ -786,26 +786,26 @@ export function Overview(options: LiveOptions) {
 
       {/* Rounds Card */}
       <Card as="section" aria-labelledby="rounds-heading">
-        <h2 id="rounds-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="rounds-heading" className="eyebrow text-gold-bright font-semibold">
           Live challenge rounds
         </h2>
         <p className="mt-3 text-sm">
-          <span className="font-semibold text-slate-900">Recorded rounds: {formatCount(bundle?.rounds.length ?? 0)}</span>{" "}
+          <span className="font-semibold text-ink">Recorded rounds: {formatCount(bundle?.rounds.length ?? 0)}</span>{" "}
           <Chip label="REPORTED" />{" "}
-          <span className="text-slate-600">
+          <span className="text-muted">
             — {formatCount(bundle?.rounds.filter((round) => round.status === "passed").length ?? 0)} passed,{" "}
             {formatCount(bundle?.rounds.filter((round) => round.status === "failed").length ?? 0)} slashed.
           </span>
         </p>
-        <ul className="mt-4 space-y-1.5 font-mono text-xs text-slate-700 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80">
+        <ul className="mt-4 space-y-1.5 font-mono text-xs text-ink bg-surface-2 p-4 rounded-xl border border-line">
           {(bundle?.rounds ?? []).map((round) => (
             <li key={round.id} className="py-0.5">{roundLine(round)}</li>
           ))}
         </ul>
         <p className="mt-4 flex flex-wrap items-center gap-2 text-sm">
           <Chip label="PENDING LIVE RUN" />
-          <span className="font-medium text-slate-900">pending</span>
-          <span className="text-slate-600">
+          <span className="font-medium text-ink">pending</span>
+          <span className="text-muted">
             — no new challenge is scheduled; a round appears here only when the chain records one.
           </span>
         </p>
@@ -813,27 +813,27 @@ export function Overview(options: LiveOptions) {
 
       {/* Source and reading Card */}
       <Card as="section" aria-labelledby="links-heading">
-        <h2 id="links-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="links-heading" className="eyebrow text-gold-bright font-semibold">
           Source and reading
         </h2>
         <ul className="mt-3 flex flex-wrap gap-6 text-sm font-medium">
           <li>
-            <a className="link-quiet underline hover:text-slate-900" href={REPO}>
+            <a className="link-quiet underline hover:text-ink" href={REPO}>
               Repository
             </a>
           </li>
           <li>
-            <a className="link-quiet underline hover:text-slate-900" href={`${REPO}#readme`}>
+            <a className="link-quiet underline hover:text-ink" href={`${REPO}#readme`}>
               README
             </a>
           </li>
           <li>
-            <a className="link-quiet underline hover:text-slate-900" href="/evidence/index.json">
+            <a className="link-quiet underline hover:text-ink" href="/evidence/index.json">
               evidence manifest
             </a>
           </li>
         </ul>
-        <p className="mt-4 max-w-[68ch] text-xs text-slate-500 leading-relaxed">
+        <p className="mt-4 max-w-[68ch] text-xs text-muted leading-relaxed">
           Read-only: there is no wallet, no key and no write function in this build. The recorded layer is
           verified by SHA-256 before it is shown, and every live number carries the block and UTC time it
           was read at.

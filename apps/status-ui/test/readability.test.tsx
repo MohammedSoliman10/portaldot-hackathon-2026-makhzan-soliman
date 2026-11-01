@@ -27,19 +27,19 @@ describe("024-ui-readability: Readability and Layout Improvements", () => {
     expect(appCss).toMatch(/\.label-chip\s*\{[^}]*font-size:\s*(13px|0\.8125rem)/);
   });
 
-  it("Task 2: Contrast - Judges and Deal 'Measured live' use text-amber-800, footer source uses readable text-slate-600", () => {
+  it("Task 2: Contrast - Judges and Deal 'Measured live' use gold-bright, footer source uses readable muted text", () => {
     const { container: judgesContainer } = renderApp(<App mode={recorded()} evidence={evidenceState()} />, {
       route: "/judges",
       evidence: evidenceState(),
     });
     const judgesLive = judgesContainer.querySelector("[data-testid='judges-live']");
     if (judgesLive) {
-      expect(judgesLive.className).toContain("text-amber-800");
-      expect(judgesLive.className).not.toContain("text-ochre");
+      expect(judgesLive.className).toContain("text-gold-bright");
+      expect(judgesLive.className).not.toContain("text-slate-");
     } else {
       // Check source directly if not in live mode
       const judgesSrc = readFileSync(resolve(__dirname, "../src/pages/Judges.tsx"), "utf8");
-      expect(judgesSrc).toMatch(/data-testid="judges-live"[^>]*text-amber-800/);
+      expect(judgesSrc).toMatch(/data-testid="judges-live"[^>]*text-gold-bright/);
     }
 
     const { container: dealContainer } = renderApp(<App mode={recorded()} evidence={evidenceState()} />, {
@@ -48,11 +48,11 @@ describe("024-ui-readability: Readability and Layout Improvements", () => {
     });
     const dealLive = dealContainer.querySelector("[data-testid='deal-live']");
     if (dealLive) {
-      expect(dealLive.className).toContain("text-amber-800");
-      expect(dealLive.className).not.toContain("text-ochre");
+      expect(dealLive.className).toContain("text-gold-bright");
+      expect(dealLive.className).not.toContain("text-slate-");
     } else {
       const dealSrc = readFileSync(resolve(__dirname, "../src/pages/Deal.tsx"), "utf8");
-      expect(dealSrc).toMatch(/data-testid="deal-live"[^>]*text-amber-800/);
+      expect(dealSrc).toMatch(/data-testid="deal-live"[^>]*text-gold-bright/);
     }
 
     // Footer source line
