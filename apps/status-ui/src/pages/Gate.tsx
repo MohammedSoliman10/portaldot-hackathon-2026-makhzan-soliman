@@ -112,7 +112,7 @@ export function Gate({ client }: { client?: ReadClient }) {
             <p className="mt-2 max-w-[62ch] text-sm text-slate-600">
               This build sets no <span className="mono font-mono text-slate-900">VITE_GATE_ADDRESS</span>, so there is nothing to
               read and no address is invented here. The contract and its tests live in{" "}
-              <span className="mono font-mono text-slate-900">contracts/src/makhzan/StorageGate.sol</span>; when a deployment sets
+              <span className="mono font-mono text-slate-900 break-all">contracts/src/makhzan/StorageGate.sol</span>; when a deployment sets
               that variable, this page reads the lock, the guard decision and the payee's bond.
             </p>
             <p className="mt-3">

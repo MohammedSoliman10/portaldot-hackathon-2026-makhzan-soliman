@@ -81,7 +81,7 @@
   kbd,
   samp {
     font-family: var(--font-mono);
-    font-size: max(13px, 0.92em);
+    font-size: max(14px, 0.92em);
   }
 
   button {
