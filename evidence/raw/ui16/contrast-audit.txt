@@ -1,0 +1,56 @@
+
+[1440px] / overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /deal/2 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /verify overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /proof overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /gate overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /judges overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /replay overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /receipt/1 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1440px] /receipt/2 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] / overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /deal/2 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /verify overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /proof overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /gate overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /judges overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /replay overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /receipt/1 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[1024px] /receipt/2 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] / overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /deal/2 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /verify overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /proof overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /gate overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /judges overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /replay overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /receipt/1 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+[390px] /receipt/2 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+SUMMARY routes=27 contrastFailures=0 smallTextUnder14=0 labelChipsAt13px=399
