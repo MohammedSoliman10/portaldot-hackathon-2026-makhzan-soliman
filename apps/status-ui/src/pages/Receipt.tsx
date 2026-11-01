@@ -86,7 +86,7 @@ export function Receipt() {
   const hasExplorer = bundle.chain.explorer !== null && bundle.chain.explorer.trim() !== "";
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <header>
         <p className="eyebrow">07 / receipt</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Receipt — deal {receipt.dealId}</h1>

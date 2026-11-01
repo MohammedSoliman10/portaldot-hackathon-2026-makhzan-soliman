@@ -83,7 +83,7 @@ export function Gate({ client }: { client?: ReadClient }) {
   };
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-12">
       <header>
         <p className="eyebrow">08 / gate</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">The gate that pays on a healthy deal</h1>
