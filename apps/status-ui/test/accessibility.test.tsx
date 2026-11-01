@@ -33,60 +33,59 @@ function contrastRatio(hex1: string, hex2: string): number {
 
 describe("accessibility pass", () => {
   describe("color contrast", () => {
-    it("ensures all text tokens have at least 4.5:1 contrast across light surfaces and dark hero panel", () => {
+    it("ensures every text token clears 4.5:1 on every surface the site draws", () => {
       const tokensPath = resolve(__dirname, "../src/styles/tokens.css");
       const css = readFileSync(tokensPath, "utf8");
 
-      // Extract colors
+      // Resolve one level of `var(--x)` indirection, because the light-era names now alias the
+      // semantic ones.
+      const raw = (name: string): string => {
+        const match = css.match(new RegExp(`--${name}:\\s*([^;]+);`));
+        if (!match || !match[1]) throw new Error(`Missing token --${name}`);
+        return match[1].trim();
+      };
       const extract = (name: string): string => {
-        const match = css.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`));
-        if (!match || !match[1]) throw new Error(`Missing token ${name}`);
-        return match[1];
+        let value = raw(name);
+        const alias = value.match(/^var\(--([\w-]+)\)$/);
+        if (alias) value = raw(alias[1]!);
+        if (!/^#[0-9a-fA-F]{6}$/.test(value)) {
+          throw new Error(`Token --${name} is "${value}", not a 6-digit hex`);
+        }
+        return value;
       };
 
-      const canvas = extract("--canvas"); // #f0f2f5
-      const paper = extract("--paper"); // #ffffff
-      const ink = extract("--ink"); // #0c0d10
-      const ash = extract("--ash"); // #475467
-      const ash2 = extract("--ash-2"); // #535d6e
-      const ochre = extract("--ochre"); // #d9a441
-      const red = extract("--red"); // #b91c1c
+      const surfaces = ["bg", "surface", "surface-2"].map((name) => ({
+        name,
+        color: extract(name),
+      }));
 
-      // Primary & secondary text tokens against light surfaces (canvas and paper cards)
-      const lightSurfaceTextTokens = [
-        { name: "--ink", color: ink },
-        { name: "--ash", color: ash },
-        { name: "--ash-2", color: ash2 },
-        { name: "--red", color: red },
-      ];
+      const textTokens = ["ink", "muted", "gold", "gold-bright"].map((name) => ({
+        name,
+        color: extract(name),
+      }));
 
-      for (const token of lightSurfaceTextTokens) {
-        const ratioCanvas = contrastRatio(token.color, canvas);
-        const ratioPaper = contrastRatio(token.color, paper);
-
-        expect(
-          ratioCanvas,
-          `Token ${token.name} (${token.color}) vs canvas (${canvas}) contrast is ${ratioCanvas.toFixed(2)}, expected >= 4.5:1`
-        ).toBeGreaterThanOrEqual(4.5);
-
-        expect(
-          ratioPaper,
-          `Token ${token.name} (${token.color}) vs paper (${paper}) contrast is ${ratioPaper.toFixed(2)}, expected >= 4.5:1`
-        ).toBeGreaterThanOrEqual(4.5);
+      for (const token of textTokens) {
+        for (const surface of surfaces) {
+          const ratio = contrastRatio(token.color, surface.color);
+          expect(
+            ratio,
+            `Token --${token.name} (${token.color}) vs --${surface.name} (${surface.color}) is ${ratio.toFixed(2)}, expected >= 4.5:1`,
+          ).toBeGreaterThanOrEqual(4.5);
+        }
       }
 
       // Voltline brand rule: black text on gold, >= 4.5:1
-      const ratioBlackOnGold = contrastRatio(ink, ochre);
+      const ratioBlackOnGold = contrastRatio(extract("on-gold"), extract("gold"));
       expect(
         ratioBlackOnGold,
-        `Black text on gold contrast is ${ratioBlackOnGold.toFixed(2)}, expected >= 4.5:1`
+        `Black text on gold contrast is ${ratioBlackOnGold.toFixed(2)}, expected >= 4.5:1`,
       ).toBeGreaterThanOrEqual(4.5);
 
-      // Light text on dark hero panel
-      const ratioWhiteOnDark = contrastRatio(paper, ink);
+      // The hero panel is still a fixed dark plate; its own ink must stay readable on it.
+      const ratioHero = contrastRatio(extract("ink"), "#0c0d10");
       expect(
-        ratioWhiteOnDark,
-        `White text on dark hero contrast is ${ratioWhiteOnDark.toFixed(2)}, expected >= 4.5:1`
+        ratioHero,
+        `Ink on the dark hero contrast is ${ratioHero.toFixed(2)}, expected >= 4.5:1`,
       ).toBeGreaterThanOrEqual(4.5);
     });
   });

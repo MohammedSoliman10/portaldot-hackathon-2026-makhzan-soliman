@@ -62,6 +62,6 @@ describe("025-ui-polish: UI Readability and Polish", () => {
 
   it("Task 5: Section headings (h2) one size bigger with thin gold underline accent", () => {
     const appCss = readFileSync(resolve(__dirname, "../src/styles/app.css"), "utf8");
-    expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*border-bottom:[^}]*var\(--ochre\)/);
+    expect(appCss).toMatch(/\.eyebrow\s*\{[^}]*border-bottom:[^}]*var\(--gold\)/);
   });
 });
