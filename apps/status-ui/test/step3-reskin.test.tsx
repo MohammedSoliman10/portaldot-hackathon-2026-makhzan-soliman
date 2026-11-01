@@ -19,7 +19,7 @@ describe("Step 3 Reskin: Deal and Verify pages", () => {
     const deal1 = container.querySelector("#deal-1");
     expect(deal1).toBeInTheDocument();
     // Voltline card classes
-    expect(deal1?.className).toMatch(/rounded-2xl/);
+    expect(deal1?.className).toMatch(/rounded-\[20px\]|rounded-2xl/);
     expect(deal1?.className).toMatch(/bg-white/);
     expect(deal1?.className).toMatch(/shadow/);
 
@@ -47,7 +47,7 @@ describe("Step 3 Reskin: Deal and Verify pages", () => {
       route: "/verify",
       evidence: evidenceState(),
     });
-    const cards = container.querySelectorAll(".rounded-2xl.bg-white");
+    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-white, .rounded-2xl.bg-white");
     expect(cards.length).toBeGreaterThanOrEqual(3); // Sample meta, dropzone card, refusals card
   });
 

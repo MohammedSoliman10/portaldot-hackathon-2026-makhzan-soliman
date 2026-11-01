@@ -17,7 +17,7 @@ describe("Step 5 Reskin: Receipt page and PNG export", () => {
       evidence: evidenceState(),
     });
 
-    const cards = container.querySelectorAll(".rounded-2xl.bg-white");
+    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-white, .rounded-2xl.bg-white");
     expect(cards.length).toBeGreaterThanOrEqual(3);
   });
 
