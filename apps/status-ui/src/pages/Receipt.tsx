@@ -18,19 +18,19 @@ const slug = (field: string): string =>
 function Row({ field, value, unit, detail, label, source }: ReceiptRow) {
   return (
     <tr data-testid={`receipt-row-${slug(field)}`}>
-      <td className="py-3.5 break-words text-slate-700">
+      <td className="py-3.5 break-words text-ink">
         <span className="font-medium">{field}</span>
-        <p className="mt-1 break-all text-[15px] text-slate-600 sm:hidden">{source}</p>
+        <p className="mt-1 break-all text-[15px] text-muted sm:hidden">{source}</p>
       </td>
       <td className="numeral py-3.5 font-mono">
-        <span className="font-semibold text-slate-900">{value}</span>
-        {unit ? <span className="text-slate-500"> {unit}</span> : null}
-        {detail ? <p className="mono mt-1 break-words font-mono text-xs text-slate-500">{detail}</p> : null}
+        <span className="font-semibold text-ink">{value}</span>
+        {unit ? <span className="text-muted"> {unit}</span> : null}
+        {detail ? <p className="mono mt-1 break-words font-mono text-xs text-muted">{detail}</p> : null}
       </td>
       <td className="py-3.5">
         <Chip label={label} />
       </td>
-      <td className="hidden py-3.5 break-words text-[15px] text-slate-600 sm:table-cell">{source}</td>
+      <td className="hidden py-3.5 break-words text-[15px] text-muted sm:table-cell">{source}</td>
     </tr>
   );
 }
@@ -55,23 +55,23 @@ export function Receipt() {
       <section className="space-y-6">
         <header>
           <p className="eyebrow">07 / receipt</p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-gold-bright">
             {bundle === null ? "The evidence has not loaded" : `No receipt for deal ${id}`}
           </h1>
-          <p className="mt-3 max-w-[68ch] text-slate-600 leading-relaxed">
+          <p className="mt-3 max-w-[68ch] text-muted leading-relaxed">
             {bundle === null
               ? "There is no evidence bundle on this page yet, so there is nothing to print. Reload when the evidence file is reachable; no number here is invented."
               : `The recorded evidence holds deals ${held}. A receipt exists only for a deal that was actually created on this deployment.`}
           </p>
         </header>
         <Card className="p-6">
-          <p className="text-sm font-mono text-slate-700">
+          <p className="text-sm font-mono text-ink">
             Available receipts:{" "}
-            <a className="link-quiet underline hover:text-amber-700 transition-colors" href="/#/receipt/1">
+            <a className="link-quiet underline hover:text-gold-bright transition-colors" href="/#/receipt/1">
               deal 1
             </a>{" "}
             ·{" "}
-            <a className="link-quiet underline hover:text-amber-700 transition-colors" href="/#/receipt/2">
+            <a className="link-quiet underline hover:text-gold-bright transition-colors" href="/#/receipt/2">
               deal 2
             </a>
           </p>
@@ -89,13 +89,13 @@ export function Receipt() {
     <div className="space-y-12">
       <header>
         <p className="eyebrow">07 / receipt</p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Receipt — deal {receipt.dealId}</h1>
-        <p className="mt-3 max-w-[68ch] text-slate-600 leading-relaxed">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-gold-bright">Receipt — deal {receipt.dealId}</h1>
+        <p className="mt-3 max-w-[68ch] text-muted leading-relaxed">
           {receipt.slashUnits === "0"
             ? `Deal ${receipt.dealId} is ${receipt.state}, and no slash was recorded on it: every challenge was answered before its deadline, so the bond came back whole.`
             : `Deal ${receipt.dealId} is ${receipt.state}, and one challenge was left unanswered. The bond went from ${formatNative(receipt.bondBeforeUnits)} tPOT to ${formatNative(receipt.bondAfterUnits)} tPOT, and the owner was credited the cut.`}{" "}
           This page is a record of what the chain did, not a live read: the bond now lives on{" "}
-          <a className="link-quiet underline hover:text-amber-700 transition-colors" href="/proof">
+          <a className="link-quiet underline hover:text-gold-bright transition-colors" href="/proof">
             the proof page
           </a>
           .
@@ -103,7 +103,7 @@ export function Receipt() {
       </header>
 
       <Card as="section" aria-labelledby="share-heading" className="p-6">
-        <h2 id="share-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="share-heading" className="eyebrow text-gold-bright font-semibold">
           Send it, or save it
         </h2>
         <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -111,11 +111,11 @@ export function Receipt() {
           <button
             type="button"
             onClick={() => setImage(downloadReceiptPng(receipt))}
-            className="min-h-[44px] rounded-full border border-slate-200 bg-white px-5 py-2 font-mono text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 transition-colors"
+            className="min-h-[44px] rounded-full border border-line bg-surface px-5 py-2 font-mono text-xs font-semibold text-ink shadow-xs hover:border-line-strong hover:bg-surface-2 transition-colors"
           >
             Download image (PNG)
           </button>
-          <span className="font-mono text-xs text-slate-500">
+          <span className="font-mono text-xs text-muted">
             {image === "downloaded"
               ? "Image saved to downloads."
               : image === "unsupported"
@@ -126,7 +126,7 @@ export function Receipt() {
       </Card>
 
       <Card as="section" aria-labelledby="bond-heading" className="p-6">
-        <h2 id="bond-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="bond-heading" className="eyebrow text-gold-bright font-semibold">
           The bond before and after
         </h2>
         <div className="mt-4 overflow-x-auto">
@@ -142,7 +142,7 @@ export function Receipt() {
               the credit together.
             </caption>
             <thead>
-              <tr className="border-b border-slate-200 text-xs font-mono uppercase tracking-wider text-slate-500">
+              <tr className="border-b border-line text-xs font-mono uppercase tracking-wider text-muted">
                 <th scope="col" className="pb-3 font-semibold">Field</th>
                 <th scope="col" className="pb-3 font-semibold">Value</th>
                 <th scope="col" className="pb-3 font-semibold">Label</th>
@@ -151,7 +151,7 @@ export function Receipt() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {rows.map((row) => (
                 <Row key={row.field} {...row} />
               ))}
@@ -161,10 +161,10 @@ export function Receipt() {
       </Card>
 
       <Card as="section" aria-labelledby="tx-heading" className="p-6">
-        <h2 id="tx-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="tx-heading" className="eyebrow text-gold-bright font-semibold">
           Every transaction on this deal
         </h2>
-        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
+        <p className="mt-2 max-w-[68ch] text-sm text-muted leading-relaxed">
           {hasExplorer
             ? "Each hash opens in the configured explorer."
             : `No EVM explorer is configured for this network, so each hash opens the evidence file that records it (${source}). The hash itself is the receipt; block numbers open in the Portaldot node console.`}
@@ -179,7 +179,7 @@ export function Receipt() {
             </colgroup>
             <caption className="sr-only">The steps the deployment recorded, in the order they happened.</caption>
             <thead>
-              <tr className="border-b border-slate-200 text-xs font-mono uppercase tracking-wider text-slate-500">
+              <tr className="border-b border-line text-xs font-mono uppercase tracking-wider text-muted">
                 <th scope="col" className="pb-3 font-semibold">Step</th>
                 <th scope="col" className="hidden pb-3 font-semibold sm:table-cell">
                   What it did
@@ -188,19 +188,19 @@ export function Receipt() {
                 <th scope="col" className="pb-3 font-semibold">Transaction</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {receipt.transactions.map((tx) => (
                 <tr key={tx.id} data-testid={`receipt-tx-${tx.id}`}>
-                  <td className="mono py-3 font-mono text-xs text-slate-600 break-words">{tx.id}</td>
-                  <td className="hidden py-3 text-slate-900 break-words sm:table-cell">{tx.label}</td>
+                  <td className="mono py-3 font-mono text-xs text-muted break-words">{tx.id}</td>
+                  <td className="hidden py-3 text-ink break-words sm:table-cell">{tx.label}</td>
                   <td className="numeral py-3 font-mono">
                     <BlockLink block={tx.block} />
                   </td>
                   <td className="mono py-3 break-all font-mono text-xs">
                     {tx.hash === null ? (
-                      <span className="text-slate-600">no hash recorded</span>
+                      <span className="text-muted">no hash recorded</span>
                     ) : (
-                      <a className="link-quiet underline hover:text-amber-700 transition-colors" href={transactionHref(bundle, tx.hash)}>
+                      <a className="link-quiet underline hover:text-gold-bright transition-colors" href={transactionHref(bundle, tx.hash)}>
                         {tx.hash}
                       </a>
                     )}
@@ -213,44 +213,44 @@ export function Receipt() {
       </Card>
 
       <Card as="section" aria-labelledby="facts-heading" className="p-6">
-        <h2 id="facts-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="facts-heading" className="eyebrow text-gold-bright font-semibold">
           The deal behind it
         </h2>
         <dl className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           <div className="pt-2 sm:pt-0">
-            <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Owner</dt>
-            <dd className="mono break-all font-mono text-xs text-slate-900 mt-1">{receipt.owner}</dd>
+            <dt className="text-xs font-mono uppercase tracking-wider text-muted">Owner</dt>
+            <dd className="hash mt-1 text-xs">{receipt.owner}</dd>
           </div>
           <div className="pt-2 sm:pt-0">
-            <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Provider</dt>
-            <dd className="numeral font-mono text-slate-900 font-semibold mt-1">{receipt.providerId}</dd>
+            <dt className="text-xs font-mono uppercase tracking-wider text-muted">Provider</dt>
+            <dd className="numeral font-mono text-ink font-semibold mt-1">{receipt.providerId}</dd>
           </div>
           <div className="pt-2 sm:pt-0">
-            <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Root</dt>
-            <dd className="mono break-all font-mono text-xs text-slate-900 mt-1">{receipt.root}</dd>
+            <dt className="text-xs font-mono uppercase tracking-wider text-muted">Root</dt>
+            <dd className="hash mt-1 text-xs">{receipt.root}</dd>
           </div>
           <div className="pt-2 sm:pt-0">
-            <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Size</dt>
-            <dd className="numeral font-mono text-slate-900 mt-1">
+            <dt className="text-xs font-mono uppercase tracking-wider text-muted">Size</dt>
+            <dd className="numeral font-mono text-ink mt-1">
               {formatCount(receipt.size)} bytes · {formatCount(receipt.leafCount)} leaves · block size{" "}
               {formatCount(receipt.blockSize)} bytes
             </dd>
           </div>
           <div className="pt-2 sm:pt-0">
-            <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Blocks</dt>
-            <dd className="numeral font-mono text-slate-900 mt-1">
+            <dt className="text-xs font-mono uppercase tracking-wider text-muted">Blocks</dt>
+            <dd className="numeral font-mono text-ink mt-1">
               {formatCount(receipt.startBlock)} to {formatCount(receipt.endBlock)}
             </dd>
           </div>
           <div className="pt-2 sm:pt-0">
-            <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">Price and claim</dt>
-            <dd className="numeral font-mono text-slate-900 mt-1">
+            <dt className="text-xs font-mono uppercase tracking-wider text-muted">Price and claim</dt>
+            <dd className="numeral font-mono text-ink mt-1">
               {formatNative(receipt.priceUnits)} tPOT price · {formatNative(receipt.claimedUnits)} tPOT
               claimed
             </dd>
           </div>
         </dl>
-        <p className="mt-4 max-w-[68ch] text-xs text-slate-500 border-t border-slate-100 pt-3">
+        <p className="mt-4 max-w-[68ch] text-xs text-muted border-t border-line pt-3">
           Reported values come from {source}. The exact slash is also printed in raw units (
           {formatWei(receipt.slashUnits)} units) and the owner credit in wei (
           {formatWei(receipt.ownerCreditWei)} wei), because rounding a slash to four decimals is how a

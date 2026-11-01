@@ -27,16 +27,16 @@ function Line({
   source: string;
 }) {
   return (
-    <div data-judges-row className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4 sm:items-start min-w-0">
-      <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">{what}</dt>
+    <div data-judges-row className="border-t border-line py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4 sm:items-start min-w-0">
+      <dt className="text-xs font-mono uppercase tracking-wider text-muted">{what}</dt>
       <dd className="mt-1 text-sm sm:mt-0 min-w-0">
         <div className="flex flex-wrap items-baseline gap-2 min-w-0">
-          <span className="numeral font-mono font-semibold text-slate-900 break-all">{value}</span>
+          <span className="numeral font-mono font-semibold text-ink break-all">{value}</span>
           <Chip label={label} />
         </div>
-        {detail ? <p className="mono mt-1 break-all text-xs text-slate-500 min-w-0">{detail}</p> : null}
-        <p className="mt-1 text-[15px] text-slate-600 break-all min-w-0">
-          <a className="link-quiet underline hover:text-slate-900" href={href}>
+        {detail ? <p className="mono mt-1 break-all text-xs text-muted min-w-0">{detail}</p> : null}
+        <p className="mt-1 text-[15px] text-muted break-all min-w-0">
+          <a className="link-quiet underline hover:text-ink" href={href}>
             evidence
           </a>
           <span className="break-all"> · {source}</span>
@@ -141,18 +141,18 @@ export function Judges(options: LiveOptions) {
     <div className="space-y-12">
       <header>
         <p className="eyebrow">05 / judges</p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">For judges</h1>
-        <p className="mt-3 max-w-[68ch] text-slate-600 leading-relaxed">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-gold-bright">For judges</h1>
+        <p className="mt-3 max-w-[68ch] text-muted leading-relaxed">
           Two minutes, four screens, then the list of what was measured live and what it does not prove.
           Everything here is read-only: no wallet, no key, no transaction.
         </p>
         {live.status === "live" ? (
-          <p data-testid="judges-live" className="mt-3 text-[15px] text-amber-800 font-semibold">
+          <p data-testid="judges-live" className="mt-3 text-[15px] text-gold-bright font-semibold">
             Measured live — block {formatCount(live.block ?? 0)} · chain {mode.expectedChainId} · {live.at}
           </p>
         ) : null}
         {live.status === "error" ? (
-          <p role="note" className="mt-3 border-l-2 border-amber-500 bg-amber-50/50 py-2 pl-3 text-sm text-amber-900 rounded-r-lg">
+          <p role="note" className="mt-3 border-l-2 border-gold bg-warn-surface py-2 pl-3 text-sm text-gold-bright rounded-r-lg">
             {live.stale ? "STALE — " : ""}
             live read failed ({live.error ?? "unknown error"}); showing the recorded evidence.
           </p>
@@ -161,32 +161,32 @@ export function Judges(options: LiveOptions) {
 
       {/* The walkthrough Card */}
       <Card as="section" aria-labelledby="walkthrough-heading">
-        <h2 id="walkthrough-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="walkthrough-heading" className="eyebrow text-gold-bright font-semibold">
           The walkthrough
         </h2>
-        <ol className="mt-4 max-w-[68ch] list-decimal space-y-3.5 pl-5 text-sm text-slate-700 leading-relaxed">
+        <ol className="mt-4 max-w-[68ch] list-decimal space-y-3.5 pl-5 text-sm text-ink leading-relaxed">
           <li>
-            <Link className="link-quiet underline font-semibold text-slate-900 hover:text-amber-700" to="/">
+            <Link className="link-quiet underline font-semibold text-ink hover:text-gold-bright" to="/">
               Overview
             </Link>{" "}
             — what is deployed, the code hash, the configuration and the live results: provider 1 bond,
             both deal healths and the contract balance.
           </li>
           <li>
-            <Link className="link-quiet underline font-semibold text-slate-900 hover:text-amber-700" to="/deal/1">
+            <Link className="link-quiet underline font-semibold text-ink hover:text-gold-bright" to="/deal/1">
               Deals
             </Link>{" "}
             — deal 1 and deal 2 with <code className="mono font-semibold">dealOf</code> and{" "}
             <code className="mono font-semibold">healthOf</code> read from the chain now.
           </li>
           <li>
-            <Link className="link-quiet underline font-semibold text-slate-900 hover:text-amber-700" to="/proof">
+            <Link className="link-quiet underline font-semibold text-ink hover:text-gold-bright" to="/proof">
               Proof
             </Link>{" "}
             — the one slash on this deployment: 30 → 24 tPOT, exactly 6 tPOT credited to the owner.
           </li>
           <li>
-            <Link className="link-quiet underline font-semibold text-slate-900 hover:text-amber-700" to="/verify">
+            <Link className="link-quiet underline font-semibold text-ink hover:text-gold-bright" to="/verify">
               Verify
             </Link>{" "}
             — use the sample file, watch the root match deal 2, then flip one byte in a copy and watch it
@@ -197,10 +197,10 @@ export function Judges(options: LiveOptions) {
 
       {/* What we measured live Card */}
       <Card as="section" aria-labelledby="measured-heading">
-        <h2 id="measured-heading" className="eyebrow text-slate-700 font-semibold">
+        <h2 id="measured-heading" className="eyebrow text-gold-bright font-semibold">
           What we measured live
         </h2>
-        <p className="mt-2 max-w-[68ch] text-sm text-slate-600 leading-relaxed">
+        <p className="mt-2 max-w-[68ch] text-sm text-muted leading-relaxed">
           Each line points at the evidence file that records it. The last line is read from the chain by
           this page; the rest come from the recorded live run.
         </p>
@@ -212,11 +212,11 @@ export function Judges(options: LiveOptions) {
       </Card>
 
       {/* What is not proven Card */}
-      <Card as="section" aria-labelledby="not-proven-heading" role="note" className="border-slate-200">
-        <h2 id="not-proven-heading" className="text-base font-bold text-slate-900">
+      <Card as="section" aria-labelledby="not-proven-heading" role="note" className="border-line">
+        <h2 id="not-proven-heading" className="text-base font-bold text-gold-bright">
           What is not proven
         </h2>
-        <ul className="mt-3 max-w-[68ch] list-disc space-y-2 pl-5 text-sm text-slate-600 leading-relaxed">
+        <ul className="mt-3 max-w-[68ch] list-disc space-y-2 pl-5 text-sm text-muted leading-relaxed">
           <li>
             This page cannot prove that a round ran. The receipts and the chain are the evidence; this is
             a read-only view of them.
@@ -248,14 +248,14 @@ export function Judges(options: LiveOptions) {
       <Card as="section" aria-labelledby="design-note-heading">
         <p className="flex flex-wrap items-center gap-2">
           <Chip label="DESIGN NOTE" />
-          <span id="design-note-heading" className="eyebrow text-slate-700 font-semibold">
+          <span id="design-note-heading" className="eyebrow text-ink font-semibold">
             Reasoning
           </span>
         </p>
-        <p className="mt-3 max-w-[68ch] text-sm text-slate-600 leading-relaxed">{DESIGN_NOTE}</p>
+        <p className="mt-3 max-w-[68ch] text-sm text-muted leading-relaxed">{DESIGN_NOTE}</p>
       </Card>
 
-      <p className="max-w-[68ch] text-xs text-slate-500 leading-relaxed">
+      <p className="max-w-[68ch] text-xs text-muted leading-relaxed">
         Read-only: there is no wallet, no key and no write function in this build. A number is only as
         good as its label and the block beside it.
       </p>
