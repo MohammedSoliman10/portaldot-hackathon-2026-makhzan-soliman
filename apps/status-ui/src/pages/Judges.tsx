@@ -27,19 +27,19 @@ function Line({
   source: string;
 }) {
   return (
-    <div data-judges-row className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4 sm:items-start">
+    <div data-judges-row className="border-t border-slate-100 py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4 sm:items-start min-w-0">
       <dt className="text-xs font-mono uppercase tracking-wider text-slate-500">{what}</dt>
-      <dd className="mt-1 text-sm sm:mt-0">
-        <div className="flex flex-wrap items-baseline gap-2">
-          <span className="numeral font-mono font-semibold text-slate-900 break-words">{value}</span>
+      <dd className="mt-1 text-sm sm:mt-0 min-w-0">
+        <div className="flex flex-wrap items-baseline gap-2 min-w-0">
+          <span className="numeral font-mono font-semibold text-slate-900 break-all">{value}</span>
           <Chip label={label} />
         </div>
-        {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
-        <p className="mt-1 text-[13px] text-slate-600">
+        {detail ? <p className="mono mt-1 break-all text-xs text-slate-500 min-w-0">{detail}</p> : null}
+        <p className="mt-1 text-[13px] text-slate-600 break-all min-w-0">
           <a className="link-quiet underline hover:text-slate-900" href={href}>
             evidence
           </a>
-          <span className="mono break-words"> · {source}</span>
+          <span className="mono break-all"> · {source}</span>
         </p>
       </dd>
     </div>
