@@ -11,7 +11,7 @@ const evidenceState = () => ({ bundle: evidence(), verified: true, error: null, 
 const recorded = () => resolveMode(parseConfig({}));
 
 describe("Step 3 Reskin: Deal and Verify pages", () => {
-  it("renders Deal cards using Voltline rounded white cards with soft shadows", () => {
+  it("renders Deal cards using dark gold-lined cards with a gold glow", () => {
     const { container } = renderApp(<App mode={recorded()} evidence={evidenceState()} />, {
       route: "/deal/1",
       evidence: evidenceState(),
@@ -20,12 +20,12 @@ describe("Step 3 Reskin: Deal and Verify pages", () => {
     expect(deal1).toBeInTheDocument();
     // Voltline card classes
     expect(deal1?.className).toMatch(/rounded-\[20px\]|rounded-2xl/);
-    expect(deal1?.className).toMatch(/bg-white/);
+    expect(deal1?.className).toMatch(/bg-surface/);
     expect(deal1?.className).toMatch(/shadow/);
 
     // Selected deal indicator
     expect(deal1).toHaveAttribute("data-selected", "true");
-    expect(deal1?.className).toMatch(/ring-2|border-ochre/);
+    expect(deal1?.className).toMatch(/ring-2|border-gold/);
   });
 
   it("renders Deal page action links with at least 44px touch targets", () => {
@@ -47,7 +47,7 @@ describe("Step 3 Reskin: Deal and Verify pages", () => {
       route: "/verify",
       evidence: evidenceState(),
     });
-    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-white, .rounded-2xl.bg-white");
+    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-surface, .rounded-2xl.bg-surface");
     expect(cards.length).toBeGreaterThanOrEqual(3); // Sample meta, dropzone card, refusals card
   });
 

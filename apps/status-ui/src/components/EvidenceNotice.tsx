@@ -15,7 +15,7 @@ export function EvidenceNotice({ evidence }: { evidence: EvidenceState }) {
 
   if (evidence.bundle === null) {
     return (
-      <div role="note" className="my-4 border-l-2 border-ochre-dim py-2 pl-3 text-sm">
+      <div role="note" className="my-4 border-l-2 border-line-strong py-2 pl-3 text-sm">
         <span className="label-chip mr-2" data-label="REPORTED">
           EVIDENCE
         </span>
@@ -26,7 +26,7 @@ export function EvidenceNotice({ evidence }: { evidence: EvidenceState }) {
 
   if (!evidence.verified) {
     return (
-      <div role="note" className="my-4 border-l-2 border-ochre-dim py-2 pl-3 text-sm">
+      <div role="note" className="my-4 border-l-2 border-line-strong py-2 pl-3 text-sm">
         <span className="label-chip mr-2" data-label="REPORTED">
           UNVERIFIED
         </span>

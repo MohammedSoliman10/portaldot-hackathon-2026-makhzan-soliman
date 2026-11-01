@@ -24,7 +24,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   render(): ReactNode {
     if (this.state.error) {
       return (
-        <div role="alert" className="my-8 border-l-2 border-red py-2 pl-4">
+        <div role="alert" className="my-8 border-l-2 border-danger py-2 pl-4">
           <h1 className="text-lg">This route failed to render</h1>
           <p className="mt-2 text-sm text-paper-dim">
             The evidence layer and the banner are still here. {this.state.error.message}

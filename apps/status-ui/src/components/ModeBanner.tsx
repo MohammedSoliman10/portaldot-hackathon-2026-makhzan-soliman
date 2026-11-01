@@ -22,10 +22,10 @@ const environmentLabel = (environment: string | undefined): string => {
 };
 
 const TONE_CLASS: Record<Tone, string> = {
-  recorded: "border-b border-slate-200/80 bg-white text-slate-800 shadow-xs",
-  live: "border-b border-amber-300 bg-amber-400 text-slate-950 font-medium shadow-xs",
-  blocking: "border-b-2 border-red-600 bg-red-50 text-red-900 font-medium",
-  warn: "border-b border-amber-300 bg-amber-50 text-amber-950",
+  recorded: "border-b border-line bg-surface text-ink",
+  live: "border-b border-gold bg-gold text-on-gold font-medium",
+  blocking: "border-b-2 border-danger bg-danger-surface text-danger font-medium",
+  warn: "border-b border-warn bg-warn-surface text-warn",
 };
 
 /**

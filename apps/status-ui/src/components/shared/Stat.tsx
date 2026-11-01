@@ -19,7 +19,7 @@ export function Stat({ value, subtitle, label, detail, className = "" }: StatPro
       formattedValue = (
         <span className="whitespace-nowrap min-w-0 inline-flex items-baseline gap-1">
           <span>{match[1]}</span>{" "}
-          <span className="text-base sm:text-lg font-normal text-slate-600">{match[2]}</span>
+          <span className="text-base sm:text-lg font-normal text-gold">{match[2]}</span>
         </span>
       );
     }
@@ -27,19 +27,19 @@ export function Stat({ value, subtitle, label, detail, className = "" }: StatPro
 
   return (
     <div
-      className={`flex flex-col justify-between rounded-[20px] border border-slate-300 bg-white p-5 shadow-[0_4px_20px_-2px_rgba(16,24,40,0.06),0_1px_3px_rgba(16,24,40,0.04)] min-w-0 h-full ${className}`}
+      className={`flex flex-col justify-between rounded-[20px] border border-line-strong bg-surface p-5 shadow-[var(--glow)] min-w-0 h-full ${className}`}
     >
       <div className="min-w-0">
         <div className="mb-2 flex items-center justify-start min-w-0">
           <Chip label={label} />
         </div>
-        <div className="font-mono text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl whitespace-nowrap min-w-0">
+        <div className="font-mono text-2xl font-bold tracking-tight text-gold-bright sm:text-3xl whitespace-nowrap min-w-0">
           {formattedValue}
         </div>
-        <p className="mt-2 text-[19px] font-medium text-slate-700 min-w-0 leading-snug">{subtitle}</p>
+        <p className="mt-2 text-[19px] font-medium text-ink min-w-0 leading-snug">{subtitle}</p>
       </div>
       {detail ? (
-        <p className="mt-3 text-[15px] text-slate-600 border-t border-slate-100 pt-2 min-w-0">
+        <p className="mt-3 text-[15px] text-muted border-t border-line pt-2 min-w-0">
           {detail}
         </p>
       ) : null}

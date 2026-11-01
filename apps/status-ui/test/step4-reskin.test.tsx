@@ -17,7 +17,7 @@ describe("Step 4 Reskin: Replay, Gate, Proof, and Judges pages", () => {
       evidence: evidenceState(),
     });
 
-    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-white, .rounded-2xl.bg-white");
+    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-surface, .rounded-2xl.bg-surface");
     expect(cards.length).toBeGreaterThanOrEqual(2);
 
     const nextBtn = getByRole("button", { name: /next step/i });
@@ -35,7 +35,7 @@ describe("Step 4 Reskin: Replay, Gate, Proof, and Judges pages", () => {
       evidence: evidenceState(),
     });
 
-    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-white, .rounded-2xl.bg-white");
+    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-surface, .rounded-2xl.bg-surface");
     expect(cards.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -45,7 +45,7 @@ describe("Step 4 Reskin: Replay, Gate, Proof, and Judges pages", () => {
       evidence: evidenceState(),
     });
 
-    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-white, .rounded-2xl.bg-white");
+    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-surface, .rounded-2xl.bg-surface");
     expect(cards.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -55,7 +55,7 @@ describe("Step 4 Reskin: Replay, Gate, Proof, and Judges pages", () => {
       evidence: evidenceState(),
     });
 
-    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-white, .rounded-2xl.bg-white");
+    const cards = container.querySelectorAll(".rounded-\\[20px\\].bg-surface, .rounded-2xl.bg-surface");
     expect(cards.length).toBeGreaterThanOrEqual(2);
   });
 });

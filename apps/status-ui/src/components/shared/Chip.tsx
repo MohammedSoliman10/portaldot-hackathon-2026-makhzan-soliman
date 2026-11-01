@@ -11,22 +11,22 @@ export interface ChipProps {
 }
 
 export function Chip({ label, tone, children, className = "" }: ChipProps) {
-  let toneClass = "bg-slate-100 text-slate-700 border-slate-200";
+  let toneClass = "bg-info-surface text-info border-info";
 
   if (label === "MEASURED" || tone === "brand") {
-    toneClass = "bg-[#fef7ea] text-slate-900 border-[#f3d289]";
+    toneClass = "bg-surface-2 text-gold-bright border-line-strong";
   } else if (label === "REPORTED" || tone === "neutral") {
-    toneClass = "bg-slate-100 text-slate-700 border-slate-200";
+    toneClass = "bg-info-surface text-info border-info";
   } else if (label === "DESIGN NOTE" || tone === "note") {
-    toneClass = "bg-blue-50 text-blue-800 border-blue-200";
+    toneClass = "bg-note-surface text-note border-note";
   } else if (label === "SIMULATED") {
-    toneClass = "bg-slate-50 text-slate-600 border-dashed border-slate-300";
+    toneClass = "bg-surface-2 text-muted border-dashed border-line-strong";
   } else if (label === "PENDING LIVE RUN") {
-    toneClass = "bg-amber-50 text-amber-800 border-amber-200";
+    toneClass = "bg-warn-surface text-warn border-warn";
   } else if (tone === "pass") {
-    toneClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
+    toneClass = "bg-ok-surface text-ok border-ok";
   } else if (tone === "danger") {
-    toneClass = "bg-red-50 text-red-800 border-red-200";
+    toneClass = "bg-danger-surface text-danger border-danger";
   }
 
   return (
@@ -35,11 +35,11 @@ export function Chip({ label, tone, children, className = "" }: ChipProps) {
       data-label={label}
     >
       {label === "MEASURED" ? (
-        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-ochre inline-block" />
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gold inline-block" />
       ) : tone === "pass" ? (
-        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-emerald-600 inline-block" />
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-ok inline-block" />
       ) : tone === "danger" ? (
-        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-red-600 inline-block" />
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-danger inline-block" />
       ) : null}
       {children ?? label}
     </span>
