@@ -39,7 +39,15 @@ describe("Overview Voltline Reskin", () => {
     expect(scope.getByText(/healthy now/i)).toBeInTheDocument();
 
     // 4. 6 tPOT slashed = exactly 20% of the bond
-    expect(scope.getByText("6 tPOT")).toBeInTheDocument();
+    expect(
+      scope.getByText((_content, element) => {
+        const hasText = element?.textContent?.replace(/\s+/g, " ").trim() === "6 tPOT";
+        const childrenDontHaveText = Array.from(element?.children || []).every(
+          (child) => child.textContent?.replace(/\s+/g, " ").trim() !== "6 tPOT"
+        );
+        return Boolean(hasText && childrenDontHaveText);
+      })
+    ).toBeInTheDocument();
     expect(scope.getByText(/slashed = exactly 20% of the bond/i)).toBeInTheDocument();
 
     // All labeled with explicit chip

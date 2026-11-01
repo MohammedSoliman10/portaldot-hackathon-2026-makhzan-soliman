@@ -113,7 +113,15 @@ describe("Overview - Deal Count & Live Index Corrections", () => {
     expect(healthyStat.getByText("0")).toBeInTheDocument();
 
     // 4. 6 tPOT slashed kept as REPORTED
-    expect(scope.getByText("6 tPOT")).toBeInTheDocument();
+    expect(
+      scope.getByText((_content, element) => {
+        const hasText = element?.textContent?.replace(/\s+/g, " ").trim() === "6 tPOT";
+        const childrenDontHaveText = Array.from(element?.children || []).every(
+          (child) => child.textContent?.replace(/\s+/g, " ").trim() !== "6 tPOT"
+        );
+        return Boolean(hasText && childrenDontHaveText);
+      })
+    ).toBeInTheDocument();
 
     // Live deals card
     const card = await findByTestId("overview-live-deals-card");

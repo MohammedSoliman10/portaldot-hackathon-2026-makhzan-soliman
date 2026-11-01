@@ -17,8 +17,8 @@ export function Stat({ value, subtitle, label, detail, className = "" }: StatPro
     const match = value.match(/^(.*?)\s+(tPOT)$/);
     if (match) {
       formattedValue = (
-        <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap min-w-0">
-          <span>{match[1]}</span>
+        <span className="whitespace-nowrap min-w-0 inline-flex items-baseline gap-1">
+          <span>{match[1]}</span>{" "}
           <span className="text-base sm:text-lg font-normal text-slate-600">{match[2]}</span>
         </span>
       );
