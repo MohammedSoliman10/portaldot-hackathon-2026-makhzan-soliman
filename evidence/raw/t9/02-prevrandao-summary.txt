@@ -1,0 +1,47 @@
+# prevRandao / mixHash on the Portaldot V3 testnet — read-only check, 1 Nov 2026
+
+RPC: https://test-evm-rpc-v3.portaldot.dev
+Methods: `eth_blockNumber`, then `eth_getBlockByNumber(hex, false)` — no transaction, no key.
+Raw responses: `01-prevrandao-30-blocks.json` (last 30 blocks) and
+`03-prevrandao-history-spotcheck.json` (seven blocks across history).
+
+## Result: the field is present, but its value never changes
+
+Last 30 blocks (282058..282087):
+
+    blocks                     30
+    mixHash present            30 of 30
+    distinct mixHash values    1
+    all-zero values            0
+    value (every block)        0x0000000000000000000000000000000000000000000000000008e1bc9bf04000
+
+The responses are not a cached duplicate: over the same 30 blocks there are 30 distinct block
+numbers, 30 distinct block hashes and 30 distinct timestamps, with 2 distinct state roots, 2 distinct
+transaction roots and 2 distinct miners. Only `mixHash` is identical.
+
+Spot check across history, same value every time:
+
+    1       0x…08e1bc9bf04000
+    100000  0x…08e1bc9bf04000
+    172546  0x…08e1bc9bf04000
+    172552  0x…08e1bc9bf04000
+    172594  0x…08e1bc9bf04000
+    281959  0x…08e1bc9bf04000
+    282007  0x…08e1bc9bf04000
+
+37 distinct blocks sampled in total (30 consecutive + 7 historical); one distinct value.
+
+## What this does and does not say
+
+- It says: on this chain, as served by this RPC, `mixHash` — the field an EVM contract reads as
+  `block.prevrandao` — carries **no per-block variation** in the sample. It is a fixed constant,
+  not zero, but constant.
+- It does **not** say the challenge selector is constant: the selector is
+  `keccak256(parent blockhash, prevrandao, dealId) % leafCount`, and the parent blockhash does change
+  every block. It says the `prevrandao` term contributes no entropy of its own.
+- It does **not** by itself contradict the Discord answer's wording ("safe to use"): the field exists
+  and is readable. It does mean we must not claim that `prevrandao` is a source of randomness on this
+  chain, and we must not call it secure or unbiasable.
+- One RPC's view of 37 blocks is an observation, not a proof about every node or every epoch.
+  This is exactly the kind of statement that stays labelled as an observation with its raw output
+  attached.

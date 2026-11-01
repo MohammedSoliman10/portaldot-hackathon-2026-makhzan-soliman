@@ -1,0 +1,15 @@
+# Two answers from the Portaldot Discord, 1 November 2026
+
+Source: Portaldot Discord, a reply in the Portaldot Discord, relayed to us by the project owner.
+Status: **reported to us, not measured by us, and not independently audited.** No value below is
+our own measurement; it is quoted because it settles two open questions we had recorded.
+
+Q1. Is `block.prevrandao` safe to use as a random number in an EVM contract on the V3 testnet?
+A1. YES.
+
+Q2. Is the storage deposit (about 165 tPOT for Makhzan) refunded if the contract is removed?
+A2. NO.
+
+Recorded verbatim as relayed, including the capitalisation of the answers. The read-only check in
+`01-prevrandao-30-blocks.json` and `02-prevrandao-summary.txt` is our own observation and is kept
+separate from these answers on purpose.
