@@ -195,7 +195,7 @@ export function Overview(options: LiveOptions) {
       <section
         aria-labelledby="overview-stats-heading"
         data-testid="overview-stats-strip"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <h2 id="overview-stats-heading" className="sr-only">
           Platform statistics

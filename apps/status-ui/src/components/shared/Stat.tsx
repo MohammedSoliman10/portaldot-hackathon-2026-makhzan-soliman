@@ -11,21 +11,35 @@ export interface StatProps {
 }
 
 export function Stat({ value, subtitle, label, detail, className = "" }: StatProps) {
+  // If value is a string containing "tPOT" or ending with a unit, render unit smaller on same line
+  let formattedValue: ReactNode = value;
+  if (typeof value === "string") {
+    const match = value.match(/^(.*?)\s+(tPOT)$/);
+    if (match) {
+      formattedValue = (
+        <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap min-w-0">
+          <span>{match[1]}</span>
+          <span className="text-base sm:text-lg font-normal text-slate-600">{match[2]}</span>
+        </span>
+      );
+    }
+  }
+
   return (
     <div
-      className={`flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs ${className}`}
+      className={`flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs min-w-0 h-fit ${className}`}
     >
-      <div>
-        <div className="flex items-start justify-between gap-2">
-          <div className="font-mono text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            {value}
-          </div>
+      <div className="min-w-0">
+        <div className="mb-2 flex items-center justify-start min-w-0">
           <Chip label={label} />
         </div>
-        <p className="mt-2 text-xs font-medium text-slate-600 sm:text-sm">{subtitle}</p>
+        <div className="font-mono text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl whitespace-nowrap min-w-0">
+          {formattedValue}
+        </div>
+        <p className="mt-2 text-xs font-medium text-slate-600 sm:text-sm min-w-0">{subtitle}</p>
       </div>
       {detail ? (
-        <p className="mt-3 font-mono text-[13px] text-slate-600 border-t border-slate-100 pt-2">
+        <p className="mt-3 font-mono text-[13px] text-slate-600 border-t border-slate-100 pt-2 min-w-0">
           {detail}
         </p>
       ) : null}
