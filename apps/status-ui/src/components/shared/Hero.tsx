@@ -17,7 +17,7 @@ export function Hero({ headline, subtitle, children, className = "" }: HeroProps
       }}
     >
       <div className="relative z-10 max-w-[68ch]">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-4xl sm:leading-[1.15] text-white">
+        <h1 className="text-2xl font-bold tracking-normal sm:text-4xl sm:leading-[1.15] text-white">
           {headline}
         </h1>
         {subtitle ? (
