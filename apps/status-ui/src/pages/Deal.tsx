@@ -43,7 +43,7 @@ function Field({
           <Chip label={label} />
         </div>
         {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
-        <p className="mono mt-1 break-words text-[13px] text-slate-600">{source}</p>
+        <p className="mt-1 break-words text-[15px] text-slate-600">{source}</p>
       </dd>
     </div>
   );
@@ -91,12 +91,12 @@ function DealCard({
               </span>
             ) : null}
           </div>
-          <p className="font-mono text-xs text-slate-500 mt-1">
+          <p className="text-[15px] text-slate-500 mt-1">
             Status: <span className="font-semibold text-slate-800">{deal.state}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-slate-600">
+          <span className="text-[15px] text-slate-600">
             {measured ? "read now" : "recorded"}
           </span>
           <Chip label={label} />
@@ -235,12 +235,12 @@ function LiveDealCard({
               selected
             </span>
           </div>
-          <p className="font-mono text-xs text-slate-500 mt-1">
+          <p className="text-[15px] text-slate-500 mt-1">
             Status: <span className="font-semibold text-slate-800">{healthText}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-slate-600">read live</span>
+          <span className="text-[15px] text-slate-600">read live</span>
           <Chip label="MEASURED" />
         </div>
       </header>
@@ -249,7 +249,7 @@ function LiveDealCard({
         <p className="font-medium">
           The full story and receipts exist only for recorded deals 1 and 2.
         </p>
-        <p className="mt-1 text-[13px] text-amber-800/80">
+        <p className="mt-1 text-[15px] text-amber-800/80">
           This deal was read directly from chain {chainId} at block {formatCount(live.block ?? 0)}.
         </p>
       </div>
@@ -384,7 +384,7 @@ export function Deal(options: LiveOptions) {
             : `Two deals were created on this deployment, both against provider 1 and the same 1 MiB file. Each card shows the recorded facts and, when the RPC answers, the same fields read now.`}
         </p>
         {live.status === "live" ? (
-          <p data-testid="deal-live" className="mt-3 font-mono text-xs text-amber-800 font-semibold">
+          <p data-testid="deal-live" className="mt-3 text-[15px] text-amber-800 font-semibold">
             Measured live — block {formatCount(live.block ?? 0)} · {live.at}
           </p>
         ) : null}

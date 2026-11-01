@@ -226,17 +226,17 @@ export function Replay() {
                 onClick={() => setIndex(position)}
                 aria-current={position === index ? "step" : undefined}
                 aria-label={`Go to step ${position + 1}: ${item.title}`}
-                className={`w-full break-words rounded-xl px-4 py-2.5 text-left transition-all cursor-pointer font-mono text-xs ${
+                className={`w-full break-words rounded-xl px-4 py-2.5 text-left transition-all cursor-pointer text-[15px] ${
                   position === index
                     ? "bg-slate-900 text-white font-semibold shadow-xs"
                     : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
                 }`}
               >
-                <span className={`mr-2.5 font-bold ${position === index ? "text-amber-400" : "text-slate-600 font-semibold"}`}>
+                <span className={`mr-2.5 font-mono font-bold ${position === index ? "text-amber-400" : "text-slate-600 font-semibold"}`}>
                   {position + 1}.
                 </span>
                 <span>{item.title}</span>
-                <span className={`ml-3 text-[13px] ${position === index ? "text-slate-300" : "text-slate-600 font-medium"}`}>
+                <span className={`ml-3 font-mono text-[14px] ${position === index ? "text-slate-300" : "text-slate-600 font-medium"}`}>
                   block {formatCount(item.block)}
                 </span>
               </button>

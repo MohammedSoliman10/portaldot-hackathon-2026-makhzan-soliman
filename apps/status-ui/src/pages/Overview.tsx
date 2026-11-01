@@ -70,7 +70,7 @@ function Row({
 function TableHead() {
   return (
     <thead>
-      <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-600">
+      <tr className="border-b border-slate-200 text-left text-[15px] uppercase tracking-wider text-slate-600">
         <th scope="col" className="pb-2.5 font-semibold">Field</th>
         <th scope="col" className="pb-2.5 font-semibold">Value</th>
         <th scope="col" className="pb-2.5 font-semibold">Label</th>
@@ -153,7 +153,7 @@ export function Overview(options: LiveOptions) {
         </div>
 
         {live.status === "live" ? (
-          <p className="mt-4 font-mono text-xs text-ochre" data-testid="live-source">
+          <p className="mt-4 text-[15px] text-ochre" data-testid="live-source">
             Measured live — block {formatCount(live.block ?? 0)} · chain {mode.expectedChainId} ·{" "}
             {hostOf(mode.rpcUrl)} · {live.at}
           </p>
@@ -237,26 +237,26 @@ export function Overview(options: LiveOptions) {
           <h2 id="judges-strip-heading" className="eyebrow text-slate-700 font-semibold">
             Start here for judges
           </h2>
-          <span className="font-mono text-xs text-slate-600">Essential verification routes</span>
+          <span className="text-[15px] text-slate-600">Essential verification routes</span>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Link
             to="/verify"
-            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 font-mono text-xs text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-[15px] font-medium text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
           >
             <span>Verify a file</span>
             <span aria-hidden="true" className="text-ochre font-bold">→</span>
           </Link>
           <Link
             to="/replay"
-            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 font-mono text-xs text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-[15px] font-medium text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
           >
             <span>Watch the slash replay</span>
             <span aria-hidden="true" className="text-ochre font-bold">→</span>
           </Link>
           <Link
             to="/gate"
-            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 font-mono text-xs text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
+            className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-[15px] font-medium text-slate-800 no-underline transition-all hover:border-ochre hover:bg-white hover:text-slate-900 shadow-xs"
           >
             <span>See the gate</span>
             <span aria-hidden="true" className="text-ochre font-bold">→</span>
@@ -369,7 +369,7 @@ export function Overview(options: LiveOptions) {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 font-mono text-[13px] uppercase tracking-wider text-slate-600">
+                <tr className="border-b border-slate-200 text-[15px] uppercase tracking-wider text-slate-600">
                   <th scope="col" className="pb-2.5 font-semibold">Deal</th>
                   <th scope="col" className="pb-2.5 font-semibold">Owner</th>
                   <th scope="col" className="pb-2.5 font-semibold">Provider</th>

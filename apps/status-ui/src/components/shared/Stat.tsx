@@ -39,7 +39,7 @@ export function Stat({ value, subtitle, label, detail, className = "" }: StatPro
         <p className="mt-2 text-xs font-medium text-slate-600 sm:text-sm min-w-0">{subtitle}</p>
       </div>
       {detail ? (
-        <p className="mt-3 font-mono text-[13px] text-slate-600 border-t border-slate-100 pt-2 min-w-0">
+        <p className="mt-3 text-[15px] text-slate-600 border-t border-slate-100 pt-2 min-w-0">
           {detail}
         </p>
       ) : null}
