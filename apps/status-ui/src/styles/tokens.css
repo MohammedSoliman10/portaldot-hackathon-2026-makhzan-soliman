@@ -1,25 +1,55 @@
 /*
- * Makhzan design tokens — Voltline Analytics skin (Gold & Black brand).
- * Light platinum canvas, white rounded cards, mono numerics, dark hero panel.
+ * Makhzan design tokens — Gold & Black.
+ *
+ * The page is black, the cards are a near-black surface, and the only colour is gold. Text is a
+ * warm off-white so it reads as paper rather than as a screen. Every component should name one of
+ * the semantic tokens below; the light-era names at the bottom are aliases kept so nothing loses
+ * its colour silently.
  */
 :root {
-  --canvas: #f0f2f5;
-  --canvas-card: #ffffff;
+  /* Semantic palette — the only colours a component should name. */
+  --bg: #0a0a0a; /* the page */
+  --surface: #141414; /* cards */
+  --surface-2: #1c1c1c; /* stripes, inputs, code blocks */
+  --line: rgba(217, 164, 65, 0.28); /* decorative hairlines: table rules, inner dividers */
+  --line-strong: rgba(217, 164, 65, 0.6); /* control boundaries: cards, buttons, inputs, nav */
+  --ink: #f5f1e6; /* main text */
+  --muted: #b9b2a1; /* secondary text */
+  --gold: #d9a441;
+  --gold-bright: #ecbf5a; /* headings, big numbers, hover */
+  --on-gold: #0a0a0a; /* text that sits on a gold fill */
 
-  --ink: #0c0d10;
-  --ink-2: #181a1f;
-  --ink-3: #22252a;
-  --paper: #ffffff;
-  --paper-dim: #2c3038;
-  --ash: #475467;
-  --ash-2: #535d6e;
+  /* Status colours: distinct hues, each readable on its own dark surface. */
+  --ok: #4ade80;
+  --ok-surface: #10231a;
+  --danger: #f87171;
+  --danger-surface: #2a1414;
+  --info: #93b4d8;
+  --info-surface: #141b23;
+  --warn: #f0a04b;
+  --warn-surface: #241d10;
+  --note: #c4a7e7;
+  --note-surface: #1e1a26;
 
-  --ochre: #d9a441;
-  --ochre-dim: #94691c;
-  --red: #b91c1c;
-  --rule: #e5e7eb;
-  --rule-strong: #d1d5db;
-  --focus: #d9a441;
+  /* Glows: gold, never a light drop shadow. */
+  --glow: 0 0 0 1px var(--line-strong), 0 10px 36px -16px rgba(217, 164, 65, 0.32);
+  --glow-strong: 0 0 0 1px var(--line-strong), 0 14px 44px -14px rgba(217, 164, 65, 0.45);
+
+  /* Aliases from the light era, repointed at the dark palette. */
+  --canvas: var(--bg);
+  --canvas-card: var(--surface);
+  --ink-2: #f0ebdd;
+  --ink-3: #e4dfd0;
+  --paper: var(--ink);
+  --paper-dim: var(--muted);
+  --ash: var(--muted);
+  --ash-2: #a49d8c;
+  --ochre: var(--gold);
+  --ochre-dim: var(--line-strong);
+  --red: var(--danger);
+  --rule: var(--line);
+  --rule-strong: var(--line-strong);
+  --focus: var(--gold-bright);
 
   --step--1: 0.875rem;
   --step-0: 1rem;
@@ -37,9 +67,29 @@
 }
 
 @theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-on-gold: var(--on-gold);
+  --color-ok: var(--ok);
+  --color-ok-surface: var(--ok-surface);
+  --color-danger: var(--danger);
+  --color-danger-surface: var(--danger-surface);
+  --color-info: var(--info);
+  --color-info-surface: var(--info-surface);
+  --color-warn: var(--warn);
+  --color-warn-surface: var(--warn-surface);
+  --color-note: var(--note);
+  --color-note-surface: var(--note-surface);
+
   --color-canvas: var(--canvas);
   --color-canvas-card: var(--canvas-card);
-  --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
   --color-paper: var(--paper);
