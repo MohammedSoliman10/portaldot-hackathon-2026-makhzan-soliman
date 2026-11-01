@@ -1,0 +1,57 @@
+# 026-ui-dark-gold — Vercel PREVIEW verification
+Timestamp (UTC): 2026-11-01T20:55:42Z
+Branch: 026-ui-dark-gold @ 3362c75
+Deployment: preview (not production)
+URL: https://status-8sf2jpo83-soliman11.vercel.app
+
+## Access
+
+The project has Vercel Authentication enabled on preview deployments: a plain request gets a 302.
+Requests made with `vercel curl` (which carries the protection bypass) get 200. This is a project
+setting, unchanged by this feature.
+
+$ curl -s -o /dev/null -w '%{http_code}' https://status-8sf2jpo83-soliman11.vercel.app/
+302
+
+## Route smoke (vercel curl)
+
+| Route | HTTP |
+|:---|:---:|
+| / | 200 |
+| /deal/2 | 200 |
+| /verify | 200 |
+| /proof | 200 |
+| /gate | 200 |
+| /judges | 200 |
+| /replay | 200 |
+| /receipt/1 | 200 |
+| /receipt/2 | 200 |
+
+## Deployed CSS carries the palette
+
+Bundle: assets/index-DF975Xvn.css (82,513 B)
+- `#0a0a0a`: 1 occurrence(s)
+- `#141414`: 1 occurrence(s)
+- `#1c1c1c`: 1 occurrence(s)
+- `#d9a441`: 1 occurrence(s)
+- `#ecbf5a`: 1 occurrence(s)
+- `#f5f1e6`: 1 occurrence(s)
+- `#b9b2a1`: 1 occurrence(s)
+- `color-scheme:dark`: 1 occurrence(s)
+- solid `bg-white` rule: none; only `.bg-white/10` and `.bg-white/20` translucent overlays on dark panels
+
+## Build environment took effect
+
+Bundle: assets/index-Dyqptxe4.js (668,067 B)
+- `test-evm-rpc-v3.portaldot.dev`: present (1)
+- `0x60481DFcFCA34A8F095939D9675eC715127B2e44`: present (1)
+- `420420777`: present (1)
+- `LIVE`: present (2)
+
+## Note
+
+The visual, contrast and overflow audit in contrast-audit.md/.txt was run against the local build
+of this same commit with the same VITE_MAKHZAN_* values. Rendering on the protected preview was
+not re-measured in a browser because the preview requires a Vercel login; what is verified here is
+that every route serves the shell and that the deployed CSS/JS carry the dark palette and the live
+build configuration.
