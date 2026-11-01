@@ -6,21 +6,21 @@ describe("025-ui-polish: UI Readability and Polish", () => {
   it("Task 1: Mono only for data - captions, footer lines, subtitles, and 'Measured live' are sans at 15px", () => {
     const statSrc = readFileSync(resolve(__dirname, "../src/components/shared/Stat.tsx"), "utf8");
     // Stat footer detail line must not be font-mono and must be 15px
-    expect(statSrc).not.toMatch(/detail[\s\S]*?font-mono/);
-    expect(statSrc).toMatch(/detail[\s\S]*?text-\[15px\]/);
+    expect(statSrc).not.toMatch(/\{detail \?[\s\S]*?font-mono[\s\S]*?<\/p>/);
+    expect(statSrc).toMatch(/\{detail \?[\s\S]*?text-\[15px\][\s\S]*?<\/p>/);
 
     // Measured live lines must not be font-mono and must be 15px
     const dealSrc = readFileSync(resolve(__dirname, "../src/pages/Deal.tsx"), "utf8");
-    expect(dealSrc).not.toMatch(/deal-live[\s\S]*?font-mono/);
-    expect(dealSrc).toMatch(/deal-live[\s\S]*?text-\[15px\]/);
+    expect(dealSrc).not.toMatch(/data-testid="deal-live"[^>]*font-mono/);
+    expect(dealSrc).toMatch(/data-testid="deal-live"[^>]*text-\[15px\]/);
 
     const judgesSrc = readFileSync(resolve(__dirname, "../src/pages/Judges.tsx"), "utf8");
-    expect(judgesSrc).not.toMatch(/judges-live[\s\S]*?font-mono/);
-    expect(judgesSrc).toMatch(/judges-live[\s\S]*?text-\[15px\]/);
+    expect(judgesSrc).not.toMatch(/data-testid="judges-live"[^>]*font-mono/);
+    expect(judgesSrc).toMatch(/data-testid="judges-live"[^>]*text-\[15px\]/);
 
     const overviewSrc = readFileSync(resolve(__dirname, "../src/pages/Overview.tsx"), "utf8");
-    expect(overviewSrc).not.toMatch(/live-source[\s\S]*?font-mono/);
-    expect(overviewSrc).toMatch(/live-source[\s\S]*?text-\[15px\]/);
+    expect(overviewSrc).not.toMatch(/<p[^>]*data-testid="live-source"[^>]*font-mono|<p[^>]*font-mono[^>]*data-testid="live-source"/);
+    expect(overviewSrc).toMatch(/<p[^>]*data-testid="live-source"[^>]*text-\[15px\]|<p[^>]*text-\[15px\][^>]*data-testid="live-source"/);
 
     // Footer lines must not be font-mono
     const footerSrc = readFileSync(resolve(__dirname, "../src/components/layout/Footer.tsx"), "utf8");
