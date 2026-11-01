@@ -91,7 +91,7 @@ export function Proof(options: LiveOptions) {
               resolve.
             </caption>
             <thead>
-              <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-400">
+              <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-600">
                 <th scope="col" className="pb-2.5 font-semibold">Field</th>
                 <th scope="col" className="pb-2.5 font-semibold">Value</th>
                 <th scope="col" className="pb-2.5 font-semibold">Label</th>
@@ -176,7 +176,7 @@ export function Proof(options: LiveOptions) {
             </colgroup>
             <caption>The bond is read from providerOf(provider 1) on every refresh.</caption>
             <thead>
-              <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-400">
+              <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-600">
                 <th scope="col" className="pb-2.5 font-semibold">Field</th>
                 <th scope="col" className="pb-2.5 font-semibold">Value</th>
                 <th scope="col" className="pb-2.5 font-semibold">Label</th>

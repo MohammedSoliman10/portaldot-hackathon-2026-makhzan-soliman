@@ -35,7 +35,7 @@ function Line({
           <Chip label={label} />
         </div>
         {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
-        <p className="mt-1 text-[13px] text-slate-400">
+        <p className="mt-1 text-[13px] text-slate-600">
           <a className="link-quiet underline hover:text-slate-900" href={href}>
             evidence
           </a>
@@ -147,7 +147,7 @@ export function Judges(options: LiveOptions) {
           Everything here is read-only: no wallet, no key, no transaction.
         </p>
         {live.status === "live" ? (
-          <p className="mt-3 font-mono text-xs text-ochre font-semibold" data-testid="judges-live">
+          <p data-testid="judges-live" className="mt-3 font-mono text-xs text-amber-800 font-semibold">
             Measured live — block {formatCount(live.block ?? 0)} · chain {mode.expectedChainId} · {live.at}
           </p>
         ) : null}

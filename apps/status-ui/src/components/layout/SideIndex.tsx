@@ -32,7 +32,7 @@ export function SideIndex() {
                     : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 font-medium"
                 }`}
               >
-                <span className={active ? "text-amber-400 font-bold" : "text-slate-400"}>
+                <span className={active ? "text-amber-400 font-bold" : "text-slate-600 font-semibold"}>
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span>{route.label}</span>

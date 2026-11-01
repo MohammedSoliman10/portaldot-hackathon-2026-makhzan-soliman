@@ -70,7 +70,7 @@ function Row({
 function TableHead() {
   return (
     <thead>
-      <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-400">
+      <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-600">
         <th scope="col" className="pb-2.5 font-semibold">Field</th>
         <th scope="col" className="pb-2.5 font-semibold">Value</th>
         <th scope="col" className="pb-2.5 font-semibold">Label</th>
@@ -237,7 +237,7 @@ export function Overview(options: LiveOptions) {
           <h2 id="judges-strip-heading" className="eyebrow text-slate-700 font-semibold">
             Start here for judges
           </h2>
-          <span className="font-mono text-xs text-slate-400">Essential verification routes</span>
+          <span className="font-mono text-xs text-slate-600">Essential verification routes</span>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Link
@@ -369,7 +369,7 @@ export function Overview(options: LiveOptions) {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 font-mono text-[13px] uppercase tracking-wider text-slate-400">
+                <tr className="border-b border-slate-200 font-mono text-[13px] uppercase tracking-wider text-slate-600">
                   <th scope="col" className="pb-2.5 font-semibold">Deal</th>
                   <th scope="col" className="pb-2.5 font-semibold">Owner</th>
                   <th scope="col" className="pb-2.5 font-semibold">Provider</th>

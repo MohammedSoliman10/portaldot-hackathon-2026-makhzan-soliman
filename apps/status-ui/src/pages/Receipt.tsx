@@ -20,7 +20,7 @@ function Row({ field, value, unit, detail, label, source }: ReceiptRow) {
     <tr data-testid={`receipt-row-${slug(field)}`}>
       <td className="py-3.5 break-words text-slate-700">
         <span className="font-medium">{field}</span>
-        <p className="mono mt-1 break-all font-mono text-[13px] text-slate-400 sm:hidden">{source}</p>
+        <p className="mono mt-1 break-all font-mono text-[13px] text-slate-600 sm:hidden">{source}</p>
       </td>
       <td className="numeral py-3.5 font-mono">
         <span className="font-semibold text-slate-900">{value}</span>
@@ -30,7 +30,7 @@ function Row({ field, value, unit, detail, label, source }: ReceiptRow) {
       <td className="py-3.5">
         <Chip label={label} />
       </td>
-      <td className="mono hidden py-3.5 break-words font-mono text-xs text-slate-400 sm:table-cell">{source}</td>
+      <td className="mono hidden py-3.5 break-words font-mono text-xs text-slate-600 sm:table-cell">{source}</td>
     </tr>
   );
 }
@@ -198,7 +198,7 @@ export function Receipt() {
                   </td>
                   <td className="mono py-3 break-all font-mono text-xs">
                     {tx.hash === null ? (
-                      <span className="text-slate-400">no hash recorded</span>
+                      <span className="text-slate-600">no hash recorded</span>
                     ) : (
                       <a className="link-quiet underline hover:text-amber-700 transition-colors" href={transactionHref(bundle, tx.hash)}>
                         {tx.hash}

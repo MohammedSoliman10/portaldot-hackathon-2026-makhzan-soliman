@@ -70,7 +70,7 @@ function Field({
           <Chip label={label} />
         </div>
         {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
-        <p className="mono mt-1 break-words text-[13px] text-slate-400">{source}</p>
+        <p className="mono mt-1 break-words text-[13px] text-slate-600">{source}</p>
       </dd>
     </div>
   );

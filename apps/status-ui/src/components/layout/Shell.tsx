@@ -13,7 +13,7 @@ function Wordmark() {
   return (
     <Link to="/" className="group inline-flex items-baseline gap-2 no-underline" aria-label="Makhzan, home">
       <span className="text-sm font-bold tracking-[0.28em] text-slate-900 group-hover:text-amber-600 transition-colors">MAKHZAN</span>
-      <span className="text-xs text-slate-400 font-medium">مخزن</span>
+      <span className="text-xs text-slate-600 font-medium">مخزن</span>
     </Link>
   );
 }

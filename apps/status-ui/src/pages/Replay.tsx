@@ -37,7 +37,7 @@ function Step({
           <dt className="text-xs font-mono uppercase text-slate-500">Transaction</dt>
           <dd className="mono break-all text-xs font-medium text-slate-800 mt-0.5">
             {step.tx === null ? (
-              <span className="text-slate-400">no transaction — nothing was sent</span>
+              <span className="text-slate-600">no transaction — nothing was sent</span>
             ) : (
               <a className="link-quiet underline hover:text-slate-900" href={bundleHref}>
                 {step.tx}
@@ -232,11 +232,11 @@ export function Replay() {
                     : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
                 }`}
               >
-                <span className={`mr-2.5 font-bold ${position === index ? "text-amber-400" : "text-slate-400"}`}>
+                <span className={`mr-2.5 font-bold ${position === index ? "text-amber-400" : "text-slate-600 font-semibold"}`}>
                   {position + 1}.
                 </span>
                 <span>{item.title}</span>
-                <span className={`ml-3 text-[13px] ${position === index ? "text-slate-300" : "text-slate-400"}`}>
+                <span className={`ml-3 text-[13px] ${position === index ? "text-slate-300" : "text-slate-600 font-medium"}`}>
                   block {formatCount(item.block)}
                 </span>
               </button>

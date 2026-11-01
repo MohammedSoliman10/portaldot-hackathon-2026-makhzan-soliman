@@ -87,7 +87,7 @@ export function MobileNav() {
                         : "text-slate-700 hover:bg-slate-100 font-medium"
                     }`}
                   >
-                    <span className={active ? "text-amber-400 font-bold" : "text-slate-400"}>
+                    <span className={active ? "text-amber-400 font-bold" : "text-slate-600 font-semibold"}>
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span>{route.label}</span>
