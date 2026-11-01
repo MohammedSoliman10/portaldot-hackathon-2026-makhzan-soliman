@@ -236,7 +236,7 @@ export function Replay() {
                   {position + 1}.
                 </span>
                 <span>{item.title}</span>
-                <span className={`ml-3 text-[11px] ${position === index ? "text-slate-300" : "text-slate-400"}`}>
+                <span className={`ml-3 text-[13px] ${position === index ? "text-slate-300" : "text-slate-400"}`}>
                   block {formatCount(item.block)}
                 </span>
               </button>

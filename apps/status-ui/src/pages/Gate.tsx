@@ -32,7 +32,7 @@ function Field({
           {unit ? <span className="text-slate-500"> {unit}</span> : null}
           <Chip label="MEASURED" />
         </div>
-        {detail ? <p className="mono mt-1 break-all text-[11px] text-slate-500">{detail}</p> : null}
+        {detail ? <p className="mono mt-1 break-all text-[13px] text-slate-500">{detail}</p> : null}
       </dd>
     </div>
   );

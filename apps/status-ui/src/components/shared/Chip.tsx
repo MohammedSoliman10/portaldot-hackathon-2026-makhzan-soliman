@@ -31,7 +31,7 @@ export function Chip({ label, tone, children, className = "" }: ChipProps) {
 
   return (
     <span
-      className={`label-chip inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium tracking-wide uppercase whitespace-nowrap ${toneClass} ${className}`}
+      className={`label-chip inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[13px] font-medium tracking-wide uppercase whitespace-nowrap ${toneClass} ${className}`}
       data-label={label}
     >
       {label === "MEASURED" ? (

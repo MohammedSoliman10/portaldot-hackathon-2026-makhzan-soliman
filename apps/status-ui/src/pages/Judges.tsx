@@ -35,7 +35,7 @@ function Line({
           <Chip label={label} />
         </div>
         {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
-        <p className="mt-1 text-[11px] text-slate-400">
+        <p className="mt-1 text-[13px] text-slate-400">
           <a className="link-quiet underline hover:text-slate-900" href={href}>
             evidence
           </a>

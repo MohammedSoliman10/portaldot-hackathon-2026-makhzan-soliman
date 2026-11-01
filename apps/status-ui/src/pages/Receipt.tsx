@@ -20,7 +20,7 @@ function Row({ field, value, unit, detail, label, source }: ReceiptRow) {
     <tr data-testid={`receipt-row-${slug(field)}`}>
       <td className="py-3.5 break-words text-slate-700">
         <span className="font-medium">{field}</span>
-        <p className="mono mt-1 break-all font-mono text-[10px] text-slate-400 sm:hidden">{source}</p>
+        <p className="mono mt-1 break-all font-mono text-[13px] text-slate-400 sm:hidden">{source}</p>
       </td>
       <td className="numeral py-3.5 font-mono">
         <span className="font-semibold text-slate-900">{value}</span>

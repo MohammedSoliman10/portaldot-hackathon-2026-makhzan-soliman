@@ -43,7 +43,7 @@ function Field({
           <Chip label={label} />
         </div>
         {detail ? <p className="mono mt-1 break-all text-xs text-slate-500">{detail}</p> : null}
-        <p className="mono mt-1 break-words text-[11px] text-slate-400">{source}</p>
+        <p className="mono mt-1 break-words text-[13px] text-slate-400">{source}</p>
       </dd>
     </div>
   );
@@ -86,7 +86,7 @@ function DealCard({
               Deal {deal.id}
             </h2>
             {selected ? (
-              <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-amber-900 border border-amber-200">
+              <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[13px] font-semibold text-amber-900 border border-amber-200">
                 selected
               </span>
             ) : null}
@@ -231,7 +231,7 @@ function LiveDealCard({
             <h2 className="text-xl font-bold tracking-tight text-slate-900">
               Deal {dealId}
             </h2>
-            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-amber-900 border border-amber-200">
+            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-[13px] font-semibold text-amber-900 border border-amber-200">
               selected
             </span>
           </div>
@@ -249,7 +249,7 @@ function LiveDealCard({
         <p className="font-medium">
           The full story and receipts exist only for recorded deals 1 and 2.
         </p>
-        <p className="mt-1 text-[11px] text-amber-800/80">
+        <p className="mt-1 text-[13px] text-amber-800/80">
           This deal was read directly from chain {chainId} at block {formatCount(live.block ?? 0)}.
         </p>
       </div>

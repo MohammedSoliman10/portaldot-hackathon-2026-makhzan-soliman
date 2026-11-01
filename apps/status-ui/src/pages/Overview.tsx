@@ -70,7 +70,7 @@ function Row({
 function TableHead() {
   return (
     <thead>
-      <tr className="border-b border-slate-200 text-left font-mono text-[11px] uppercase tracking-wider text-slate-400">
+      <tr className="border-b border-slate-200 text-left font-mono text-[13px] uppercase tracking-wider text-slate-400">
         <th scope="col" className="pb-2.5 font-semibold">Field</th>
         <th scope="col" className="pb-2.5 font-semibold">Value</th>
         <th scope="col" className="pb-2.5 font-semibold">Label</th>
@@ -369,7 +369,7 @@ export function Overview(options: LiveOptions) {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 font-mono text-[11px] uppercase tracking-wider text-slate-400">
+                <tr className="border-b border-slate-200 font-mono text-[13px] uppercase tracking-wider text-slate-400">
                   <th scope="col" className="pb-2.5 font-semibold">Deal</th>
                   <th scope="col" className="pb-2.5 font-semibold">Owner</th>
                   <th scope="col" className="pb-2.5 font-semibold">Provider</th>
@@ -402,7 +402,7 @@ export function Overview(options: LiveOptions) {
                         to={`/deal/${deal.id}`}
                         className="text-ochre hover:underline inline-flex items-center gap-1"
                       >
-                        Deal {deal.id} <span aria-hidden="true" className="text-[10px]">→</span>
+                        Deal {deal.id} <span aria-hidden="true" className="text-[13px]">→</span>
                       </Link>
                     </td>
                     <td className="py-3 font-mono text-xs text-slate-700">
