@@ -1,0 +1,34 @@
+# Deployed verification on https://status-ui-one.vercel.app
+Timestamp (UTC): 2026-11-02T15:29:44.308Z
+Favicon: /favicon.ico -> HTTP 200
+Apple Touch Icon: /apple-touch-icon.png -> HTTP 200
+
+[1440px] / scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /deal/2 scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /verify scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /proof scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /gate scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /judges scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /replay scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /receipt/1 scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1440px] /receipt/2 scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] / scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /deal/2 scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /verify scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /proof scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /gate scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /judges scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /replay scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /receipt/1 scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[1024px] /receipt/2 scrollWidth=1024 viewport=1024 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] / scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /deal/2 scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /verify scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /proof scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /gate scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /judges scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /replay scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /receipt/1 scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+[390px] /receipt/2 scrollWidth=390 viewport=390 overflow=0px contrastFailures=0 smallText=0 lightSurfaces=0
+
+SUMMARY routes=27 contrastFailures=0 smallTextUnder14=0 labelChipsAt13px=438 favicons=PASS
