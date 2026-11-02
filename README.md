@@ -563,7 +563,7 @@ transport, plus a scripted client that calls every tool over stdio against the l
 
 ## Built with AI assistance
 
-This project was built with AI assistance across all development stages, with human engineering direction, architecture specification, review, and verification. AI-assisted commits carry `[ai]` in their commit messages (over 380 commits).
+This project was built with AI assistance across all development stages, with human engineering direction, architecture specification, review, and verification. AI-assisted commits carry `[ai]` in their commit messages (over 400 commits).
 
 - **Tooling & Environments:** Initial specifications, scaffolding, and Tier-0/Tier-1 contract skeletons were generated using **opencode** paired with [GitHub Spec Kit](https://github.com/github/spec-kit) (`specify-cli`). Advanced agentic implementation, StorageGate escrow extensions, read-only MCP agent server (`apps/makhzan-mcp`), comprehensive test suites (unit, fuzz, invariant, live scripted clients), mobile accessibility polish, and live audit workflows were developed with **Google Antigravity** using **Claude and Gemini models**.
 - **Human Oversight:** The solo builder directed every architectural decision, established all invariant rules, verified live testnet deployments against Portaldot V3, and reviewed every batch checkpoint before merging.
