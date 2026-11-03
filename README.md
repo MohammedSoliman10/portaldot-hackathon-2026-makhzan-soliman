@@ -236,7 +236,12 @@ cd apps/status-ui && npm ci && npm test && npm run dev
 
 See [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) for full analysis:
 - **One block at one moment:** A passed challenge proves possession of one 1 KiB block during the window, not continuous disk storage.
+- **Only the deal owner can challenge:** `challenge(dealId)` restricts caller to `deal.owner`; a third party cannot challenge a bad provider, and only the deal owner is paid from the slashed bond.
 - **Challenge index & entropy:** Derived via D5 fallback (`keccak256(blockhash(n-1), prevrandao, dealId) % leafCount`). While Discord confirmed YES to `block.prevrandao`, our read-only audit measured `mixHash` as constant `0x8e1bc9bf04000` across 37 blocks (and opcode `0x44` dry-runs return the same constant). Thus, randomness relies on the parent blockhash and deal ID: unpredictable before block creation, but not VRF-grade and biasable by block producers.
+- **Fixed challenge window:** The 50-block window (~300 s at 6 s blocks) is a deployed constant. About 6 rounds fit a 300-block demo deal; real deals get 288 rounds per day.
+- **Health semantics & gate visibility:** `healthOf == 1` means "no open challenge", not "file stored". The gate sees current state only; once a default is resolved, `healthOf` returns to 1, and `minBond` is how it notices a past slash.
+- **Demo pricing:** The 5 tPOT price is a demo value, not a tariff. It was set to make the live runs legible, not from market economics.
+- **Guarded CLI & simulation:** The live gate demo used guarded CLI commands (`apps/makhzan`); the 3 refusals (`Expired`, `BondTooLow`, `RefundNotAllowed`) were shown by `eth_call` pre-broadcast simulation with 0 gas spent.
 - **Identical blocks:** Leaf commits bytes without position; identical blocks share proofs.
 - **Shared bond ceiling:** One provider bond backs all deals under management.
 - **Same-transaction gate check:** `StorageGate` reads health at execution; later slashes cannot retroactively undo a release.
