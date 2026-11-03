@@ -1,264 +1,60 @@
 # Makhzan
 
-> **Start here:** [Live Web App](https://status-ui-one.vercel.app/) · Makhzan: [`0x60481DFcFCA34A8F095939D9675eC715127B2e44`](https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44) · StorageGate: [`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`](https://pindex.onrender.com/app/?q=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA) · **3 verify steps:** 1. [`/verify`](https://status-ui-one.vercel.app/verify) (hash sample in browser against live deal 2) → 2. [`/replay`](https://status-ui-one.vercel.app/replay) (watch live challenge & 20% slash timeline) → 3. [`/gate`](https://status-ui-one.vercel.app/gate) (inspect live StorageGate locks).
+Bonded, challenge-verified storage on Portaldot: a provider stakes tPOT, and a client can prove a missing block on-chain and be paid from the bond.
 
-**Bonded, challenge-verified storage on Portaldot: a provider stakes tPOT, and a client can prove a
-missing block and be paid from the bond.**
+**Status:** Live on Portaldot V3 testnet, chain 420420777 · **873 tests** (208 contracts · 339 UI · 181 CLI · 68 MCP · 49 gates · 28 scripts) · **5 live deals** (all settled) · **20% slash** (6 tPOT)
 
-- **Team:** Mohammed Soliman (solo builder)
-- **Repository:** https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman
-- **Live Makhzan contract (Portaldot V3 testnet, chain `420420777`):** `0x60481DFcFCA34A8F095939D9675eC715127B2e44`
-- **Live StorageGate contract (Portaldot V3 testnet, chain `420420777`):** `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`
-- **Status:** **full live run complete [live run]**: contract deployed, provider-1 registered, deal A
-  passed and was claimed/settled, deal B passed with the fixed daemon, then a skipped second challenge
-  was resolved with exactly 20% slashed to the owner, and deal B was claimed/settled. The first live
-  pass exposed daemon defect T1-002 (a 15 s receipt wait mislabelled a landed answer); it is fixed and
-  the re-run is clean. A fresh read-only client then retrieved the 1 MiB file as 1,024 blocks, verified
-  every block against the on-chain root, and reproduced the upload sha256; a tampered copy was rejected.
-  StorageGate live demo complete: deals 3, 4, and 5 exercised across 11 transactions (lock, release,
-  refusals, post-term refund, claims, settles) with total fees of 50.205185 tPOT and gate balance at 0.
-  Everything not marked `[live run]` is local evidence.
+[Try It in 60s](#try-it-in-60-seconds) · [Screenshots](#screenshots) · [Problem & Solution](#problem-and-solution) · [How It Works](#how-it-works) · [Live Results](#live-results) · [Live Gate Demo](#live-gate-demo) · [Verify It Yourself](#verify-it-yourself) · [Consumer Layer](#consumer-layer) · [Why Portaldot V3](#why-portaldot-v3) · [Quickstart](#quickstart) · [Security & Limits](#security-and-honest-limits) · [Economics & Project Info](#economics)
 
-## The problem
+---
 
-A storage deal is a promise about bytes the client cannot see. Today the client either trusts the
-provider or pays for a full audit. Settling "did you really keep block 7?" on-chain needs four things:
-a compact commitment to the file, a bounded window to ask, a verifiable answer, and a penalty that
-actually pays the wronged client. Makhzan implements those four pieces with a small contract and a
-CLI/daemon pair.
+## Try it in 60 seconds
 
-## How it works, in plain words
+- **Status Web App (Live):** [status-ui-one.vercel.app](https://status-ui-one.vercel.app/)
+- **Verify in Browser (`/verify`):** [status-ui-one.vercel.app/verify](https://status-ui-one.vercel.app/verify) — recompute 1 MiB Merkle root against live deal 2; flip 1 byte to reject.
+- **For Judges (`/judges`):** [status-ui-one.vercel.app/judges](https://status-ui-one.vercel.app/judges) — direct verification index, contract facts, and proof hashes.
+- **Makhzan Core:** [`0x60481DFcFCA34A8F095939D9675eC715127B2e44`](https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44) *(third-party lookup: Pindex)*
+- **StorageGate:** [`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`](https://pindex.onrender.com/app/?q=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA) *(third-party lookup: Pindex)*
 
-1. **Commit.** The client splits the file into fixed **1 KiB blocks**, builds a Merkle tree, and calls
-   `createDeal(providerId, root, leafCount, size, durationBlocks, price)` with the price in native
-   tPOT. The root and the size are on-chain; the bytes stay with the provider.
-2. **Bond.** A provider registers with a bond (`registerProvider`, at least `minBond`). The bond is
-   the money at risk; the same bond backs every deal that provider holds.
-3. **Challenge.** Within the deal's life the client can open one challenge per deal. The contract
-   picks a leaf index from `keccak256(blockhash(block.number - 1), prevrandao, dealId) % leafCount`
-   and stores a **50-block deadline**.
-4. **Answer.** The provider daemon rebuilds the Merkle path for that block and submits the 1 KiB block
-   plus the path. The contract recomputes the root and checks the index, the path length and the
-   bytes. A correct answer closes the challenge with **no bond movement**.
-5. **Slash.** If the deadline passes without an answer, anyone may call `resolve`. Exactly
-   **`slashBps` (2,000 bps = 20%) of the bond** is slashed and credited to the deal owner in
-   `WEI_PER_UNIT` accounting. A late or wrong answer cannot rescue the round.
-6. **Pay.** After the end block, the provider calls `claim` to take its accrued price (claim is
-   provider-only and does **not** move the bond), then the owner calls `settle` to release the deal.
-   `healthOf(dealId)` exposes `0` unknown/settled, `1` healthy, `2` challenge pending, `3` in default
-   so other contracts can gate on availability without decoding storage.
+## Screenshots
 
-The daemon never trusts its own tx hash: after sending it re-reads `challengeStateOf` and the provider
-bond, and only then labels the round `passed` or `failed`.
+| Live Deals Overview (`/`) | In-Browser Merkle Verification (`/verify`) |
+| :---: | :---: |
+| ![Makhzan Live Deals Overview](docs/img/overview.png) | ![Makhzan In-Browser Merkle Verification](docs/img/verify.png) |
 
-### Why not TransactionStorage
+## Problem and solution
 
-Portaldot's own `TransactionStorage` pallet is the obvious first candidate: metadata read at spec
-`3002` shows `store`, `renew` and `checkProof`, an `8 MiB` per-transaction limit and a `100,800`-block
-retention `[measured]` (`evidence/raw/t1/78-chain-facts.txt`). The bytes go into blocks, but the
-pallet's metadata exposes no client-facing promise, payment, bond or penalty entry point: there is no
-call for a client to name a provider, escrow a price for that provider, or slash a bond when a block
-is missing `[design note]`. Makhzan adds exactly those pieces on the EVM side: a bonded provider, a
-random challenge, a 20% slash and `healthOf(dealId)` as a gate other contracts can read. The pallet
-does show what storage costs: a dry-run `store` of `1 MiB` quoted `104.86915567090586 tPOT` and
-`4 MiB` quoted `419.44210364626048 tPOT` `[measured]`.
+1. Off-chain storage protocols offer invoices and uptime dashboards, but clients have no way to audit custody or punish missing data on-chain.
+2. A hash check in a private console proves data existed only at the moment of checking and cannot be verified by third parties without sharing private keys.
+3. Makhzan turns storage promises into cryptographic commitments by dividing files into 1 KiB leaves committed under an on-chain Merkle root.
+4. Storage providers stake a native tPOT bond that is held directly at risk throughout the deal's duration.
+5. If a provider fails to produce a challenged 1 KiB block and its Merkle path within 50 blocks (300 s), exactly 20% of the bond is slashed on-chain and credited to the client.
 
-## Portaldot V3 features used
+## How it works
 
-- **EVM via pallet-revive.** The contract is ordinary Solidity (`solc`, `via_ir = true`), deployed as
-  EVM bytecode to the Portaldot V3 testnet over `eth_sendRawTransaction`. The live `eth_estimateGas`
-  and the deploy transaction both accepted the IR bytecode.
-- **Native tPOT value with the 10,000 wei unit factor.** Deal price and bond are stored in **native
-  units**; `msg.value = units × 10,000 wei`. The factor `WEI_PER_UNIT = 10_000` was confirmed on the
-  live chain in Tier 0 and is used unchanged in the contract, CLI and deploy script.
-- **Account mapping.** The same H160 is mapped to a Substrate account on Portaldot. The deployed
-  contract address `0x60481D…2e44` maps to `5EEwsqgiEVZNUdUHdmsEMqBQzJjNy5PULPBYoo5yF2GX45DZ`
-  (`accountId32 = h160 ‖ 0xee × 12`, SS58 prefix `42`; confirmed by an exact native/EVM balance
-  reconciliation in `evidence/raw/t1/79-account-mapping-deposits.txt`). Keys stay in the environment;
-  the wrapper never prints or stores one.
-
-Measured caveats that cost us real debugging time — via IR acceptance, the `0.0807 tPOT` per runtime
-byte deploy cost, the observed gas-price band, the `10,000 wei` factor with the `0.1 tPOT` existential
-deposit, the `15 s` receipt trap (T1-002), the three custom selectors, the account mapping, the
-storage-deposit split and the absence of any answer/settle refund — are collected in
-[docs/V3-GOTCHAS.md](docs/V3-GOTCHAS.md), each with its evidence file.
-
-## Deployment — Portaldot V3 testnet `[live run]`
-
-| Field | Value |
-| --- | --- |
-| Chain id | `420420777` |
-| RPC | `https://test-evm-rpc-v3.portaldot.dev` |
-| Contract | `0x60481DFcFCA34A8F095939D9675eC715127B2e44` |
-| Deployer | `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` |
-| Deploy tx | `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7` |
-| Block | `171308` (finalized block `171311` observed afterwards) |
-| Status / gas | `success` / `16262870374998956` gas, effective price `32580` wei |
-| Estimate → measured | `538.123540 tPOT` → `529.844316817465986480 tPOT` |
-| Cost split `[inferred from reconciliation]` | `165.513 tPOT` reserved storage deposit in the contract + `364.331316817465986480 tPOT` execution fees |
-| Ratio vs calibration | `0.9846146412530473` vs Tier 0 `0.984608251872` (+0.00065%) |
-| Owner balance after | `199.435042290680279745 tPOT` (100 tPOT reserve intact) |
-| Runtime / creation | `6,566 B` / `7,154 B` (budget `10,240 B`) |
-| Runtime code hash | `0x115036eac836fca78bef7824fb0d0834ccf3d9d7f9663fe154c36e91f7d26a98` |
-| `verify:deployment` | **match**, 6,566 B runtime = 6,566 B artifact, `firstDiff: null` |
-| Config read back | window `50`, block size `1024`, slash `2000 bps`, min bond `1e15 units` (`1e19` wei), duration `100…100800` |
-
-### StorageGate Deployment — Portaldot V3 testnet `[live run]`
-
-| Field | Value |
-| --- | --- |
-| Chain id | `420420777` |
-| RPC | `https://test-evm-rpc-v3.portaldot.dev` |
-| Contract | `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` |
-| Target Makhzan | `0x60481DFcFCA34A8F095939D9675eC715127B2e44` |
-| Deployer | `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` |
-| Deploy tx | `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7` |
-| Block | `240956` |
-| Status / gas | `success` / `7692259825084675` gas, effective price `27375` wei |
-| Measured cost | `210.575612711692978125 tPOT` |
-| Runtime bytes | `2,528 B` |
-| Runtime code hash | `0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5` |
-| `makhzan()` read-back | `0x60481DFcFCA34A8F095939D9675eC715127B2e44` (matches target) |
-| Evidence | `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/receipts/live/0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7.json`, `evidence/raw/t2/126-gate-live-verify.txt` |
-
-**Live contracts.** Confirmed deep links:
-
-- Scanner block page: <https://scanner-testnet-v3.portaldot.dev/blocks/171308>. The route returns HTTP
-  `200`, and its backend (`https://scanner-testnet-v3-api.portaldot.dev/blocks/171308`) returns height
-  `171308` with hash `0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98`, identical
-  to `chain.getBlockHash(171308)`. The page is a client-rendered SPA, so the route and its data are
-  confirmed, not a screenshot (`evidence/raw/t1/78-chain-facts.txt`).
-- Community address lookup (third-party):
-  <https://pindex.onrender.com/app/?q=0x60481DFcFCA34A8F095939D9675eC715127B2e44> (the page performs
-  the lookup client-side; the API returns the mapped account).
-
-Pindex **does not have a confirmed transaction-hash route** — its 64-hex search treats the value as a
-block hash — so search the address above or block **`171308`**. The official Portaldot node console (Polkadot.js explorer)
-<https://node-console.portaldot.dev/> has no confirmed deep-link format; open it and search the same
-address or block. The tx hash is shown as plain text above; no URL pattern is invented.
-
-**Evidence** (all committed):
-
-- `evidence/raw/t1/59-live-deploy.txt` — deploy facts, measured drop, ratio, config read-back
-- `evidence/deployments/live-420420777-20261024-065714Z.json` — deployment record
-- `evidence/receipts/live/0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7.json` — raw receipt
-- `evidence/verify-deployment.json` — byte-for-byte code verification
-- `evidence/raw/t1/58-live-gate.txt`, `59-doctor-after-deploy.txt`, `59-pending-{sending,sent}.json`
-- Tier 0 calibration: `evidence/calibration.json` (ratio `0.984608251872`)
-
-**Live run [live run].** Provider-1 registered with a 30 tPOT bond (tx
-`0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91`), deal A was created at block
-`172266` (tx `0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1`), challenge 1
-opened at index `451` (tx `0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda`), and
-the daemon's answer landed at block `172295` (tx
-`0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3`) before the `172331`
-deadline. On-chain the round passed: `healthOf(1) = 1`, the bond stayed at 30 tPOT.
-
-That first pass exposed T1-002: the daemon's 15 s receipt wait timed out before the answer was mined,
-it had not persisted the hash, and it labelled the closed round `unanswered`. The fix persists the
-hash before any wait, uses a receipt timeout of at least 120 s (600 s in the live rerun), and keeps a
-timed-out round `submitted` until a later receipt and read-back resolve it.
-
-After the fix the full live path ran:
-
-- **Deal A close.** Claim tx `0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b`
-  (block `172557`) paid the provider the full 5 tPOT; settle tx
-  `0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3` (block `172564`) set health
-  to `0`; the bond did not move.
-- **Deal B pass.** Deal 2 was created at block `172578` (tx
-  `0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3`, end `172878`). Challenge
-  index `29` (tx `0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb`, block
-  `172584`) was answered at block `172585` (tx
-  `0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210`). The daemon state became
-  `passed` only after the receipt and read-back; `healthOf(2) = 1` and the bond did not move. The
-  raw answer receipt is in `txs.json`.
-- **Deal B slash.** A second challenge, index `623` (tx
-  `0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db`, block `172602`,
-  deadline `172652`), was left unanswered by the skip-mode daemon: health was `2` during the window
-  and `3` after it. Resolve tx
-  `0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3` (block `172658`) slashed
-  exactly 6 tPOT (30 -> 24 tPOT, 20%) and credited the owner exactly 6 tPOT. The daemon labelled the
-  round `failed`.
-- **Deal B close.** Claim tx
-  `0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee` (block `172881`) paid the
-  provider 5 tPOT; settle tx
-  `0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec` (block `172887`) set health
-  to `0`; the remaining bond stayed at 24 tPOT.
-- **Refusals.** Free `eth_call` checks returned the custom selectors `0x30cd7471` (NotOwner),
-  `0x3480e2b2` (NotProvider) and `0x019af637` (BadParams), so R2 is yes.
-
-Final measured balances: owner `172229122908433355700` wei, provider-1
-`27993410962002459140` wei, provider bond `2400000000000000` units. A keyless
-`makhzan verify 1` and `makhzan verify 2` re-read the chain and printed `RESULT: PASS` for both deals
-(`evidence/raw/t1/76-verify-deal1.txt`, `77-verify-deal2.txt`). Evidence:
-`evidence/raw/t1/60-live-pass.txt`, `62-live-register.txt`, `63-live-refusals.txt`,
-`64-live-claim-a.txt` through `72-live-summary.txt`, plus the raw receipts under
-`evidence/receipts/live/`.
-
-Read-only chain facts gathered after the run — `TransactionStorage` metadata and fees, block
-`171308` on the scanner, the account mapping and the storage-deposit split — are in
-`evidence/raw/t1/78-chain-facts.txt` and `79-account-mapping-deposits.txt`.
-
-## Live gate demo
-
-The live demo of `StorageGate` on Portaldot V3 exercised end-to-end escrow, guard validation, preflight refusals, release payout, expiry and bond-floor enforcement, post-term refund, and deal settlement across deals 3, 4, and 5 (`evidence/raw/t8/gate-demo-summary.md`).
-
-Across the 11 transactions broadcast to the network, total gas fees were **`50.205185 tPOT`** (out of an 80 tPOT budget cap), leaving the owner balance at `195.509586 tPOT` (100 tPOT reserve intact), Provider-1 balance at `44.932150 tPOT`, and the `StorageGate` contract balance at `0 tPOT`.
-
-| Step | Action | Tx hash or refusal | Block | Result |
-| --- | --- | --- | --- | --- |
-| 1 | `createDeal(3)` (term 500 blocks, price 5 tPOT) | `0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee` | `250092` | Deal 3 created (endBlock `250692`, fee 11.557014 tPOT) |
-| 2 | `gate lock 3` | *refused before broadcast* (`Expired`) | `251940` | Refused: block 251940 > endBlock 250692; guard checks expiry before bond floor (0 gas) |
-| 3 | `createDeal(4)` (term 3,000 blocks, price 5 tPOT) | `0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761` | `252512` | Deal 4 created (endBlock `255512`, fee 11.557014 tPOT) |
-| 4 | `gate lock 4` (payee Provider-1, minBond 20 tPOT, amount 2 tPOT) | `0x3719248237ec37c916b11e3d014aebba05d84cedcdcdc79cc1b9feaa18a62203` | `252523` | Lock 4 opened; 2 tPOT deposited to gate (fee 7.705815 tPOT) |
-| 5 | `gate release 4` (called by Provider-1) | `0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f` | `252535` | Payout released; +2 tPOT to Provider-1 (fee 0.015322 tPOT); released lock stays released |
-| 6 | `createDeal(5)` (term 3,000 blocks, price 5 tPOT) | `0x12557be0d42359a70cbb22acd05310efff94c1bd19223c7d524e8c59400662be` | `252544` | Deal 5 created (endBlock `255544`, fee 11.557014 tPOT) |
-| 7 | `gate lock 5` (payee Provider-1, minBond 30 tPOT, amount 2 tPOT) | `0xf84af2e383b8239c350a16bdf074a14925cd954cacd3ca25ec1621a5fcf869db` | `252552` | Lock 5 opened; 2 tPOT deposited to gate (fee 7.705815 tPOT) |
-| 8 | `gate release 5` | *refused before broadcast* (`BondTooLow`) | `252560` | Refused: provider bond 24 tPOT < minBond 30 tPOT (0 gas) |
-| 9 | `gate refund 5` (in-term) | *refused before broadcast* (`RefundNotAllowed`) | `252564` | Refused: deal healthy and within term (block 252564 < 255544) (0 gas) |
-| 10 | `claim(3)` | `0x9c8ec1c10b2f57ffa90ed22c09db49b019e26b7656825df3bd764bad46505441` | `258836` | Deal 3 claimed by Provider-1 (+5 tPOT, fee 0.015313 tPOT) |
-| 11 | `settle(3)` | `0x57d35092a6f16989ae26a59fa35acec60179aac043bbf247f2ecf54c32d8e064` | `258844` | Deal 3 settled by Owner (fee 0.015312 tPOT) |
-| 12 | `gate refund 5` (post-term) | `0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23` | `264442` | Lock 5 refunded to Owner (+2 tPOT, fee 0.015317 tPOT); gate balance returns to 0 tPOT |
-| 13 | `claim(4)` | `0x491fdf174810101c7e96915604d78cc6c0e12bcdb1ef7d810adb264382ca1846` | `264450` | Deal 4 claimed by Provider-1 (+5 tPOT, fee 0.015313 tPOT) |
-| 14 | `claim(5)` | `0x0bda52e6038d9955293ffbb2b78935638659696e4e5a1dd905809d6ee2134745` | `264458` | Deal 5 claimed by Provider-1 (+5 tPOT, fee 0.015313 tPOT) |
-| 15 | `settle(4)` | `0x5a156d435057ddbeb9de0ca9b4cd48155dbf63391af0fca7cfd76231c4448279` | `264469` | Deal 4 settled by Owner (fee 0.015312 tPOT) |
-| 16 | `settle(5)` | `0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34` | `264477` | Deal 5 settled by Owner (fee 0.015312 tPOT) |
-
-### Keyless gate inspection commands
-
-Judges can inspect the live on-chain status of deals 3, 4, and 5 at any time without private keys using the Makhzan CLI or MCP tool:
-
-```bash
-cd apps/makhzan
-MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
-MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
-MAKHZAN_GATE=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA \
-node src/cliMain.ts gate status 3
-
-node src/cliMain.ts gate status 4
-
-node src/cliMain.ts gate status 5
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Provider
+  actor Client
+  participant Makhzan as Makhzan.sol (0x6048...2e44)
+  participant Gate as StorageGate.sol (0x5ee9...1DCA)
+  Provider->>Makhzan: registerProvider(bond) [min 10 tPOT]
+  Client->>Makhzan: createDeal(providerId, root, leaves, size, duration, price)
+  opt Conditional Escrow
+    Client->>Gate: lock(dealId, payee, minBond)
+  end
+  Client->>Makhzan: challenge(dealId) [50-block deadline]
+  alt Valid block & Merkle path within window
+    Provider->>Makhzan: answer(dealId, blockBytes, merklePath)
+    Note over Makhzan: Bond untouched (health = 1)
+  else Missed deadline or invalid proof
+    Client->>Makhzan: resolve(dealId)
+    Note over Makhzan: Slash 20% of bond (6 tPOT) to client
+  end
+  Provider->>Makhzan: claim(dealId) [accrued price payout]
+  Client->>Makhzan: settle(dealId) [concludes deal]
 ```
-
-- **Deal 3:** shows `healthOf = 0` (settled), lock `None` (lock was refused `Expired`).
-- **Deal 4:** shows `healthOf = 0` (settled), lock `Released` (status 2, amount 2 tPOT, payee Provider-1 `0xf4ec143c743ff57c0d32e829f50692551cbf6029`, minBond 20 tPOT).
-- **Deal 5:** shows `healthOf = 0` (settled), lock `Refunded` (status 3, amount 2 tPOT, payer Owner `0x0948ebd7637d1c32858a6fc5d947e85a6600205c`, minBond 30 tPOT).
-
-Or via the read-only MCP server (`apps/makhzan-mcp`):
-```json
-{
-  "name": "makhzan_gate_status",
-  "arguments": { "dealId": "4" }
-}
-```
-Tool returns the complete lock state, predicted release verdict (`Released`), payer, payee, amounts, and health.
-
-### Honest notes from live execution
-1. **The guard checks expiry before the bond floor:** In `MakhzanGuard.requireHealthy`, the end-block check executes before checking `_dealProviderBond`. When deal 3's term elapsed, `gate lock 3` failed with `Expired` rather than examining the bond floor.
-2. **A released lock stays released:** Once a lock transitions to `Released` (status 2) or `Refunded` (status 3), it cannot be re-locked, released again, or refunded; it is immutable and terminal.
-3. **Display-unit bug caught and resolved:** Live evidence capture uncovered a display-unit bug where a 2 tPOT gate lock was formatted as 20,000 in raw unit parsing. This was fixed in both the web UI (`0f5e93e`) and the MCP server (`1f4b029`).
-
-## Architecture
 
 ```mermaid
 flowchart TD
@@ -266,331 +62,199 @@ flowchart TD
     UI["Status Web App (React / Vite)<br/>status-ui-one.vercel.app"]
     CLI["Makhzan CLI<br/>apps/makhzan"]
     MCP["Read-Only MCP Agent Server<br/>apps/makhzan-mcp"]
-    AI["AI Agent (Claude / Cursor / IDE)"]
-    CONSUMER["Payer / Consumer Smart Contract"]
+    CONSUMER["Consumer Smart Contract"]
   end
-
-  subgraph Provider["Storage Provider Node"]
+  subgraph ProviderNode["Storage Provider Node"]
     DAEMON["Provider Daemon<br/>apps/makhzan/daemonMain.ts"]
-    STORE[("1 KiB Blocks Store &<br/>Merkle Tree Vector Index")]
+    STORE[("1 KiB Blocks & Merkle Tree")]
   end
-
   subgraph Chain["Portaldot V3 Testnet (Chain 420420777)"]
-    subgraph MakhzanCore["Core Storage Protocol"]
-      MAKHZAN["Makhzan.sol (0x60481DFc...2e44)<br/>Deals · Bonds · Challenges · Slashes · Payouts"]
-      MERKLE["MerkleLib.sol<br/>Keccak-256 Merkle Proof Verifier"]
-    end
-    subgraph EscrowGate["Conditional Payment Layer"]
-      GATE["StorageGate.sol (0x5ee99E8A...1DCA)<br/>Lock · Release · Refund · Bond Floor"]
-      GUARD["MakhzanGuard.sol<br/>HealthOf & Term Availability Guard"]
-    end
+    MAKHZAN["Makhzan.sol (0x60481DFc...2e44)<br/>Deals · Bonds · Challenges · Slashes"]
+    MERKLE["MerkleLib.sol<br/>Keccak-256 Verifier"]
+    GATE["StorageGate.sol (0x5ee99E8A...1DCA)<br/>Escrow · Release · Refund · Bond Floor"]
+    GUARD["MakhzanGuard.sol<br/>Health & Expiry Checks"]
   end
-
-  %% Interactions
-  CLI -->|"1. Upload 1 KiB blocks"| DAEMON
+  CLI -->|"1. Upload blocks"| DAEMON
   DAEMON --> STORE
-  CLI -->|"2. createDeal(root, size, price)"| MAKHZAN
-  CONSUMER -->|"3. lock(dealId, payee, minBond)"| GATE
-
-  CLI -->|"4. challenge(dealId)"| MAKHZAN
-  MAKHZAN -->|"ChallengeOpened(leafIndex, deadline)"| DAEMON
-  DAEMON -->|"5. answer(blockBytes, merklePath)"| MAKHZAN
+  CLI -->|"2. createDeal"| MAKHZAN
+  CONSUMER -->|"3. lock"| GATE
+  CLI -->|"4. challenge"| MAKHZAN
+  DAEMON -->|"5. answer"| MAKHZAN
   MAKHZAN --> MERKLE
-
-  CLI -->|"6. resolve(dealId) if deadline missed"| MAKHZAN
-  MAKHZAN -->|"20% bond slash to owner"| CLI
-
+  CLI -->|"6. resolve (slash 20%)"| MAKHZAN
   GATE -->|"check health & term"| GUARD
   GUARD -->|"healthOf(dealId)"| MAKHZAN
-  GATE -->|"conditional release or refund"| CONSUMER
-
-  AI -->|"stdio JSON-RPC"| MCP
   MCP -->|"read-only eth_call"| MAKHZAN
   MCP -->|"read-only gateLock"| GATE
   UI -->|"read-only RPC queries"| MAKHZAN
   UI -->|"read-only RPC queries"| GATE
 ```
 
-The full component and sequence views are in [docs/architecture.md](docs/architecture.md).
+## Live results
 
-## Implemented / simulated / roadmap
+All 5 deals are settled on Portaldot V3 testnet (`chain 420420777`). Core deployment: Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` deployed by `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` (tx `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7`, block `171308`, total cost `529.844316817465986480 tPOT`, reserved deposit `165.513 tPOT`). StorageGate: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`).
 
-| Capability | State | Evidence |
-| --- | --- | --- |
-| Merkle block commitment shared by Solidity and TypeScript (golden vectors, leaf counts 1, 3, 7, 1000) | implemented, local | `evidence/raw/t1/05-vectors.txt`, `11-ts-merkle-green.txt` |
-| Provider registry, minimum bond, packed slot layout | implemented, local | `evidence/raw/t1/17-registry-green.txt`, `21-slots-green.txt` |
-| Deals: root, size, leaf count, price escrow, duration | implemented, local | `evidence/raw/t1/19-deals-green.txt`, `22-us1-independent.txt` |
-| Challenge index from the D5 fallback, deadline, expected path length | implemented, local | `evidence/raw/t1/24-challenge-green.txt`, `26-challenge-slots-green.txt` |
-| Answer verification, pass without bond movement, 20% slash on `resolve` | implemented, local | `evidence/raw/t1/31-rounds-green.txt`, `48-e2e-local.txt` |
-| `claim` (provider-only) and `settle`, exactly-once accounting | implemented, local | `evidence/raw/t1/28-payments-green.txt` |
-| Provider daemon: poll, rebuild path, submit, label only from read-back, drills | implemented, local | `evidence/raw/t1/44-daemon-red.txt`, `59-daemon-evidence-green.txt` |
-| Client CLI: upload, create, register, challenge, watch, claim, settle, resolve, report, verify (read-only) | implemented, local + live verify | `evidence/raw/t1/47-cli-green.txt`, `112-register-green.txt`, `76-verify-deal1.txt` |
-| Network-explicit deploy: reserve guard, pending record, resume, calibration | implemented, local + one live deploy | `61-deploy-green.txt`, `59-live-deploy.txt` |
-| `healthOf(uint32)` availability view | implemented, local | `evidence/raw/t1/84-health-red.txt`, `85-health-green.txt` |
-| Versioned evidence bundle (`makhzan.evidence/v0`) + raw receipts + derived views | implemented, local | `evidence/raw/t1/88-evidence-red.txt`, `89-evidence-green.txt` |
-| Byte-for-byte deployment verification | implemented, local + live | `evidence/verify-deployment.json` |
-| Decoded refusal evidence (`evidence:refusals`, `eth_call` only) | implemented, local | `evidence/raw/t1/94-refusals-anvil.txt` |
-| Read-only `doctor` with an exact fix per failed check | implemented, local | `evidence/raw/t1/97-doctor-anvil.txt` |
-| Read-only `makhzan verify <dealId>`: provider bond, deal root, each challenge's block/index, answered or slashed with block and amounts, `claimed = accrued`, final `healthOf` | **implemented [live run]**; keyless, exits non-zero on FAIL or INCOMPLETE, reports a refused log range instead of guessing | `evidence/raw/t1/76-verify-deal1.txt`, `77-verify-deal2.txt` |
-| Live deploy on Portaldot V3 | **implemented [live run]** | `evidence/raw/t1/59-live-deploy.txt` |
-| Live registration + deal A + one challenge/answer | **implemented [live run]**; on-chain pass (`healthOf(1) = 1`, bond unchanged). The first pass exposed T1-002; the fixed daemon then labelled deal B `passed` from read-back | `62-live-register.txt`, `60-live-pass.txt`, `67-live-answer-b.txt` |
-| Live slashed round, claim, settle | **implemented [live run]**; claim/settle A and B, second deal B challenge slashed exactly 20% and credited the owner 6 tPOT | `64-live-claim-a.txt` .. `71-live-settle-b.txt`, `72-live-summary.txt` |
-| Live retrieval from a fresh client | **implemented [live run]**; 1,024 blocks verified against the deal root, sha256 `7f2fd6d5...e21e` matches the upload, tampered copy rejected with `ProofRejected` | `75-live-retrieval.txt` |
-| Daemon receipt-timeout fix (T1-002) | **implemented, red then green**; hash persisted before wait, 120 s minimum, later poll labels from receipt/read-back | `61-t1002-red.txt`, `61-t1002-green.txt` |
-| Status web app (feature 003) | **merged and live**; Overview, Deals, Proof, Verify, Replay (`/replay`) and Judges read the deployment live and fall back to the recorded run | <https://status-ui-one.vercel.app/> |
-| Consumer example: `MakhzanGuard` (health + term) and `StorageGate` (lock / release / refund, optional bond floor) | **deployed live** (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`) | `contracts/src/makhzan/MakhzanGuard.sol`, `contracts/src/makhzan/StorageGate.sol`, `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt` |
-| Consumer demo: `gate-demo` (deploy, lock, release, expire, slash, `BondTooLow`, refund) and the gate's size budget | **implemented [live run]**; deals 3, 4, 5 exercised on live chain (lock 4 + release 4, lock 5 + BondTooLow refusal + RefundNotAllowed refusal, post-term refund 5, lock 3 Expired refusal, claims and settles for 3, 4, 5; gate balance 0) | `evidence/raw/t8/gate-demo-summary.md`, `evidence/raw/t1/100-gate-deploy.txt`, `101-gate-demo-local.txt` |
-| Write-capable agent client, indexed history, pull-payment escrow | roadmap (Tier 2+; read-only MCP server exists) | not started |
-| Randomness beyond the D5 fallback | roadmap (Discord reply said YES to prevrandao, but mixHash is constant 0x8e1bc9bf04000 across 37 blocks) | not started |
-| PolkaVM (`resolc`) deployment path | simulated only (compiler probe) | `evidence/raw/t1/` Tier-0 gates |
+<details>
+<summary><strong>Core Protocol Lifecycle: Deals 1 & 2 [live run] (Click to expand)</strong></summary>
 
-## Using Makhzan from your contract
+| Step | Action | Tx Hash | Block | Result / Measured Numbers | Evidence Path |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Deploy | Deploy Makhzan | `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7` | `171308` | Cost 529.844316817465986480 tPOT, runtime 6,566 B | `evidence/raw/t1/59-live-deploy.txt` |
+| Reg | Register Provider-1 | `0xd579567999dab3e34f5c6858eebff651b5d497d39995b47cabedd601a7d9cb91` | `172240` | Bond 30 tPOT locked (fee 11.537715 tPOT) | `evidence/raw/t1/62-live-register.txt` |
+| Deal 1 | createDeal (1 MiB) | `0x44c41e75c8e6d8a70620f07c56a6bd2a721cc6c45d0b98a314190767276c09b1` | `172266` | 1,024 leaves, price 5 tPOT, duration 150 blocks | `evidence/raw/t1/60-live-pass.txt` |
+| Deal 1 | challenge #1 | `0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda` | `172281` | Leaf index 451, deadline 172331 | `evidence/raw/t1/60-live-pass.txt` |
+| Deal 1 | answer #1 | `0x8da1f12d9db85123e4ea3a13c8e2aa57b373981a6b6df66c57ec153cea9ce8e3` | `172295` | Valid proof; bond remains 30 tPOT (health = 1) | `evidence/raw/t1/60-live-pass.txt` |
+| Deal 1 | claim | `0x48a306f40b67302ff3c274e2b6e1ad74f721fb9ca426a7274df10e057378415b` | `172557` | Provider-1 paid 5 tPOT accrued price | `evidence/raw/t1/64-live-claim-a.txt` |
+| Deal 1 | settle | `0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3` | `172564` | Concluded; healthOf(1) = 0 | `evidence/raw/t1/65-live-settle-a.txt` |
+| Deal 2 | createDeal (1 MiB) | `0xc6cd7a3ce372535c8a769feb8addbe328e17fb179156ac53d7a8c732acb1a0d3` | `172578` | 1,024 leaves, price 5 tPOT, duration 300 blocks | `evidence/raw/t1/66-live-deal-b.txt` |
+| Deal 2 | challenge #1 | `0xd2d8445b0671aa3d0c307ce54c1fb251bc6cd08b7d72a3f291ca7497c0d65cdb` | `172584` | Leaf index 29, deadline 172634 | `evidence/raw/t1/67-live-answer-b.txt` |
+| Deal 2 | answer #1 | `0xb1ddb1fb54e6f4c4405cfcb85640cae51808ef6ce7509f0e14acc422c3621210` | `172585` | Valid proof; bond unchanged | `evidence/raw/t1/67-live-answer-b.txt` |
+| Deal 2 | challenge #2 | `0x510df3134ce6dff37155d72237b6e4da09538f139621079b22efe227d677f4db` | `172602` | Leaf index 623, deadline 172652; skipped by daemon | `evidence/raw/t1/68-live-skip-b.txt` |
+| Deal 2 | resolve (slash) | `0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3` | `172658` | Exactly 20% (6 tPOT) slashed to owner; bond: 30 -> 24 | `evidence/raw/t1/69-live-resolve-b.txt` |
+| Deal 2 | claim | `0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee` | `172881` | Provider-1 paid 5 tPOT accrued price | `evidence/raw/t1/70-live-claim-b.txt` |
+| Deal 2 | settle | `0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec` | `172887` | Concluded; healthOf(2) = 0 | `evidence/raw/t1/71-live-settle-b.txt` |
 
-`healthOf` is a challenge check, not a storage proof and not an expiry check. **`healthOf == 1`
-means "no open challenge" — it does not mean "the file is stored".** It also stays `1` after the
-deal's end block and for a deal that was never challenged. A consumer that pays on `healthOf == 1`
-alone can pay for an expired deal. Add the term check, or use `MakhzanGuard`:
+</details>
 
-It also goes back to `1` as soon as a failed challenge is resolved, while the 20% slash stays on the
-provider's bond: a gate that reads only `healthOf` cannot see that a default already happened. If
-that matters, pass a `minBond` to `StorageGate.lock` — the release then re-reads the provider's
-current bond and reverts `BondTooLow` when it is under the floor.
+## Live gate demo
 
-```solidity
-import {IMakhzan} from "./IMakhzan.sol";
-import {MakhzanGuard} from "./MakhzanGuard.sol";
+Exercised `StorageGate` across 11 broadcast transactions with total fees of **`50.205185 tPOT`** (gate balance returned to 0 tPOT; `evidence/raw/t8/gate-demo-summary.md`):
 
-contract PayOnServe {
-    IMakhzan public immutable makhzan;
-    constructor(IMakhzan m) { makhzan = m; }
-    function pay(uint32 dealId, address payee) external payable {
-        MakhzanGuard.requireHealthy(makhzan, dealId); // Pending / Default / SettledOrNone / Expired
-        (bool ok,) = payee.call{value: msg.value}("");
-        require(ok, "transfer failed");
-    }
-}
+<details>
+<summary><strong>StorageGate Demo: Deals 3, 4, 5 (Click to expand)</strong></summary>
+
+| Step | Action | Tx Hash or Refusal | Block | Result |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | `createDeal(3)` | `0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee` | `250092` | Deal 3 created (term 500, endBlock 250692) |
+| 2 | `gate lock 3` | *refused pre-broadcast* (`Expired`) | `251940` | Block 251940 > endBlock 250692 (0 gas) |
+| 3 | `createDeal(4)` | `0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761` | `252512` | Deal 4 created (term 3,000) |
+| 4 | `gate lock 4` | `0x3719248237ec37c916b11e3d014aebba05d84cedcdcdc79cc1b9feaa18a62203` | `252523` | Lock 4 opened; 2 tPOT deposited (minBond 20 tPOT) |
+| 5 | `gate release 4` | `0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f` | `252535` | Provider-1 paid +2 tPOT; status = released |
+| 6 | `createDeal(5)` | `0x12557be0d42359a70cbb22acd05310efff94c1bd19223c7d524e8c59400662be` | `252544` | Deal 5 created (term 3,000) |
+| 7 | `gate lock 5` | `0xf84af2e383b8239c350a16bdf074a14925cd954cacd3ca25ec1621a5fcf869db` | `252552` | Lock 5 opened; 2 tPOT deposited (minBond 30 tPOT) |
+| 8 | `gate release 5` | *refused pre-broadcast* (`BondTooLow`) | `252560` | Bond 24 < minBond 30 tPOT (0 gas) |
+| 9 | `gate refund 5` | *refused pre-broadcast* (`RefundNotAllowed`) | `252564` | In-term and healthy (0 gas) |
+| 10 | `claim(3)` | `0x9c8ec1c10b2f57ffa90ed22c09db49b019e26b7656825df3bd764bad46505441` | `258836` | Deal 3 claimed by Provider-1 (+5 tPOT) |
+| 11 | `settle(3)` | `0x57d35092a6f16989ae26a59fa35acec60179aac043bbf247f2ecf54c32d8e064` | `258844` | Deal 3 settled by Owner |
+| 12 | `gate refund 5` | `0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23` | `264442` | Post-term refund: +2 tPOT back to Owner |
+| 13 | `claim(4)` | `0x491fdf174810101c7e96915604d78cc6c0e12bcdb1ef7d810adb264382ca1846` | `264450` | Deal 4 claimed (+5 tPOT) |
+| 14 | `claim(5)` | `0x0bda52e6038d9955293ffbb2b78935638659696e4e5a1dd905809d6ee2134745` | `264458` | Deal 5 claimed (+5 tPOT) |
+| 15 | `settle(4)` | `0x5a156d435057ddbeb9de0ca9b4cd48155dbf63391af0fca7cfd76231c4448279` | `264469` | Deal 4 settled by Owner |
+| 16 | `settle(5)` | `0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34` | `264477` | Deal 5 settled by Owner |
+
+</details>
+
+*Honest operational notes:*
+1. Guard checks expiry before the bond floor in `MakhzanGuard.requireHealthy`.
+2. A released lock stays released (status 2 and 3 are terminal).
+3. Display-unit bug fixed in UI (`0f5e93e`) and MCP server (`1f4b029`).
+
+## Verify it yourself
+
+All commands are 100% read-only (no private key, 0 gas, public EVM RPC):
+
+```bash
+# 1. Audit Deal 1 on-chain verification (7 checks)
+cd apps/makhzan
+MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev MAKHZAN_CHAIN_ID=420420777 MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 node src/cliMain.ts verify 1
+# Expected: RESULT: PASS (7 pass, 0 fail, 0 unknown, 0 pending)
+
+# 2. Audit Deal 2 challenge pass & 20% slash (9 checks)
+MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev MAKHZAN_CHAIN_ID=420420777 MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 node src/cliMain.ts verify 2
+# Expected: RESULT: PASS (9 pass, 0 fail, 0 unknown, 0 pending) — 600000000000000 units slashed to owner
+
+# 3. Check live StorageGate lock 4 state (released to Provider-1)
+MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev MAKHZAN_CHAIN_ID=420420777 MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 MAKHZAN_GATE=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA node src/cliMain.ts gate status 4
+# Expected: "status": 2, "statusName": "released", "amountTpot": "2.000000", "minBondTpot": "20.000000"
+
+# 4. Check live StorageGate lock 5 state (refunded to Owner)
+MAKHZAN_NETWORK=live MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev MAKHZAN_CHAIN_ID=420420777 MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 MAKHZAN_GATE=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA node src/cliMain.ts gate status 5
+# Expected: "status": 3, "statusName": "refunded", "amountTpot": "2.000000", "minBondTpot": "30.000000"
+
+# 5. Read Makhzan healthOf(1) via cast (0 = settled)
+cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 1 --rpc-url https://test-evm-rpc-v3.portaldot.dev
+# Expected: 0x0000000000000000000000000000000000000000000000000000000000000000
+
+# 6. Read StorageGate lockOf(4) raw slot via cast
+cast call 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA "lockOf(uint32)" 4 --rpc-url https://test-evm-rpc-v3.portaldot.dev
+# Expected: payer 0x0948...205c, amount 2 tPOT (0x1bc16d674ec80000 wei), payee 0xf4ec...6029, minBond 20 tPOT, status 2
 ```
 
-- `MakhzanGuard.isHealthy(makhzan, dealId)` is the boolean form: `healthOf == 1` **and**
-  `block.number < endBlock` (the third field of `dealOf`).
-- `MakhzanGuard.requireHealthy` reverts with `Pending()` (code 2), `Default()` (3),
-  `SettledOrNone()` (0, which covers both settled and never existed) or `Expired()` (1, but at or
-  past `endBlock`). The library is internal-only, so it adds no deployment and no address to trust.
-- `StorageGate` is the ready-made version of the same idea: one `lock(dealId, payee, minBond)` per
-  deal, payee-only `release` while healthy, payer-only `refund` on default or from `endBlock` on,
-  state written before every transfer. It has no admin, owner or upgrade path. `minBond` is a
-  provider bond floor in planck (`0` = no check, the old behaviour); it is stored, not checked, at
-  lock time. Because Makhzan exposes `providerOf(address)` and no `providerId` lookup, the gate
-  resolves the provider through the payee — the payee must be the deal's provider — and any other
-  payee reads as a zero bond.
-- Deployment and limits: StorageGate is deployed live on Portaldot V3 (`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, block `240956`); the guard reads two views per check
-  (`healthOf`, `dealOf`), so it inherits whatever the Makhzan deployment says at that block. The
-  gate's runtime is 2,528 B, measured — over the 1,500 B target, because the inlined guard costs
-  about 285 B per entry point (`evidence/raw/t1/94-storage-gate-size-gas.txt`). Tests: 41 in the
-  guard and gate suites, including a fuzz invariant that no release happens unless `healthOf == 1`
-  and `block.number < endBlock` (`evidence/raw/t1/93-storage-gate-bond-suite.txt`). The floor is
-  not a substitute for the health check: it is read only after the guard has passed.
+## Consumer layer
 
-## Who would pay and why (hypothesis, not validated)
+`StorageGate.sol` ([`0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`](https://pindex.onrender.com/app/?q=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA)) provides conditional escrow for contracts paying storage providers:
+- **`lock(dealId, payee, minBond)`**: deposits payer tPOT; requires healthy deal.
+- **`release(dealId)`**: payee-only; requires `MakhzanGuard.requireHealthy` and provider bond >= `minBond`.
+- **`refund(dealId)`**: payer-only; allowed if defaulted (`healthOf == 3`) or term elapsed (`block.number >= endBlock`).
 
-**This section is a hypothesis.** It is not backed by interviews, a pilot, a survey or a pricing
-test. No external team has used Makhzan, and the only live deals are our own. Treat it as a plan to
-be tested, not as evidence of demand.
+**Read-only MCP Agent Server (`apps/makhzan-mcp`):** Exposes 4 keyless tools over standard stdio JSON-RPC:
+1. `makhzan_health(dealId)`: returns `healthOf`, block status, and guard verdict.
+2. `makhzan_verify_file(dealId, path)`: checks local file Merkle tree against on-chain root (sandboxed).
+3. `makhzan_deal_story(dealId)`: chronological reconstruction of deal lifecycle events.
+4. `makhzan_gate_status(dealId)`: inspects escrow lock status, payee, and release readiness.
 
-| Payer | The job they need done | Why they might pay | What they would need to see first |
-| --- | --- | --- | --- |
-| A storage or backup provider | Prove to a client that a specific file is still held, on demand | A challengeable receipt with money at risk is cheaper than a bespoke audit or an SLA credit negotiation | An independent run, a retention window with several challenges, and a price per deal |
-| A buyer of storage (archive, media, compliance) | A check it can run itself, without trusting the vendor's logs | Keyless verification from public chain data; a wrong answer costs the provider its bond | A clean reproduce path, a threat model it accepts, and a dispute runbook |
-| A chain or ecosystem team | A small, auditable availability primitive it can point users at | Reuse of the contract and the measured V3 notes instead of rebuilding the plumbing | A security review and a second implementation |
+## Why Portaldot V3
 
-What has to be true for the hypothesis to survive: a provider must prefer this to its own auditing;
-the bond must be large enough to matter but small enough to be affordable; the price per deal must
-cover gas, storage and support; and a buyer must accept a Merkle commitment as proof of possession
-rather than a certification.
+- **EVM via `pallet-revive`:** standard Solidity (`solc 0.8.28`, `via_ir=true`), deployed directly over `eth_sendRawTransaction`.
+- **Native Value & Unit Factor:** deal prices and bonds use native units (`1 tPOT = 10^14 planck`); `WEI_PER_UNIT = 10,000` (`1 tPOT = 10^18 wei`). Existential deposit = 0.1 tPOT (`10^17 wei`).
+- **Account Mapping:** H160 mapped to Substrate `AccountId32` via `h160 || 0xEE * 12` (contract maps to `5EEwsqgiEVZNUdUHdmsEMqBQzJjNy5PULPBYoo5yF2GX45DZ`).
+- **Chain Gotchas Guide ([docs/V3-GOTCHAS.md](docs/V3-GOTCHAS.md)):** 12 measured findings including gas price bands (~32.5k wei), 15 s receipt trap (T1-002), permanent non-refundable storage deposits, and the constant `prevrandao` opcode observation.
 
-### Three milestones (no dates)
+## Quickstart
 
-1. **Independent provider pilot.** A provider we do not operate stores a real file under its own key
-   and answers challenges for a full retention window. Success = an outside operator completes a
-   deal without our daemon or our help.
-2. **Retrieval that is paid for.** Extend the challenge from "did you answer?" to "did you serve the
-   bytes?" with sampling across the deal, and price that work. Success = a measured run where
-   non-serving is detected and the bond responds, not just a missed answer.
-3. **One paid deal with a design partner.** A non-team buyer pays the on-chain price and settles,
-   with a written runbook for disputes. Success = one real invoice, or a signed pilot with a named
-   partner; until then this criterion stays unvalidated.
-
-`docs/JUDGING.md` maps these claims to evidence and lists the weak spots criterion by criterion.
-`docs/BUSINESS.md` is the business case: who would pay, the measured cost of a deal, the honesty
-limits that bound the price, and what we have not validated.
-
-## Quick start
-
-Prerequisites: Node 24, Foundry 1.8.5 (`forge`, `anvil`, `cast`), git.
+**Prerequisites:** Node.js 24, Foundry 1.8.5 (`forge`, `anvil`, `cast`), git.
 
 ```bash
 git clone https://github.com/MohammedSoliman10/portaldot-hackathon-2026-makhzan-soliman.git
 cd portaldot-hackathon-2026-makhzan-soliman
-
-# Submodules: online, Foundry 1.8.5 detects missing forge-std during `forge build`
-# and auto-clones it. In offline or network-isolated environments, initialize
-# submodules first or `forge build` fails with missing dependency errors:
 git submodule update --init --recursive
 
-# Contracts
-cd contracts
-forge build --sizes
-forge test
-cd ..
+# 1. Run Contract Suites (208 tests)
+cd contracts && forge build --sizes && forge test && cd ..
 
-# TypeScript client + daemon
-cd apps/makhzan
-npm ci
-npm run typecheck
-npm test
+# 2. Run Client & Daemon Tests (181 tests)
+cd apps/makhzan && npm ci && npm test && cd ../..
 
-# Full local end-to-end: deploy, register, 1 MiB file, one passed round,
-# one skipped/slashed round (exactly 20%), claim, settle
-node scripts/e2e-local.mjs
-cd ../..
+# 3. Run MCP Agent Server Tests (68 tests)
+cd apps/makhzan-mcp && npm ci && npm test && cd ../..
 
-# Read-only MCP server for agents: no key, no write tool (docs/AGENT.md)
-cd apps/makhzan-mcp
-npm ci
-npm run typecheck
-npm test
-cd ../..
-
-# Deployed size budget
-node scripts/check-size.mjs
-
-# Docs hygiene: every address/hash/block/bond figure must match evidence/
-node --test scripts/docs-hygiene.test.mjs
-node scripts/docs-hygiene.mjs
-
-# Read-only deal audit on the live testnet (no key needed; MAKHZAN_PRIVATE_KEY unset)
-cd apps/makhzan
-MAKHZAN_NETWORK=live \
-MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
-MAKHZAN_CHAIN_ID=420420777 \
-MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
-node src/cliMain.ts verify 1
+# 4. Run Status Web UI locally (339 tests)
+cd apps/status-ui && npm ci && npm test && npm run dev
 ```
 
-Expected: Forge reports **208 tests passed**; `apps/makhzan` reports **181 tests passed**;
-`apps/makhzan-mcp` **49**; `apps/gates` **49**; `apps/status-ui` **280**; the secret scanner **6**; the
-docs-hygiene check **8** tests and **205 facts**; the e2e ends with
-`PASS — SC-001 (one passed challenge) and SC-002 (one slashed challenge) on local anvil`; the size
-check prints **6,566 B ≤ 10,240 B**.
+### Repository & Documentation Map
 
-The live run needs a funded key in the environment; `scripts/with-live-env.sh owner|provider-1 --
-<command>` loads one key without printing it. The exact live sequence, caps and abort rules are in
-[docs/live-runbook.md](docs/live-runbook.md).
+| Directory | Purpose | Document | Focus |
+| :--- | :--- | :--- | :--- |
+| `contracts/` | Solidity contracts (Makhzan, StorageGate, MerkleLib) | [docs/architecture.md](docs/architecture.md) | Component diagrams & lifecycle sequences |
+| `apps/makhzan/` | Client CLI, provider daemon, verification scripts | [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | Threat boundaries, assets & invariants |
+| `apps/makhzan-mcp/` | Read-only MCP agent server (4 tools) | [docs/BUSINESS.md](docs/BUSINESS.md) | Economic models, costs & sensitivity |
+| `apps/status-ui/` | React / Vite black-and-gold status web app | [docs/V3-GOTCHAS.md](docs/V3-GOTCHAS.md) | 12 live-measured Portaldot V3 facts |
+| `evidence/` | Raw transaction receipts, deploy records & logs | [docs/REPRODUCE.md](docs/REPRODUCE.md) | Step-by-step reproduction runbook |
 
-## Repository layout
+## Security and honest limits
 
-```text
-contracts/                 Solidity source, Foundry tests, size budget, snapshot
-  src/makhzan/             Makhzan contract, interface, verifier library
-  src/tier0/               disposable Tier-0 probe contracts (not on the product path)
-apps/makhzan/              TypeScript client: Merkle, CLI, daemon, deploy, evidence, verify, doctor
-apps/makhzan-mcp/          read-only MCP server for agents: health, file verify, story, gate status
-apps/gates/                Tier-0 read-only network gates and shared chain helpers
-scripts/                   deploy.mjs, check-size.mjs, secret-scan.mjs, secret-scan-history.mjs, docs-hygiene.mjs, with-live-env.sh
-specs/002-core-storage-proofs/   spec, plan, tasks, quickstart, research
-docs/                      architecture, live runbook, decisions, evidence schema, threat model,
-                           demo, check-in, explainer, demo checklist, judging, reproduce, business
-evidence/                  raw command output, deployment records, receipts, verification, calibrations
-```
+See [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) for full analysis:
+- **One block at one moment:** A passed challenge proves possession of one 1 KiB block during the window, not continuous disk storage.
+- **Challenge index & entropy:** Derived via D5 fallback (`keccak256(blockhash(n-1), prevrandao, dealId) % leafCount`). While Discord confirmed YES to `block.prevrandao`, our read-only audit measured `mixHash` as constant `0x8e1bc9bf04000` across 37 blocks (and opcode `0x44` dry-runs return the same constant). Thus, randomness relies on the parent blockhash and deal ID: unpredictable before block creation, but not VRF-grade and biasable by block producers.
+- **Identical blocks:** Leaf commits bytes without position; identical blocks share proofs.
+- **Shared bond ceiling:** One provider bond backs all deals under management.
+- **Same-transaction gate check:** `StorageGate` reads health at execution; later slashes cannot retroactively undo a release.
+- **Audit status:** No formal security audit; no live explorer source verification.
 
-## Demo
+## Economics
 
-**Live read-only status page:** <https://status-ui-one.vercel.app/>. It is a read-only view over the
-deployed Makhzan contract on Portaldot V3: the page bundle contains the contract address, chain
-`420420777` and the live RPC, and calls only read methods (`healthOf`, `dealOf`, `challengeStateOf`,
-`providerOf`, `getBalance`). It sends no transactions. The live challenge rounds ran separately and
-are recorded in the check-in; the page shows those recorded results beside the live state, and is not
-independent evidence that a round ran. **Verify** recomputes the keccak256 Merkle root of a file in
-the browser (the sample is the exact 1 MiB file deals 1 and 2 committed) and compares it with deal 2's
-root read live; flipping one byte in a copy fails at the changed block.
-
-The 3-minute local script is [docs/demo.md](docs/demo.md). It deploys to anvil, registers a provider,
-uploads a 1 MiB file as 1,024 blocks, passes one challenge, then skips a second and shows exactly 20%
-slashed to the owner, followed by claim and settle.
-
-A recorded video is **not yet published** (`[pending]`). The check-in text is in
-[docs/CHECKIN.md](docs/CHECKIN.md).
-
-## Agent access, read-only
-
-`apps/makhzan-mcp` is a [Model Context Protocol](https://modelcontextprotocol.io/) server that lets an AI
-agent **read** Makhzan. Four tools, all `readOnlyHint`, all labelled `[MEASURED]`:
-
-| Tool | Answers |
-| --- | --- |
-| `makhzan_health(dealId)` | `healthOf`, end block, blocks left, and the MakhzanGuard decision |
-| `makhzan_verify_file(dealId, path)` | does this local file rebuild the Merkle root the deal commits? |
-| `makhzan_deal_story(dealId)` | the deal's events in order, plus the CLI's PASS/FAIL checks |
-| `makhzan_gate_status(dealId)` | the gate lock, the bond floor, and whether `release` would pass now |
-
-It has **no key, no signer and no write tool**: it cannot create a deal, answer a challenge, claim,
-settle, lock or release a payment. `loadConfig` refuses to start if a key variable is present, and the
-read surface is nine view/client calls. `gate_status` predicts what `release` would do — and reads live StorageGate `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` when configured (or answers "gate not deployed" when `MAKHZAN_GATE` is unset) — but it never builds that
-transaction. Verification is delegated to the model; authority stays with the person.
-
-Setup for Claude Desktop and Claude Code, the live transcript and the limits are in
-[docs/AGENT.md](docs/AGENT.md). Tests: 36 unit tests with a fake read surface and an in-memory MCP
-transport, plus a scripted client that calls every tool over stdio against the live testnet
-(`evidence/raw/t2/121-mcp-live-transcript.txt`).
-
-## Security model and honest limits
-
-- A pass proves possession of **one block at one moment** inside the response window, not continuous
-  local storage. Nothing observes the disk between challenges.
-- Identical 1 KiB blocks are interchangeable by design (the leaf commits bytes, not position); this
-  does not reduce what a distinct file costs to store.
-- One bond backs every deal a provider holds; the bond is the economic bound, not a per-deal deposit.
-- The challenge index uses the documented D5 fallback (`keccak256(blockhash(block.number - 1), prevrandao, dealId) % leafCount`). A reply in the Portaldot Discord on Nov 1 2026 said YES to using block.prevrandao. Our read-only measurement shows the block header mixHash is the same constant 0x8e1bc9bf04000 (2,500,000,000,000,000) on 37 blocks from 1 to 282,087, so we do not rely on prevrandao for entropy. Makhzan's challenge index also mixes the parent blockhash and the deal id: unpredictable until the previous block exists, but not VRF-grade and biasable by block producers.
-- A value-rejecting owner or provider can block its own payout; Tier 1 assumes externally owned
-  accounts. Pull-payment escrow is a Tier 2 item.
-- No audit, no explorer source verification, no per-deal bond, no proof of replication.
-- The live pass, slash, claim and settle all ran, and a fresh read-only client retrieved the file with
-  every block verified against the deal root. Retrieval proves the provider served the file at that
-  moment, not continuous storage. Live block time was measured across deal B (`172578`..`172878`) and
-  was slow enough to outlast the old 15 s receipt wait.
-- T1-002 is fixed: the daemon persisted the hash before waiting and labelled a passed and a slashed
-  live round correctly. The receipt, not the label alone, remains the primary evidence.
+- **Measured transaction costs (at ~32.5k wei gas price):** Makhzan deploy `529.844316817465986480 tPOT` (`165.513 tPOT` reserved deposit + execution), StorageGate deploy `210.575612711692978125 tPOT`, deal create `11.557014 tPOT`, register provider `11.537715 tPOT`, gate lock `7.705815 tPOT`, challenge `0.0153 tPOT`, answer `0.1629 tPOT`, resolve/slash `0.0153 tPOT`. Full analysis in [docs/BUSINESS.md](docs/BUSINESS.md).
+- **Roadmap (unbuilt):** Independent third-party provider pilot, day-scale deals (288 rounds/day), VRF/native randomness beacon integration, parameterised bond scaling v2, and write-capable agent client.
+- **Team:** Mohammed Soliman (solo builder).
 
 ## Built with AI assistance
 
-This project was built with AI assistance across all development stages, with human engineering direction, architecture specification, review, and verification. AI-assisted commits carry `[ai]` in their commit messages (over 400 commits).
-
-- **Tooling & Environments:** Initial specifications, scaffolding, and Tier-0/Tier-1 contract skeletons were generated using **opencode** paired with [GitHub Spec Kit](https://github.com/github/spec-kit) (`specify-cli`). Advanced agentic implementation, StorageGate escrow extensions, read-only MCP agent server (`apps/makhzan-mcp`), comprehensive test suites (unit, fuzz, invariant, live scripted clients), mobile accessibility polish, and live audit workflows were developed with **Google Antigravity** using **Claude and Gemini models**.
-- **Human Oversight:** The solo builder directed every architectural decision, established all invariant rules, verified live testnet deployments against Portaldot V3, and reviewed every batch checkpoint before merging.
-- **Evidence-Based Grounding:** Live deployment facts, gas metrics, and transaction receipts are recorded directly from live chain execution (`evidence/`), never synthesized from model memory.
+This project was built with AI assistance across all development stages, with human engineering direction, architecture specification, review, and verification. AI-assisted commits carry `[ai]` in their commit messages (over 400 commits). Tooling: opencode + Spec Kit for scaffolding, Google Antigravity (Claude and Gemini models) for implementation, testing, UI polish, and live audit.
 
 ## Third-party software
 
-See [THIRD-PARTY.md](THIRD-PARTY.md) for the complete directory of packages, dependencies, versions, and licences across contracts, client tools, agent server, and status web UI.
-
-| Component | Version | Licence |
-| --- | --- | --- |
-| [GitHub Spec Kit](https://github.com/github/spec-kit) (`specify-cli`) | v1.2.2 | MIT |
-| [Foundry](https://github.com/foundry-rs/foundry) (`forge`, `cast`, `anvil`) | 1.8.5 | MIT / Apache-2.0 |
-| [forge-std](https://github.com/foundry-rs/forge-std) | 1.17.0 | MIT OR Apache-2.0 |
-| [resolc](https://github.com/paritytech/revive) (PolkaVM compiler probe only) | 1.4.0 | Apache-2.0 |
-| [Node.js](https://nodejs.org/) | 24.20.0 | MIT |
-| [viem](https://viem.sh/) | 2.57.7 | MIT |
-| [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) | 1.32.2 | MIT |
-| [zod](https://zod.dev/) | 4.6.7 | MIT |
-| [@polkadot/api](https://github.com/polkadot-js/api) | 17.0.2 | Apache-2.0 |
-| [@polkadot/util](https://github.com/polkadot-js/common) | 14.0.3 | Apache-2.0 |
-| [@polkadot/util-crypto](https://github.com/polkadot-js/common) | 14.0.3 | Apache-2.0 |
-| [React](https://react.dev/) | 19.2.9 | MIT |
-| [Tailwind CSS](https://tailwindcss.com/) | 4.1.14 | MIT |
-| [Vite](https://vite.dev/) | 7.3.7 | MIT |
-| [TypeScript](https://www.typescriptlang.org/) | 5.9.3 | Apache-2.0 |
-| [@types/node](https://github.com/DefinitelyTyped/DefinitelyTyped) | 24.19.2 | MIT |
+See [THIRD-PARTY.md](THIRD-PARTY.md) for package manifests and versions. Key tools: Spec Kit (v1.2.2, MIT), Foundry (1.8.5, MIT/Apache-2.0), viem (2.57.7, MIT), @modelcontextprotocol/sdk (1.32.2, MIT), React (19.2.9, MIT), Tailwind CSS (4.1.14, MIT), Vite (7.3.7, MIT).
 
 ## Licence
 
