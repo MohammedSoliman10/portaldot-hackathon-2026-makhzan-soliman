@@ -118,7 +118,7 @@ All 5 deals are settled on Portaldot V3 testnet (`chain 420420777`). Core deploy
 
 ## Live gate demo
 
-Exercised `StorageGate` across 11 broadcast transactions with total fees of **`50.205185 tPOT`** (gate balance returned to 0 tPOT; `evidence/raw/t8/gate-demo-summary.md`):
+Exercised `StorageGate` across 13 broadcast transactions with total fees of **`50.205185 tPOT`** (gate balance returned to 0 tPOT; `evidence/raw/t8/gate-demo-summary.md`):
 
 <details>
 <summary><strong>StorageGate Demo: Deals 3, 4, 5 (Click to expand)</strong></summary>

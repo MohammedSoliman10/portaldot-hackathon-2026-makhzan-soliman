@@ -85,7 +85,7 @@ Recorded run: `evidence/raw/t2/126-gate-live-verify.txt`.
 
 ## 2c. Inspect live StorageGate demo deals (keyless) — about 5 s
 
-The live demo of `StorageGate` exercised deals 3, 4, and 5 on Portaldot V3 (`evidence/raw/t8/gate-demo-summary.md`) across 11 transactions totaling `50.205185 tPOT` in fees. Anyone can query the on-chain lock states, payees, amounts, and health without a private key:
+The live demo of `StorageGate` exercised deals 3, 4, and 5 on Portaldot V3 (`evidence/raw/t8/gate-demo-summary.md`) across 13 transactions totaling `50.205185 tPOT` in fees. Anyone can query the on-chain lock states, payees, amounts, and health without a private key:
 
 ```bash
 cd apps/makhzan

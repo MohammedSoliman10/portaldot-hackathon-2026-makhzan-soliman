@@ -6,7 +6,7 @@
 - Owner Address: `0x0948EBD7637D1C32858a6FC5D947E85A6600205C`
 - Provider-1 Address: `0xf4ec143c743FF57c0D32e829f50692551CBf6029`
 
-## Live Transactions (11 Total)
+## Live Transactions (13 Total)
 
 1. `createDeal(3)`: tx `0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee`, block 250092, duration 600 blocks (endBlock 250692), price 5 tPOT (500000000000000 units), fee 11.557013864671672935 tPOT (11.557014 tPOT).
 2. `createDeal(4)`: tx `0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761`, block 252512, duration 3000 blocks (endBlock 255512), price 5 tPOT (500000000000000 units), fee 11.557013787572357160 tPOT (11.557014 tPOT).
@@ -36,4 +36,4 @@
 - Final Provider-1 Balance: `44.932150264353992530 tPOT` (`44.932150 tPOT`) (block 264487)
 - Final StorageGate Balance: `0 tPOT` (0 wei)
 - Provider-1 Bond: `24 tPOT` (2400000000000000 units)
-- Total Transaction Fees: `50.205184994871606830 tPOT` (`50.205185 tPOT`) across 11 transactions against 80 tPOT budget cap.
+- Total Transaction Fees: `50.205184994871606830 tPOT` (`50.205185 tPOT`) across 13 transactions against 80 tPOT budget cap.
