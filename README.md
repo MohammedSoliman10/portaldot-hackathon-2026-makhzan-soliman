@@ -92,7 +92,7 @@ flowchart TD
 
 ## Live results
 
-All 5 deals are settled on Portaldot V3 testnet (`chain 420420777`). Core deployment: Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` deployed by `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` (tx `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7`, block `171308`, total cost `529.844316817465986480 tPOT`, reserved deposit `165.513 tPOT`). StorageGate: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`).
+All 5 deals are settled on Portaldot V3 testnet (`chain 420420777`). Core deployment: Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` deployed by `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` (tx `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7`, block `171308` with hash `0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98`, finalized block `171311`, total cost `529.844316817465986480 tPOT`, reserved deposit `165.513 tPOT`, owner balance after `199.435042290680279745 tPOT`). StorageGate: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`).
 
 <details>
 <summary><strong>Core Protocol Lifecycle: Deals 1 & 2 [live run] (Click to expand)</strong></summary>
@@ -118,7 +118,7 @@ All 5 deals are settled on Portaldot V3 testnet (`chain 420420777`). Core deploy
 
 ## Live gate demo
 
-Exercised `StorageGate` across 13 broadcast transactions with total fees of **`50.205185 tPOT`** (gate balance returned to 0 tPOT; `evidence/raw/t8/gate-demo-summary.md`):
+Exercised `StorageGate` across 13 broadcast transactions with total fees of **`50.205185 tPOT`** (out of an 80 tPOT budget cap), ending with Owner balance at `195.509586 tPOT`, Provider-1 balance at `44.932150 tPOT`, and gate balance returned to 0 tPOT (`evidence/raw/t8/gate-demo-summary.md`):
 
 <details>
 <summary><strong>StorageGate Demo: Deals 3, 4, 5 (Click to expand)</strong></summary>
@@ -129,18 +129,18 @@ Exercised `StorageGate` across 13 broadcast transactions with total fees of **`5
 | 2 | `gate lock 3` | *refused pre-broadcast* (`Expired`) | `251940` | Block 251940 > endBlock 250692 (0 gas) |
 | 3 | `createDeal(4)` | `0x853225285c317dc91de4ecc9aee61be950fad7801ea64fcf25d79710d1104761` | `252512` | Deal 4 created (term 3,000) |
 | 4 | `gate lock 4` | `0x3719248237ec37c916b11e3d014aebba05d84cedcdcdc79cc1b9feaa18a62203` | `252523` | Lock 4 opened; 2 tPOT deposited (minBond 20 tPOT) |
-| 5 | `gate release 4` | `0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f` | `252535` | Provider-1 paid +2 tPOT; status = released |
+| 5 | `gate release 4` | `0x4c63d339e7db1cfa9ef7b48194d38f6b2c2613f60d6cf0d3d3c6afbbc6d35c3f` | `252535` | Provider-1 paid +2 tPOT (fee 0.015322 tPOT); status = released |
 | 6 | `createDeal(5)` | `0x12557be0d42359a70cbb22acd05310efff94c1bd19223c7d524e8c59400662be` | `252544` | Deal 5 created (term 3,000) |
 | 7 | `gate lock 5` | `0xf84af2e383b8239c350a16bdf074a14925cd954cacd3ca25ec1621a5fcf869db` | `252552` | Lock 5 opened; 2 tPOT deposited (minBond 30 tPOT) |
 | 8 | `gate release 5` | *refused pre-broadcast* (`BondTooLow`) | `252560` | Bond 24 < minBond 30 tPOT (0 gas) |
 | 9 | `gate refund 5` | *refused pre-broadcast* (`RefundNotAllowed`) | `252564` | In-term and healthy (0 gas) |
-| 10 | `claim(3)` | `0x9c8ec1c10b2f57ffa90ed22c09db49b019e26b7656825df3bd764bad46505441` | `258836` | Deal 3 claimed by Provider-1 (+5 tPOT) |
-| 11 | `settle(3)` | `0x57d35092a6f16989ae26a59fa35acec60179aac043bbf247f2ecf54c32d8e064` | `258844` | Deal 3 settled by Owner |
-| 12 | `gate refund 5` | `0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23` | `264442` | Post-term refund: +2 tPOT back to Owner |
-| 13 | `claim(4)` | `0x491fdf174810101c7e96915604d78cc6c0e12bcdb1ef7d810adb264382ca1846` | `264450` | Deal 4 claimed (+5 tPOT) |
-| 14 | `claim(5)` | `0x0bda52e6038d9955293ffbb2b78935638659696e4e5a1dd905809d6ee2134745` | `264458` | Deal 5 claimed (+5 tPOT) |
-| 15 | `settle(4)` | `0x5a156d435057ddbeb9de0ca9b4cd48155dbf63391af0fca7cfd76231c4448279` | `264469` | Deal 4 settled by Owner |
-| 16 | `settle(5)` | `0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34` | `264477` | Deal 5 settled by Owner |
+| 10 | `claim(3)` | `0x9c8ec1c10b2f57ffa90ed22c09db49b019e26b7656825df3bd764bad46505441` | `258836` | Deal 3 claimed by Provider-1 (+5 tPOT, fee 0.015313 tPOT) |
+| 11 | `settle(3)` | `0x57d35092a6f16989ae26a59fa35acec60179aac043bbf247f2ecf54c32d8e064` | `258844` | Deal 3 settled by Owner (fee 0.015312 tPOT) |
+| 12 | `gate refund 5` | `0x11adf58b7d5071d486e185b4485c380878768ee05c508331cd6a07c7b8347a23` | `264442` | Post-term refund: +2 tPOT back to Owner (fee 0.015317 tPOT) |
+| 13 | `claim(4)` | `0x491fdf174810101c7e96915604d78cc6c0e12bcdb1ef7d810adb264382ca1846` | `264450` | Deal 4 claimed (+5 tPOT, fee 0.015313 tPOT) |
+| 14 | `claim(5)` | `0x0bda52e6038d9955293ffbb2b78935638659696e4e5a1dd905809d6ee2134745` | `264458` | Deal 5 claimed (+5 tPOT, fee 0.015313 tPOT) |
+| 15 | `settle(4)` | `0x5a156d435057ddbeb9de0ca9b4cd48155dbf63391af0fca7cfd76231c4448279` | `264469` | Deal 4 settled by Owner (fee 0.015312 tPOT) |
+| 16 | `settle(5)` | `0x54c71257ed6f82b5ba6cbd0983ea1b99b300fe705c2eed1abecab6bad719fc34` | `264477` | Deal 5 settled by Owner (fee 0.015312 tPOT) |
 
 </details>
 
@@ -196,7 +196,7 @@ cast call 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA "lockOf(uint32)" 4 --rpc-ur
 ## Why Portaldot V3
 
 - **EVM via `pallet-revive`:** standard Solidity (`solc 0.8.28`, `via_ir=true`), deployed directly over `eth_sendRawTransaction`.
-- **Native Value & Unit Factor:** deal prices and bonds use native units (`1 tPOT = 10^14 planck`); `WEI_PER_UNIT = 10,000` (`1 tPOT = 10^18 wei`). Existential deposit = 0.1 tPOT (`10^17 wei`).
+- **Native Value & Unit Factor:** deal prices and bonds use native units (`1 tPOT = 10^14 planck`); `WEI_PER_UNIT = 10,000` (`1 tPOT = 10^18 wei`). Existential deposit = 0.1 tPOT (`10^17 wei`). Native dry-run store of 1 MiB quoted `104.86915567090586 tPOT` and 4 MiB quoted `419.44210364626048 tPOT`; runtime deposit is `0.0807 tPOT` per byte.
 - **Account Mapping:** H160 mapped to Substrate `AccountId32` via `h160 || 0xEE * 12` (contract maps to `5EEwsqgiEVZNUdUHdmsEMqBQzJjNy5PULPBYoo5yF2GX45DZ`).
 - **Chain Gotchas Guide ([docs/V3-GOTCHAS.md](docs/V3-GOTCHAS.md)):** 12 measured findings including gas price bands (~32.5k wei), 15 s receipt trap (T1-002), permanent non-refundable storage deposits, and the constant `prevrandao` opcode observation.
 
