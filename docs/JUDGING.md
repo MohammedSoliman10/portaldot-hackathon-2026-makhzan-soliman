@@ -13,7 +13,7 @@ Foundry/anvil; live numbers come from Portaldot V3 (`chain id 420420777`, spec `
 
 | Criterion | Weight | What we can defend | Honest verdict |
 | --- | --- | --- | --- |
-| Technical Feasibility | 30 | Deployed and exercised end-to-end on a public testnet (Makhzan and StorageGate live); 208 contract tests (unit, fuzz, invariant), 171 client tests, keyless live audit, byte-for-byte deployment check, consumer gate live | **Strong**, with one-operator and fallback-randomness caveats (live gate demo fully exercised across 11 txs and 50.205185 tPOT fees) |
+| Technical Feasibility | 30 | Deployed and exercised end-to-end on a public testnet (Makhzan and StorageGate live); 208 contract tests (unit, fuzz, invariant), 171 client tests, keyless live audit, byte-for-byte deployment check, consumer gate live | **Strong**, with one-operator and fallback-randomness caveats (live gate demo fully exercised across 13 txs and 50.205185 tPOT fees) |
 | Innovation | 30 | Merkle commitment + challenge/slash + evidence bundle + keyless verification in one small flow | **Modest**; the primitives are known, the packaging is the contribution |
 | Ecosystem Contribution | 20 | Measured Portaldot V3 gotchas, native dry-run and TransactionStorage facts, docs-vs-evidence check, reusable client patterns | **Useful but small**; no upstream PR, no SDK, no third-party adoption |
 | Business Potential | 20 | A clear payer hypothesis and a cost model that can be tested | **Unvalidated**; no interviews, no pricing test, no paying user |
@@ -37,7 +37,7 @@ non-answer, and release payment; a separate keyless client can audit every step 
 | `evidence/raw/t1/101-gate-demo-local.txt` | `gate-demo` on local anvil: deploy, lock with a bond floor, release while healthy, challenge/expire/resolve (slash), `BondTooLow`, `RefundNotAllowed`, refund at the end block, gate balance `0` |
 | `evidence/raw/t1/100-gate-deploy.txt`, `102-size-check-gate.txt` | StorageGate deploys through the same dry run and pending record as Makhzan, `2,528 B` runtime against a `2,600 B` budget enforced next to Makhzan's |
 | `evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt` | StorageGate live deploy: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA`, tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, measured cost `210.575612711692978125 tPOT`, runtime `2,528 B`, keccak `0x684a6af5dbb9bd02e917e79507ebd8a02758e192dc2804a5357f13026b8e72c5` |
-| `evidence/raw/t8/gate-demo-summary.md` | Live StorageGate demo on Portaldot V3: deals 3, 4, 5 across 11 txs and 50.205185 tPOT in fees; lock 4 + release 4 (+2 tPOT to provider-1); lock 5 + release refused with BondTooLow (bond 24 < 30 tPOT) + in-term refund refused with RefundNotAllowed; post-term refund 5 (+2 tPOT back to owner, gate balance 0); lock 3 refused with Expired; claims and settles for 3, 4, 5 complete |
+| `evidence/raw/t8/gate-demo-summary.md` | Live StorageGate demo on Portaldot V3: deals 3, 4, 5 across 13 transactions and 50.205185 tPOT in fees; lock 4 + release 4 (+2 tPOT to provider-1); lock 5 + release refused with BondTooLow (bond 24 < 30 tPOT) + in-term refund refused with RefundNotAllowed; post-term refund 5 (+2 tPOT back to owner, gate balance 0); lock 3 refused with Expired; claims and settles for 3, 4, 5 complete |
 | `evidence/raw/t1/78-chain-facts.txt`, `79-account-mapping-deposits.txt` | Chain constants, H160→AccountId32 mapping, deposit split reconciled against `system.account.reserved` |
 
 **Weak spots (discount these).**

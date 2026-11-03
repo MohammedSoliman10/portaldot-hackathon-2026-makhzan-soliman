@@ -10,8 +10,16 @@ The Makhzan CLI (`apps/makhzan`) provides standalone guarded commands for intera
 Read-only command querying the on-chain lock, deal health, provider bond, and release verdict.
 
 ```bash
-# Local or live read-only query (requires no private key)
-node apps/makhzan/src/cliMain.ts gate status <dealId> [--gate <address>]
+# Local read-only query:
+MAKHZAN_NETWORK=local node apps/makhzan/src/cliMain.ts gate status <dealId>
+
+# Live read-only query (requires no private key):
+MAKHZAN_NETWORK=live \
+MAKHZAN_RPC_URL=https://test-evm-rpc-v3.portaldot.dev \
+MAKHZAN_CHAIN_ID=420420777 \
+MAKHZAN_CONTRACT=0x60481DFcFCA34A8F095939D9675eC715127B2e44 \
+MAKHZAN_GATE=0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA \
+node apps/makhzan/src/cliMain.ts gate status <dealId>
 ```
 
 Output:
