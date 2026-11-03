@@ -1,6 +1,6 @@
 # Makhzan
 
-Bonded, challenge-verified storage on Portaldot: a provider stakes tPOT, and a client can prove a missing block on-chain and be paid from the bond.
+Bonded, challenge-verified storage on Portaldot: a provider locks a tPOT bond, and if it cannot prove it still holds a randomly chosen 1 KiB block of the client's file, 20% of the bond is paid to the client.
 
 **Status:** Live on Portaldot V3 testnet, chain 420420777 · **873 tests** (208 contracts · 339 UI · 181 CLI · 68 MCP · 49 gates · 28 scripts) · **5 live deals** (all settled) · **20% slash** (6 tPOT)
 
@@ -25,7 +25,7 @@ Bonded, challenge-verified storage on Portaldot: a provider stakes tPOT, and a c
 ## Problem and solution
 
 1. Off-chain storage protocols offer invoices and uptime dashboards, but clients have no way to audit custody or punish missing data on-chain.
-2. A hash check in a private console proves data existed only at the moment of checking and cannot be verified by third parties without sharing private keys.
+2. A provider can claim to store data while holding nothing, and today there is no cheap way to check without trusting them or downloading everything.
 3. Makhzan turns storage promises into cryptographic commitments by dividing files into 1 KiB leaves committed under an on-chain Merkle root.
 4. Storage providers stake a native tPOT bond that is held directly at risk throughout the deal's duration.
 5. If a provider fails to produce a challenged 1 KiB block and its Merkle path within 50 blocks (300 s), exactly 20% of the bond is slashed on-chain and credited to the client.
@@ -237,7 +237,7 @@ cd apps/status-ui && npm ci && npm test && npm run dev
 See [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) for full analysis:
 - **One block at one moment:** A passed challenge proves possession of one 1 KiB block during the window, not continuous disk storage.
 - **Only the deal owner can challenge:** `challenge(dealId)` restricts caller to `deal.owner`; a third party cannot challenge a bad provider, and only the deal owner is paid from the slashed bond.
-- **Challenge index & entropy:** Derived via D5 fallback (`keccak256(blockhash(n-1), prevrandao, dealId) % leafCount`). While Discord confirmed YES to `block.prevrandao`, our read-only audit measured `mixHash` as constant `0x8e1bc9bf04000` across 37 blocks (and opcode `0x44` dry-runs return the same constant). Thus, randomness relies on the parent blockhash and deal ID: unpredictable before block creation, but not VRF-grade and biasable by block producers.
+- **Challenge index & entropy:** Derived via the fallback selector (`keccak256(blockhash(n-1), prevrandao, dealId) % leafCount`). While Discord confirmed YES to `block.prevrandao`, our read-only audit measured `mixHash` as constant `0x8e1bc9bf04000` across 37 blocks (and opcode `0x44` dry-runs return the same constant). Thus, randomness relies on the parent blockhash and deal ID: unpredictable before block creation, but not VRF-grade and biasable by block producers.
 - **Fixed challenge window:** The 50-block window (~300 s at 6 s blocks) is a deployed constant. About 6 rounds fit a 300-block demo deal; real deals get 288 rounds per day.
 - **Health semantics & gate visibility:** `healthOf == 1` means "no open challenge", not "file stored". The gate sees current state only; once a default is resolved, `healthOf` returns to 1, and `minBond` is how it notices a past slash.
 - **Demo pricing:** The 5 tPOT price is a demo value, not a tariff. It was set to make the live runs legible, not from market economics.
