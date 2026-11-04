@@ -28,7 +28,7 @@ const liveMode = () =>
 
 function mockClientWithHealth(healthCode: number, blockNumber: bigint = 300000n, endBlock: number = 200000): ReadClient {
   return {
-    readContract: vi.fn(async ({ functionName, args }: { functionName: string; args?: readonly unknown[] }) => {
+    readContract: vi.fn(async ({ functionName }: { functionName: string; args?: readonly unknown[] }) => {
       if (functionName === "peek") return [SLOT0_DEAL1];
       if (functionName === "providerOf") return [1, 2400000000000000n, 0n, true];
       if (functionName === "dealOf") {
@@ -138,5 +138,14 @@ describe("Health semantics contract alignment", () => {
     await findByTestId("deal-live");
     const deal1 = container.querySelector("#deal-1");
     expect(deal1?.textContent).toMatch(/health.*unknown/i);
+  });
+
+  it("renders health status on Overview page for code 0 as none or settled", async () => {
+    const { findByTestId, container } = renderApp(
+      <Overview client={mockClientWithHealth(0)} />,
+      { mode: liveMode(), evidence: evidenceState() },
+    );
+    await findByTestId("live-results");
+    expect(container.textContent).toContain("none or settled");
   });
 });
