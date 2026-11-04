@@ -1,12 +1,12 @@
-# 033-ui-all-deals — Headless Chromium Audit (UI18)
-Timestamp (UTC): 2026-11-04T09:40:00Z
-Deployment: Vercel Preview (https://status-jufcj0a3i-soliman11.vercel.app) & Local Preview (http://localhost:4180)
+# 033-ui-all-deals — Headless Chromium Audit (UI18 Update)
+Timestamp (UTC): 2026-11-04T10:22:00Z
+Deployment: Local Preview (http://localhost:4180) & Vercel Preview
 Browser: headless Chromium (chrome-headless-shell 1248) via playwright-core
 
 ## Audit Criteria
 
 1. **Horizontal Overflow**: `scrollWidth` must equal client viewport width (`overflow == 0px`).
-2. **Typography**: No non-badge text under 14px (all descriptive and data text >= 14px; `.label-chip` badges allowed at 13px).
+2. **Typography**: No non-badge text under 14px (all descriptive and data text >= 14px; `.label-chip` badges allowed at 13px; deal chip links at 14px).
 3. **Contrast**: WCAG 2.1 contrast ratio >= 4.5:1 for normal text and >= 3:1 for large text against composited background.
 
 ## Results Table

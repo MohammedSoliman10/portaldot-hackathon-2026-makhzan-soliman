@@ -1,6 +1,6 @@
 # Headless Chromium audit on Vercel preview & local preview
-Timestamp (UTC): 2026-11-04T09:40:00Z
-Target: https://status-jufcj0a3i-soliman11.vercel.app
+Timestamp (UTC): 2026-11-04T10:22:00Z
+Target: http://localhost:4180
 
 [1440px] / scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0
 [1440px] /deal/1 scrollWidth=1440 viewport=1440 overflow=0px contrastFailures=0 smallText=0
