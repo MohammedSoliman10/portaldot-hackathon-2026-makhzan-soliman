@@ -1,0 +1,50 @@
+# Deployed verification on https://status-ui-one.vercel.app
+Timestamp (UTC): 2026-11-04T10:59:55.186Z
+Favicon: /favicon.ico -> HTTP 200
+Apple Touch Icon: /apple-touch-icon.png -> HTTP 200
+
+# Overview Verification:
+  - 6 created: YES
+  - 5 settled: YES
+  - 1 healthy now: YES
+  - deal chips 1 to 6: YES
+
+# Deal 6 Verification:
+  - healthy: YES
+  - end block 418,835: YES
+
+[1440px] / scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /deal/1 scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /deal/2 scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /deal/6 scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /verify scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /proof scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /gate scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /judges scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /replay scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /receipt/1 scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1440px] /receipt/2 scrollWidth=1440px viewport=1440px overflow=0px contrastFailures=0 smallText=0
+[1024px] / scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /deal/1 scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /deal/2 scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /deal/6 scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /verify scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /proof scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /gate scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /judges scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /replay scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /receipt/1 scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[1024px] /receipt/2 scrollWidth=1024px viewport=1024px overflow=0px contrastFailures=0 smallText=0
+[390px] / scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /deal/1 scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /deal/2 scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /deal/6 scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /verify scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /proof scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /gate scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /judges scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /replay scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /receipt/1 scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+[390px] /receipt/2 scrollWidth=390px viewport=390px overflow=0px contrastFailures=0 smallText=0
+
+SUMMARY routes=33 totalFailures=0 contrastFailures=0 smallTextUnder14=0 favicons=PASS liveContent=PASS
