@@ -4,7 +4,7 @@
 
 - **The problem:** Off-chain storage offers promises and invoices, but buyers have no way to audit custody or penalise missing data on-chain.
 - **What we built:** Makhzan, an accountable storage protocol on Portaldot EVM where providers bond tPOT and are challenged on random blocks with a 20% slash on failure.
-- **What is measured live:** Five deals, one provider, one pass, one slash, linear accrual, settlement, and keyless verification on the Portaldot V3 testnet.
+- **What is measured live:** Six deals created (5 settled, 1 healthy until about Nov 11, `evidence/raw/t10/03-deal6-summary.md`), one provider, one pass, one slash, linear accrual, settlement, and keyless verification on the Portaldot V3 testnet.
 - **The biggest honest limit:** One provider and operator (all ours), with challenge randomness relying on a blockhash/prevrandao fallback rather than a VRF.
 - **What we need:** Foundation support for redeployment budget, an independent provider, day-scale deal runs, and clarity on V3 randomness.
 - **Where to verify:** Complete reproduction commands in `docs/REPRODUCE.md`, receipts in `evidence/`, and a read-only status UI and MCP server.

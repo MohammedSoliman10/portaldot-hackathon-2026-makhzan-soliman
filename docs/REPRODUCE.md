@@ -124,7 +124,7 @@ Honest notes:
 
 ## 2d. Inspect live Deal 6 (healthy active deal) — about 2 s
 
-Deal 6 was created live on Portaldot V3 testnet (`evidence/raw/t10/03-deal6-summary.md`, tx `0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1`, block `318035`) with a 100,800 block duration (~7 days, endBlock `418835`, expiring `2026-11-11T08:40:54Z`). It is deliberately active and healthy (`healthOf(6) = 1`):
+Deal 6 was created live on Portaldot V3 testnet (`evidence/raw/t10/03-deal6-summary.md`, tx `0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1`, block `318035`) with a 100,800 block duration (~7 days, endBlock `418835`, expiring `2026-11-11T08:40:54Z`, total cost `16.557011868111074750 tPOT` with `11.557011868111074750 tPOT` fee). It is deliberately active and healthy (`healthOf(6) = 1`):
 
 ```bash
 cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 6 --rpc-url https://test-evm-rpc-v3.portaldot.dev

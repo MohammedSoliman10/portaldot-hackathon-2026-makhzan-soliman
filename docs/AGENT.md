@@ -245,7 +245,7 @@ node scripts/live-client.mjs
 ```bash
 cd apps/makhzan-mcp
 npm run typecheck
-npm test          # 49 tests, no network: a fake Read surface and an in-memory MCP transport
+npm test          # 68 tests, no network: a fake Read surface and an in-memory MCP transport
 node scripts/live-client.mjs   # the live transcript above, read-only
 ```
 

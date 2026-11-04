@@ -2,7 +2,7 @@
 
 Bonded, challenge-verified storage on Portaldot: a provider locks a tPOT bond, and if it cannot prove it still holds a randomly chosen 1 KiB block of the client's file, 20% of the bond is paid to the client.
 
-**Status:** Live on Portaldot V3 testnet, chain 420420777 · **873 tests** (208 contracts · 339 UI · 181 CLI · 68 MCP · 49 gates · 28 scripts) · **6 live deals** (5 settled, 1 healthy until about Nov 11) · **20% slash** (6 tPOT)
+**Status:** Live on Portaldot V3 testnet, chain 420420777 · **889 tests** (208 contracts · 355 UI · 181 CLI · 68 MCP · 49 gates · 28 scripts) · **6 live deals** (5 settled, 1 healthy until about Nov 11) · **20% slash** (6 tPOT)
 
 [Try It in 60s](#try-it-in-60-seconds) · [Screenshots](#screenshots) · [Problem & Solution](#problem-and-solution) · [How It Works](#how-it-works) · [Live Results](#live-results) · [Live Gate Demo](#live-gate-demo) · [Verify It Yourself](#verify-it-yourself) · [Consumer Layer](#consumer-layer) · [Why Portaldot V3](#why-portaldot-v3) · [Quickstart](#quickstart) · [Security & Limits](#security-and-honest-limits) · [Economics & Project Info](#economics)
 
@@ -113,7 +113,7 @@ flowchart TD
 | Deal 2 | resolve (slash) | `0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3` | `172658` | Exactly 20% (6 tPOT) slashed to owner; bond: 30 -> 24 | `evidence/raw/t1/69-live-resolve-b.txt` |
 | Deal 2 | claim | `0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee` | `172881` | Provider-1 paid 5 tPOT accrued price | `evidence/raw/t1/70-live-claim-b.txt` |
 | Deal 2 | settle | `0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec` | `172887` | Concluded; healthOf(2) = 0 | `evidence/raw/t1/71-live-settle-b.txt` |
-| Deal 6 | createDeal (1 MiB, 7-day) | `0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1` | `318035` | 1,024 leaves, price 5 tPOT, duration 100,800 blocks (endBlock 418835); active healthy (healthOf = 1) until about Nov 11 | `evidence/raw/t10/03-deal6-summary.md` |
+| Deal 6 | createDeal (1 MiB, 7-day) | `0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1` | `318035` | 1,024 leaves, price 5 tPOT, duration 100,800 blocks (endBlock 418835); total cost 16.557011868111074750 tPOT (fee 11.557011868111074750 tPOT); active healthy (healthOf = 1) until about Nov 11 | `evidence/raw/t10/03-deal6-summary.md` |
 
 </details>
 
@@ -223,7 +223,7 @@ cd apps/makhzan && npm ci && npm test && cd ../..
 # 3. Run MCP Agent Server Tests (68 tests)
 cd apps/makhzan-mcp && npm ci && npm test && cd ../..
 
-# 4. Run Status Web UI locally (339 tests)
+# 4. Run Status Web UI locally (355 tests)
 cd apps/status-ui && npm ci && npm test && npm run dev
 ```
 
