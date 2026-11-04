@@ -9,13 +9,9 @@ import type { DealRead } from "../data/reads";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
 import { Card } from "../components/shared/Card";
 import { Chip } from "../components/shared/Chip";
+import { HEALTH_TEXT, healthLabel } from "../data/health";
 
-const HEALTH_TEXT: Record<number, string> = {
-  0: "settled",
-  1: "healthy",
-  2: "challenged",
-  3: "expired",
-};
+export { HEALTH_TEXT };
 
 const short = (value: string): string => `${value.slice(0, 10)}…${value.slice(-6)}`;
 
@@ -74,10 +70,7 @@ function DealCard({
     : `evidence/${evidenceId}.json`;
 
   const healthValue = health !== null ? health : (recorded?.health ?? null);
-  let healthText = healthValue === null ? "not read" : (HEALTH_TEXT[healthValue] ?? `code ${healthValue}`);
-  if (healthValue === 1 && read && live.block !== null && live.block >= read.endBlock) {
-    healthText = "expired";
-  }
+  const healthText = healthValue === null ? "not read" : healthLabel(healthValue);
 
   const statusText = measured ? healthText : (recorded?.state ?? healthText);
 

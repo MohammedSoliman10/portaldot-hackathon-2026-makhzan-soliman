@@ -24,12 +24,9 @@ const hostOf = (rpcUrl: string | null): string => {
   }
 };
 
-const HEALTH_TEXT: Record<number, string> = {
-  0: "settled",
-  1: "healthy",
-  2: "challenged",
-  3: "expired",
-};
+import { HEALTH_TEXT, healthLabel } from "../data/health";
+
+export { HEALTH_TEXT };
 
 function Row({
   field,
@@ -210,7 +207,7 @@ export function Overview(options: LiveOptions) {
           value={formatCount(live.status === "live" ? liveDeals.counts.settled : 2)}
           subtitle="settled"
           label={live.status === "live" ? "MEASURED" : "REPORTED"}
-          detail={live.status === "live" ? "healthOf = 0 (settled or none)" : "deals 1 & 2 settled on Portaldot"}
+          detail={live.status === "live" ? "healthOf = 0 (none or settled)" : "deals 1 & 2 settled on Portaldot"}
         />
         <Stat
           value={formatCount(live.status === "live" ? liveDeals.counts.healthyNow : 0)}
@@ -393,7 +390,7 @@ export function Overview(options: LiveOptions) {
                       blocksLeft: 0,
                       flags: d.flags ?? 1,
                       health: d.health ?? 0,
-                      healthLabel: "settled or none" as const,
+                      healthLabel: "none or settled",
                     }))
                 ).map((deal) => (
                   <tr key={deal.id} className="hover:bg-surface-2 transition-colors">
@@ -683,7 +680,7 @@ export function Overview(options: LiveOptions) {
                     key={deal.id}
                     field={`Deal ${deal.id} health`}
                     value={health === null ? "not read" : String(health)}
-                    unit={health === null ? undefined : HEALTH_TEXT[health]}
+                    unit={health === null ? undefined : healthLabel(health)}
                     label={live.health[deal.id] !== undefined && live.health[deal.id] !== null ? "MEASURED" : "REPORTED"}
                     source={live.health[deal.id] !== undefined && live.health[deal.id] !== null ? configSource : recordedSource}
                   />

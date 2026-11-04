@@ -2,7 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ModeState } from "../config/modes";
 import { createReadClient, type ReadClient, runRead } from "./client";
 import { dealOf, healthOf, peekConfig } from "./reads";
+import { healthLabel } from "./health";
 import type { Hex } from "./schema";
+
+export type DealHealthLabel =
+  | "none or settled"
+  | "healthy"
+  | "challenge open inside its window"
+  | "challenge open past its deadline (provider in default)"
+  | "unknown";
 
 export interface LiveDealRow {
   id: number;
@@ -14,7 +22,7 @@ export interface LiveDealRow {
   blocksLeft: number;
   flags: number;
   health: number;
-  healthLabel: "healthy" | "challenge open" | "in default" | "settled or none" | "term ended, not settled";
+  healthLabel: DealHealthLabel | string;
 }
 
 export interface LiveDealsCounts {
@@ -41,19 +49,10 @@ const CACHE_KEY_PREFIX = "makhzan_live_deals_v1";
 
 export function formatDealHealth(
   health: number,
-  endBlock: number,
-  currentBlock: number | null,
-): "healthy" | "challenge open" | "in default" | "settled or none" | "term ended, not settled" {
-  if (health === 0) return "settled or none";
-  if (health === 2) return "challenge open";
-  if (health === 3) return "in default";
-  if (health === 1) {
-    if (currentBlock !== null && currentBlock >= endBlock) {
-      return "term ended, not settled";
-    }
-    return "healthy";
-  }
-  return "settled or none";
+  _endBlock?: number,
+  _currentBlock?: number | null,
+): DealHealthLabel {
+  return healthLabel(health) as DealHealthLabel;
 }
 
 interface CachedData {

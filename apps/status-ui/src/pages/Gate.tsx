@@ -7,6 +7,7 @@ import { guardDecision, releaseVerdict } from "../data/gate";
 import { formatCount, formatNative, formatWei, formatWeiAsNative } from "../data/labels";
 import type { ReadClient } from "../data/client";
 import { useGate } from "../data/use-gate";
+import { healthLabel } from "../data/health";
 import { Card } from "../components/shared/Card";
 import { Chip } from "../components/shared/Chip";
 
@@ -281,6 +282,7 @@ export function Gate({ client }: { client?: ReadClient }) {
                   <Field
                     name="Deal health"
                     value={live.health === null ? "not read" : `healthOf = ${live.health}`}
+                    unit={live.health === null ? undefined : `(${healthLabel(live.health)})`}
                     testId="gate-health"
                     detail={`read at block ${formatCount(live.block ?? 0)}`}
                   />

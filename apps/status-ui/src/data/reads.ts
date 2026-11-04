@@ -149,9 +149,7 @@ export function accruedOf(client: ReadClient, address: Hex, dealId: number): Pro
 export function healthOf(client: ReadClient, address: Hex, dealId: number): Promise<ReadResult<number>> {
   return runRead(async () => {
     const value = await client.readContract({ address, abi: ABI, functionName: "healthOf", args: [dealId] });
-    const health = Number(value);
-    if (![0, 1, 2, 3].includes(health)) throw new Error(`malformed health value ${String(value)}`);
-    return health;
+    return Number(value);
   });
 }
 
