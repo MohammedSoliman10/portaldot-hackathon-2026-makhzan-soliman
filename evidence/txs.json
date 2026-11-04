@@ -4,7 +4,7 @@
   "derivedFrom": "evidence/receipts",
   "network": "LIVE",
   "chainId": 420420777,
-  "generatedAt": "2026-10-31T08:28:49Z",
+  "generatedAt": "2026-11-04T08:40:58Z",
   "entries": [
     {
       "hash": "0x02686f6ff22cd0f4a905b489a30bd45b1c481229cb2830ae0467dbee072ffcda",
@@ -59,6 +59,15 @@
       "network": "LIVE",
       "utc": "2026-10-30T08:21:01Z",
       "receiptPath": "evidence/receipts/live/0x196d1ab6b059441ad92a17e83d98b5da2f8fa8c223ed6f79a42df238284689ee.json"
+    },
+    {
+      "hash": "0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1",
+      "action": "create",
+      "block": 318035,
+      "status": "success",
+      "network": "LIVE",
+      "utc": "2026-11-04T08:40:58Z",
+      "receiptPath": "evidence/receipts/live/0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1.json"
     },
     {
       "hash": "0x312534d44d26dccee8f11b790d0a013cd9631e642e38efe8c7a31d39d18d3af3",
