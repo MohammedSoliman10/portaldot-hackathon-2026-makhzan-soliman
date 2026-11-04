@@ -15,6 +15,8 @@ export interface LiveOptions {
   providerAddress?: Hex | null;
   /** Deals to read back; normally the ids recorded in the evidence. */
   dealIds?: readonly number[];
+  /** When true, reads all deals from 1..nextDealId reported by config. */
+  allDeals?: boolean;
 }
 
 export interface LiveDeployment {
@@ -103,10 +105,6 @@ export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): L
         balanceOf(active, address),
         providerAddress ? providerOf(active, address, providerAddress) : Promise.resolve(null),
       ]);
-      const [dealReads, healthReads] = await Promise.all([
-        Promise.all(ids.map((id) => dealOf(active, address, id))),
-        Promise.all(ids.map((id) => healthOf(active, address, id))),
-      ]);
       if (cancelled) return;
 
       if (config.value === null) {
@@ -116,12 +114,44 @@ export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): L
           status: "error",
           stale: age > staleAfterMs,
           error: config.error?.message ?? "the config read failed",
+          deals: options.allDeals ? {} : previous.deals,
+          health: options.allDeals ? {} : previous.health,
         }));
         return;
       }
 
-      const deals = ids.map((id, position) => ({ id, deal: dealReads[position] }));
-      const health = ids.map((id, position) => ({ id, health: healthReads[position] }));
+      let targetIds = ids;
+      if (options.allDeals && config.value) {
+        const total = Math.max(0, config.value.nextDealId);
+        const all = Array.from({ length: total }, (_, i) => i + 1);
+        targetIds = [...new Set([...all, ...ids])].sort((a, b) => a - b);
+      }
+
+      const [dealReads, healthReads] = await Promise.all([
+        Promise.all(targetIds.map((id) => dealOf(active, address, id))),
+        Promise.all(targetIds.map((id) => healthOf(active, address, id))),
+      ]);
+      if (cancelled) return;
+
+      if (options.allDeals) {
+        const failedDeal = dealReads.find((r) => r.value === null);
+        const failedHealth = healthReads.find((r) => r.value === null);
+        if (failedDeal || failedHealth) {
+          const err = failedDeal?.error?.message ?? failedHealth?.error?.message ?? "failed to read deal from chain";
+          setState((previous) => ({
+            ...previous,
+            status: "error",
+            stale: false,
+            error: err,
+            deals: {},
+            health: {},
+          }));
+          return;
+        }
+      }
+
+      const deals = targetIds.map((id, position) => ({ id, deal: dealReads[position] }));
+      const health = targetIds.map((id, position) => ({ id, health: healthReads[position] }));
       const runtime = code.value ?? null;
       lastGood.current = now();
 
@@ -157,7 +187,7 @@ export function useLiveDeployment(mode: ModeState, options: LiveOptions = {}): L
       cancelled = true;
       controller.abort();
     };
-  }, [client, tick, mode.address, mode.expectedChainId, staleAfterMs, providerAddress, dealIdsKey, now]);
+  }, [client, tick, mode.address, mode.expectedChainId, staleAfterMs, providerAddress, dealIdsKey, options.allDeals, now]);
 
   useEffect(() => {
     if (!client) return;

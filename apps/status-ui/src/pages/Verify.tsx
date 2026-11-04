@@ -257,7 +257,7 @@ export function Verify(options: VerifyOptions) {
           The sample file
         </h2>
         <p className="mt-2 max-w-[68ch] text-sm text-muted leading-relaxed">
-          Deals 1 and 2 committed this exact 1 MiB file. It is served byte-for-byte, so the numbers
+          Deals on this deployment committed this exact 1 MiB file. It is served byte-for-byte, so the numbers
           below can be checked without trusting this page.
         </p>
         <dl className="mt-4" data-testid="verify-sample-meta">

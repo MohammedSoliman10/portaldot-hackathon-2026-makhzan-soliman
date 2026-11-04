@@ -26,7 +26,7 @@ const hostOf = (rpcUrl: string | null): string => {
 
 const HEALTH_TEXT: Record<number, string> = {
   0: "settled",
-  1: "active",
+  1: "healthy",
   2: "challenged",
   3: "expired",
 };

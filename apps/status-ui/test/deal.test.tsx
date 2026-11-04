@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { Route, Routes } from "react-router-dom";
 import run2 from "../public/evidence/portaldot-live-run2.json";
 import { Deal } from "../src/pages/Deal";
 import { parseConfig } from "../src/config/env";
@@ -134,11 +135,16 @@ describe("Deals, nextDealId = 6 live chain", () => {
   });
 
   it("renders deal 6 with health healthy, status healthy, end block 418,835 and claimed 0", async () => {
-    const { container, findByTestId } = renderApp(<Deal client={liveClientWithSixDeals()} />, {
-      route: "/deal/6",
-      mode: liveMode(),
-      evidence: evidenceState(),
-    });
+    const { container, findByTestId } = renderApp(
+      <Routes>
+        <Route path="/deal/:id" element={<Deal client={liveClientWithSixDeals()} />} />
+      </Routes>,
+      {
+        route: "/deal/6",
+        mode: liveMode(),
+        evidence: evidenceState(),
+      },
+    );
     await findByTestId("deal-live");
 
     const deal6 = container.querySelector("#deal-6");

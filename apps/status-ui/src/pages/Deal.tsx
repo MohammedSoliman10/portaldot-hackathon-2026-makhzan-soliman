@@ -5,13 +5,14 @@ import { BlockLink } from "../components/BlockLink";
 import { useEvidence } from "../data/evidence-context";
 import { formatCount, formatNative, type Label } from "../data/labels";
 import type { DealInfo } from "../data/schema";
+import type { DealRead } from "../data/reads";
 import { useLiveDeployment, type LiveOptions } from "../data/use-live";
 import { Card } from "../components/shared/Card";
 import { Chip } from "../components/shared/Chip";
 
 const HEALTH_TEXT: Record<number, string> = {
   0: "settled",
-  1: "active",
+  1: "healthy",
   2: "challenged",
   3: "expired",
 };
@@ -50,32 +51,60 @@ function Field({
 }
 
 function DealCard({
-  deal,
+  dealId,
+  recorded,
   selected,
   live,
   chainId,
   evidenceId,
 }: {
-  deal: DealInfo;
+  dealId: number;
+  recorded: DealInfo | null;
   selected: boolean;
   live: ReturnType<typeof useLiveDeployment>;
   chainId: number;
   evidenceId: string;
 }) {
-  const read = live.deals[deal.id] ?? null;
-  const health = live.health[deal.id] ?? null;
+  const read = live.deals[dealId] ?? null;
+  const health = live.health[dealId] ?? null;
   const measured = read !== null;
   const label: Label = measured ? "MEASURED" : "REPORTED";
   const source = measured
     ? `chain ${chainId} @ block ${formatCount(live.block ?? 0)} · ${live.at}`
     : `evidence/${evidenceId}.json`;
-  const healthValue = health === null ? deal.health : health;
-  const healthText = healthValue === null ? "not read" : HEALTH_TEXT[healthValue];
+
+  const healthValue = health !== null ? health : (recorded?.health ?? null);
+  let healthText = healthValue === null ? "not read" : (HEALTH_TEXT[healthValue] ?? `code ${healthValue}`);
+  if (healthValue === 1 && read && live.block !== null && live.block >= read.endBlock) {
+    healthText = "expired";
+  }
+
+  const statusText = measured ? healthText : (recorded?.state ?? healthText);
+
+  if (live.status === "checking" && read === null && !recorded) {
+    return (
+      <Card as="article" id={`deal-${dealId}`} className="p-6">
+        <h2 className="text-xl font-bold tracking-tight text-gold-bright">Deal {dealId}</h2>
+        <p className="mt-3 text-sm text-muted">Reading deal {dealId} from chain…</p>
+      </Card>
+    );
+  }
+
+  const priceUnits = read?.priceUnits ?? recorded?.priceUnits ?? "0";
+  const startBlock = read?.startBlock ?? recorded?.startBlock ?? 0;
+  const endBlock = read?.endBlock ?? recorded?.endBlock ?? 0;
+  const claimedUnits = read?.claimedUnits ?? recorded?.claimedUnits ?? "0";
+  const size = read?.size ?? recorded?.size ?? 0;
+  const leafCount = read?.leafCount ?? recorded?.leafCount ?? 0;
+  const root = read?.root ?? recorded?.root ?? "0x";
+  const owner = read?.owner ?? recorded?.owner ?? null;
+  const providerId = read?.providerId ?? recorded?.providerId ?? null;
+  const flags = read?.flags ?? recorded?.flags ?? null;
 
   return (
     <Card
       as="article"
-      id={`deal-${deal.id}`}
+      id={`deal-${dealId}`}
       data-selected={selected ? "true" : undefined}
       className={`transition-all ${selected ? "ring-2 ring-gold border-gold/80 shadow-md" : "hover:border-line-strong"}`}
     >
@@ -83,7 +112,7 @@ function DealCard({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold tracking-tight text-gold-bright">
-              Deal {deal.id}
+              Deal {dealId}
             </h2>
             {selected ? (
               <span className="label-chip inline-flex items-center rounded-full bg-warn-surface px-2.5 py-0.5 font-mono text-[13px] font-semibold text-gold-bright border border-warn">
@@ -92,285 +121,228 @@ function DealCard({
             ) : null}
           </div>
           <p className="text-[15px] text-muted mt-1">
-            Status: <span className="font-semibold text-ink">{deal.state}</span>
+            Status: <span className="font-semibold text-ink">{statusText}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[15px] text-muted">
-            {measured ? "read now" : "recorded"}
+            {measured ? "read live" : "recorded"}
           </span>
           <Chip label={label} />
         </div>
       </header>
 
-      <dl className="mt-4">
-        <Field
-          name="Health"
-          value={healthValue === null ? "not read" : String(healthValue)}
-          unit={healthText}
-          label={label}
-          source={source}
-        />
-        <Field
-          name="Price"
-          value={formatNative(read?.priceUnits ?? deal.priceUnits)}
-          unit="tPOT"
-          label={label}
-          source={source}
-        />
-        <Field
-          name="Start block"
-          value={<BlockLink block={read?.startBlock ?? deal.startBlock} />}
-          label={label}
-          source={source}
-        />
-        <Field
-          name="End block"
-          value={<BlockLink block={read?.endBlock ?? deal.endBlock} />}
-          label={label}
-          source={source}
-        />
-        <Field
-          name="Claimed"
-          value={formatNative(read?.claimedUnits ?? deal.claimedUnits)}
-          unit="tPOT"
-          label={label}
-          source={source}
-        />
-        <Field
-          name="Size"
-          value={formatCount(deal.size)}
-          unit="bytes"
-          detail={`${formatCount(deal.leafCount)} leaves · block size ${formatCount(deal.blockSize)} bytes`}
-          label="REPORTED"
-          source={`evidence/${evidenceId}.json`}
-        />
-        <Field
-          name="Root"
-          value={short(deal.root)}
-          detail={deal.root}
-          label="REPORTED"
-          source={`evidence/${evidenceId}.json`}
-        />
-      </dl>
-
-      <ul className="mt-6 flex flex-wrap gap-2.5 border-t border-line pt-4 text-xs font-mono">
-        <li>
-          <a
-            className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
-            href={`/evidence/${evidenceId}.json`}
-          >
-            evidence
-          </a>
-        </li>
-        <li>
-          <Link
-            className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
-            to={`/verify/${deal.id}`}
-          >
-            verify deal {deal.id}
-          </Link>
-        </li>
-        <li>
-          <Link
-            className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
-            to={`/receipt/${deal.id}`}
-          >
-            receipt for deal {deal.id}
-          </Link>
-        </li>
-      </ul>
-    </Card>
-  );
-}
-
-function LiveDealCard({
-  dealId,
-  live,
-  chainId,
-}: {
-  dealId: number;
-  live: ReturnType<typeof useLiveDeployment>;
-  chainId: number;
-}) {
-  const read = live.deals[dealId] ?? null;
-  const health = live.health[dealId] ?? null;
-  const healthText = health === null ? "not read" : HEALTH_TEXT[health] ?? `code ${health}`;
-  const source = `chain ${chainId} @ block ${formatCount(live.block ?? 0)} · ${live.at}`;
-
-  if (live.status === "checking" && read === null) {
-    return (
-      <Card as="article" id={`deal-${dealId}`} className="ring-2 ring-gold border-gold/80 shadow-md p-6">
-        <h2 className="text-xl font-bold tracking-tight text-gold-bright">Deal {dealId}</h2>
-        <p className="mt-3 text-sm text-muted">Reading deal {dealId} from chain…</p>
-      </Card>
-    );
-  }
-
-  if (read === null) {
-    return (
-      <Card as="article" id={`deal-${dealId}`} className="ring-2 ring-gold border-gold/80 shadow-md p-6">
-        <h2 className="text-xl font-bold tracking-tight text-gold-bright">Deal {dealId}</h2>
-        <p className="mt-3 text-sm text-muted">
-          Deal {dealId} was not found on chain or could not be read.
-        </p>
-      </Card>
-    );
-  }
-
-  return (
-    <Card
-      as="article"
-      id={`deal-${dealId}`}
-      data-selected="true"
-      className="ring-2 ring-gold border-gold/80 shadow-md transition-all"
-    >
-      <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight text-gold-bright">
-              Deal {dealId}
-            </h2>
-            <span className="label-chip inline-flex items-center rounded-full bg-warn-surface px-2.5 py-0.5 font-mono text-[13px] font-semibold text-gold-bright border border-warn">
-              selected
-            </span>
-          </div>
-          <p className="text-[15px] text-muted mt-1">
-            Status: <span className="font-semibold text-ink">{healthText}</span>
+      {!recorded ? (
+        <div className="mt-4 rounded-xl border border-warn bg-warn-surface p-3.5 text-xs text-gold-bright">
+          <p className="font-medium">
+            The full story and receipts exist only for recorded deals 1 and 2.
+          </p>
+          <p className="mt-1 text-[15px] text-gold-bright">
+            This deal was read directly from chain {chainId} at block {formatCount(live.block ?? 0)}.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[15px] text-muted">read live</span>
-          <Chip label="MEASURED" />
-        </div>
-      </header>
-
-      <div className="mt-4 rounded-xl border border-warn bg-warn-surface p-3.5 text-xs text-gold-bright">
-        <p className="font-medium">
-          The full story and receipts exist only for recorded deals 1 and 2.
-        </p>
-        <p className="mt-1 text-[15px] text-gold-bright">
-          This deal was read directly from chain {chainId} at block {formatCount(live.block ?? 0)}.
-        </p>
-      </div>
+      ) : null}
 
       <dl className="mt-4">
         <Field
           name="Health"
-          value={health === null ? "not read" : String(health)}
-          unit={healthText}
-          label="MEASURED"
+          value={healthText}
+          unit={healthValue !== null ? `(code ${healthValue})` : undefined}
+          label={label}
           source={source}
         />
-        <Field
-          name="Owner"
-          value={<span className="mono text-xs font-mono">{read.owner}</span>}
-          label="MEASURED"
-          source={source}
-        />
-        <Field
-          name="Provider"
-          value={`provider ${read.providerId}`}
-          label="MEASURED"
-          source={source}
-        />
-        <Field
-          name="Flags"
-          value={String(read.flags)}
-          label="MEASURED"
-          source={source}
-        />
+        {owner ? (
+          <Field
+            name="Owner"
+            value={<span className="mono text-xs font-mono break-all">{short(owner)}</span>}
+            detail={owner}
+            label={label}
+            source={source}
+          />
+        ) : null}
+        {providerId !== null ? (
+          <Field
+            name="Provider"
+            value={`provider ${providerId}`}
+            label={label}
+            source={source}
+          />
+        ) : null}
+        {flags !== null ? (
+          <Field
+            name="Flags"
+            value={String(flags)}
+            label={label}
+            source={source}
+          />
+        ) : null}
         <Field
           name="Price"
-          value={formatNative(read.priceUnits)}
+          value={formatNative(priceUnits)}
           unit="tPOT"
-          label="MEASURED"
+          label={label}
           source={source}
         />
         <Field
           name="Start block"
-          value={<BlockLink block={read.startBlock} />}
-          label="MEASURED"
+          value={<BlockLink block={startBlock} />}
+          label={label}
           source={source}
         />
         <Field
           name="End block"
-          value={<BlockLink block={read.endBlock} />}
-          label="MEASURED"
+          value={<BlockLink block={endBlock} />}
+          label={label}
           source={source}
         />
         <Field
           name="Claimed"
-          value={formatNative(read.claimedUnits)}
+          value={formatNative(claimedUnits)}
           unit="tPOT"
-          label="MEASURED"
+          label={label}
           source={source}
         />
         <Field
           name="Size"
-          value={formatCount(read.size)}
+          value={formatCount(size)}
           unit="bytes"
-          detail={`${formatCount(read.leafCount)} leaves`}
-          label="MEASURED"
+          detail={`${formatCount(leafCount)} leaves${recorded?.blockSize ? ` · block size ${formatCount(recorded.blockSize)} bytes` : ""}`}
+          label={measured ? "MEASURED" : "REPORTED"}
           source={source}
         />
         <Field
           name="Root"
-          value={short(read.root)}
-          detail={read.root}
-          label="MEASURED"
+          value={short(root)}
+          detail={root}
+          label={measured ? "MEASURED" : "REPORTED"}
           source={source}
         />
       </dl>
 
       <ul className="mt-6 flex flex-wrap gap-2.5 border-t border-line pt-4 text-xs font-mono">
+        {recorded ? (
+          <li>
+            <a
+              className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
+              href={`/evidence/${evidenceId}.json`}
+            >
+              evidence
+            </a>
+          </li>
+        ) : null}
         <li>
           <Link
             className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
-            to="/deal/1"
+            to={`/verify/${dealId}`}
           >
-            deal 1 (recorded)
+            verify deal {dealId}
           </Link>
         </li>
-        <li>
-          <Link
-            className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
-            to="/deal/2"
-          >
-            deal 2 (recorded)
-          </Link>
-        </li>
-        <li>
-          <Link
-            className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
-            to="/gate"
-          >
-            view on gate
-          </Link>
-        </li>
+        {recorded ? (
+          <li>
+            <Link
+              className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface-2 px-4 py-2 text-ink hover:border-gold-bright hover:bg-surface hover:text-ink transition-all no-underline shadow-xs"
+              to={`/receipt/${dealId}`}
+            >
+              receipt for deal {dealId}
+            </Link>
+          </li>
+        ) : null}
       </ul>
     </Card>
   );
 }
 
-/** Both deals, side by side with the chain: recorded facts, then the same fields read live. */
+function buildIntroSentence({
+  totalDeals,
+  dealsList,
+  isLive,
+  error,
+}: {
+  totalDeals: number;
+  dealsList: (DealRead | null)[];
+  isLive: boolean;
+  error?: string | null;
+}): string {
+  if (!isLive) {
+    if (error) return "Failed to read deals from the chain.";
+    return `${formatCount(totalDeals)} ${totalDeals === 1 ? "deal" : "deals"} recorded in evidence.`;
+  }
+
+  const validDeals = dealsList.filter((d): d is DealRead => d !== null);
+  const allDealsRead = validDeals.length === totalDeals && totalDeals > 0;
+
+  const allSameProvider =
+    allDealsRead && validDeals.every((d) => d.providerId === validDeals[0]!.providerId);
+  const providerId = allSameProvider ? validDeals[0]!.providerId : null;
+
+  const allSameFile =
+    allDealsRead &&
+    validDeals.every((d) => d.root === validDeals[0]!.root && d.size === validDeals[0]!.size);
+  const fileSize = allSameFile ? validDeals[0]!.size : null;
+  const fileSizeStr = fileSize === 1048576 ? "1 MiB" : fileSize !== null ? `${formatCount(fileSize)} byte` : "";
+
+  let claim = `${formatCount(totalDeals)} ${totalDeals === 1 ? "deal" : "deals"}, read live from the chain`;
+
+  if (allSameProvider && allSameFile) {
+    claim += `, all against provider ${providerId} and the same ${fileSizeStr} file.`;
+  } else if (allSameProvider) {
+    claim += `, all against provider ${providerId}.`;
+  } else if (allSameFile) {
+    claim += `, all for the same ${fileSizeStr} file.`;
+  } else {
+    claim += ".";
+  }
+
+  return claim;
+}
+
+/** Shows one card per deal for 1..nextDealId read live from the chain. */
 export function Deal(options: LiveOptions) {
   const mode = useMode();
   const { id } = useParams();
   const evidence = useEvidence();
   const bundle = evidence.bundle;
-  const deals = bundle?.deals ?? [];
+  const recordedDeals = bundle?.deals ?? [];
   const selected = id === undefined ? null : Number(id);
-  const isRecorded = deals.some((deal) => deal.id === selected);
-  const dealIds = deals.map((deal) => deal.id);
-  if (selected !== null && !isRecorded && !dealIds.includes(selected)) {
-    dealIds.push(selected);
-  }
+
+  const requestDealIds = [
+    ...new Set([
+      ...(options.dealIds ?? []),
+      ...(selected !== null && selected > 0 ? [selected] : []),
+    ]),
+  ];
 
   const live = useLiveDeployment(mode, {
     ...options,
+    allDeals: options.allDeals ?? true,
+    dealIds: requestDealIds,
     providerAddress: bundle?.providers[0]?.address ?? null,
-    dealIds,
+  });
+
+  const isLive = live.status === "live";
+  const isError = live.status === "error";
+  const isChecking = live.status === "checking";
+
+  const totalDeals = isLive && live.config
+    ? Math.max(0, live.config.nextDealId)
+    : recordedDeals.length;
+
+  let dealIds = isLive
+    ? Array.from({ length: totalDeals }, (_, i) => i + 1)
+    : recordedDeals.map((d) => d.id);
+
+  if (selected !== null && selected > 0 && !dealIds.includes(selected)) {
+    dealIds = [...dealIds, selected];
+  }
+
+  const dealsList = dealIds.map((dealId) => live.deals[dealId] ?? null);
+
+  const intro = buildIntroSentence({
+    totalDeals,
+    dealsList,
+    isLive,
+    error: isError ? live.error : null,
   });
 
   return (
@@ -379,20 +351,11 @@ export function Deal(options: LiveOptions) {
         <p className="eyebrow">02 / deals</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-gold-bright">Deals</h1>
         <p className="mt-3 max-w-[68ch] text-muted leading-relaxed">
-          {selected !== null && !isRecorded
-            ? `Deal ${selected} was read live from the chain. Recorded facts and challenge rounds exist for deals 1 and 2.`
-            : `Two deals were created on this deployment, both against provider 1 and the same 1 MiB file. Each card shows the recorded facts and, when the RPC answers, the same fields read now.`}
+          {intro}
         </p>
-        {live.status === "live" ? (
+        {isLive ? (
           <p data-testid="deal-live" className="mt-3 text-[15px] text-gold-bright font-semibold">
             Measured live — block {formatCount(live.block ?? 0)} · {live.at}
-          </p>
-        ) : null}
-        {live.status === "error" ? (
-          <p role="note" className="mt-3 border-l-2 border-gold bg-warn-surface py-2 pl-3 text-sm text-gold-bright rounded-r-lg">
-            {live.stale ? "STALE — " : ""}
-            live read failed ({live.error ?? "unknown error"}); showing the last good value or the
-            recorded evidence.
           </p>
         ) : null}
         {mode.clientEnabled ? (
@@ -409,45 +372,53 @@ export function Deal(options: LiveOptions) {
         ) : null}
       </header>
 
-      {selected !== null && !isRecorded ? (
-        <div className="space-y-8">
-          <LiveDealCard
-            dealId={selected}
-            live={live}
-            chainId={bundle?.chain.chainId ?? mode.expectedChainId}
-          />
-          <section className="space-y-4 pt-4 border-t border-line">
-            <h2 className="eyebrow text-muted font-semibold">Recorded evidence deals</h2>
-            <div className="grid gap-6 lg:grid-cols-2">
-              {deals.map((deal) => (
-                <DealCard
-                  key={deal.id}
-                  deal={deal}
-                  selected={false}
-                  live={live}
-                  chainId={bundle?.chain.chainId ?? mode.expectedChainId}
-                  evidenceId={bundle?.id ?? "portaldot-live-run2"}
-                />
-              ))}
+      {isError ? (
+        <Card as="section" role="alert" className="border-danger/80 bg-danger-surface p-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold tracking-tight text-danger">RPC Read Failed</h2>
+          </div>
+          <p className="mt-3 text-sm text-ink leading-relaxed">
+            Failed to read live deals from the chain: {live.error ?? "unknown error"}.
+          </p>
+          <p className="mt-2 text-xs text-muted">
+            Stale deal numbers are hidden to prevent showing inaccurate chain state.
+          </p>
+          {mode.clientEnabled ? (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={live.refresh}
+                className="inline-flex min-h-[38px] items-center justify-center rounded-full border border-line-strong bg-surface px-4 py-1.5 font-mono text-xs font-medium text-ink shadow-xs hover:border-gold-bright hover:text-gold-bright transition-all cursor-pointer"
+              >
+                Retry
+              </button>
             </div>
-          </section>
-        </div>
-      ) : deals.length === 0 ? (
+          ) : null}
+        </Card>
+      ) : isChecking && dealIds.length === 0 ? (
+        <Card>
+          <p className="text-sm text-muted">Reading deals live from the chain…</p>
+        </Card>
+      ) : dealIds.length === 0 ? (
         <Card>
           <p className="text-sm text-muted">No deal is recorded in the evidence.</p>
         </Card>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
-          {deals.map((deal) => (
-            <DealCard
-              key={deal.id}
-              deal={deal}
-              selected={selected === deal.id}
-              live={live}
-              chainId={bundle?.chain.chainId ?? mode.expectedChainId}
-              evidenceId={bundle?.id ?? "portaldot-live-run2"}
-            />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {dealIds.map((dealId) => {
+            const recorded = recordedDeals.find((d) => d.id === dealId) ?? null;
+            return (
+              <DealCard
+                key={dealId}
+                dealId={dealId}
+                recorded={recorded}
+                selected={selected === dealId}
+                live={live}
+                chainId={bundle?.chain.chainId ?? mode.expectedChainId}
+                evidenceId={bundle?.id ?? "portaldot-live-run2"}
+              />
+            );
+          })}
         </div>
       )}
 

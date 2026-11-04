@@ -170,13 +170,13 @@ export function Judges(options: LiveOptions) {
               Overview
             </Link>{" "}
             — what is deployed, the code hash, the configuration and the live results: provider 1 bond,
-            both deal healths and the contract balance.
+            deal healths and the contract balance.
           </li>
           <li>
             <Link className="link-quiet underline font-semibold text-ink hover:text-gold-bright" to="/deal/1">
               Deals
             </Link>{" "}
-            — deal 1 and deal 2 with <code className="mono font-semibold">dealOf</code> and{" "}
+            — deals 1..nextDealId with <code className="mono font-semibold">dealOf</code> and{" "}
             <code className="mono font-semibold">healthOf</code> read from the chain now.
           </li>
           <li>
