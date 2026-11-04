@@ -112,6 +112,8 @@ export function Overview(options: LiveOptions) {
   const codeVerified = deployment?.codeVerified ?? null;
   const provider = live.provider ?? bundle?.providers[0] ?? null;
   const bondSource = live.provider ? configSource : recordedSource;
+  const nextDealId = config?.nextDealId ?? deals.length;
+  const dealChips = Array.from({ length: nextDealId }, (_, i) => i + 1);
   const txById = new Map((bundle?.transactions ?? []).map((tx) => [tx.id, tx]));
   const txRow = (id: string, field: string) => {
     const tx = txById.get(id);
@@ -222,6 +224,38 @@ export function Overview(options: LiveOptions) {
           detail="round 2 slashed in block 172,658"
         />
       </section>
+
+      {/* Live Deal Chips */}
+      {dealChips.length > 0 ? (
+        <Card as="section" aria-labelledby="deal-chips-heading" className="border-line bg-surface">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
+            <div>
+              <h2 id="deal-chips-heading" className="eyebrow text-gold-bright font-semibold">
+                Deals 1..{nextDealId}
+              </h2>
+              <p className="mt-1 text-xs text-muted">
+                Direct links to all deals created on this deployment (read live from chain).
+              </p>
+            </div>
+            <Chip label={live.config ? "MEASURED" : "REPORTED"} />
+          </div>
+          <div
+            data-testid="overview-deal-chips"
+            className="mt-4 flex flex-wrap items-center gap-2"
+          >
+            {dealChips.map((id) => (
+              <Link
+                key={id}
+                to={`/deal/${id}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-surface-2 px-3 py-1 font-mono text-sm font-medium text-ink hover:border-gold hover:text-gold-bright hover:bg-surface transition-colors no-underline"
+              >
+                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gold inline-block" />
+                Deal {id}
+              </Link>
+            ))}
+          </div>
+        </Card>
+      ) : null}
 
       {/* Judges Strip */}
       <Card
