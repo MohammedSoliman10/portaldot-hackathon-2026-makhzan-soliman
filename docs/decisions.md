@@ -597,6 +597,5 @@ Derive counts and order the live deals table descending from `nextDealId` down t
 Query `healthOf` for all deals 1..`nextDealId` so settled and healthy-now counts cover the full deal history.
 Display `nextDealId + 1` as the true next deal ID to be assigned.
 
-**Consequences.** The UI accurately reports all on-chain deals (1 through 5 on current testnet) with 0 off-by-one
-errors.
+**Consequences.** The UI accurately reports all on-chain deals (1 through `nextDealId` on testnet: 6 deals created, 5 settled, 1 healthy until about Nov 11) with 0 off-by-one errors.
 

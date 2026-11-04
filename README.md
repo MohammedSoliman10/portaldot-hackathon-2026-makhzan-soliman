@@ -2,7 +2,7 @@
 
 Bonded, challenge-verified storage on Portaldot: a provider locks a tPOT bond, and if it cannot prove it still holds a randomly chosen 1 KiB block of the client's file, 20% of the bond is paid to the client.
 
-**Status:** Live on Portaldot V3 testnet, chain 420420777 · **873 tests** (208 contracts · 339 UI · 181 CLI · 68 MCP · 49 gates · 28 scripts) · **5 live deals** (all settled) · **20% slash** (6 tPOT)
+**Status:** Live on Portaldot V3 testnet, chain 420420777 · **873 tests** (208 contracts · 339 UI · 181 CLI · 68 MCP · 49 gates · 28 scripts) · **6 live deals** (5 settled, 1 healthy until about Nov 11) · **20% slash** (6 tPOT)
 
 [Try It in 60s](#try-it-in-60-seconds) · [Screenshots](#screenshots) · [Problem & Solution](#problem-and-solution) · [How It Works](#how-it-works) · [Live Results](#live-results) · [Live Gate Demo](#live-gate-demo) · [Verify It Yourself](#verify-it-yourself) · [Consumer Layer](#consumer-layer) · [Why Portaldot V3](#why-portaldot-v3) · [Quickstart](#quickstart) · [Security & Limits](#security-and-honest-limits) · [Economics & Project Info](#economics)
 
@@ -92,7 +92,7 @@ flowchart TD
 
 ## Live results
 
-All 5 deals are settled on Portaldot V3 testnet (`chain 420420777`). Core deployment: Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` deployed by `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` (tx `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7`, block `171308` with hash `0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98`, finalized block `171311`, total cost `529.844316817465986480 tPOT`, reserved deposit `165.513 tPOT`, owner balance after `199.435042290680279745 tPOT`). StorageGate: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`).
+6 deals created on Portaldot V3 testnet (`chain 420420777`): 5 settled, 1 healthy until about Nov 11 (`evidence/raw/t10/03-deal6-summary.md`). Core deployment: Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` deployed by `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` (tx `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7`, block `171308` with hash `0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98`, finalized block `171311`, total cost `529.844316817465986480 tPOT`, reserved deposit `165.513 tPOT`, owner balance after `199.435042290680279745 tPOT`). StorageGate: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`).
 
 <details>
 <summary><strong>Core Protocol Lifecycle: Deals 1 & 2 [live run] (Click to expand)</strong></summary>

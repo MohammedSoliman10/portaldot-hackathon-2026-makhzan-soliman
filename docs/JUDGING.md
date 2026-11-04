@@ -13,7 +13,7 @@ Foundry/anvil; live numbers come from Portaldot V3 (`chain id 420420777`, spec `
 
 | Criterion | Weight | What we can defend | Honest verdict |
 | --- | --- | --- | --- |
-| Technical Feasibility | 30 | Deployed and exercised end-to-end on a public testnet (Makhzan and StorageGate live); 208 contract tests (unit, fuzz, invariant), 171 client tests, keyless live audit, byte-for-byte deployment check, consumer gate live | **Strong**, with one-operator and fallback-randomness caveats (live gate demo fully exercised across 13 txs and 50.205185 tPOT fees) |
+| Technical Feasibility | 30 | Deployed and exercised end-to-end on a public testnet (Makhzan and StorageGate live); 208 contract tests (unit, fuzz, invariant), 171 client tests, keyless live audit, byte-for-byte deployment check, consumer gate live | **Strong**, with one-operator and fallback-randomness caveats (6 deals created: 5 settled, 1 healthy until about Nov 11; live gate demo across 13 txs and 50.205185 tPOT fees) |
 | Innovation | 30 | Merkle commitment + challenge/slash + evidence bundle + keyless verification in one small flow | **Modest**; the primitives are known, the packaging is the contribution |
 | Ecosystem Contribution | 20 | Measured Portaldot V3 gotchas, native dry-run and TransactionStorage facts, docs-vs-evidence check, reusable client patterns | **Useful but small**; no upstream PR, no SDK, no third-party adoption |
 | Business Potential | 20 | A clear payer hypothesis and a cost model that can be tested | **Unvalidated**; no interviews, no pricing test, no paying user |
