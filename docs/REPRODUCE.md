@@ -122,6 +122,15 @@ Honest notes:
 2. A released lock stays released (status `Released` is final and irreversible).
 3. A display-unit bug (2 tPOT shown as 20,000) was found by our own live capture and fixed in the UI (`0f5e93e`) and the MCP server (`1f4b029`).
 
+## 2d. Inspect live Deal 6 (healthy active deal) — about 2 s
+
+Deal 6 was created live on Portaldot V3 testnet (`evidence/raw/t10/03-deal6-summary.md`, tx `0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1`, block `318035`) with a 100,800 block duration (~7 days, endBlock `418835`, expiring `2026-11-11T08:40:54Z`). It is deliberately active and healthy (`healthOf(6) = 1`):
+
+```bash
+cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 6 --rpc-url https://test-evm-rpc-v3.portaldot.dev
+# Expected: 0x0000000000000000000000000000000000000000000000000000000000000001
+```
+
 ## 3. Fresh-client retrieval — under 1 s
 
 ```bash
@@ -255,7 +264,7 @@ block. This is the arithmetic behind the honesty section of `BUSINESS.md` §7, i
 ## What these five do not prove
 
 - They do not reproduce the deploy or the live rounds (those cost real testnet funds). Those are
-  evidenced, not re-run: Makhzan deploy 529.844316817465986480 tPOT (`evidence/raw/t1/59-live-deploy.txt`), StorageGate deploy 210.575612711692978125 tPOT (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`), live rounds `60-live-pass.txt`, `64`–`72`.
+  evidenced, not re-run: Makhzan deploy 529.844316817465986480 tPOT (`evidence/raw/t1/59-live-deploy.txt`), StorageGate deploy 210.575612711692978125 tPOT (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`), live rounds `60-live-pass.txt`, `64`–`72`, and Deal 6 creation (`evidence/raw/t10/03-deal6-summary.md`).
 - They do not prove the provider is independent: both live deals were run by this team.
 - They do not test the native deployment path. That was measured by an unsigned dry-run only:
   `evidence/raw/t1/86-native-deploy-dryrun.txt`.

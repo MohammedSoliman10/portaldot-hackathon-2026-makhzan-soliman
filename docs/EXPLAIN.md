@@ -2,7 +2,8 @@
 
 **Feature**: `002-core-storage-proofs`. Plain English; no marketing claims. Every statement here is
 backed by `evidence/tier1-results.md` (local) or by the live run in `evidence/raw/t1/`
-(`59-live-deploy.txt` to `77-verify-deal2.txt`, summarised in `72-live-summary.txt`).
+(`59-live-deploy.txt` to `77-verify-deal2.txt`, summarised in `72-live-summary.txt`), `evidence/raw/t8/`
+(`gate-demo-summary.md` for deals 3, 4, 5), and `evidence/raw/t10/` (`03-deal6-summary.md` for deal 6).
 
 ## What a deal is
 

@@ -95,7 +95,7 @@ flowchart TD
 6 deals created on Portaldot V3 testnet (`chain 420420777`): 5 settled, 1 healthy until about Nov 11 (`evidence/raw/t10/03-deal6-summary.md`). Core deployment: Makhzan `0x60481DFcFCA34A8F095939D9675eC715127B2e44` deployed by `0x0948EBD7637D1C32858a6FC5D947E85A6600205C` (tx `0xf29a52c507726ceed20861f2cc4cc5f937542d0caa42a7e2a369ea08c998e3e7`, block `171308` with hash `0x5a301c5d1b4ebaa818c0a6aa03fda46ba6829017275d58e45ca4885d1f654a98`, finalized block `171311`, total cost `529.844316817465986480 tPOT`, reserved deposit `165.513 tPOT`, owner balance after `199.435042290680279745 tPOT`). StorageGate: `0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA` (tx `0x5a0f5719c447cfa771221872bcd7935f74fecedf046dc7b14acb40031b0a25a7`, block `240956`, cost `210.575612711692978125 tPOT`).
 
 <details>
-<summary><strong>Core Protocol Lifecycle: Deals 1 & 2 [live run] (Click to expand)</strong></summary>
+<summary><strong>Core Protocol Lifecycle: Deals 1, 2 & 6 [live run] (Click to expand)</strong></summary>
 
 | Step | Action | Tx Hash | Block | Result / Measured Numbers | Evidence Path |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -113,6 +113,7 @@ flowchart TD
 | Deal 2 | resolve (slash) | `0x97da004710a5e01ea97b9d602f5b8ef5c5382ea5800c5d52b02951cb6809e8a3` | `172658` | Exactly 20% (6 tPOT) slashed to owner; bond: 30 -> 24 | `evidence/raw/t1/69-live-resolve-b.txt` |
 | Deal 2 | claim | `0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee` | `172881` | Provider-1 paid 5 tPOT accrued price | `evidence/raw/t1/70-live-claim-b.txt` |
 | Deal 2 | settle | `0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec` | `172887` | Concluded; healthOf(2) = 0 | `evidence/raw/t1/71-live-settle-b.txt` |
+| Deal 6 | createDeal (1 MiB, 7-day) | `0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1` | `318035` | 1,024 leaves, price 5 tPOT, duration 100,800 blocks (endBlock 418835); active healthy (healthOf = 1) until about Nov 11 | `evidence/raw/t10/03-deal6-summary.md` |
 
 </details>
 
@@ -178,6 +179,10 @@ cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 1 --rpc-
 # 6. Read StorageGate lockOf(4) raw slot via cast
 cast call 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA "lockOf(uint32)" 4 --rpc-url https://test-evm-rpc-v3.portaldot.dev
 # Expected: payer 0x0948...205c, amount 2 tPOT (0x1bc16d674ec80000 wei), payee 0xf4ec...6029, minBond 20 tPOT, status 2
+
+# 7. Read Makhzan healthOf(6) via cast (1 = healthy active deal)
+cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 6 --rpc-url https://test-evm-rpc-v3.portaldot.dev
+# Expected: 0x0000000000000000000000000000000000000000000000000000000000000001
 ```
 
 ## Consumer layer
