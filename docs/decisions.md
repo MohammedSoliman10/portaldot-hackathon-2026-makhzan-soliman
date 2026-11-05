@@ -599,3 +599,12 @@ Display `nextDealId + 1` as the true next deal ID to be assigned.
 
 **Consequences.** The UI accurately reports all on-chain deals (1 through `nextDealId` on testnet: 6 deals created, 5 settled, 1 healthy until about Nov 11) with 0 off-by-one errors.
 
+## D-15 — TransactionStorage anchor hash distinction (block hash vs. extrinsic hash) (2026-11-05, feature 034)
+
+**Context.** The owner reported anchor 1 at block 333185 with hash `0x9106e229f61f6ef793fc0c15cc9719e849b07e4b56ca37651e92fd28b80c8d39`, and anchor 2 at block 333189 with hash `0x4663aea7b2a8718895f4e38e8b02987a528ac76176b28dc6f0483b2749493685`. Reading the live Substrate chain reveals that these two 32-byte hashes are the **block hashes** of blocks 333185 and 333189. Inside those blocks, the `transactionStorage.store` extrinsics have extrinsic hashes `0x622262a662fc517b957a4da35912637109b7e5c07c35a008964a61292ba106fc` (extrinsic index 1 in block 333185) and `0xad209e843ec732f72031cf0e971a6486509a3f72b9767879abbcefb2d897d354` (extrinsic index 1 in block 333189).
+
+**Decision.** In all evidence and documentation, record both the block hash and the extrinsic hash explicitly, disambiguating them. Distinguish anchor 1 (primary) from anchor 2 (duplicate submit of identical 283-byte manifest JSON).
+
+**Consequences.** Exact technical precision: anyone auditing via Polkadot.js Explorer (`#/explorer/query/<blockHash>`) can find the block directly by block hash, and anyone verifying extrinsic signatures or events can locate the extrinsic by its true extrinsic hash.
+
+

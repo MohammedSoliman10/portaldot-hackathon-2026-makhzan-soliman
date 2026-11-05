@@ -1,0 +1,83 @@
+{
+  "blockNumber": 333185,
+  "blockHash": "0x9106e229f61f6ef793fc0c15cc9719e849b07e4b56ca37651e92fd28b80c8d39",
+  "timestampMs": 1793873208000,
+  "timestampIso": "2026-11-05T10:06:48.000Z",
+  "retentionPeriodBlocks": 100800,
+  "expiryBlock": 433985,
+  "expiryIso": "2026-11-12T10:06:48.000Z",
+  "extrinsicIndex": 1,
+  "extrinsicHash": "0x622262a662fc517b957a4da35912637109b7e5c07c35a008964a61292ba106fc",
+  "signer": "5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF",
+  "nonce": 9,
+  "tip": "0",
+  "call": "transactionStorage.store",
+  "dataHex": "0x7b22736368656d61223a226d616b687a616e2d6d616e69666573742d7631222c22636861696e4964223a3432303432303737372c22636f6e7472616374223a22307836303438314446634643413334413846303935393339443936373565433731353132374232653434222c226465616c4964223a362c22726f6f74223a22307864326261303765313138633166636366353033633766663033656366323465346665653636646164366562616561363565326131633662303131333837306337222c2273697a65223a313034383537362c226c656166436f756e74223a313032342c2270726f7669646572223a22307866346563313433633734334646353763304433326538323966353036393235353143426636303239227d",
+  "dataByteLength": 283,
+  "decodedManifest": {
+    "schema": "makhzan-manifest-v1",
+    "chainId": 420420777,
+    "contract": "0x60481DFcFCA34A8F095939D9675eC715127B2e44",
+    "dealId": 6,
+    "root": "0xd2ba07e118c1fccf503c7ff03ecf24e4fee66dad6ebaea65e2a1c6b0113870c7",
+    "size": 1048576,
+    "leafCount": 1024,
+    "provider": "0xf4ec143c743FF57c0D32e829f50692551CBf6029"
+  },
+  "storedEvents": [
+    {
+      "phase": {
+        "ApplyExtrinsic": "1"
+      },
+      "event": "Stored",
+      "data": [
+        0,
+        "0x62cc9db432d5b3b553565f0d5e05b0312e4244d7ab424b9188ae18e62c8b39eb"
+      ]
+    }
+  ],
+  "feePaid": [
+    {
+      "phase": {
+        "ApplyExtrinsic": "1"
+      },
+      "data": [
+        "5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF",
+        3940482682698,
+        0
+      ]
+    },
+    {
+      "phase": {
+        "ApplyExtrinsic": "2"
+      },
+      "data": [
+        "5CjEvXjS5WV7yUmqVQKoT9n1mTZpLQMcVaovDQXan1HAqYTx",
+        10551548376706,
+        0
+      ]
+    }
+  ],
+  "storageFeeHeld": [
+    {
+      "phase": {
+        "ApplyExtrinsic": "1"
+      },
+      "data": [
+        {
+          "transactionStorage": "StorageFeeHold"
+        },
+        "5CXe6SQaDPsA9ngkmd1U63x4ktLnrkmwRJR5AneeFJdLcSQF",
+        3830
+      ]
+    }
+  ],
+  "transactionsStorageState": [
+    {
+      "chunkRoot": "0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1",
+      "contentHash": "0x62cc9db432d5b3b553565f0d5e05b0312e4244d7ab424b9188ae18e62c8b39eb",
+      "size": 283,
+      "blockChunks": 2
+    }
+  ]
+}
