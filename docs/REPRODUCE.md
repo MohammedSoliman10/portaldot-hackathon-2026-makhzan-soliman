@@ -131,6 +131,23 @@ cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 6 --rpc-
 # Expected: 0x0000000000000000000000000000000000000000000000000000000000000001
 ```
 
+## 2e. Inspect native TransactionStorage deal manifest anchor — about 2 s
+
+The Deal 6 manifest was anchored in Portaldot V3's native `TransactionStorage` pallet in block `333185` (extrinsic hash `0x622262a662fc517b957a4da35912637109b7e5c07c35a008964a61292ba106fc`, block hash `0x9106e229f61f6ef793fc0c15cc9719e849b07e4b56ca37651e92fd28b80c8d39`, fee `0.039405 tPOT`, `evidence/raw/t11/03-anchor-summary.md`; Anchor 2 is a duplicate submit in block `333189`, extrinsic hash `0xad209e843ec732f72031cf0e971a6486509a3f72b9767879abbcefb2d897d354`, block hash `0x4663aea7b2a8718895f4e38e8b02987a528ac76176b28dc6f0483b2749493685`). It has a 100,800 block retention period (~7 days, expiring about `2026-11-12T10:06:48Z`).
+
+Read back the stored chunk root (`0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1`) and size (`283` bytes) from chain state:
+
+```bash
+cd apps/gates && node -e '
+import { ApiPromise, WsProvider } from "@polkadot/api";
+const api = await ApiPromise.create({ provider: new WsProvider("wss://test-node-v3.portaldot.dev"), noInitWarn: true });
+const txs = await api.query.transactionStorage.transactions(333185);
+console.log(JSON.stringify(txs.toJSON()));
+await api.disconnect();
+'
+# Expected: [{"chunkRoot":"0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1","contentHash":"0x62cc9db432d5b3b553565f0d5e05b0312e4244d7ab424b9188ae18e62c8b39eb","size":283,"blockChunks":2}]
+```
+
 ## 3. Fresh-client retrieval — under 1 s
 
 ```bash
@@ -264,7 +281,7 @@ block. This is the arithmetic behind the honesty section of `BUSINESS.md` §7, i
 ## What these five do not prove
 
 - They do not reproduce the deploy or the live rounds (those cost real testnet funds). Those are
-  evidenced, not re-run: Makhzan deploy 529.844316817465986480 tPOT (`evidence/raw/t1/59-live-deploy.txt`), StorageGate deploy 210.575612711692978125 tPOT (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`), live rounds `60-live-pass.txt`, `64`–`72`, and Deal 6 creation (`evidence/raw/t10/03-deal6-summary.md`).
+  evidenced, not re-run: Makhzan deploy 529.844316817465986480 tPOT (`evidence/raw/t1/59-live-deploy.txt`), StorageGate deploy 210.575612711692978125 tPOT (`evidence/deployments/gate-live-420420777-20261029-170256Z.json`, `evidence/raw/t2/126-gate-live-verify.txt`), live rounds `60-live-pass.txt`, `64`–`72`, Deal 6 creation (`evidence/raw/t10/03-deal6-summary.md`), and native TransactionStorage deal manifest anchoring (`evidence/raw/t11/03-anchor-summary.md`).
 - They do not prove the provider is independent: both live deals were run by this team.
 - They do not test the native deployment path. That was measured by an unsigned dry-run only:
   `evidence/raw/t1/86-native-deploy-dryrun.txt`.

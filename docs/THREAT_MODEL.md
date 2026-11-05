@@ -3,8 +3,8 @@
 Scope: the Makhzan contract (`contracts/src/makhzan/`), the CLI/daemon (`apps/makhzan/`), and the
 evidence writer. Local anvil is the reference network; live behaviour on Portaldot was run and is
 recorded in `evidence/raw/t1/` (`59-live-deploy.txt` .. `77-verify-deal2.txt` for deals 1 and 2),
-`evidence/raw/t8/` (`gate-demo-summary.md` for deals 3, 4, and 5), and `evidence/raw/t10/`
-(`03-deal6-summary.md` for deal 6), so anything not covered across those live records is `[pending live run]`.
+`evidence/raw/t8/` (`gate-demo-summary.md` for deals 3, 4, and 5), `evidence/raw/t10/`
+(`03-deal6-summary.md` for deal 6), and `evidence/raw/t11/` (`03-anchor-summary.md` for native TransactionStorage anchoring), so anything not covered across those live records is `[pending live run]`.
 
 ## Assets
 

@@ -203,6 +203,7 @@ Read at spec `3002`, pallet `TransactionStorage` (index `51`):
   (`0.0117066527757 tPOT`).
 - `paymentInfo` returns one `partialFee`; it does not break the fee into base, length, weight or
   storage components.
+- **First live testnet usage (`evidence/raw/t11/03-anchor-summary.md`):** Deal 6 manifest (283 B) anchored in block `333185`, extrinsic hash `0x622262a662fc517b957a4da35912637109b7e5c07c35a008964a61292ba106fc` (block hash `0x9106e229f61f6ef793fc0c15cc9719e849b07e4b56ca37651e92fd28b80c8d39`). Measured fee: `0.039405 tPOT` (3,940,482,682,698 planck fee + 3,830 planck storage fee hold). Querying `transactionStorage.transactions(333185)` returns chunkRoot `0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1` and size 283 B. Anchor 2 is a duplicate submit of the same manifest in block `333189`, extrinsic hash `0xad209e843ec732f72031cf0e971a6486509a3f72b9767879abbcefb2d897d354` (block hash `0x4663aea7b2a8718895f4e38e8b02987a528ac76176b28dc6f0483b2749493685`), fee `0.039405 tPOT`. Retention is strictly temporary: 100,800 blocks (~7 days); Anchor 1 expires about `2026-11-12T10:06:48Z` unless renewed.
 
 `[design note]` The pallet puts bytes in blocks. Its metadata shows no client-facing promise, payment,
 bond or penalty entry point: no way for a client to require a provider to keep a block, to be paid if
@@ -210,7 +211,7 @@ it does not, or to challenge a miss and take money from a bond. That is why Makh
 contract with its own bonded provider, random challenge, slash and `healthOf` gate, instead of a
 wrapper around `store`.
 
-Evidence: `evidence/raw/t1/78-chain-facts.txt`.
+Evidence: `evidence/raw/t1/78-chain-facts.txt`, `evidence/raw/t1/87-txstorage-store.txt`, `evidence/raw/t11/03-anchor-summary.md`.
 
 ## 11. `healthOf` is a challenge check, not an expiry check `[measured]`
 

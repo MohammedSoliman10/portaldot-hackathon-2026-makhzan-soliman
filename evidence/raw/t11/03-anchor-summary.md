@@ -27,7 +27,7 @@ Call: `store(data: Bytes)`
 | **Event ContentHash** | `0x62cc9db432d5b3b553565f0d5e05b0312e4244d7ab424b9188ae18e62c8b39eb` | `0x62cc9db432d5b3b553565f0d5e05b0312e4244d7ab424b9188ae18e62c8b39eb` |
 | **Chunk Root** | `0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1` | `0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1` |
 | **Payload Size** | `283` bytes | `283` bytes |
-| **Transaction Fee** | `3,940,482,682,698` planck (`0.03940482682698 tPOT`) | `3,940,482,678,968` planck (`0.03940482678968 tPOT`) |
+| **Transaction Fee** | `3,940,482,682,698` planck (`0.03940482682698 tPOT`, about `0.039405 tPOT`) | `3,940,482,678,968` planck (`0.03940482678968 tPOT`, about `0.039405 tPOT`) |
 | **Storage Fee Held** | `3,830` planck (`0.00000000003830 tPOT`) | `3,830` planck (`0.00000000003830 tPOT`) |
 | **Total Paid** | `3,940,482,686,528` planck (`0.03940482686528 tPOT`) | `3,940,482,682,798` planck (`0.03940482682798 tPOT`) |
 

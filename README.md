@@ -114,6 +114,8 @@ flowchart TD
 | Deal 2 | claim | `0x128bfd86661cd988e103153f82753a92b01650a7774228be8ee831163dff36ee` | `172881` | Provider-1 paid 5 tPOT accrued price | `evidence/raw/t1/70-live-claim-b.txt` |
 | Deal 2 | settle | `0x59d61ee8b330c37576b9245731d2ab3ebac28d07faf03148f6eff5388dc2bbec` | `172887` | Concluded; healthOf(2) = 0 | `evidence/raw/t1/71-live-settle-b.txt` |
 | Deal 6 | createDeal (1 MiB, 7-day) | `0x1fc238c44224a861b5e6456813396272ab470930c518a338c734283b1003abd1` | `318035` | 1,024 leaves, price 5 tPOT, duration 100,800 blocks (endBlock 418835); total cost 16.557011868111074750 tPOT (fee 11.557011868111074750 tPOT); active healthy (healthOf = 1) until about Nov 11 | `evidence/raw/t10/03-deal6-summary.md` |
+| Native Anchor 1 | `TransactionStorage.store` (manifest 283 B) | Extrinsic hash: `0x622262a662fc517b957a4da35912637109b7e5c07c35a008964a61292ba106fc` · Block hash: `0x9106e229f61f6ef793fc0c15cc9719e849b07e4b56ca37651e92fd28b80c8d39` | `333185` | Manifest 283 B anchored; fee 0.039405 tPOT; chunkRoot `0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1`; retention 100,800 blocks (expires about 2026-11-12T10:06:48Z) | `evidence/raw/t11/03-anchor-summary.md` |
+| Native Anchor 2 | `TransactionStorage.store` (duplicate submit) | Extrinsic hash: `0xad209e843ec732f72031cf0e971a6486509a3f72b9767879abbcefb2d897d354` · Block hash: `0x4663aea7b2a8718895f4e38e8b02987a528ac76176b28dc6f0483b2749493685` | `333189` | Duplicate submit of identical 283 B manifest; fee 0.039405 tPOT; chunkRoot `0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1`; retention 100,800 blocks (expires about 2026-11-12T10:07:12Z) | `evidence/raw/t11/03-anchor-summary.md` |
 
 </details>
 
@@ -183,6 +185,18 @@ cast call 0x5ee99E8AE165d0C33677C812d70B0b07820c1DCA "lockOf(uint32)" 4 --rpc-ur
 # 7. Read Makhzan healthOf(6) via cast (1 = healthy active deal)
 cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 6 --rpc-url https://test-evm-rpc-v3.portaldot.dev
 # Expected: 0x0000000000000000000000000000000000000000000000000000000000000001
+
+# 8. Inspect native TransactionStorage anchor 1 (manifest 283 B in block 333185)
+# In browser: https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/333185
+# Or read back storage state via @polkadot/api from apps/gates:
+cd apps/gates && node -e '
+import { ApiPromise, WsProvider } from "@polkadot/api";
+const api = await ApiPromise.create({ provider: new WsProvider("wss://test-node-v3.portaldot.dev"), noInitWarn: true });
+const txs = await api.query.transactionStorage.transactions(333185);
+console.log(JSON.stringify(txs.toJSON()));
+await api.disconnect();
+'
+# Expected: [{"chunkRoot":"0xea74ca619064ac9e1509ff7e00d1ec9b63d301d5ff76dae618c2ec73163e8cb1","contentHash":"0x62cc9db432d5b3b553565f0d5e05b0312e4244d7ab424b9188ae18e62c8b39eb","size":283,"blockChunks":2}]
 ```
 
 ## Consumer layer
@@ -203,6 +217,7 @@ cast call 0x60481DFcFCA34A8F095939D9675eC715127B2e44 "healthOf(uint32)" 6 --rpc-
 - **EVM via `pallet-revive`:** standard Solidity (`solc 0.8.28`, `via_ir=true`), deployed directly over `eth_sendRawTransaction`.
 - **Native Value & Unit Factor:** deal prices and bonds use native units (`1 tPOT = 10^14 planck`); `WEI_PER_UNIT = 10,000` (`1 tPOT = 10^18 wei`). Existential deposit = 0.1 tPOT (`10^17 wei`). Native dry-run store of 1 MiB quoted `104.86915567090586 tPOT` and 4 MiB quoted `419.44210364626048 tPOT`; runtime deposit is `0.0807 tPOT` per byte.
 - **Account Mapping:** H160 mapped to Substrate `AccountId32` via `h160 || 0xEE * 12` (contract maps to `5EEwsqgiEVZNUdUHdmsEMqBQzJjNy5PULPBYoo5yF2GX45DZ`).
+- **Native TransactionStorage Anchoring:** First live use of Substrate's `TransactionStorage` pallet on Portaldot V3 testnet (`evidence/raw/t11/03-anchor-summary.md`). Deal 6 manifest (283 B) anchored in block `333185` (extrinsic hash `0x622262a662fc517b957a4da35912637109b7e5c07c35a008964a61292ba106fc`, block hash `0x9106e229f61f6ef793fc0c15cc9719e849b07e4b56ca37651e92fd28b80c8d39`) for a fee of `0.039405 tPOT` (duplicate anchor 2 in block `333189`, extrinsic hash `0xad209e843ec732f72031cf0e971a6486509a3f72b9767879abbcefb2d897d354`, block hash `0x4663aea7b2a8718895f4e38e8b02987a528ac76176b28dc6f0483b2749493685`). Storage is temporary with a 100,800 block retention period (~7 days; Anchor 1 expires about `2026-11-12T10:06:48Z`).
 - **Chain Gotchas Guide ([docs/V3-GOTCHAS.md](docs/V3-GOTCHAS.md)):** 12 measured findings including gas price bands (~32.5k wei), 15 s receipt trap (T1-002), permanent non-refundable storage deposits, and the constant `prevrandao` opcode observation.
 
 ## Quickstart
